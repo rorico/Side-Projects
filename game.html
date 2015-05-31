@@ -1000,7 +1000,7 @@ $(document).ready(function(){
 
             //if jacks, just push jacks
             if (player[k]===0||player[k]===-1) {
-                options1.push(player[k]);
+                options1=player[k];
             } else {
                 
                 for( var i = 0 ; i<board.length ; i++ )
@@ -1617,6 +1617,7 @@ $(document).ready(function(){
         while(number!==-1&&breakopen){
             for(var option = 0; option<options.length&&breakopen ; option++){
                 //continue out if a Jack
+                console.log(options);
                 if (options[option]===-1||options[option]===0) {
                     continue;
                 }
@@ -1637,6 +1638,7 @@ $(document).ready(function(){
                     //row x, col y
                     var x = options[option][option2][0];
                     var y = options[option][option2][1];
+                    console.log(x,y);
                     
                     var check = false;
                     
