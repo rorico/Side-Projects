@@ -1,4 +1,4 @@
-<!DOCvalue html>
+<!DOCTYPE html>
 
 <html>
 <head>
@@ -133,6 +133,9 @@
         }
         .choose{
             background-color:orange !important;
+        }
+        .choose.special{
+            background-color:red !important;
         }
     </style>
 </head>
@@ -323,7 +326,6 @@ $(document).ready(function(){
             }
             gameN=j;
             turnN=i;
-            console.log(j);
             $('#bluewin').text(bluewin);
             $('#greenwin').text(greenwin);
             $('#ties').text(ties);
@@ -479,13 +481,20 @@ $(document).ready(function(){
             }
     }
     function playHuman(player,value) {
+        var options = getOptions(players[player]);
         for (var i = 0 ; i<players[player].length ; i++) {
             $('#p'+player+'_'+i).addClass('choose');
+            if (options[i].length==0||options[i]==-1||options[i]==0) {
+                $('#p'+player+'_'+i).addClass('special');
+            }
             $('#p'+player+'_'+i).bind('click',{player:player,i:i,value:value}, function(event) {
+                event.stopPropagation();
+                $('.special').removeClass('special');
+                $('.choose').unbind('click');
+                $('.choose').removeClass('choose');
                 chooseCard(event.data.player,event.data.i,event.data.value);
             });
         }
-        var options = getOptions(players[player]);
         for (var card = 0 ; card<options.length ; card++) {
             for (var side = 0 ; options[card]!=-1&&options[card]!=0&&side<options[card].length ; side++) {
                 var x = options[card][side][0];
@@ -495,22 +504,22 @@ $(document).ready(function(){
         }
     }
     function chooseCard(player,card,value) {
-        event.stopPropagation();
-        $('.choose').unbind('click');
-        $('.choose').removeClass('choose');
+        
         $('#o'+player).append("<div class='choose option' id='back'>BACK</div>");
         $('#back').bind('click',{player:player,value:value}, function(event) {
             $('.option').remove();
+            $('.special').removeClass('special');
             $('.choose').unbind('click');
             $('.choose').removeClass('choose');
             playHuman(event.data.player,event.data.value);
         });
         options = getOptions([players[player][card]]);
-        if (options[0]==0) {
+        if (options[0]===0) {
             var options = [];
             options.push(addJR());
         }
-        if (options[0]==-1) {
+        
+        if (options[0]===-1) {
             var options = [];
             options.push(removeJR(value));
             for (var side = 0 ; side<options[0].length ; side++) {
@@ -520,16 +529,19 @@ $(document).ready(function(){
             }
             return;
         }
-        if (options[0].length==0) {
+        
+        if (options[0].length===0) {
             $('#o'+player).append("<div class='choose option' id='remove'>REMOVE</div>");
             $('#remove').bind('click',{player:player,value:value,card:card}, function(event) {
                 $('.option').remove();
+                $('.special').removeClass('special');
                 $('.choose').unbind('click');
                 $('.choose').removeClass('choose');
                 afterplay(event.data.player,event.data.card,event.data.value,true);
                 playHuman(event.data.player,event.data.value);
             });
         }
+        
         for (var side = 0 ; side<options[0].length ; side++) {
             var x = options[0][side][0];
             var y = options[0][side][1];
@@ -544,6 +556,7 @@ $(document).ready(function(){
         $('#'+position).bind('click',{player:player,x:x,y:y,value:value,card:card}, function(event) {
             event.stopPropagation();
             $('.choose').unbind('click');
+            $('.special').removeClass('special');
             $('.choose').removeClass('choose');
             $('.option').remove();
             chooseSide(event.data.player,event.data.x,event.data.y,event.data.value,event.data.card);
@@ -565,6 +578,7 @@ $(document).ready(function(){
         $('#'+position).bind('click',{player:player,x:x,y:y,value:value,card:card}, function(event) {
             event.stopPropagation();
             $('.choose').unbind('click');
+            $('.special').removeClass('special');
             $('.choose').removeClass('choose');
             $('.option').remove();
             chooseSideRemove(event.data.player,event.data.x,event.data.y,event.data.value,event.data.card);
@@ -585,13 +599,13 @@ $(document).ready(function(){
     }
     function playHybrid (player,value){
         if (value===3) {
-            if (greenLines==1) {
+            if (greenLines===1) {
                 playAI(player,value,true);
             } else {
                 playAI(player,value,false);
             }
         } else if (value===1) {
-            if (blueLines==1) {
+            if (blueLines===1) {
                 playAI(player,value,true);
             } else {
                 playAI(player,value,false);
@@ -600,13 +614,13 @@ $(document).ready(function(){
     }
     
     function play(player,value){
-        if (players[player].length==0) {
+        if (players[player].length===0) {
             return;
         }
         var options = getOptions(players[player]);
         var card = Math.floor(Math.random()*options.length);
-        if (options[card].length!=0) {
-            if (options[card]==0){
+        if (options[card].length!==0) {
+            if (options[card]===0){
                 options = addJR();
                 var side = Math.floor(Math.random()*options.length);
                 var x = options[side][0];
@@ -614,9 +628,9 @@ $(document).ready(function(){
                 changeValue(x,y,value);
                 checker(x,y);
                 afterplay(player,card,value);
-            } else if(options[card]==-1) {
+            } else if(options[card]===-1) {
                 options = removeJR(value);
-                if (options.length==0) {
+                if (options.length===0) {
                     play(player,value);
                     return;
                 }
@@ -640,7 +654,7 @@ $(document).ready(function(){
     }
     
     function playAI(player,value,offensive) {
-        if (players[player].length==0) {
+        if (players[player].length===0) {
             return;
         }
         var options = getOptions(players[player]);
@@ -651,11 +665,11 @@ $(document).ready(function(){
             return;
         }
         var best = mostLines(options,value,offensive);
-        if (best[0]!=4) {
+        if (best[0]!==4) {
             var removePos = hasRemove(players[player]);
-            if (removePos!=-1) {
+            if (removePos!==-1) {
                 var options2 = removeJ(value);
-                if (options2.length!=0) {
+                if (options2.length!==0) {
                     var side = Math.floor(Math.random()*options2.length);
                     var x = options2[side][0];
                     var y = options2[side][1];
@@ -675,7 +689,7 @@ $(document).ready(function(){
                 }
             }
             var addPos = hasAdd(players[player]);
-            if (addPos!=-1) {
+            if (addPos!==-1) {
                 var options2 = addJ(value,offensive);
                 if (options2.length!=0) {
                     var side = Math.floor(Math.random()*options2.length);
@@ -707,7 +721,7 @@ $(document).ready(function(){
         afterplay(player,card,value);
     }
     function playSides(player,value,offensive) {
-        if (players[player].length==0) {
+        if (players[player].length===0) {
             return;
         }
         var options = getOptions(players[player]);
@@ -718,11 +732,11 @@ $(document).ready(function(){
             return;
         }
         var best = mostLines(options,value,offensive);
-        if (best[0]!=4) {
+        if (best[0]!==4) {
             var removePos = hasRemove(players[player]);
-            if (removePos!=-1) {
+            if (removePos!==-1) {
                 var options2 = removeJ(value);
-                if (options2.length!=0) {
+                if (options2.length!==0) {
                     var side = Math.floor(Math.random()*options2.length);
                     var x = options2[side][0];
                     var y = options2[side][1];
@@ -742,9 +756,9 @@ $(document).ready(function(){
                 }
             }
             var addPos = hasAdd(players[player]);
-            if (addPos!=-1) {
+            if (addPos!==-1) {
                 var options2 = addJ(value,offensive);
-                if (options2.length!=0) {
+                if (options2.length!==0) {
                     var side = Math.floor(Math.random()*options2.length);
                     var x = options2[side][0];
                     var y = options2[side][1];
@@ -797,7 +811,7 @@ $(document).ready(function(){
         afterplay(player,card,value);
     }
     function playWorth(player,value,offensive) {
-        if (players[player].length==0) {
+        if (players[player].length===0) {
             return;
         }
         
@@ -810,9 +824,9 @@ $(document).ready(function(){
             return;
         }
         var removePos = hasRemove(players[player]);
-        if (removePos!=-1) {
+        if (removePos!==-1) {
             var options2 = removeJ(value);
-            if (options2.length!=0) {
+            if (options2.length!==0) {
                 var side = Math.floor(Math.random()*options2.length);
                 var x = options2[side][0];
                 var y = options2[side][1];
@@ -832,9 +846,9 @@ $(document).ready(function(){
             }
         }
         var addPos = hasAdd(players[player]);
-        if (addPos!=-1) {
+        if (addPos!==-1) {
             var options2 = addJ(value,offensive);
-            if (options2.length!=0) {
+            if (options2.length!==0) {
                 var side = Math.floor(Math.random()*options2.length);
                 var x = options2[side][0];
                 var y = options2[side][1];
@@ -858,7 +872,7 @@ $(document).ready(function(){
         var maxSide = -1;
         for (var i = 0 ; i < options.length ; i++) {
             for (var j = 0 ; j < options[i].length ; j++) {
-                if (options[i][j]==0||options[i][j]==-1) {
+                if (options[i][j]===0||options[i][j]===-1) {
                     continue;
                 }
                 if (worth[options[i][j][0]][options[i][j][1]] > max) {
@@ -879,14 +893,14 @@ $(document).ready(function(){
         for( var k = 0 ; k<player.length ; k++ )
         {
             var options1 = [];
-            if (player[k]==0||player[k]==-1) {
-                options1.push(player[k]);
+            if (player[k]===0||player[k]===-1) {
+                options1 = player[k];
             } else {
                 for( var i = 0 ; i<board.length ; i++ )
                 {
                     for( var j = 0 ; j<board[i].length ; j++ )
                     {
-                        if (board[i][j]==player[k]&&points[i][j]==0) {
+                        if (board[i][j]===player[k]&&points[i][j]===0) {
                             options1.push([i,j]);
                         }
                     }
@@ -901,7 +915,7 @@ $(document).ready(function(){
             $("#card_played").prepend("<div class='c"+value+"'>"+changeToCards(players[player][index])+"</div>");
         }
         cardsplayed.push(players[player][index]);
-        if (cardsleft!=-1) {
+        if (cardsleft!==-1) {
             players[player][index] = deck[cardsleft];
             cardsleft--;
             if (animate) {
@@ -921,7 +935,7 @@ $(document).ready(function(){
         {
             for( var j = 0 ; j<board[i].length ; j++ )
             {
-                if (points[i][j]==0) {
+                if (points[i][j]===0) {
                     options.push([i,j]);
                 }
             }
@@ -929,17 +943,13 @@ $(document).ready(function(){
         return options;
     }
     function removeJR(colour){
-        if (colour==1) {
-            colour=3;
-        } else if (colour==3) {
-            colour=1;
-        }
+        colour=4-colour;
         var options = [];
         for( var i = 0 ; i<board.length ; i++ )
         {
             for( var j = 0 ; j<board[i].length ; j++ )
             {
-                if (points[i][j]==colour) {
+                if (points[i][j]===colour) {
                     options.push([i,j]);
                 }
             }
@@ -953,7 +963,7 @@ $(document).ready(function(){
         
         for ( var times = 0 ; times <=1 ; times++) {
             value=4-value;
-            if (value!=colour&&offensive) {
+            if (value!==colour&&offensive) {
                 continue;
             }
             var checkOpen = 0;
@@ -965,31 +975,31 @@ $(document).ready(function(){
                 checkOpen = 0;
                 cnt21=0;
                 for(var i = 0 ; i < 5 ; i++) {
-                    if (points[row][i]==value) {
+                    if (points[row][i]===value) {
                         cnt21++;
-                    } else if (points[row][i]!=0) {
+                    } else if (points[row][i]!==0) {
                         checkOpen++;
                     } else {
                         tnp=[row,i];
                     }
                 }
-                if (cnt21==4&&checkOpen==0) {
+                if (cnt21===4&&checkOpen===0) {
                     returnValues.push(tnp.slice());
                 }
                 for (var col = 0 ; col<5 ; col++) {
-                    if (points[row][col]==value) {
+                    if (points[row][col]===value) {
                         cnt21--;
-                    } else if (points[row][col]!=0) {
+                    } else if (points[row][col]!==0) {
                         checkOpen--;
                     }
-                    if (points[row][col+5]==value) {
+                    if (points[row][col+5]===value) {
                         cnt21++;
-                    } else if (points[row][col+5]!=0) {
+                    } else if (points[row][col+5]!==0) {
                         checkOpen++;
                     } else {
                         tnp = [row,col+5];
                     }
-                    if (cnt21==4&&checkOpen==0) {
+                    if (cnt21===4&&checkOpen===0) {
                         returnValues.push(tnp.slice());
                     }
                 }
@@ -998,31 +1008,31 @@ $(document).ready(function(){
                 checkOpen = 0;
                 cnt12=0;
                 for(var i = 0 ; i < 5 ; i++) {
-                    if (points[i][col]==value) {
+                    if (points[i][col]===value) {
                         cnt12++;
-                    } else if (points[i][col]!=0) {
+                    } else if (points[i][col]!==0) {
                         checkOpen++;
                     } else {
                         tnp=[i,col];
                     }
                 }
-                if (cnt12==4&&checkOpen==0) {
+                if (cnt12===4&&checkOpen===0) {
                     returnValues.push(tnp.slice());
                 }
                 for (var row = 0 ; row<5 ; row++) {
-                    if (points[row][col]==value) {
+                    if (points[row][col]===value) {
                         cnt12--;
-                    } else if (points[row][col]!=0) {
+                    } else if (points[row][col]!==0) {
                         checkOpen--;
                     }
-                    if (points[row+5][col]==value) {
+                    if (points[row+5][col]===value) {
                         cnt12++;
-                    } else if (points[row+5][col]!=0) {
+                    } else if (points[row+5][col]!==0) {
                         checkOpen++;
                     } else {
                         tnp = [row+5,col];
                     }
-                    if (cnt12==4&&checkOpen==0) {
+                    if (cnt12===4&&checkOpen===0) {
                         returnValues.push(tnp.slice());
                     }
                 }
@@ -1031,31 +1041,31 @@ $(document).ready(function(){
                 checkOpen = 0;
                 cnt11=0;
                 for(var i = 0 ; i < 5 ; i++) {
-                    if (points[row+i][i]==value) {
+                    if (points[row+i][i]===value) {
                         cnt11++;
-                    } else if (points[row+i][i]!=0) {
+                    } else if (points[row+i][i]!==0) {
                         checkOpen++;
                     } else {
                         tnp=[row+i,i];
                     }
                 }
-                if (cnt11==4&&checkOpen==0) {
+                if (cnt11===4&&checkOpen===0) {
                     returnValues.push(tnp.slice());
                 }
                 for (var col = 0 ; col<5-row ; col++) {
-                    if (points[row+col][col]==value) {
+                    if (points[row+col][col]===value) {
                         cnt11--;
-                    } else if (points[row+col][col]!=0) {
+                    } else if (points[row+col][col]!==0) {
                         checkOpen--;
                     }
-                    if (points[row+5+col][col+5]==value) {
+                    if (points[row+5+col][col+5]===value) {
                         cnt11++;
-                    } else if (points[row+5+col][col+5]!=0) {
+                    } else if (points[row+5+col][col+5]!==0) {
                         checkOpen++;
                     } else {
                         tnp = [row+5+col,col+5];
                     }
-                    if (cnt11==4&&checkOpen==0) {
+                    if (cnt11===4&&checkOpen===0) {
                         returnValues.push(tnp.slice());
                     }
                 }
@@ -1064,31 +1074,31 @@ $(document).ready(function(){
                 checkOpen = 0;
                 cnt11=0;
                 for(var i = 0 ; i < 5 ; i++) {
-                    if (points[i][col+i]==value) {
+                    if (points[i][col+i]===value) {
                         cnt11++;
-                    } else if (points[i][col+i]!=0) {
+                    } else if (points[i][col+i]!==0) {
                         checkOpen++;
                     } else {
                         tnp=[i,col+i];
                     }
                 }
-                if (cnt11==4&&checkOpen==0) {
+                if (cnt11===4&&checkOpen===0) {
                     returnValues.push(tnp.slice());
                 }
                 for (var row = 0 ; row<5-col ; row++) {
-                    if (points[row][col+row]==value) {
+                    if (points[row][col+row]===value) {
                         cnt11--;
-                    } else if (points[row][col+row]!=0) {
+                    } else if (points[row][col+row]!==0) {
                         checkOpen--;
                     }
-                    if (points[row+5][col+5+row]==value) {
+                    if (points[row+5][col+5+row]===value) {
                         cnt11++;
-                    } else if (points[row+5][col+5+row]!=0) {
+                    } else if (points[row+5][col+5+row]!==0) {
                         checkOpen++;
                     } else {
                         tnp = [row+5,col+5+row];
                     }
-                    if (cnt11==4&&checkOpen==0) {
+                    if (cnt11===4&&checkOpen===0) {
                         returnValues.push(tnp.slice());
                     }
                 }
@@ -1097,31 +1107,31 @@ $(document).ready(function(){
                 checkOpen = 0;
                 cnt11=0;
                 for(var i = 0 ; i < 5 ; i++) {
-                    if (points[row-i][i]==value) {
+                    if (points[row-i][i]===value) {
                         cnt11++;
-                    } else if (points[row-i][i]!=0) {
+                    } else if (points[row-i][i]!==0) {
                         checkOpen++;
                     } else {
                         tnp=[row-i,i];
                     }
                 }
-                if (cnt11==4&&checkOpen==0) {
+                if (cnt11===4&&checkOpen===0) {
                     returnValues.push(tnp.slice());
                 }
                 for (var col = 0 ; col<row-4 ; col++) {
-                    if (points[row-col][col]==value) {
+                    if (points[row-col][col]===value) {
                         cnt11--;
-                    } else if (points[row-col][col]!=0) {
+                    } else if (points[row-col][col]!==0) {
                         checkOpen--;
                     }
-                    if (points[row-5-col][col+5]==value) {
+                    if (points[row-5-col][col+5]===value) {
                         cnt11++;
-                    } else if (points[row-5-col][col+5]!=0) {
+                    } else if (points[row-5-col][col+5]!==0) {
                         checkOpen++;
                     } else {
                         tnp = [row-5-col,col+5];
                     }
-                    if (cnt11==4&&checkOpen==0) {
+                    if (cnt11===4&&checkOpen===0) {
                         returnValues.push(tnp.slice());
                     }
                 }
@@ -1130,43 +1140,43 @@ $(document).ready(function(){
                 checkOpen = 0;
                 cnt11=0;
                 for(var i = 0 ; i < 5 ; i++) {
-                    if (points[9-i][col+i]==value) {
+                    if (points[9-i][col+i]===value) {
                         cnt11++;
-                    } else if (points[9-i][col+i]!=0) {
+                    } else if (points[9-i][col+i]!==0) {
                         checkOpen++;
                     } else {
                         tnp=[9-i,col+i];
                     }
                 }
-                if (cnt11==4&&checkOpen==0) {
+                if (cnt11===4&&checkOpen===0) {
                     returnValues.push(tnp.slice());
                 }
                 for (var row = 0 ; row<5-col ; row++) {
-                    if (points[9-row][col+row]==value) {
+                    if (points[9-row][col+row]===value) {
                         cnt11--;
-                    } else if (points[9-row][col+row]!=0) {
+                    } else if (points[9-row][col+row]!==0) {
                         checkOpen--;
                     }
-                    if (points[4-row][col+5+row]==value) {
+                    if (points[4-row][col+5+row]===value) {
                         cnt11++;
-                    } else if (points[4-row][col+5+row]!=0) {
+                    } else if (points[4-row][col+5+row]!==0) {
                         checkOpen++;
                     } else {
                         tnp = [4-row,col+5+row];
                     }
-                    if (cnt11==4&&checkOpen==0) {
+                    if (cnt11===4&&checkOpen===0) {
                         returnValues.push(tnp.slice());
                     }
                 }
             }
         }
-        if (returnValues.length!=0) {
+        if (returnValues.length!==0) {
             returnValues.sort(sort_arrays);
             var returnValues2 = [];
             var current = [,];
             var cnt = 0;
             for (var i = 0; i < returnValues.length; i++) {
-                if (returnValues[i][0] != current[0]||returnValues[i][1] != current[1]) {
+                if (returnValues[i][0] !== current[0]||returnValues[i][1] !== current[1]) {
                     if (cnt > 0) {
                         returnValues2.push(current.slice());
                         returnValues2[returnValues2.length-1].push(cnt);
@@ -1185,7 +1195,7 @@ $(document).ready(function(){
             returnValues2.sort(sort_by_number);
             max = returnValues2[0][2];
             for (var i = 0 ; i < returnValues2.length ; i++){
-                if (returnValues2[i][2]==max) {
+                if (returnValues2[i][2]===max) {
                     returnValues3.push(returnValues2[i].slice());
                 }else {
                     break;
@@ -1201,12 +1211,7 @@ $(document).ready(function(){
         return options;
     }
     function removeJ(colour){
-        if (colour==1) {
-            colour=3;
-        } else if (colour==3) {
-            colour=1;
-        }
-        
+        colour = 4-colour;       
         var worth = [];
         for( var i = 0 ; i<board.length ; i++ ){
             var worthrow = [];
@@ -1229,32 +1234,32 @@ $(document).ready(function(){
             tnp=[];
             cnt21=0;
             for(var i = 0 ; i < 5 ; i++) {
-                if (points[row][i]==value) {
+                if (points[row][i]===value) {
                     cnt21++;
                     tnp.push([row,i])
-                } else if (points[row][i]!=0) {
+                } else if (points[row][i]!==0) {
                     check=false;
                 }
             }
-            if (cnt21==4&&check) {
+            if (cnt21===4&&check) {
                 for(var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
             for (var col = 0 ; col<5 ; col++) {
-                if (points[row][col]==value) {
+                if (points[row][col]===value) {
                     tnp.splice(0,1);
                     cnt21--;
-                } else if (points[row][col]!=0){
+                } else if (points[row][col]!==0){
                     check=true;
                 }
-                if (points[row][col+5]==value) {
+                if (points[row][col+5]===value) {
                     cnt21++;
                     tnp.push([row,col+5]);
-                } else if (points[row][col+5]!=0) {
+                } else if (points[row][col+5]!==0) {
                     check=false;
                 }
-                if (cnt21==4&&check) {
+                if (cnt21===4&&check) {
                     for(var i = 0 ; i<tnp.length ; i++){
                         worth[tnp[i][0]][tnp[i][1]]++;
                     }
@@ -1266,32 +1271,32 @@ $(document).ready(function(){
             tnp=[];
             cnt12=0;
             for(var i = 0 ; i < 5 ; i++) {
-                if (points[i][col]==value) {
+                if (points[i][col]===value) {
                     cnt12++;
                     tnp.push([i,col]);
-                } else if (points[i][col]!=0) {
+                } else if (points[i][col]!==0) {
                     check=false;
                 }
             }
-            if (cnt12==4&&check) {
+            if (cnt12===4&&check) {
                 for(var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
             for (var row = 0 ; row<5 ; row++) {
-                if (points[row][col]==value) {
+                if (points[row][col]===value) {
                     tnp.splice(0,1);
                     cnt12--;
-                } else if (points[row][col]!=0) {
+                } else if (points[row][col]!==0) {
                     check=true;
                 }
-                if (points[row+5][col]==value) {
+                if (points[row+5][col]===value) {
                     cnt12++;
                     tnp.push([row+5,col]);
-                } else if (points[row+5][col]!=0) {
+                } else if (points[row+5][col]!==0) {
                     check=false;
                 }
-                if (cnt12==4&&check) {
+                if (cnt12===4&&check) {
                     for(var i = 0 ; i<tnp.length ; i++){
                         worth[tnp[i][0]][tnp[i][1]]++;
                     }
@@ -1302,32 +1307,32 @@ $(document).ready(function(){
             check = true;
             cnt11=0;
             for(var i = 0 ; i < 5 ; i++) {
-                if (points[row+i][i]==value) {
+                if (points[row+i][i]===value) {
                     cnt11++;
                     tnp.push([row+i,i]);
-                } else if (points[row+i][i]!=0) {
+                } else if (points[row+i][i]!==0) {
                     check=false;
                 }
             }
-            if (cnt11==4&&check) {
+            if (cnt11===4&&check) {
                 for(var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
             for (var col = 0 ; col<5-row ; col++) {
-                if (points[row+col][col]==value) {
+                if (points[row+col][col]===value) {
                     tnp.splice(0,1);
                     cnt11--;
-                } else if (points[row+col][col]!=0) {
+                } else if (points[row+col][col]!==0) {
                     check=true;
                 }
-                if (points[row+5+col][col+5]==value) {
+                if (points[row+5+col][col+5]===value) {
                     cnt11++;
                     tnp.push([row+5+col,col+5]);
-                } else if (points[row+5+col][col+5]!=0) {
+                } else if (points[row+5+col][col+5]!==0) {
                     check=false;
                 }
-                if (cnt11==4&&check) {
+                if (cnt11===4&&check) {
                     for(var i = 0 ; i<tnp.length ; i++){
                         worth[tnp[i][0]][tnp[i][1]]++;
                     }
@@ -1339,32 +1344,32 @@ $(document).ready(function(){
             tnp=[];
             cnt11=0;
             for(var i = 0 ; i < 5 ; i++) {
-                if (points[i][col+i]==value) {
+                if (points[i][col+i]===value) {
                     cnt11++;
                     tnp.push([i,col+i]);
-                } else if (points[i][col+i]!=0) {
+                } else if (points[i][col+i]!==0) {
                     check=false;
                 }
             }
-            if (cnt11==4&&check) {
+            if (cnt11===4&&check) {
                 for(var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
             for (var row = 0 ; row<5-col ; row++) {
-                if (points[row][col+row]==value) {
+                if (points[row][col+row]===value) {
                     tnp.splice(0,1);
                     cnt11--;
-                } else if (points[row][col+row]!=0) {
+                } else if (points[row][col+row]!==0) {
                     check=true;
                 }
-                if (points[row+5][col+5+row]==value) {
+                if (points[row+5][col+5+row]===value) {
                     cnt11++;
                     tnp.push([row+5,col+5+row]);
-                } else if (points[row+5][col+5+row]!=0) {
+                } else if (points[row+5][col+5+row]!==0) {
                     check=false;
                 }
-                if (cnt11==4&&check) {
+                if (cnt11===4&&check) {
                     for(var i = 0 ; i<tnp.length ; i++){
                         worth[tnp[i][0]][tnp[i][1]]++;
                     }
@@ -1376,32 +1381,32 @@ $(document).ready(function(){
             tnp=[];
             cnt11=0;
             for(var i = 0 ; i < 5 ; i++) {
-                if (points[row-i][i]==value) {
+                if (points[row-i][i]===value) {
                     cnt11++;
                     tnp.push([row-i,i]);
-                } else if (points[row-i][i]!=0) {
+                } else if (points[row-i][i]!==0) {
                     check=false;
                 }
             }
-            if (cnt11==4&&check) {
+            if (cnt11===4&&check) {
                 for(var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
             for (var col = 0 ; col<row-4 ; col++) {
-                if (points[row-col][col]==value) {
+                if (points[row-col][col]===value) {
                     tnp.splice(0,1);
                     cnt11--;
-                } else if (points[row-col][col]!=0) {
+                } else if (points[row-col][col]!==0) {
                     check=true;
                 }
-                if (points[row-5-col][col+5]==value) {
+                if (points[row-5-col][col+5]===value) {
                     cnt11++;
                     tnp.push([row-5-col,col+5]);
-                } else if (points[row-5-col][col+5]!=0) {
+                } else if (points[row-5-col][col+5]!==0) {
                     check=false;
                 }
-                if (cnt11==4&&check) {
+                if (cnt11===4&&check) {
                     for(var i = 0 ; i<tnp.length ; i++){
                         worth[tnp[i][0]][tnp[i][1]]++;
                     }
@@ -1413,32 +1418,32 @@ $(document).ready(function(){
             tnp=[];
             cnt11=0;
             for(var i = 0 ; i < 5 ; i++) {
-                if (points[9-i][col+i]==value) {
+                if (points[9-i][col+i]===value) {
                     cnt11++;
                     tnp.push([9-i,col+i]);
-                } else if (points[9-i][col+i]!=0) {
+                } else if (points[9-i][col+i]!==0) {
                     check=false;
                 }
             }
-            if (cnt11==4&&check) {
+            if (cnt11===4&&check) {
                 for(var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
             for (var row = 0 ; row<5-col ; row++) {
-                if (points[9-row][col+row]==value) {
+                if (points[9-row][col+row]===value) {
                     tnp.splice(0,1);
                     cnt11--;
-                } else if (points[9-row][col+row]!=0) {
+                } else if (points[9-row][col+row]!==0) {
                     check=true;
                 }
-                if (points[4-row][col+5+row]==value) {
+                if (points[4-row][col+5+row]===value) {
                     cnt11++;
                     tnp.push([4-row,col+5+row]);
-                } else if (points[4-row][col+5+row]!=0) {
+                } else if (points[4-row][col+5+row]!==0) {
                     check=false;
                 }
-                if (cnt11==4&&check) {
+                if (cnt11===4&&check) {
                     for(var i = 0 ; i<tnp.length ; i++){
                         worth[tnp[i][0]][tnp[i][1]]++;
                     }
@@ -1457,7 +1462,7 @@ $(document).ready(function(){
         if (max!=0) {
             for( var i = 0 ; i<board.length ; i++ ){
                 for( var j = 0 ; j<board[i].length ; j++ ){
-                    if (max==worth[i][j]) {
+                    if (max===worth[i][j]) {
                         returnValues.push([i,j]);
                     }
                 }
@@ -1483,9 +1488,9 @@ $(document).ready(function(){
             worth.push(worthrow);
         }
         var breakopen = true;
-        while(number!=-1&&breakopen){
+        while(number!==-1&&breakopen){
             for(var option = 0; option<options.length&&breakopen ; option++){
-                if (options[option]==-1||options[option]==0) {
+                if (options[option]===-1||options[option]===0) {
                     continue;
                 }
                 for( var blah = 0 ; blah<=1&&breakopen; blah++){
@@ -1508,10 +1513,10 @@ $(document).ready(function(){
                     var cnt = 0;
                     
                     for(var i = 1 ; i < 5 ; i++) { //11
-                        if (x-i!=-1 && y-i!=-1){
-                            if(points[x-i][y-i]==type) {
+                        if (x-i!==-1 && y-i!==-1){
+                            if(points[x-i][y-i]===type) {
                                 cnt++;
-                            } else if(points[x-i][y-i]!=0){
+                            } else if(points[x-i][y-i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1520,10 +1525,10 @@ $(document).ready(function(){
                         }
                     }
                     for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!=10 && y+i!=10){
-                            if(points[x+i][y+i]==type) {
+                        if (x+i!==10 && y+i!==10){
+                            if(points[x+i][y+i]===type) {
                                 cnt++;
-                            } else if(points[x+i][y+i]!=0){
+                            } else if(points[x+i][y+i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1531,22 +1536,22 @@ $(document).ready(function(){
                             break;
                         }
                     }
-                    if (cnt==number&&checkOpen==0) {
+                    if (cnt===number&&checkOpen===0) {
                         check = true;
                         worth[option][option2]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!=10 && y+i!=10 && checkremove ; i++){
-                        if (points[x+i-4][y+i-4]==type) {
+                    for(var i = removed ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
+                        if (points[x+i-4][y+i-4]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y+i-4]!=0){
+                        } else if (points[x+i-4][y+i-4]!==0){
                             checkOpen--;
                         }
-                        if (points[x+i][y+i]==type) {
+                        if (points[x+i][y+i]===type) {
                             cnt++;
-                        } else if (points[x+i][y+i]!=0){
+                        } else if (points[x+i][y+i]!==0){
                             checkOpen++;
                         }
-                        if (cnt==number&&checkOpen==0) {
+                        if (cnt===number&&checkOpen===0) {
                             check = true;
                             worth[option][option2]+=number*number;
                         }
@@ -1556,10 +1561,10 @@ $(document).ready(function(){
                     removed = 0;
                     cnt = 0;
                     for(var i = 1 ; i < 5 ; i++) { //12
-                        if (x-i!=-1){
-                            if(points[x-i][y]==type) {
+                        if (x-i!==-1){
+                            if(points[x-i][y]===type) {
                                 cnt++;
-                            } else if(points[x-i][y]!=0){
+                            } else if(points[x-i][y]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1568,10 +1573,10 @@ $(document).ready(function(){
                         }
                     }
                     for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!=10){
-                            if(points[x+i][y]==type) {
+                        if (x+i!==10){
+                            if(points[x+i][y]===type) {
                                 cnt++;
-                            } else if(points[x+i][y]!=0){
+                            } else if(points[x+i][y]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1579,22 +1584,22 @@ $(document).ready(function(){
                             break;
                         }
                     }
-                    if (cnt==number&&checkOpen==0) {
+                    if (cnt===number&&checkOpen===0) {
                         check = true;
                         worth[option][option2]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!=10 && checkremove ; i++){
-                        if (points[x+i-4][y]==type) {
+                    for(var i = removed ; i<5 && x+i!==10 && checkremove ; i++){
+                        if (points[x+i-4][y]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y]!=0){
+                        } else if (points[x+i-4][y]!==0){
                             checkOpen--;
                         }
-                        if (points[x+i][y]==type) {
+                        if (points[x+i][y]===type) {
                             cnt++;
-                        } else if (points[x+i][y]!=0){
+                        } else if (points[x+i][y]!==0){
                             checkOpen++;
                         }
-                        if (cnt==number&&checkOpen==0) {
+                        if (cnt===number&&checkOpen===0) {
                             check = true;
                             worth[option][option2]+=number*number;
                         }
@@ -1604,10 +1609,10 @@ $(document).ready(function(){
                     removed = 0;
                     cnt = 0;
                     for(var i = 1 ; i < 5 ; i++) { //11
-                        if (x-i!=-1 && y+i!=10){
-                            if(points[x-i][y+i]==type) {
+                        if (x-i!==-1 && y+i!==10){
+                            if(points[x-i][y+i]===type) {
                                 cnt++;
-                            } else if(points[x-i][y+i]!=0){
+                            } else if(points[x-i][y+i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1616,10 +1621,10 @@ $(document).ready(function(){
                         }
                     }
                     for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!=10 && y-i!=-1){
-                            if(points[x+i][y-i]==type) {
+                        if (x+i!==10 && y-i!==-1){
+                            if(points[x+i][y-i]===type) {
                                 cnt++;
-                            } else if(points[x+i][y-i]!=0){
+                            } else if(points[x+i][y-i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1627,22 +1632,22 @@ $(document).ready(function(){
                             break;
                         }
                     }
-                    if (cnt==number&&checkOpen==0) {
+                    if (cnt===number&&checkOpen===0) {
                         check = true;
                         worth[option][option2]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!=10 && y-i!=-1 && checkremove ; i++){
-                        if (points[x+i-4][y-i+4]==type) {
+                    for(var i = removed ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
+                        if (points[x+i-4][y-i+4]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y-i+4]!=0){
+                        } else if (points[x+i-4][y-i+4]!==0){
                             checkOpen--;
                         }
-                        if (points[x+i][y+i]==type) {
+                        if (points[x+i][y+i]===type) {
                             cnt++;
-                        } else if (points[x+i][y-i]!=0){
+                        } else if (points[x+i][y-i]!==0){
                             checkOpen++;
                         }
-                        if (cnt==number&&checkOpen==0) {
+                        if (cnt===number&&checkOpen===0) {
                             check = true;
                             worth[option][option2]+=number*number;
                         }
@@ -1651,10 +1656,10 @@ $(document).ready(function(){
                     removed = 0;
                     cnt = 0;
                     for(var i = 1 ; i < 5 ; i++) { //11
-                        if (y-i!=-1){
-                            if(points[x][y-i]==type) {
+                        if (y-i!==-1){
+                            if(points[x][y-i]===type) {
                                 cnt++;
-                            } else if(points[x][y-i]!=0){
+                            } else if(points[x][y-i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1663,10 +1668,10 @@ $(document).ready(function(){
                         }
                     }
                     for(var i = 1 ; i<=removed ; i++){
-                        if (y+i!=10){
-                            if(points[x][y+i]==type) {
+                        if (y+i!==10){
+                            if(points[x][y+i]===type) {
                                 cnt++;
-                            } else if(points[x][y+i]!=0){
+                            } else if(points[x][y+i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1674,29 +1679,29 @@ $(document).ready(function(){
                             break;
                         }
                     }
-                    if (cnt==number&&checkOpen==0) {
+                    if (cnt===number&&checkOpen===0) {
                         check = true;
                         worth[option][option2]+=number*number;
                     }
-                    for(var i = removed ; i<5 && y+i!=10 && checkremove ; i++){
-                        if (points[x][y+i-4]==type) {
+                    for(var i = removed ; i<5 && y+i!==10 && checkremove ; i++){
+                        if (points[x][y+i-4]===type) {
                             cnt--;
-                        } else if (points[x][y+i-4]!=0){
+                        } else if (points[x][y+i-4]!==0){
                             checkOpen--;
                         }
-                        if (points[x][y+i]==type) {
+                        if (points[x][y+i]===type) {
                             cnt++;
-                        } else if (points[x][y+i]!=0){
+                        } else if (points[x][y+i]!==0){
                             checkOpen++;
                         }
-                        if (cnt==number&&checkOpen==0) {
+                        if (cnt===number&&checkOpen===0) {
                             check = true;
                             worth[option][option2]+=number*number;
                             }
                         }
                 }
                 }
-                if (check == true) {
+                if (check === true) {
                     breakopen = false;
                     break;
                 }
@@ -1715,7 +1720,7 @@ $(document).ready(function(){
         var returnValuesValues = [];
         for( var i = 0 ; i<worth.length ; i++ ){
             for( var j = 0 ; j<worth[i].length ; j++ ){
-                if (max==worth[i][j]) {
+                if (max===worth[i][j]) {
                     returnValuesValues.push([i,j]);
                 }
             }
@@ -1735,7 +1740,7 @@ $(document).ready(function(){
             worth.push(0);
         }
         var breakopen = true;
-        while(number!=-1&&breakopen){    
+        while(number!==-1&&breakopen){    
             for(var side = 0; side<card.length ; side++){
                 var x = card[side][0];
                 var y = card[side][1];
@@ -1756,10 +1761,10 @@ $(document).ready(function(){
                         type=4-value;
                     }
                     for(var i = 1 ; i < 5 ; i++) { //11
-                        if (x-i!=-1 && y-i!=-1){
-                            if(points[x-i][y-i]==type) {
+                        if (x-i!==-1 && y-i!==-1){
+                            if(points[x-i][y-i]===type) {
                                 cnt++;
-                            } else if(points[x-i][y-i]!=0){
+                            } else if(points[x-i][y-i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1768,10 +1773,10 @@ $(document).ready(function(){
                         }
                     }
                     for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!=10 && y+i!=10){
-                            if(points[x+i][y+i]==type) {
+                        if (x+i!==10 && y+i!==10){
+                            if(points[x+i][y+i]===type) {
                                 cnt++;
-                            } else if(points[x+i][y+i]!=0){
+                            } else if(points[x+i][y+i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1779,22 +1784,22 @@ $(document).ready(function(){
                             break;
                         }
                     }
-                    if (cnt==number&&checkOpen==0) {
+                    if (cnt===number&&checkOpen===0) {
                         check = true;
                         worth[side]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!=10 && y+i!=10 && checkremove ; i++){
-                        if (points[x+i-4][y+i-4]==type) {
+                    for(var i = removed ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
+                        if (points[x+i-4][y+i-4]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y+i-4]!=0){
+                        } else if (points[x+i-4][y+i-4]!==0){
                             checkOpen--;
                         }
-                        if (points[x+i][y+i]==type) {
+                        if (points[x+i][y+i]===type) {
                             cnt++;
-                        } else if (points[x+i][y+i]!=0){
+                        } else if (points[x+i][y+i]!==0){
                             checkOpen++;
                         }
-                        if (cnt==number&&checkOpen==0) {
+                        if (cnt===number&&checkOpen===0) {
                             check = true;
                             worth[side]+=number*number;
                         }
@@ -1804,10 +1809,10 @@ $(document).ready(function(){
                     removed = 0;
                     cnt = 0;
                     for(var i = 1 ; i < 5 ; i++) { //12
-                        if (x-i!=-1){
-                            if(points[x-i][y]==type) {
+                        if (x-i!==-1){
+                            if(points[x-i][y]===type) {
                                 cnt++;
-                            } else if(points[x-i][y]!=0){
+                            } else if(points[x-i][y]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1816,10 +1821,10 @@ $(document).ready(function(){
                         }
                     }
                     for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!=10){
-                            if(points[x+i][y]==type) {
+                        if (x+i!==10){
+                            if(points[x+i][y]===type) {
                                 cnt++;
-                            } else if(points[x+i][y]!=0){
+                            } else if(points[x+i][y]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1827,22 +1832,22 @@ $(document).ready(function(){
                             break;
                         }
                     }
-                    if (cnt==number&&checkOpen==0) {
+                    if (cnt===number&&checkOpen===0) {
                         check = true;
                         worth[side]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!=10 && checkremove ; i++){
-                        if (points[x+i-4][y]==type) {
+                    for(var i = removed ; i<5 && x+i!==10 && checkremove ; i++){
+                        if (points[x+i-4][y]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y]!=0){
+                        } else if (points[x+i-4][y]!==0){
                             checkOpen--;
                         }
-                        if (points[x+i][y]==type) {
+                        if (points[x+i][y]===type) {
                             cnt++;
-                        } else if (points[x+i][y]!=0){
+                        } else if (points[x+i][y]!==0){
                             checkOpen++;
                         }
-                        if (cnt==number&&checkOpen==0) {
+                        if (cnt===number&&checkOpen===0) {
                             check = true;
                             worth[side]+=number*number;
                         }
@@ -1852,10 +1857,10 @@ $(document).ready(function(){
                     removed = 0;
                     cnt = 0;
                     for(var i = 1 ; i < 5 ; i++) { //11
-                        if (x-i!=-1 && y+i!=10){
-                            if(points[x-i][y+i]==type) {
+                        if (x-i!==-1 && y+i!==10){
+                            if(points[x-i][y+i]===type) {
                                 cnt++;
-                            } else if(points[x-i][y+i]!=0){
+                            } else if(points[x-i][y+i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1864,10 +1869,10 @@ $(document).ready(function(){
                         }
                     }
                     for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!=10 && y-i!=-1){
-                            if(points[x+i][y-i]==type) {
+                        if (x+i!==10 && y-i!==-1){
+                            if(points[x+i][y-i]===type) {
                                 cnt++;
-                            } else if(points[x+i][y-i]!=0){
+                            } else if(points[x+i][y-i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1875,22 +1880,22 @@ $(document).ready(function(){
                             break;
                         }
                     }
-                    if (cnt==number&&checkOpen==0) {
+                    if (cnt===number&&checkOpen===0) {
                         check = true;
                         worth[side]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!=10 && y-i!=-1 && checkremove ; i++){
-                        if (points[x+i-4][y-i+4]==type) {
+                    for(var i = removed ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
+                        if (points[x+i-4][y-i+4]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y-i+4]!=0){
+                        } else if (points[x+i-4][y-i+4]!==0){
                             checkOpen--;
                         }
-                        if (points[x+i][y+i]==type) {
+                        if (points[x+i][y+i]===type) {
                             cnt++;
-                        } else if (points[x+i][y-i]!=0){
+                        } else if (points[x+i][y-i]!==0){
                             checkOpen++;
                         }
-                        if (cnt==number&&checkOpen==0) {
+                        if (cnt===number&&checkOpen===0) {
                             check = true;
                             worth[side]+=number*number;
                         }
@@ -1899,10 +1904,10 @@ $(document).ready(function(){
                     removed = 0;
                     cnt = 0;
                     for(var i = 1 ; i < 5 ; i++) { //11
-                        if (y-i!=-1){
-                            if(points[x][y-i]==type) {
+                        if (y-i!==-1){
+                            if(points[x][y-i]===type) {
                                 cnt++;
-                            } else if(points[x][y-i]!=0){
+                            } else if(points[x][y-i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1911,10 +1916,10 @@ $(document).ready(function(){
                         }
                     }
                     for(var i = 1 ; i<=removed ; i++){
-                        if (y+i!=10){
-                            if(points[x][y+i]==type) {
+                        if (y+i!==10){
+                            if(points[x][y+i]===type) {
                                 cnt++;
-                            } else if(points[x][y+i]!=0){
+                            } else if(points[x][y+i]!==0){
                                 checkOpen++;
                             }
                         } else {
@@ -1922,22 +1927,22 @@ $(document).ready(function(){
                             break;
                         }
                     }
-                    if (cnt==number&&checkOpen==0) {
+                    if (cnt===number&&checkOpen===0) {
                         check = true;
                         worth[side]+=number*number;
                     }
-                    for(var i = removed ; i<5 && y+i!=10 && checkremove ; i++){
-                        if (points[x][y+i-4]==type) {
+                    for(var i = removed ; i<5 && y+i!==10 && checkremove ; i++){
+                        if (points[x][y+i-4]===type) {
                             cnt--;
-                        } else if (points[x][y+i-4]!=0){
+                        } else if (points[x][y+i-4]!==0){
                             checkOpen--;
                         }
-                        if (points[x][y+i]==type) {
+                        if (points[x][y+i]===type) {
                             cnt++;
-                        } else if (points[x][y+i]!=0){
+                        } else if (points[x][y+i]!==0){
                             checkOpen++;
                         }
-                        if (cnt==number&&checkOpen==0) {
+                        if (cnt===number&&checkOpen===0) {
                             check = true;
                             worth[side]+=number*number;
                         }
@@ -1996,13 +2001,13 @@ $(document).ready(function(){
         var cnt21 = 0;
         
         for(var i = 1 ; i < 5 ; i++) { //check later for edges
-            if (x-i!=-1 && x-i!=-1 && check11 && points[x-i][y-i]==value) {
+            if (x-i!==-1 && x-i!==-1 && check11 && points[x-i][y-i]===value) {
                 cnt11++;
                 tnp.push([x-i,y-i])
             } else {
                 check11 = false;
             }
-            if (x+i!=10 && x+i!=10 && check33 && points[x+i][y+i]==value) {
+            if (x+i!==10 && x+i!==10 && check33 && points[x+i][y+i]===value) {
                 cnt11++;
                 tnp.push([x+i,y+i])
             } else {
@@ -2010,9 +2015,9 @@ $(document).ready(function(){
             }
         }
         if (cnt11>=4) {
-            if (value == 1) {
+            if (value === 1) {
                 blueLines++;
-            } else if (value == 3){
+            } else if (value === 3){
                 greenLines++;
             }
             finishLine(x,y,value);
@@ -2022,13 +2027,13 @@ $(document).ready(function(){
         }
         tnp = [];
         for(var i = 1 ; i < 5 ; i++) { //check later for edges
-            if (y-i!=-1 && check12 && points[x][y-i]==value) {
+            if (y-i!==-1 && check12 && points[x][y-i]===value) {
                 cnt12++;
                 tnp.push([x,y-i])
             } else {
                 check12 = false;
             }
-            if (y+i!=10 && check32 && points[x][y+i]==value) {
+            if (y+i!==10 && check32 && points[x][y+i]===value) {
                 cnt12++;
                 tnp.push([x,y+i])
             } else {
@@ -2036,9 +2041,9 @@ $(document).ready(function(){
             }
         }
         if (cnt12>=4) {
-            if (value == 1) {
+            if (value === 1) {
                 blueLines++;
-            } else if (value == 3){
+            } else if (value === 3){
                 greenLines++;
             }
             finishLine(x,y,value);
@@ -2048,13 +2053,13 @@ $(document).ready(function(){
         }
         tnp = [];
         for(var i = 1 ; i < 5 ; i++) { //check later for edges
-            if (x+i!=10 && y-i!=-1 && check13 && points[x+i][y-i]==value) {
+            if (x+i!==10 && y-i!==-1 && check13 && points[x+i][y-i]===value) {
                 cnt13++;
                 tnp.push([x+i,y-i])
             } else {
                 check13 = false;
             }
-            if (x-i!=-1 && y+i!=10 && check31 && points[x-i][y+i]==value) {
+            if (x-i!==-1 && y+i!==10 && check31 && points[x-i][y+i]===value) {
                 cnt13++;
                 tnp.push([x-i,y+i])
             } else {
@@ -2062,9 +2067,9 @@ $(document).ready(function(){
             }
         }
         if (cnt13>=4) {
-            if (value == 1) {
+            if (value === 1) {
                 blueLines++;
-            } else if (value == 3){
+            } else if (value === 3){
                 greenLines++;
             }
             finishLine(x,y,value);
@@ -2074,13 +2079,13 @@ $(document).ready(function(){
         }
         tnp = [];
         for(var i = 1 ; i < 5 ; i++) { //check later for edges
-            if (x-i!=-1 && check21 && points[x-i][y]==value) {
+            if (x-i!==-1 && check21 && points[x-i][y]===value) {
                 cnt21++;
                 tnp.push([x-i,y])
             } else {
                 check21 = false;
             }
-            if (x+i!=10 && check23 && points[x+i][y]==value) {
+            if (x+i!==10 && check23 && points[x+i][y]===value) {
                 cnt21++;
                 tnp.push([x+i,y])
             } else {
@@ -2088,9 +2093,9 @@ $(document).ready(function(){
             }
         }
         if (cnt21>=4) {
-            if (value == 1) {
+            if (value === 1) {
                 blueLines++;
-            } else if (value == 3){
+            } else if (value === 3){
                 greenLines++;
             }
             finishLine(x,y,value);
@@ -2184,7 +2189,7 @@ $(document).ready(function(){
     }
     function hasAdd(player){
         for (var i = 0 ; i < player.length ; i++){
-            if (player[i] == 0) {
+            if (player[i] === 0) {
                 return i;
             }
         }
@@ -2192,7 +2197,7 @@ $(document).ready(function(){
     }
     function hasRemove(player) {
         for (var i = 0 ; i < player.length ; i++){
-            if (player[i]==-1) {
+            if (player[i]===-1) {
                 return i;
             }
         }
@@ -2200,7 +2205,7 @@ $(document).ready(function(){
     }
     function hasOnlyJ(player) {
         for (var i = 0 ; i < player.length ; i++){
-            if (player[i]!=-1&&player[i]!=0) {
+            if (player[i]!==-1&&player[i]!==0) {
                 return false;
             }
         }
@@ -2208,7 +2213,7 @@ $(document).ready(function(){
     }
     function hasOnlyRemoveJ(player) {
         for (var i = 0 ; i < player.length ; i++){
-            if (player[i]!=-1) {
+            if (player[i]!==-1) {
                 return false;
             }
         }
@@ -2216,7 +2221,7 @@ $(document).ready(function(){
     }
     function hasUselessCard(options) {
         for (var i = 0 ; i < options.length ; i++){
-            if (options[i].length==0) {
+            if (options[i].length===0) {
                 return i;
             }
         }
@@ -2282,13 +2287,21 @@ $(document).ready(function(){
         }
         if (!change) {
             $('#p'+player+'_'+index).addClass('raise');
+            pastRemove = remove;
         } else {
             $('#p'+player+'_'+index).html(changeToCards(players[player][index]));
+            if (remove) {
+                size = players[player].length;
+                $('#p'+player+'_'+size).remove();
+                for ( var i = index ; i < size ; i++) {
+                    $('#p'+player+'_'+i).html(changeToCards(players[player][i]));
+                }
+            }
+            pastRemove = false;
         }
         pastCard = players[player][index];
         pastCardIndex = index;
         pastPlayer = player;
-        pastRemove = remove;
         pastChange = change;
     }
     function showWorth() {
@@ -2325,7 +2338,7 @@ $(document).ready(function(){
     function hideHands(player) {
         for (var i = 0 ; i<players.length ; i++)
         {
-            if (i == player) {
+            if (i === player) {
                 continue;
             }
             for (var j = 0 ; j<players[i].length; j++) {
