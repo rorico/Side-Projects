@@ -1589,7 +1589,7 @@ $(document).ready(function(){
     //returns indexes for options with greatest value
     function mostLines(options,value,offensive){
         var type = value;
-        var number = 4;
+        var number = 4; //helps a line of four
         var worth = [];
 
         //initialize worth to be 0
@@ -1607,7 +1607,7 @@ $(document).ready(function(){
             worth.push(worthrow);
         }
 
-        //why is number not -1?? what is breakopen?? what is type??
+        //if finds a line of 4,breakopenbreaks out of for loop
         var breakopen = true;
         while(number!=-1&&breakopen){
             for(var option = 0; option<options.length&&breakopen; option++){
@@ -1627,8 +1627,10 @@ $(document).ready(function(){
                         type=4-value;
                 }
 
-                //
+                
                 for(var option2 = 0; option2<options[option].length ; option2++){
+
+                    //row x, col y
                     var x = options[option][option2][0];
                     var y = options[option][option2][1];
                     
@@ -1636,9 +1638,10 @@ $(document).ready(function(){
                     
                     var checkOpen = 0;
                     var checkremove = true;
-                    var removed = 0;
+                    var removed = 0; 
                     var cnt = 0;
                     
+                    //diagonal
                     for(var i = 1 ; i < 5 ; i++) { //11
                         if (x-i!=-1 && y-i!=-1){
                             if(points[x-i][y-i]==type) {
@@ -1663,6 +1666,8 @@ $(document).ready(function(){
                             break;
                         }
                     }
+
+                    //
                     if (cnt==number&&checkOpen==0) {
                         check = true;
                         worth[option][option2]+=number*number;
@@ -1835,6 +1840,8 @@ $(document).ready(function(){
             }
             number--
         }
+
+        //return max
         var returnValues = [number+1];
         var max = 0;
         for( var i = 0 ; i<worth.length ; i++ ){
