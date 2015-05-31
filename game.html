@@ -201,13 +201,13 @@
         <td>6</td>
         <td>7</td>
     </tr><tr>
-        <td id="worth1">1</td>
-        <td id="worth2">2</td>
-        <td id="worth3">3</td>
-        <td id="worth4">4</td>
-        <td id="worth5">5</td>
-        <td id="worth6">6</td>
-        <td id="worth7">7</td>
+        <td id="worth1"></td>
+        <td id="worth2"></td>
+        <td id="worth3"></td>
+        <td id="worth4"></td>
+        <td id="worth5"></td>
+        <td id="worth6"></td>
+        <td id="worth7"></td>
     </tr>
 </table>
 <p id="values"></p>
@@ -3204,6 +3204,12 @@ $(document).ready(function(){
                 return "7 &#9671";
             default:
                 return "-2";
+        }
+    }
+    showandskjlfnasdlfj([11,223,43,45,5,6,7]);
+    function showandskjlfnasdlfj(array) {
+        for(var i = 0 ; i<array.length ; i++) {
+            $('#worth'+i).html(array[i]);
         }
     }
 });
