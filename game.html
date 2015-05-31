@@ -494,6 +494,7 @@ $(document).ready(function(){
             if (options[i].length==0||options[i]==-1||options[i]==0) {
                 $('#p'+player+'_'+i).addClass('special');
             }
+            $('#p'+player+'_'+i).unbind('click');
             $('#p'+player+'_'+i).bind('click',{player:player,i:i,value:value}, function(event) {
                 event.stopPropagation();
                 $('.special').removeClass('special');
