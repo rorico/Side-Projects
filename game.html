@@ -75,7 +75,7 @@
             background-color: white;
             font-size: 100px;
             top: 40%;
-            left: 36%;
+            left: 80%;
             position: fixed;
             display: none;
             border: 1px black solid;
@@ -610,10 +610,10 @@ $(document).ready(function(){
 
     //game play
     function playBlue (player){
-        playWorth(player,1,true);
+        play(player,1,true);
     }
     function playGreen (player){
-        playWorth(player,3,true);
+        playAIphil(player,3,true);
     }
 
     //start of different AIs
@@ -831,8 +831,8 @@ $(document).ready(function(){
 
     function mostLinesPhil(options,value,offensive){
         var typeFor = value;
-        var typeAgainst = 4 - type;
-        var number = 4; //helps a line of four
+        var typeAgainst = 4 - typeFor;
+        var number = 0; //helps a line of four
         var worth = [];
 
         //initialize worth to be 0
@@ -850,288 +850,184 @@ $(document).ready(function(){
             worth.push(worthrow);
         }
 
-        for(var card = 0; card<options.length&&breakopen; card++){
+        for(var card = 0; card<options.length; card++){
             if (options[card]===-1||options[card]===0) {
                 continue;
             }
+
             for(var side = 0; side<options[card].length ; side++){
-                var x = options[card][side][0];
-                var y = options[card][side][1];
+                var row = options[card][side][0];
+                var col = options[card][side][1];
 
-                for (var i = -4; i <= 4; i++){
+                //console.log("card: " + card + " side: " + side);
+                //vertical
+                for (var i = -4; i <= 0; i++){
 
-                    var start = x + i;
-                    if(start < 0 || start > 6){
+                    var start = row + i;
+                    if(start < 0 || start > 5){
                         continue;
                     }
+
+                    var cntFor = 0;
+                    var cntAgainst = 0;
+                    var cntWon = 0;
+
                     for(var j = 0; j <=4; j++){
-                        var cntFor = 0;
-                        var cntAgainst = 0;
-                        var index = x + i + j;
-                        if(points[index][y]===typeFor) {
+                        var indexRow = row + i + j;
+                        var indexCol = col;
+
+
+
+                        if(points[indexRow][indexCol]===typeFor) {
                             cntFor++;
-                        } else if(points[index][y]===typeAgainst){
+                        } else if(points[indexRow][indexCol]===typeAgainst){
                             cntAgainst++;
+                        } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            cntWon++;
                         }
-                        if(cntFor > 0 && cntAgainst > 0){
 
-                        } else if (cntFor > 0){
-
-                        } else if (cntAgainst > 0){
-                            
+                    }
+                    if(cntFor === 4 || cntAgainst === 4){
+                        if (number === 0){
+                            number = 4;
                         }
                     }
-                }
-            }
-        }
 
-        //if finds a line of 4,breakopenbreaks out of for loop
-        var breakopen = true;
-        while(number!==-1&&breakopen){
-            for(var option = 0; option<options.length&&breakopen ; option++){
-                //continue out if a Jack
-                if (options[option]===-1||options[option]===0) {
-                    continue;
+                    if(cntFor > 0 && cntAgainst > 0 && cntWon > 0){
+
+                    } else if (cntFor > 0){
+                        worth[card][side] += valueFor(cntFor);
+                    } else if (cntAgainst > 0){
+                        worth[card][side] += valueAgainst(cntAgainst);
+                    }
+                    //console.log("V: card: " + card + " side: " + side + " start " + start +" indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
+
                 }
 
-                //switches from offensive to defensive
-                for(var blah = 0 ; blah<=1&&breakopen; blah++){
-                    if (blah===0) {
-                        type = value;
-                    } else if (offensive||number<3) {
+                //horizontal
+                for (var i = -4; i <= 0; i++){
+
+                    var start = col + i;
+                    if(start < 0 || start > 5){
                         continue;
-                    } else if (!offensive) {
-                        type=4-value;
-                }
+                    }
 
-                
-                for(var option2 = 0; option2<options[option].length ; option2++){
+                    var cntFor = 0;
+                    var cntAgainst = 0;
+                    var cntWon = 0;
 
-                    //row x, col y
-                    var x = options[option][option2][0];
-                    var y = options[option][option2][1];
-                    
-                    var check = false;
-                    
-                    var checkOpen = 0;
-                    var checkremove = true;
-                    var removed = 0; 
-                    var cnt = 0;
-                    
-                    //diagonal
-                    for(var i = 1 ; i < 5 ; i++) { //11
-                        if (x-i!==-1 && y-i!==-1){
-                            if(points[x-i][y-i]===type) {
-                                cnt++;
-                            } else if(points[x-i][y-i]!==0){
-                                checkOpen++;
-                            }
-                        } else {
-                            removed+=5-i;
-                            break;
+                    for(var j = 0; j <=4; j++){
+
+                        var indexRow = row;
+                        var indexCol = col + i + j;
+                        
+                        if(points[indexRow][indexCol]===typeFor) {
+                            cntFor++;
+                        } else if(points[indexRow][indexCol]===typeAgainst){
+                            cntAgainst++;
+                        } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            cntWon++;
+                        }
+
+                    }
+
+                    if(cntFor === 4 || cntAgainst === 4){
+                        if (number === 0){
+                            number = 4;
                         }
                     }
-                    for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!==10 && y+i!==10){
-                            if(points[x+i][y+i]===type) {
-                                cnt++;
-                            } else if(points[x+i][y+i]!==0){
-                                checkOpen++;
-                            }
-                        } else {
-                            checkremove = false;
-                            break;
-                        }
+
+                    if(cntFor > 0 && cntAgainst > 0 && cntWon > 0){
+
+                    } else if (cntFor > 0){
+                        worth[card][side] += valueFor(cntFor);
+                    } else if (cntAgainst > 0){
+                        worth[card][side] += valueAgainst(cntAgainst);
                     }
-                    if (cnt===number&&checkOpen===0) {
-                        check = true;
-                        worth[option][option2]+=number*number;
-                    }
-                    for(var i = removed ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
-                        if (points[x+i-4][y+i-4]===type) {
-                            cnt--;
-                        } else if (points[x+i-4][y+i-4]!==0){
-                            checkOpen--;
-                        }
-                        if (points[x+i][y+i]===type) {
-                            cnt++;
-                        } else if (points[x+i][y+i]!==0){
-                            checkOpen++;
-                        }
-                        if (cnt===number&&checkOpen===0) {
-                            check = true;
-                            worth[option][option2]+=number*number;
-                        }
-                    }
-                    
-                    checkOpen = 0;
-                    removed = 0;
-                    cnt = 0;
-                    for(var i = 1 ; i < 5 ; i++) { //12
-                        if (x-i!==-1){
-                            if(points[x-i][y]===type) {
-                                cnt++;
-                            } else if(points[x-i][y]!==0){
-                                checkOpen++;
-                            }
-                        } else {
-                            removed+=5-i;
-                            break;
-                        }
-                    }
-                    for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!==10){
-                            if(points[x+i][y]===type) {
-                                cnt++;
-                            } else if(points[x+i][y]!==0){
-                                checkOpen++;
-                            }
-                        } else {
-                            checkremove = false;
-                            break;
-                        }
-                    }
-                    if (cnt===number&&checkOpen===0) {
-                        check = true;
-                        worth[option][option2]+=number*number;
-                    }
-                    for(var i = removed ; i<5 && x+i!==10 && checkremove ; i++){
-                        if (points[x+i-4][y]===type) {
-                            cnt--;
-                        } else if (points[x+i-4][y]!==0){
-                            checkOpen--;
-                        }
-                        if (points[x+i][y]===type) {
-                            cnt++;
-                        } else if (points[x+i][y]!==0){
-                            checkOpen++;
-                        }
-                        if (cnt===number&&checkOpen===0) {
-                            check = true;
-                            worth[option][option2]+=number*number;
-                        }
-                    }
-                    
-                    checkOpen = 0;
-                    removed = 0;
-                    cnt = 0;
-                    for(var i = 1 ; i < 5 ; i++) { //11
-                        if (x-i!==-1 && y+i!==10){
-                            if(points[x-i][y+i]===type) {
-                                cnt++;
-                            } else if(points[x-i][y+i]!==0){
-                                checkOpen++;
-                            }
-                        } else {
-                            removed+=5-i;
-                            break;
-                        }
-                    }
-                    for(var i = 1 ; i<=removed ; i++){
-                        if (x+i!==10 && y-i!==-1){
-                            if(points[x+i][y-i]===type) {
-                                cnt++;
-                            } else if(points[x+i][y-i]!==0){
-                                checkOpen++;
-                            }
-                        } else {
-                            checkremove = false;
-                            break;
-                        }
-                    }
-                    if (cnt===number&&checkOpen===0) {
-                        check = true;
-                        worth[option][option2]+=number*number;
-                    }
-                    for(var i = removed ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
-                        if (points[x+i-4][y-i+4]===type) {
-                            cnt--;
-                        } else if (points[x+i-4][y-i+4]!==0){
-                            checkOpen--;
-                        }
-                        if (points[x+i][y+i]===type) {
-                            cnt++;
-                        } else if (points[x+i][y-i]!==0){
-                            checkOpen++;
-                        }
-                        if (cnt===number&&checkOpen===0) {
-                            check = true;
-                            worth[option][option2]+=number*number;
-                        }
-                    }
-                    checkOpen = 0;
-                    removed = 0;
-                    cnt = 0;
-                    for(var i = 1 ; i < 5 ; i++) { //11
-                        if (y-i!==-1){
-                            if(points[x][y-i]===type) {
-                                cnt++;
-                            } else if(points[x][y-i]!==0){
-                                checkOpen++;
-                            }
-                        } else {
-                            removed+=5-i;
-                            break;
-                        }
-                    }
-                    for(var i = 1 ; i<=removed ; i++){
-                        if (y+i!==10){
-                            if(points[x][y+i]===type) {
-                                cnt++;
-                            } else if(points[x][y+i]!==0){
-                                checkOpen++;
-                            }
-                        } else {
-                            checkremove = false;
-                            break;
-                        }
-                    }
-                    if (cnt===number&&checkOpen===0) {
-                        check = true;
-                        worth[option][option2]+=number*number;
-                    }
-                    for(var i = removed ; i<5 && y+i!==10 && checkremove ; i++){
-                        if (points[x][y+i-4]===type) {
-                            cnt--;
-                        } else if (points[x][y+i-4]!==0){
-                            checkOpen--;
-                        }
-                        if (points[x][y+i]===type) {
-                            cnt++;
-                        } else if (points[x][y+i]!==0){
-                            checkOpen++;
-                        }
-                        if (cnt===number&&checkOpen===0) {
-                            check = true;
-                            worth[option][option2]+=number*number;
-                            }
-                        }
+                    //console.log("H: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
+
                 }
-                }
-                if (check === true) {
-                    breakopen = false;
-                    break;
+                //diagonal
+                for (var i = -4; i <= 0; i++){
+
+                    var startRow = row + i;
+                    var startCol = col + i;
+                    if(startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
+                        continue;
+                    }
+
+                    var cntFor = 0;
+                    var cntAgainst = 0;
+                    var cntWon = 0;
+
+                    for(var j = 0; j <=4; j++){
+
+                        var indexRow = row + i + j;
+                        var indexCol = col + i + j;
+                        
+                        if(points[indexRow][indexCol]===typeFor) {
+                            cntFor++;
+                        } else if(points[indexRow][indexCol]===typeAgainst){
+                            cntAgainst++;
+                        } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            cntWon++;
+                        }
+                    }
+                    if(cntFor === 4 || cntAgainst === 4){
+                        if (number === 0){
+                            number = 4;
+                        }
+                    }
+
+                    if(cntFor > 0 && cntAgainst > 0 && cntWon > 0){
+
+                    } else if (cntFor > 0){
+                        worth[card][side] += valueFor(cntFor);
+                    } else if (cntAgainst > 0){
+                        worth[card][side] += valueAgainst(cntAgainst);
+                    }
+                    //console.log("D: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
                 }
             }
-            number--
         }
+
+
 
         //return max
-        var returnValues = [number+1];
+        var returnValues = [number];
+        var maxDifference = [];
+        var bestestSide = [];        
+
         var max = 0;
+
+
         for( var i = 0 ; i<worth.length ; i++ ){
-            for( var j = 0 ; j<worth[i].length ; j++ ){
-                if (max<worth[i][j]) {
-                    max = worth[i][j];
-                }
+            maxDifference[i] = 0;
+        }
+
+        for( var i = 0 ; i<worth.length ; i++ ){
+            if(worth[i].length == 1){
+                maxDifference[i] = worth[i][0]/3;
+                bestestSide[i] = 0;
+            } else if (worth[i][0] <= worth[i][1])  {
+                maxDifference[i] = worth[i][1] - worth[i][0];
+                bestestSide[i] = 1;
+            } else if (worth[i][0] > worth[i][1])  {
+                maxDifference[i] = worth[i][0] - worth[i][1];
+                bestestSide[i] = 0;
+            } else{
+                maxDifference[i] = 0;
+                bestestSide[i] = 0;
+            }
+
+            if (max< maxDifference[i]) {
+                max = maxDifference[i];
             }
         }
         var returnValuesValues = [];
         for( var i = 0 ; i<worth.length ; i++ ){
-            for( var j = 0 ; j<worth[i].length ; j++ ){
-                if (max===worth[i][j]) {
-                    returnValuesValues.push([i,j]);
-                }
+            if (max===maxDifference[i]) {
+                returnValuesValues.push([i,bestestSide[i]]);
             }
         }
         returnValues.push(returnValuesValues);
@@ -1139,6 +1035,35 @@ $(document).ready(function(){
         
     }
 
+    function valueFor(cntFor){
+        switch (cntFor) {
+            case 1:
+                return 0.03;
+            case 2:
+                return 0.1;
+            case 3:
+                return 0.33;
+            case 4:
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
+    function valueAgainst(cntFor){
+        switch (cntFor) {
+            case 1:
+                return 0.02;
+            case 2:
+                return 0.08;
+            case 3:
+                return 0.3;
+            case 4:
+                return 0.9;
+            default:
+                return 0;
+        }
+    }
 
     function playSides(player,value,offensive) {
         if (players[player].length===0) {
