@@ -344,6 +344,7 @@ $(document).ready(function(){
             }
         }
     }
+
     function delayedStart(i,j) {
         if (speed==0) {
             start(i,j);
@@ -396,6 +397,7 @@ $(document).ready(function(){
     
     function initialize()
     {
+        //creates indexes for rows 1 - 5
         for (var row = 0 ; row < 5 ; row++) {
             var rowinfo = [];
             var pointsrow = [];
@@ -424,6 +426,8 @@ $(document).ready(function(){
             points.push(pointsrow);
             pointworth.push(pointworthrow);
         }
+
+        //copies a reverse of rows 1 - 5
         for (var i = 0 ; i < 5 ; i++)
         {
             board.push(board[4-i].slice().reverse());
@@ -445,7 +449,8 @@ $(document).ready(function(){
             deck.push(-1);
         }
         shuffle(deck);
-        
+     
+        //create deck //deal deck
         var player1 = [];
         var player2 = [];
         var player3 = [];
@@ -480,6 +485,8 @@ $(document).ready(function(){
                 }
             }
     }
+
+    //game play
     function playHuman(player,value) {
         var options = getOptions(players[player]);
         for (var i = 0 ; i<players[player].length ; i++) {
@@ -591,12 +598,16 @@ $(document).ready(function(){
         pauseable = true;
         delayedStart(turnN+1,gameN);
     }
+
+    //game play
     function playBlue (player){
         playAI(player,1,true);
     }
     function playGreen (player){
         playAI(player,3,true);
     }
+
+    //start of different AIs
     function playHybrid (player,value){
         if (value===3) {
             if (greenLines===1) {
@@ -665,7 +676,11 @@ $(document).ready(function(){
             return;
         }
         var best = mostLines(options,value,offensive);
+
+        //if best line is 4
         if (best[0]!==4) {
+
+            //determines if has remove Jack
             var removePos = hasRemove(players[player]);
             if (removePos!==-1) {
                 var options2 = removeJ(value);
@@ -688,8 +703,92 @@ $(document).ready(function(){
                     return;
                 }
             }
+
+            //determines if has add Jack
             var addPos = hasAdd(players[player]);
             if (addPos!==-1) {
+                var options2 = addJ(value,offensive);
+                if (options2.length!=0) {
+                    var side = Math.floor(Math.random()*options2.length);
+                    var x = options2[side][0];
+                    var y = options2[side][1];
+                    changeValue(x,y,value);
+                    checker(x,y);
+                    afterplay(player,addPos,value);
+                    return;
+                } else if (hasOnlyJ(players[player])){
+                    options = addJR();
+                    var side = Math.floor(Math.random()*options.length);
+                    var x = options[side][0];
+                    var y = options[side][1];
+                    changeValue(x,y,value);
+                    checker(x,y);
+                    afterplay(player,addPos,value);
+                    return;
+                }
+            }
+        }
+
+        //determine what value to play
+        //best[0] is longest line
+        //best[1] is best play info
+        //best[1][cards] is the cards that play the best line
+        //best[1][card][0] is card
+        //best[1][card][1] is side
+        var random = Math.floor(Math.random()*best[1].length);
+        var card = best[1][random][0];
+        var side = best[1][random][1];
+
+        //after the play
+        var x = options[card][side][0];
+        var y = options[card][side][1];
+        changeValue(x,y,value);
+        checker(x,y);
+        afterplay(player,card,value);
+    }
+    function playAIphil(player,value,offensive) {
+        if (players[player].length==0) {
+            return;
+        }
+
+        //get all options
+        var options = getOptions(players[player]);
+
+        //determines useless cards
+        var useless = hasUselessCard(options);
+        if (useless!==false) {
+            afterplay(player,useless,value,true);
+            playAI(player,value,offensive);
+            return;
+        }
+
+        //determines best line
+        var best = mostLines(options,value,offensive);
+        if (best[0]!=4) {
+            var removePos = hasRemove(players[player]);
+            if (removePos!=-1) {
+                var options2 = removeJ(value);
+                if (options2.length!=0) {
+                    var side = Math.floor(Math.random()*options2.length);
+                    var x = options2[side][0];
+                    var y = options2[side][1];
+                    points[x][y] = 0;
+                    value0(x,y);
+                    afterplay(player,removePos,value);
+                    return;
+                }  else if (hasOnlyRemoveJ(players[player])){
+                    options = removeJR(value);
+                    var side = Math.floor(Math.random()*options.length);
+                    var x = options[side][0];
+                    var y = options[side][1];
+                    points[x][y] = 0;
+                    value0(x,y);
+                    afterplay(player,removePos,value);
+                    return;
+                }
+            }
+            var addPos = hasAdd(players[player]);
+            if (addPos!=-1) {
                 var options2 = addJ(value,offensive);
                 if (options2.length!=0) {
                     var side = Math.floor(Math.random()*options2.length);
@@ -719,7 +818,9 @@ $(document).ready(function(){
         changeValue(x,y,value);
         checker(x,y);
         afterplay(player,card,value);
-    }
+    }    
+
+
     function playSides(player,value,offensive) {
         if (players[player].length===0) {
             return;
@@ -888,18 +989,25 @@ $(document).ready(function(){
         checker(x,y);
         afterplay(player,maxCard,value);
     }
+
+    //array of options that player can play
+    //Output [card][side][row i, col yj]
     function getOptions(player){
         var options = [];
         for( var k = 0 ; k<player.length ; k++ )
         {
             var options1 = [];
+
+            //if jacks, just push jacks
             if (player[k]===0||player[k]===-1) {
-                options1 = player[k];
+                options1.push(player[k]);
             } else {
+                
                 for( var i = 0 ; i<board.length ; i++ )
                 {
                     for( var j = 0 ; j<board[i].length ; j++ )
                     {
+                        //checks if played on the board, adds to options
                         if (board[i][j]===player[k]&&points[i][j]===0) {
                             options1.push([i,j]);
                         }
@@ -910,6 +1018,8 @@ $(document).ready(function(){
         }
         return options;
     }
+
+    //pick up new card
     function afterplay(player,index,value,change) {
         if (animate) {
             $("#card_played").prepend("<div class='c"+value+"'>"+changeToCards(players[player][index])+"</div>");
@@ -929,6 +1039,7 @@ $(document).ready(function(){
         }
     }
 
+    //random add jack
     function addJR (){
         var options = [];
         for( var i = 0 ; i<board.length ; i++ )
@@ -942,6 +1053,8 @@ $(document).ready(function(){
         }
         return options;
     }
+
+    //random remove jack 
     function removeJR(colour){
         colour=4-colour;
         var options = [];
@@ -956,6 +1069,8 @@ $(document).ready(function(){
         }
         return options;
     }
+
+    //add jack
     function addJ (colour,offensive){
         var value = 4-colour;
         var tnp = [];
@@ -1206,10 +1321,14 @@ $(document).ready(function(){
             return [];
         }
     }
+
+    //add jack v2
     function addJ_2 (colour){
         var options = check4_2(colour);
         return options;
     }
+
+    //remove jack 
     function removeJ(colour){
         colour = 4-colour;       
         var worth = [];
@@ -1472,12 +1591,17 @@ $(document).ready(function(){
         
     }
     
+    //returns indexes for options with greatest value
     function mostLines(options,value,offensive){
         var type = value;
         var number = 4;
         var worth = [];
+
+        //initialize worth to be 0
         for(var i = 0 ; i<options.length ; i++){
             var worthrow = [];
+
+            //if Jacks, push -1
             if (options[i]==-1||options[i]==0) {
                 worthrow.push(-1);
             } else {
@@ -1487,20 +1611,27 @@ $(document).ready(function(){
             }
             worth.push(worthrow);
         }
+
+        //why is number not -1?? what is breakopen?? what is type??
         var breakopen = true;
         while(number!==-1&&breakopen){
             for(var option = 0; option<options.length&&breakopen ; option++){
+                //continue out if a Jack
                 if (options[option]===-1||options[option]===0) {
                     continue;
                 }
-                for( var blah = 0 ; blah<=1&&breakopen; blah++){
-                if (blah===0) {
-                    type = value;
-                } else if (offensive||number<3) {
-                    continue;
-                } else if (!offensive) {
-                    type=4-value;
+
+                //switches from offensive to defensive
+                for(var blah = 0 ; blah<=1&&breakopen; blah++){
+                    if (blah===0) {
+                        type = value;
+                    } else if (offensive||number<3) {
+                        continue;
+                    } else if (!offensive) {
+                        type=4-value;
                 }
+
+                //
                 for(var option2 = 0; option2<options[option].length ; option2++){
                     var x = options[option][option2][0];
                     var y = options[option][option2][1];
@@ -1982,6 +2113,8 @@ $(document).ready(function(){
         return returnValues;
         
     }
+
+    //checks if lines is won and turns them over
     function checker(x,y){
         var value = points[x][y];
         var tnp = [];
@@ -2105,6 +2238,8 @@ $(document).ready(function(){
         }
         tnp = [];
     }
+
+    //restart game
     function restart (){
         for (var row = 0 ; row < 10 ; row++) {
             for( var col = 0 ; col< 10 ; col++)
@@ -2156,7 +2291,7 @@ $(document).ready(function(){
     }
     
     
-    
+    //shuffle deck
     function shuffle(array) {
         var currentIndex = array.length, temporaryValue, randomIndex ;
       
@@ -2187,6 +2322,8 @@ $(document).ready(function(){
         if (a[2] > b[2]) return 1;
         return 0;
     }
+
+    //has an Add J
     function hasAdd(player){
         for (var i = 0 ; i < player.length ; i++){
             if (player[i] === 0) {
@@ -2195,6 +2332,8 @@ $(document).ready(function(){
         }
         return -1;
     }
+
+    //has a Remove J
     function hasRemove(player) {
         for (var i = 0 ; i < player.length ; i++){
             if (player[i]===-1) {
@@ -2219,6 +2358,8 @@ $(document).ready(function(){
         }
         return true;
     }
+
+    //has a useless card
     function hasUselessCard(options) {
         for (var i = 0 ; i < options.length ; i++){
             if (options[i].length===0) {
@@ -2227,6 +2368,8 @@ $(document).ready(function(){
         }
         return false;
     }
+
+    //changes a value to 0 because of remove J
     function value0(x,y) {
         points[x][y] = 0;
             var position = 10*x+y+1;
@@ -2235,6 +2378,8 @@ $(document).ready(function(){
             $('#'+position).addClass('v0');
             }
     }
+
+    //changes value to given value of card played
     function changeValue(x,y,value) {
         points[x][y] = value;
             var position = 10*x+y+1;
@@ -2243,6 +2388,8 @@ $(document).ready(function(){
             $('#'+position).addClass('v'+value);
             }
     }
+
+    //creates a line
     function finishLine(x,y,value){
         points[x][y] = value+1;
         pointworth[x][y]++;
@@ -2252,6 +2399,8 @@ $(document).ready(function(){
             $('#'+position).addClass('v'+(value+1));
             }
     }
+
+    //shows Hand on board
     function showHands(){
         $("#p0").empty();
         $("#p1").empty();
