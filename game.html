@@ -191,6 +191,25 @@
         <td id="tieP">0.00%</td>
     </tr>
 </table>
+<table id="scores">
+    <tr>
+        <td>1</td>
+        <td>2</td>
+        <td>3</td>
+        <td>4</td>
+        <td>5</td>
+        <td>6</td>
+        <td>7</td>
+    </tr><tr>
+        <td id="worth1">1</td>
+        <td id="worth2">2</td>
+        <td id="worth3">3</td>
+        <td id="worth4">4</td>
+        <td id="worth5">5</td>
+        <td id="worth6">6</td>
+        <td id="worth7">7</td>
+    </tr>
+</table>
 <p id="values"></p>
 <script value="text/javascript">
 
@@ -250,6 +269,10 @@ $(document).ready(function(){
     var greenwin = 0;
     var bluewin = 0;
     var ties = 0;
+    
+    var maxCards = 108;
+    var handLength = 7;
+    
     //var pointworth = [];
     //var pointworth = [[58,64,77,91,128,129,82,77,72,55],[76,84,96,137,162,133,106,92,95,56],[87,98,126,155,193,184,147,147,113,84],[93,128,149,158,196,215,187,152,135,95],[130,151,169,190,234,248,222,172,150,127],[118,145,178,220,255,248,211,175,147,130],[87,124,154,209,238,226,181,161,123,100],[68,94,124,166,178,191,178,151,98,88],[62,90,94,112,133,157,129,104,82,64],[50,61,60,78,102,113,86,85,57,50]];
     var pointworth = [[1050,878,938,928,1209,1089,656,536,479,437],[1159,1255,1202,1480,1468,1462,1092,719,622,449],[1421,1524,1806,1733,1714,1620,1379,1187,705,537],[1639,2062,2229,2122,1875,1848,1596,1315,1075,644],[2055,2235,2431,2331,1975,1992,1603,1435,1268,1039],[1906,2357,2635,2791,2776,2352,1857,1587,1438,1327],[1220,1914,2271,2663,2624,2358,1912,1604,1313,1014],[984,1304,2068,2280,2431,2298,1887,1651,1089,918],[835,1217,1289,1853,2134,2015,1684,1279,1126,844],[800,947,1057,1206,1783,1630,1169,1009,841,940]];
@@ -257,7 +280,7 @@ $(document).ready(function(){
     var players = [];
     var blueLines = 0;
     var greenLines = 0;
-    var cardsleft = 75;
+    var cardsleft = maxCards - 4 * handLength + 5;
     var cardsplayed = [];
     
     
@@ -451,7 +474,7 @@ $(document).ready(function(){
         {
             deck.push(1);
         }
-        for (var i = 0 ; i < 2 ; i++)
+        for (var i = 0 ; i < 4 ; i++)
         {
             deck.push(0);
             deck.push(-1);
@@ -463,19 +486,19 @@ $(document).ready(function(){
         var player2 = [];
         var player3 = [];
         var player4 = [];
-        for (var i = 97 ; i < 104 ; i++)
+        for (var i = maxCards - handLength ; i < maxCards ; i++)
         {
             player1.push(deck[i]);
         }
-        for (var i = 90 ; i < 97 ; i++)
+        for (var i = maxCards - 2 * handLength ; i < maxCards - handLength ; i++)
         {
             player2.push(deck[i]);
         }
-        for (var i = 83 ; i < 90 ; i++)
+        for (var i = maxCards - 3 * handLength ; i < maxCards - 2 * handLength ; i++)
         {
             player3.push(deck[i]);
         }
-        for (var i = 76 ; i < 83 ; i++)
+        for (var i = maxCards - 4 * handLength ; i < maxCards - 3 * handLength ; i++)
         {
             player4.push(deck[i]);
         }
@@ -2833,19 +2856,19 @@ $(document).ready(function(){
         var player2 = [];
         var player3 = [];
         var player4 = [];
-        for (var i = 97 ; i < 104 ; i++)
+        for (var i = maxCards - handLength ; i < maxCards ; i++)
         {
             player1.push(deck[i]);
         }
-        for (var i = 90 ; i < 97 ; i++)
+        for (var i = maxCards - 2 * handLength ; i < maxCards - handLength ; i++)
         {
             player2.push(deck[i]);
         }
-        for (var i = 83 ; i < 90 ; i++)
+        for (var i = maxCards - 3 * handLength ; i < maxCards - 2 * handLength ; i++)
         {
             player3.push(deck[i]);
         }
-        for (var i = 76 ; i < 83 ; i++)
+        for (var i = maxCards - 4 * handLength ; i < maxCards - 3 * handLength ; i++)
         {
             player4.push(deck[i]);
         }
@@ -2865,7 +2888,7 @@ $(document).ready(function(){
             $('#card_played').empty();
         }
         cardsplayed = [];
-        cardsleft = 75;
+        cardsleft = maxCards - 4 * handLength + 5;
         blueLines = 0;
         greenLines = 0;
     }
