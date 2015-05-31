@@ -167,11 +167,11 @@
     
 </div>
 <div style="float:right;">
-    <p>Speed(ms): <input type="text" id="speed" value="1000"></p>
-    <p>Player1: Human<input name="1" value="human" type="radio">Computer<input name="1" value="computer" checked="checked" type="radio"></p>
-    <p>Player2: Human<input name="2" value="human" checked="checked" type="radio">Computer<input name="2" value="computer" type="radio"></p>
-    <p>Player3: Human<input name="3" value="human" type="radio">Computer<input name="3" value="computer" checked="checked" type="radio"></p>
-    <p>Player4: Human<input name="4" value="human" type="radio">Computer<input name="4" value="computer" checked="checked" type="radio"></p>
+    <p>Speed(ms): <input type="text" id="speed"></p>
+    <p>Player1: Human<input name="1" value="human" type="radio">Computer<input name="1" value="computer" type="radio"></p>
+    <p>Player2: Human<input name="2" value="human" type="radio">Computer<input name="2" value="computer" type="radio"></p>
+    <p>Player3: Human<input name="3" value="human" type="radio">Computer<input name="3" value="computer" type="radio"></p>
+    <p>Player4: Human<input name="4" value="human" type="radio">Computer<input name="4" value="computer" type="radio"></p>
 </div>
 <table id="scores">
     <tr>
@@ -197,20 +197,9 @@
 
 
 $(document).ready(function(){
-    $('input[type=radio]').on('change',function(){
-        event.stopPropagation();
-        if (this.value=="human") {
-            human[this.name-1]=true;
-        } else if (this.value=="computer") {
-            human[this.name-1]=false;
-        }
-    });
-    $('input[type=radio]').click(function(){
-        event.stopPropagation();
-    });
     
     var keepgoing = true;
-    var maxGame = 1000;
+    var maxGame = 10000;
     var gameN = 0;
     var turnN = 0;
     var pauseable = true;
@@ -224,26 +213,46 @@ $(document).ready(function(){
                     unpauseable = false;
                     start(turnN,gameN);
                 }
-            } else {
-                $('#pause').css('display','block');
-            }
+            } 
         }   
     })
     
-    var speed = 1000;
+    var speed = 000;
+    $('#speed').val(speed);
     $('#speed').keyup(function () {
-         var thisSpeed = $(this).val();
-         if (!isNaN(thisSpeed)) {
-             speed = thisSpeed;
-         }
-     });
+        var thisSpeed = $(this).val();
+        if (!isNaN(thisSpeed)) {
+            speed = thisSpeed;
+        }
+    });
+    var human = [false,false,false,false];
+    for(var i = 0 ; i<human.length ; i++) {
+        if (human[i]) {
+            $('input[name='+(i+1)+'][value=human]').attr('checked','checked');
+        } else {
+            $('input[name='+(i+1)+'][value=computer]').attr('checked','checked');
+        }
+    }
+    $('input[type=radio]').on('change',function(){
+        event.stopPropagation();
+        if (this.value=="human") {
+            human[this.name-1]=true;
+        } else if (this.value=="computer") {
+            human[this.name-1]=false;
+        }
+    });
+    $('input[type=radio]').click(function(){
+        event.stopPropagation();
+    });
+
     var board = [];
     var deck = [];
     var greenwin = 0;
     var bluewin = 0;
     var ties = 0;
-    var pointworth = [];
-    
+    //var pointworth = [];
+    //var pointworth = [[58,64,77,91,128,129,82,77,72,55],[76,84,96,137,162,133,106,92,95,56],[87,98,126,155,193,184,147,147,113,84],[93,128,149,158,196,215,187,152,135,95],[130,151,169,190,234,248,222,172,150,127],[118,145,178,220,255,248,211,175,147,130],[87,124,154,209,238,226,181,161,123,100],[68,94,124,166,178,191,178,151,98,88],[62,90,94,112,133,157,129,104,82,64],[50,61,60,78,102,113,86,85,57,50]];
+    var pointworth = [[1050,878,938,928,1209,1089,656,536,479,437],[1159,1255,1202,1480,1468,1462,1092,719,622,449],[1421,1524,1806,1733,1714,1620,1379,1187,705,537],[1639,2062,2229,2122,1875,1848,1596,1315,1075,644],[2055,2235,2431,2331,1975,1992,1603,1435,1268,1039],[1906,2357,2635,2791,2776,2352,1857,1587,1438,1327],[1220,1914,2271,2663,2624,2358,1912,1604,1313,1014],[984,1304,2068,2280,2431,2298,1887,1651,1089,918],[835,1217,1289,1853,2134,2015,1684,1279,1126,844],[800,947,1057,1206,1783,1630,1169,1009,841,940]];
     var points = [];
     var players = [];
     var blueLines = 0;
@@ -251,8 +260,7 @@ $(document).ready(function(){
     var cardsleft = 75;
     var cardsplayed = [];
     
-    var human = [false,true,false,false];
-
+    
     
     initialize();
     var gameend = true;
@@ -424,7 +432,7 @@ $(document).ready(function(){
             }
             board.push(rowinfo);
             points.push(pointsrow);
-            pointworth.push(pointworthrow);
+            //pointworth.push(pointworthrow);
         }
 
         //copies a reverse of rows 1 - 5
@@ -432,7 +440,7 @@ $(document).ready(function(){
         {
             board.push(board[4-i].slice().reverse());
             points.push(points[4-i].slice());
-            pointworth.push(pointworth[4-i].slice());
+            //pointworth.push(pointworth[4-i].slice());
         }
         for (var i = 2 ; i < 50 ; i++)
         {
@@ -602,10 +610,10 @@ $(document).ready(function(){
 
     //game play
     function playBlue (player){
-        playAI(player,1,true);
+        playWorth(player,1,true);
     }
     function playGreen (player){
-        playAI(player,3,true);
+        playWorth(player,3,true);
     }
 
     //start of different AIs
@@ -1227,72 +1235,84 @@ $(document).ready(function(){
             return;
         }
         
-        var worth = [[58,64,77,91,128,129,82,77,72,55],[76,84,96,137,162,133,106,92,95,56],[87,98,126,155,193,184,147,147,113,84],[93,128,149,158,196,215,187,152,135,95],[130,151,169,190,234,248,222,172,150,127],[118,145,178,220,255,248,211,175,147,130],[87,124,154,209,238,226,181,161,123,100],[68,94,124,166,178,191,178,151,98,88],[62,90,94,112,133,157,129,104,82,64],[50,61,60,78,102,113,86,85,57,50]];
         var options = getOptions(players[player]);
         var useless = hasUselessCard(options);
         if (useless!==false) {
             afterplay(player,useless,value,true);
-            playSides(player,value,offensive);
+            playWorth(player,value,offensive);
             return;
         }
-        var removePos = hasRemove(players[player]);
-        if (removePos!==-1) {
-            var options2 = removeJ(value);
-            if (options2.length!==0) {
-                var side = Math.floor(Math.random()*options2.length);
-                var x = options2[side][0];
-                var y = options2[side][1];
-                points[x][y] = 0;
-                value0(x,y);
-                afterplay(player,removePos,value);
-                return;
-            }  else if (hasOnlyRemoveJ(players[player])){
-                options = removeJR(value);
-                var side = Math.floor(Math.random()*options.length);
-                var x = options[side][0];
-                var y = options[side][1];
-                points[x][y] = 0;
-                value0(x,y);
-                afterplay(player,removePos,value);
-                return;
+        
+        var best = mostLines(options,value,offensive);
+
+        //if best line is 4
+        if (best[0]!==4) {
+
+            //determines if has remove Jack
+            var removePos = hasRemove(players[player]);
+            if (removePos!==-1) {
+                var options2 = removeJ(value);
+                if (options2.length!==0) {
+                    var side = Math.floor(Math.random()*options2.length);
+                    var x = options2[side][0];
+                    var y = options2[side][1];
+                    points[x][y] = 0;
+                    value0(x,y);
+                    afterplay(player,removePos,value);
+                    return;
+                }  else if (hasOnlyRemoveJ(players[player])){
+                    options = removeJR(value);
+                    var side = Math.floor(Math.random()*options.length);
+                    var x = options[side][0];
+                    var y = options[side][1];
+                    points[x][y] = 0;
+                    value0(x,y);
+                    afterplay(player,removePos,value);
+                    return;
+                }
+            }
+
+            //determines if has add Jack
+            var addPos = hasAdd(players[player]);
+            if (addPos!==-1) {
+                var options2 = addJ(value,offensive);
+                if (options2.length!=0) {
+                    var side = Math.floor(Math.random()*options2.length);
+                    var x = options2[side][0];
+                    var y = options2[side][1];
+                    changeValue(x,y,value);
+                    checker(x,y);
+                    afterplay(player,addPos,value);
+                    return;
+                } else if (hasOnlyJ(players[player])){
+                    options = addJR();
+                    var side = Math.floor(Math.random()*options.length);
+                    var x = options[side][0];
+                    var y = options[side][1];
+                    changeValue(x,y,value);
+                    checker(x,y);
+                    afterplay(player,addPos,value);
+                    return;
+                }
             }
         }
-        var addPos = hasAdd(players[player]);
-        if (addPos!==-1) {
-            var options2 = addJ(value,offensive);
-            if (options2.length!==0) {
-                var side = Math.floor(Math.random()*options2.length);
-                var x = options2[side][0];
-                var y = options2[side][1];
-                changeValue(x,y,value);
-                checker(x,y);
-                afterplay(player,addPos,value);
-                return;
-            } else if (hasOnlyJ(players[player])){
-                options = addJR();
-                var side = Math.floor(Math.random()*options.length);
-                var x = options[side][0];
-                var y = options[side][1];
-                changeValue(x,y,value);
-                checker(x,y);
-                afterplay(player,addPos,value);
-                return;
-            }
-        }
+        
         var max = 0;
         var maxCard = -1;
         var maxSide = -1;
-        for (var i = 0 ; i < options.length ; i++) {
-            for (var j = 0 ; j < options[i].length ; j++) {
-                if (options[i][j]===0||options[i][j]===-1) {
+        for (var i = 0 ; i < best[1].length ; i++) {
+            //for (var j = 0 ; j < best[1][i].length ; j++) {
+                var card = best[1][i][0];
+                var side = best[1][i][1];
+                if (options[card][side]===0||options[card][side]===-1) {
                     continue;
                 }
-                if (worth[options[i][j][0]][options[i][j][1]] > max) {
-                    max = worth[options[i][j][0]][options[i][j][1]];
-                    maxCard = i;
-                    maxSide = j;
+                if (pointworth[options[card][side][0]][options[card][side][1]] > max) {
+                    max = pointworth[options[card][side][0]][options[card][side][1]];
+                    maxCard = card;
+                    maxSide = side;
                 }
-            }
+            //}
         }
         var x = options[maxCard][maxSide][0];
         var y = options[maxCard][maxSide][1];
@@ -2919,7 +2939,6 @@ $(document).ready(function(){
                 return "-2";
         }
     }
-    
 });
 </script>
 </body>
