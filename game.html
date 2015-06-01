@@ -191,25 +191,42 @@
         <td id="tieP">0.00%</td>
     </tr>
 </table>
-<table id="scores">
+<br>
+<!-- <table id="scores">
     <tr>
-        <td>1</td>
-        <td>2</td>
-        <td>3</td>
-        <td>4</td>
-        <td>5</td>
-        <td>6</td>
-        <td>7</td>
+        <td id="worth00"></td>
+        <td id="worth10"></td>
+        <td id="worth20"></td>
+        <td id="worth30"></td>
+        <td id="worth40"></td>
+        <td id="worth50"></td>
+        <td id="worth60"></td>
     </tr><tr>
-        <td id="worth1"></td>
-        <td id="worth2"></td>
-        <td id="worth3"></td>
-        <td id="worth4"></td>
-        <td id="worth5"></td>
-        <td id="worth6"></td>
-        <td id="worth7"></td>
+        <td id="worth01"></td>
+        <td id="worth11"></td>
+        <td id="worth21"></td>
+        <td id="worth31"></td>
+        <td id="worth41"></td>
+        <td id="worth51"></td>
+        <td id="worth61"></td>
+    </tr><tr>
+        <td id="worth02"></td>
+        <td id="worth12"></td>
+        <td id="worth22"></td>
+        <td id="worth32"></td>
+        <td id="worth42"></td>
+        <td id="worth52"></td>
+        <td id="worth62"></td>
+    </tr><tr>
+        <td id="worth03"></td>
+        <td id="worth13"></td>
+        <td id="worth23"></td>
+        <td id="worth33"></td>
+        <td id="worth43"></td>
+        <td id="worth53"></td>
+        <td id="worth63"></td>
     </tr>
-</table>
+</table> -->
 <p id="values"></p>
 <script value="text/javascript">
 
@@ -244,7 +261,7 @@ $(document).ready(function(){
             speed = thisSpeed;
         }
     });
-    var human = [true,false,false,false];
+    var human = [false,false,false,false];
     for(var i = 0 ; i<human.length ; i++) {
         if (human[i]) {
             $('input[name='+(i+1)+'][value=human]').attr('checked','checked');
@@ -300,6 +317,7 @@ $(document).ready(function(){
                     if (human[player]) {
                         pauseable = false;
                         hideHands(player);
+                        showCardWorth(cardWorth(getOptions(players[0]),1,true));
                         playHuman(player,1);
                         return;
                     } else {
@@ -633,10 +651,10 @@ $(document).ready(function(){
 
     //game play
     function playBlue (player){
-        playAIphil(player,1,true);
+        playAI(player,1,true);
     }
     function playGreen (player){
-        playAI(player,3,true);
+        playAIphil(player,3,true);
     }
 
     //start of different AIs
@@ -796,6 +814,7 @@ $(document).ready(function(){
 
         //determines best line
         var best = mostLinesPhil(options,value,offensive);
+
         if (best[0]!=4) {
             var removePos = hasRemove(players[player]);
             if (removePos!=-1) {
@@ -1000,7 +1019,7 @@ $(document).ready(function(){
                     //console.log("H: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
 
                 }
-                //diagonal
+                //diagonal right down
                 for (var i = -4; i <= 0; i++){
 
                     var startRow = row + i;
@@ -1057,70 +1076,129 @@ $(document).ready(function(){
                     }
                     //console.log("D: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
                 }
+
+                //diagonal right up
+                for (var i = -4; i <= 0; i++){
+
+                    var startRow = row - i;
+                    var startCol = col + i;
+                    if(startRow < 4 || startRow > 9 || startCol < 0 || startCol > 5){
+                        continue;
+                    }
+
+                    var cntFor = 0;
+                    var cntAgainst = 0;
+                    var cntWon = 0;
+                    var cntOpPlayed = 0;
+                    var cntForInHand = 0;
+
+                    for(var j = 0; j <=4; j++){
+
+                        var indexRow = row - i - j;
+                        var indexCol = col + i + j;
+                        
+                        if(points[indexRow][indexCol]===typeFor) {
+                            cntFor++;
+                        } else if(points[indexRow][indexCol]===typeAgainst){
+                            cntAgainst++;
+                        } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            cntWon++;
+                        } else if(points[9-indexRow][9-indexCol] > 0){
+                            cntOpPlayed++;
+                        }
+
+                        // for(var card2 = 0; card2<options.length; card2++){
+                        //     for(var side2 = 0; side2<options[card2].length ; side2++){
+                        //         var row2 = options[card2][side2][0];
+                        //         var col2 = options[card2][side2][1];
+                        //         if (indexRow == row2 && indexCol == col2){
+                        //             cntForInHand++;
+                        //         }
+                        //     }
+                        // }
+                    }
+                    if(cntFor === 4 || cntAgainst === 4){
+                        if (number === 0){
+                            number = 4;
+                        }
+                    }
+
+                    //cntFor = cntFor + cntForInHand;
+
+                    if(cntFor > 0 && cntAgainst > 0 && cntWon > 0){
+
+                    } else if (cntFor > 0){
+                        worth[card][side] += valueFor(cntFor);
+                    } else if (cntAgainst > 0){
+                        worth[card][side] += valueAgainst(cntAgainst);
+                    }
+                    //console.log("D: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
+                }
+
             }
         }
 
         //return max
-        var returnValues = [number+1];
-        var max = 0;
-        for( var i = 0 ; i<worth.length ; i++ ){
-            for( var j = 0 ; j<worth[i].length ; j++ ){
-                console.log("D: card: " + i + " side: " + j + " worth" + worth[i][j]);
-                if (max<worth[i][j]) {
-                    max = worth[i][j];
-                }
-            }
-        }
-        var returnValuesValues = [];
-        for( var i = 0 ; i<worth.length ; i++ ){
-            for( var j = 0 ; j<worth[i].length ; j++ ){
-                if (max===worth[i][j]) {
-                    returnValuesValues.push([i,j]);
-                }
-            }
-        }
-        returnValues.push(returnValuesValues);
-        return returnValues;
-
-        //return max
-        // var returnValues = [number];
-        // var maxDifference = [];
-        // var bestestSide = [];        
-
+        // var returnValues = [number+1];
         // var max = 0;
-
-
         // for( var i = 0 ; i<worth.length ; i++ ){
-        //     maxDifference[i] = 0;
-        // }
-
-        // for( var i = 0 ; i<worth.length ; i++ ){
-        //     if(worth[i].length == 1){
-        //         maxDifference[i] = worth[i][0]/2;
-        //         bestestSide[i] = 0;
-        //     } else if (worth[i][0] <= worth[i][1])  {
-        //         maxDifference[i] = worth[i][1] - worth[i][0];
-        //         bestestSide[i] = 1;
-        //     } else if (worth[i][0] > worth[i][1])  {
-        //         maxDifference[i] = worth[i][0] - worth[i][1];
-        //         bestestSide[i] = 0;
-        //     } else{
-        //         maxDifference[i] = 0;
-        //         bestestSide[i] = 0;
-        //     }
-
-        //     if (max< maxDifference[i]) {
-        //         max = maxDifference[i];
+        //     for( var j = 0 ; j<worth[i].length ; j++ ){
+        //         //console.log("D: card: " + i + " side: " + j + " worth" + worth[i][j]);
+        //         if (max<worth[i][j]) {
+        //             max = worth[i][j];
+        //         }
         //     }
         // }
         // var returnValuesValues = [];
         // for( var i = 0 ; i<worth.length ; i++ ){
-        //     if (max===maxDifference[i]) {
-        //         returnValuesValues.push([i,bestestSide[i]]);
+        //     for( var j = 0 ; j<worth[i].length ; j++ ){
+        //         if (max===worth[i][j]) {
+        //             returnValuesValues.push([i,j]);
+        //         }
         //     }
         // }
         // returnValues.push(returnValuesValues);
         // return returnValues;
+
+        //return max
+        var returnValues = [number];
+        var maxDifference = [];
+        var bestestSide = [];        
+
+        var max = 0;
+
+
+        for( var i = 0 ; i<worth.length ; i++ ){
+            maxDifference[i] = 0;
+        }
+
+        for( var i = 0 ; i<worth.length ; i++ ){
+            if(worth[i].length == 1){
+                maxDifference[i] = worth[i][0]/2;
+                bestestSide[i] = 0;
+            } else if (worth[i][0] <= worth[i][1])  {
+                maxDifference[i] = worth[i][1] - worth[i][0];
+                bestestSide[i] = 1;
+            } else if (worth[i][0] > worth[i][1])  {
+                maxDifference[i] = worth[i][0] - worth[i][1];
+                bestestSide[i] = 0;
+            } else{
+                maxDifference[i] = 0;
+                bestestSide[i] = 0;
+            }
+
+            if (max< maxDifference[i]) {
+                max = maxDifference[i];
+            }
+        }
+        var returnValuesValues = [];
+        for( var i = 0 ; i<worth.length ; i++ ){
+            if (max===maxDifference[i]) {
+                returnValuesValues.push([i,bestestSide[i]]);
+            }
+        }
+        returnValues.push(returnValuesValues);
+        return returnValues;
         
     }
 
@@ -1329,10 +1407,70 @@ $(document).ready(function(){
                     }
                     //console.log("D: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
                 }
+                //diagonal right up
+                for (var i = -4; i <= 0; i++){
+
+                    var startRow = row - i;
+                    var startCol = col + i;
+                    if(startRow < 4 || startRow > 9 || startCol < 0 || startCol > 5){
+                        continue;
+                    }
+
+                    var cntFor = 0;
+                    var cntAgainst = 0;
+                    var cntWon = 0;
+                    var cntOpPlayed = 0;
+                    var cntForInHand = 0;
+
+                    for(var j = 0; j <=4; j++){
+
+                        var indexRow = row - i - j;
+                        var indexCol = col + i + j;
+                        
+                        if(points[indexRow][indexCol]===typeFor) {
+                            cntFor++;
+                        } else if(points[indexRow][indexCol]===typeAgainst){
+                            cntAgainst++;
+                        } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            cntWon++;
+                        } else if(points[9-indexRow][9-indexCol] > 0){
+                            cntOpPlayed++;
+                        }
+
+                        // for(var card2 = 0; card2<options.length; card2++){
+                        //     for(var side2 = 0; side2<options[card2].length ; side2++){
+                        //         var row2 = options[card2][side2][0];
+                        //         var col2 = options[card2][side2][1];
+                        //         if (indexRow == row2 && indexCol == col2){
+                        //             cntForInHand++;
+                        //         }
+                        //     }
+                        // }
+                    }
+                    if(cntFor === 4 || cntAgainst === 4){
+                        if (number === 0){
+                            number = 4;
+                        }
+                    }
+
+                    //cntFor = cntFor + cntForInHand;
+
+                    if(cntFor > 0 && cntAgainst > 0 && cntWon > 0){
+
+                    } else if (cntFor > 0){
+                        worth[card][side] += valueFor(cntFor);
+                    } else if (cntAgainst > 0){
+                        worth[card][side] += valueAgainst(cntAgainst);
+                    }
+                    //console.log("D: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
+                }
+
+                //console.log("card: " + card + " side: " + " worth " + worth[card][side]);
             }
         }
 
         //return max
+        //console.log(worth)
         return worth;
 
         //return max
@@ -1395,9 +1533,9 @@ $(document).ready(function(){
     function valueAgainst(cntFor){
         switch (cntFor) {
             case 1:
-                return 0.02;
+                return 0.01;
             case 2:
-                return 0.08;
+                return 0.05;
             case 3:
                 return 0.3;
             case 4:
@@ -3206,10 +3344,17 @@ $(document).ready(function(){
                 return "-2";
         }
     }
-    showandskjlfnasdlfj([11,223,43,45,5,6,7]);
-    function showandskjlfnasdlfj(array) {
+    
+
+    function showCardWorth(array) {
+        //console.log(array.length);
         for(var i = 0 ; i<array.length ; i++) {
-            $('#worth'+i).html(array[i]);
+            
+            for(var j = 0 ; j<array[i].length ; j++) {
+            //console.log(i + " " + j + " " + array[i][j]);
+
+                $('#worth'+i+j).html(array[i][j]);
+            }
         }
     }
 });
