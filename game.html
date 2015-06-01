@@ -50,10 +50,10 @@
             color:white;
         }
         #card_played{
-            margin-top:11px;
+            margin-top:40px;
             margin-left:30px;
             width:61px;
-            max-height:380px;
+            max-height:378px;
             overflow-y: auto;
             overflow-x: hidden;
             text-align:center;
@@ -191,25 +191,6 @@
         <td id="tieP">0.00%</td>
     </tr>
 </table>
-<table id="scores">
-    <tr>
-        <td>1</td>
-        <td>2</td>
-        <td>3</td>
-        <td>4</td>
-        <td>5</td>
-        <td>6</td>
-        <td>7</td>
-    </tr><tr>
-        <td id="worth1"></td>
-        <td id="worth2"></td>
-        <td id="worth3"></td>
-        <td id="worth4"></td>
-        <td id="worth5"></td>
-        <td id="worth6"></td>
-        <td id="worth7"></td>
-    </tr>
-</table>
 <p id="values"></p>
 <script value="text/javascript">
 
@@ -244,7 +225,7 @@ $(document).ready(function(){
             speed = thisSpeed;
         }
     });
-    var human = [true,false,false,false];
+    var human = [false,false,false,false];
     for(var i = 0 ; i<human.length ; i++) {
         if (human[i]) {
             $('input[name='+(i+1)+'][value=human]').attr('checked','checked');
@@ -280,7 +261,7 @@ $(document).ready(function(){
     var players = [];
     var blueLines = 0;
     var greenLines = 0;
-    var cardsleft = maxCards - 4 * handLength + 5;
+    var cardsleft = maxCards - 4 * handLength - 1;
     var cardsplayed = [];
     
     
@@ -1065,7 +1046,7 @@ $(document).ready(function(){
         var max = 0;
         for( var i = 0 ; i<worth.length ; i++ ){
             for( var j = 0 ; j<worth[i].length ; j++ ){
-                console.log("D: card: " + i + " side: " + j + " worth" + worth[i][j]);
+                //console.log("D: card: " + i + " side: " + j + " worth" + worth[i][j]);
                 if (max<worth[i][j]) {
                     max = worth[i][j];
                 }
@@ -2888,7 +2869,7 @@ $(document).ready(function(){
             $('#card_played').empty();
         }
         cardsplayed = [];
-        cardsleft = maxCards - 4 * handLength + 5;
+        cardsleft = maxCards - 4 * handLength - 1;
         blueLines = 0;
         greenLines = 0;
     }
@@ -3204,12 +3185,6 @@ $(document).ready(function(){
                 return "7 &#9671";
             default:
                 return "-2";
-        }
-    }
-    showandskjlfnasdlfj([11,223,43,45,5,6,7]);
-    function showandskjlfnasdlfj(array) {
-        for(var i = 0 ; i<array.length ; i++) {
-            $('#worth'+i).html(array[i]);
         }
     }
 });
