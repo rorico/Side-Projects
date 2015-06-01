@@ -50,10 +50,10 @@
             color:white;
         }
         #card_played{
-            margin-top:11px;
+            margin-top:40px;
             margin-left:30px;
             width:61px;
-            max-height:380px;
+            max-height:378px;
             overflow-y: auto;
             overflow-x: hidden;
             text-align:center;
@@ -297,7 +297,7 @@ $(document).ready(function(){
     var players = [];
     var blueLines = 0;
     var greenLines = 0;
-    var cardsleft = maxCards - 4 * handLength + 5;
+    var cardsleft = maxCards - 4 * handLength - 1;
     var cardsplayed = [];
     
     
@@ -1077,6 +1077,7 @@ $(document).ready(function(){
                     //console.log("D: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
                 }
 
+<<<<<<< HEAD
                 //diagonal right up
                 for (var i = -4; i <= 0; i++){
 
@@ -1133,6 +1134,24 @@ $(document).ready(function(){
                         worth[card][side] += valueAgainst(cntAgainst);
                     }
                     //console.log("D: card: " + card + " side: " + side + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " worth " + worth[card][side]);
+=======
+        //return max
+        var returnValues = [number+1];
+        var max = 0;
+        for( var i = 0 ; i<worth.length ; i++ ){
+            for( var j = 0 ; j<worth[i].length ; j++ ){
+                //console.log("D: card: " + i + " side: " + j + " worth" + worth[i][j]);
+                if (max<worth[i][j]) {
+                    max = worth[i][j];
+                }
+            }
+        }
+        var returnValuesValues = [];
+        for( var i = 0 ; i<worth.length ; i++ ){
+            for( var j = 0 ; j<worth[i].length ; j++ ){
+                if (max===worth[i][j]) {
+                    returnValuesValues.push([i,j]);
+>>>>>>> origin/master
                 }
 
             }
@@ -3026,7 +3045,7 @@ $(document).ready(function(){
             $('#card_played').empty();
         }
         cardsplayed = [];
-        cardsleft = maxCards - 4 * handLength + 5;
+        cardsleft = maxCards - 4 * handLength - 1;
         blueLines = 0;
         greenLines = 0;
     }
@@ -3344,6 +3363,7 @@ $(document).ready(function(){
                 return "-2";
         }
     }
+<<<<<<< HEAD
     
 
     function showCardWorth(array) {
@@ -3357,6 +3377,8 @@ $(document).ready(function(){
             }
         }
     }
+=======
+>>>>>>> origin/master
 });
 </script>
 </body>
