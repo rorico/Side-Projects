@@ -249,7 +249,10 @@ $(document).ready(function(){
                     unpauseable = false;
                     start(turnN,gameN);
                 }
-        }   
+            } else {
+                $('#pause').css('display','block');
+            }
+        }
     })
     
     var speed = 000;
@@ -307,6 +310,7 @@ $(document).ready(function(){
     //noDelay();
     delayedStart(0,0);
     function start(i,j){
+        pauseable = true;
         if( i < 104 && greenLines<2 && blueLines<2 && keepgoing && gameend ){
             gameN=j;
             turnN=i;
