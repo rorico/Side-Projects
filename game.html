@@ -249,7 +249,6 @@ $(document).ready(function(){
                     unpauseable = false;
                     start(turnN,gameN);
                 }
-            } 
         }   
     })
     
@@ -624,7 +623,6 @@ $(document).ready(function(){
         checker(x,y);
         afterplay(player,card,value);
         $('.hide').removeClass('hide');
-        pauseable = true;
         delayedStart(turnN+1,gameN);
     }
     function showChooseRemove(player,x,y,value,card) {
