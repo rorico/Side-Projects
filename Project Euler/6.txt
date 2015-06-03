@@ -1,0 +1,18 @@
+using System;
+
+class dkafldjaf
+{
+	static void Main()
+	{
+		long x = 0;
+		long y = 0;
+		for (int i = 1 ; i<=100 ; i++)
+		{
+			x+=(i*i);
+			y+=i;
+		}
+		y=y*y;
+		Console.WriteLine(y-x);
+	
+	}		
+}

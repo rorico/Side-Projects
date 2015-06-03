@@ -1,0 +1,25 @@
+using System;
+
+class dkafldjaf
+{
+	static void Main()
+	{
+		long z = 0;
+		for ( long i = 2 ; i < 1e6 ; i++ )
+		{
+			long a = 0;
+			string x = Convert.ToString(i);
+			char[] y = x.ToCharArray();
+			for ( int j = 0 ; j < y.Length ; j++)
+			{
+				double b = (y[j])-'0';
+				a +=(long)Math.Pow(b,5);
+			}
+			if (a==i)
+			{
+				z+=a;
+			}	
+		}		
+		Console.WriteLine(z);
+	}		
+}

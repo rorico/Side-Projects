@@ -1,0 +1,32 @@
+using System;
+
+class dkafldjaf
+{
+	static void Main()
+	{
+		long x = 0;
+		long i = 2;
+		for ( ; i<2e6 ; i++)
+		{
+			for (int j = 2 ; j<=i; j++)
+			{
+				if (i==2)
+				{
+					x+=i;
+				}
+				if (i%j==0)
+				{
+					break;
+				}
+				if (j==i-1)
+				{
+					x+=i;
+					Console.WriteLine(i);
+				}
+			}
+		
+		}
+		Console.WriteLine(x);
+	
+	}		
+}

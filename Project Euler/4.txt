@@ -1,0 +1,35 @@
+using System;
+
+class dkafldjaf
+{
+	static void Main()
+	{
+		int a = 0;
+		string s;
+		string b; 
+		for ( int x = 100 ; x<1000 ; x++ )
+		{
+			for ( int y = 100 ; y<1000 ; y ++)
+			{
+				int kj = x*y;
+				s = Convert.ToString(kj);
+				char[] ab = s.ToCharArray();
+				Array.Reverse(ab);
+				b = new string(ab);
+				int i = int.Parse(s);
+				int j = int.Parse(b);
+				if(i==j)
+				{
+					if ( kj>a)
+					{
+						a=kj;
+					}
+							
+				}
+
+			}
+		}
+		Console.WriteLine(a);
+	
+	}		
+}

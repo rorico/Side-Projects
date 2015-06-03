@@ -1,0 +1,19 @@
+using System;
+
+class dkafldjaf
+{
+	static void Main()
+	{
+		long z = 0;
+		for ( long i = 143 ; i < 1e10 ; i++ )
+		{
+			for (long j = 165; j<3*i ; j++)
+			{
+				if (i*((2*i)-1) == j*(3*j-1)/2)
+				{
+						Console.WriteLine(i*(2*i-1));
+				}
+			}	
+		}		
+	}		
+}
