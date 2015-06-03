@@ -233,29 +233,11 @@
 
 
 $(document).ready(function(){
-    
-    var keepgoing = true;
+    //settings
     var maxGame = 10000;
-    var gameN = 0;
-    var turnN = 0;
-    var pauseable = true;
-    var unpauseable = false;
-    $(document).click(function(){
-        if (pauseable) {
-            keepgoing = !keepgoing;
-            if (keepgoing) {
-                $('#pause').css('display','none');
-                if (unpauseable) {
-                    unpauseable = false;
-                    start(turnN,gameN);
-                }
-            } else {
-                $('#pause').css('display','block');
-            }
-        }
-    })
+    var speed = 500;
+    var human = [false,false,false,false];
     
-    var speed = 000;
     $('#speed').val(speed);
     $('#speed').keyup(function () {
         var thisSpeed = $(this).val();
@@ -263,7 +245,6 @@ $(document).ready(function(){
             speed = thisSpeed;
         }
     });
-    var human = [false,false,false,false];
     for(var i = 0 ; i<human.length ; i++) {
         if (human[i]) {
             $('input[name='+(i+1)+'][value=human]').attr('checked','checked');
@@ -281,6 +262,32 @@ $(document).ready(function(){
     });
     $('input[type=radio]').click(function(){
         event.stopPropagation();
+    });
+    
+    
+    var keepgoing = true;
+    var gameN = 0;
+    var turnN = 0;
+    var pauseable = true;
+    var unpauseable = false;
+    var thispause = true;
+    $(document).click(function(){
+        if (thispause) {
+            thispause = false;
+            if (pauseable) {
+                keepgoing = !keepgoing;
+                if (keepgoing) {
+                    $('#pause').css('display','none');
+                    if (unpauseable) {
+                        unpauseable = false;
+                        delayedStart(turnN,gameN);
+                    }
+                } else {
+                    $('#pause').css('display','block');
+                }
+            }
+        }
+        thispause = true;
     });
 
     var board = [];
@@ -301,13 +308,11 @@ $(document).ready(function(){
     var greenLines = 0;
     var cardsleft = maxCards - 4 * handLength - 1;
     var cardsplayed = [];
-    
-    
+        
     
     initialize();
     var gameend = true;
     var animate = true;
-    //noDelay();
     delayedStart(0,0);
     function start(i,j){
         pauseable = true;
@@ -318,6 +323,7 @@ $(document).ready(function(){
             switch (player) {
                 case 0:
                     if (human[player]) {
+                        keepgoing = true;
                         pauseable = false;
                         hideHands(player);
                         showCardWorth(cardWorth(getOptions(players[0]),1,true));
@@ -329,6 +335,7 @@ $(document).ready(function(){
                     break;
                 case 1:
                     if (human[player]) {
+                        keepgoing = true;
                         pauseable = false;
                         hideHands(player);
                         playHuman(player,3);
@@ -339,6 +346,7 @@ $(document).ready(function(){
                     break;
                 case 2:
                     if (human[player]) {
+                        keepgoing = true;
                         pauseable = false;
                         hideHands(player);
                         playHuman(player,1);
@@ -349,6 +357,7 @@ $(document).ready(function(){
                     break;
                 case 3:
                     if (human[player]) {
+                        keepgoing = true;
                         pauseable = false;
                         hideHands(player);
                         playHuman(player,3);
@@ -647,7 +656,6 @@ $(document).ready(function(){
         value0(x,y);
         afterplay(player,card,value);
         $('.hide').removeClass('hide');
-        pauseable = true;
         delayedStart(turnN+1,gameN);
     }
 
