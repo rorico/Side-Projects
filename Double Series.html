@@ -245,6 +245,15 @@ $(document).ready(function(){
             speed = thisSpeed;
         }
     });
+    $(window).keydown(function(e) {
+        if (e.keyCode == 38) {
+            speed++;
+            $('#speed').val(speed);
+        } else if (e.keyCode == 40&&speed>0) {
+            speed--;
+            $('#speed').val(speed);
+        }
+    });
     for(var i = 0 ; i<human.length ; i++) {
         if (human[i]) {
             $('input[name='+(i+1)+'][value=human]').attr('checked','checked');
@@ -271,6 +280,26 @@ $(document).ready(function(){
     var pauseable = true;
     var unpauseable = false;
     var thispause = true;
+    $(window).keypress(function(e) {
+        if (e.keyCode == 0 || e.keyCode == 32) {
+            if (thispause) {
+                thispause = false;
+                if (pauseable) {
+                    keepgoing = !keepgoing;
+                    if (keepgoing) {
+                        $('#pause').css('display','none');
+                        if (unpauseable) {
+                            unpauseable = false;
+                            delayedStart(turnN,gameN);
+                        }
+                    } else {
+                        $('#pause').css('display','block');
+                    }
+                }
+            }
+            thispause = true;
+        }
+    });
     $(document).click(function(){
         if (thispause) {
             thispause = false;
@@ -299,9 +328,9 @@ $(document).ready(function(){
     var maxCards = 108;
     var handLength = 7;
     
-    //var pointworth = [];
+    var pointworth = [];
     //var pointworth = [[58,64,77,91,128,129,82,77,72,55],[76,84,96,137,162,133,106,92,95,56],[87,98,126,155,193,184,147,147,113,84],[93,128,149,158,196,215,187,152,135,95],[130,151,169,190,234,248,222,172,150,127],[118,145,178,220,255,248,211,175,147,130],[87,124,154,209,238,226,181,161,123,100],[68,94,124,166,178,191,178,151,98,88],[62,90,94,112,133,157,129,104,82,64],[50,61,60,78,102,113,86,85,57,50]];
-    var pointworth = [[1050,878,938,928,1209,1089,656,536,479,437],[1159,1255,1202,1480,1468,1462,1092,719,622,449],[1421,1524,1806,1733,1714,1620,1379,1187,705,537],[1639,2062,2229,2122,1875,1848,1596,1315,1075,644],[2055,2235,2431,2331,1975,1992,1603,1435,1268,1039],[1906,2357,2635,2791,2776,2352,1857,1587,1438,1327],[1220,1914,2271,2663,2624,2358,1912,1604,1313,1014],[984,1304,2068,2280,2431,2298,1887,1651,1089,918],[835,1217,1289,1853,2134,2015,1684,1279,1126,844],[800,947,1057,1206,1783,1630,1169,1009,841,940]];
+    //var pointworth = [[1050,878,938,928,1209,1089,656,536,479,437],[1159,1255,1202,1480,1468,1462,1092,719,622,449],[1421,1524,1806,1733,1714,1620,1379,1187,705,537],[1639,2062,2229,2122,1875,1848,1596,1315,1075,644],[2055,2235,2431,2331,1975,1992,1603,1435,1268,1039],[1906,2357,2635,2791,2776,2352,1857,1587,1438,1327],[1220,1914,2271,2663,2624,2358,1912,1604,1313,1014],[984,1304,2068,2280,2431,2298,1887,1651,1089,918],[835,1217,1289,1853,2134,2015,1684,1279,1126,844],[800,947,1057,1206,1783,1630,1169,1009,841,940]];
     var points = [];
     var players = [];
     var blueLines = 0;
@@ -485,7 +514,7 @@ $(document).ready(function(){
             }
             board.push(rowinfo);
             points.push(pointsrow);
-            //pointworth.push(pointworthrow);
+            pointworth.push(pointworthrow);
         }
 
         //copies a reverse of rows 1 - 5
@@ -493,7 +522,7 @@ $(document).ready(function(){
         {
             board.push(board[4-i].slice().reverse());
             points.push(points[4-i].slice());
-            //pointworth.push(pointworth[4-i].slice());
+            pointworth.push(pointworth[4-i].slice());
         }
         for (var i = 2 ; i < 50 ; i++)
         {
@@ -2340,8 +2369,11 @@ $(document).ready(function(){
     //returns indexes for options with greatest value
     function mostLines(options,value,offensive){
         var type = value;
+        var typeFor = value;
+        var typeAgainst = 4 - value;
         var number = 4; //helps a line of four
         var worth = [];
+        var best = 0;
 
         //initialize worth to be 0
         for(var i = 0 ; i<options.length ; i++){
@@ -2361,28 +2393,28 @@ $(document).ready(function(){
         //if finds a line of 4,breakopenbreaks out of for loop
         var breakopen = true;
         while(number!==-1&&breakopen){
-            for(var option = 0; option<options.length&&breakopen ; option++){
+            for(var card = 0; card<options.length&&breakopen ; card++){
                 //continue out if a Jack
-                if (options[option]===-1||options[option]===0) {
+                if (options[card]===-1||options[card]===0) {
                     continue;
                 }
 
                 //switches from offensive to defensive
                 for(var blah = 0 ; blah<=1&&breakopen; blah++){
                     if (blah===0) {
-                        type = value;
+                        type = typeFor;
                     } else if (offensive||number<3) {
                         continue;
                     } else if (!offensive) {
-                        type=4-value;
-                }
+                        type = typeAgainst;
+                    }
 
                 
-                for(var option2 = 0; option2<options[option].length ; option2++){
+                for(var side = 0; side<options[card].length ; side++){
 
                     //row x, col y
-                    var x = options[option][option2][0];
-                    var y = options[option][option2][1];
+                    var x = options[card][side][0];
+                    var y = options[card][side][1];
                     
                     var check = false;
                     
@@ -2399,6 +2431,7 @@ $(document).ready(function(){
                             } else if(points[x-i][y-i]!==0){
                                 checkOpen++;
                             }
+                            console.log(x-i,y-i);
                         } else {
                             removed+=5-i;
                             break;
@@ -2411,6 +2444,7 @@ $(document).ready(function(){
                             } else if(points[x+i][y+i]!==0){
                                 checkOpen++;
                             }
+                            console.log(x+i,y+i);
                         } else {
                             checkremove = false;
                             break;
@@ -2418,12 +2452,13 @@ $(document).ready(function(){
                     }
                     if (cnt===number&&checkOpen===0) {
                         check = true;
-                        worth[option][option2]+=number*number;
+                        worth[card][side]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
-                        if (points[x+i-4][y+i-4]===type) {
+                    for(var i = removed + 1 ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
+                            console.log(x+i,y+i);
+                        if (points[x+i-5][y+i-5]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y+i-4]!==0){
+                        } else if (points[x+i-5][y+i-5]!==0){
                             checkOpen--;
                         }
                         if (points[x+i][y+i]===type) {
@@ -2433,7 +2468,7 @@ $(document).ready(function(){
                         }
                         if (cnt===number&&checkOpen===0) {
                             check = true;
-                            worth[option][option2]+=number*number;
+                            worth[card][side]+=number*number;
                         }
                     }
                     
@@ -2466,12 +2501,12 @@ $(document).ready(function(){
                     }
                     if (cnt===number&&checkOpen===0) {
                         check = true;
-                        worth[option][option2]+=number*number;
+                        worth[card][side]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!==10 && checkremove ; i++){
-                        if (points[x+i-4][y]===type) {
+                    for(var i = removed + 1 ; i<5 && x+i!==10 && checkremove ; i++){
+                        if (points[x+i-5][y]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y]!==0){
+                        } else if (points[x+i-5][y]!==0){
                             checkOpen--;
                         }
                         if (points[x+i][y]===type) {
@@ -2481,14 +2516,14 @@ $(document).ready(function(){
                         }
                         if (cnt===number&&checkOpen===0) {
                             check = true;
-                            worth[option][option2]+=number*number;
+                            worth[card][side]+=number*number;
                         }
                     }
                     
                     checkOpen = 0;
                     removed = 0;
                     cnt = 0;
-                    for(var i = 1 ; i < 5 ; i++) { //11
+                    for(var i = 1 ; i < 5 ; i++) { //13
                         if (x-i!==-1 && y+i!==10){
                             if(points[x-i][y+i]===type) {
                                 cnt++;
@@ -2514,12 +2549,12 @@ $(document).ready(function(){
                     }
                     if (cnt===number&&checkOpen===0) {
                         check = true;
-                        worth[option][option2]+=number*number;
+                        worth[card][side]+=number*number;
                     }
-                    for(var i = removed ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
-                        if (points[x+i-4][y-i+4]===type) {
+                    for(var i = removed + 1 ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
+                        if (points[x+i-5][y-i+5]===type) {
                             cnt--;
-                        } else if (points[x+i-4][y-i+4]!==0){
+                        } else if (points[x+i-5][y-i+5]!==0){
                             checkOpen--;
                         }
                         if (points[x+i][y+i]===type) {
@@ -2529,7 +2564,7 @@ $(document).ready(function(){
                         }
                         if (cnt===number&&checkOpen===0) {
                             check = true;
-                            worth[option][option2]+=number*number;
+                            worth[card][side]+=number*number;
                         }
                     }
                     checkOpen = 0;
@@ -2561,12 +2596,12 @@ $(document).ready(function(){
                     }
                     if (cnt===number&&checkOpen===0) {
                         check = true;
-                        worth[option][option2]+=number*number;
+                        worth[card][side]+=number*number;
                     }
-                    for(var i = removed ; i<5 && y+i!==10 && checkremove ; i++){
-                        if (points[x][y+i-4]===type) {
+                    for(var i = removed + 1 ; i<5 && y+i!==10 && checkremove ; i++){
+                        if (points[x][y+i-5]===type) {
                             cnt--;
-                        } else if (points[x][y+i-4]!==0){
+                        } else if (points[x][y+i-5]!==0){
                             checkOpen--;
                         }
                         if (points[x][y+i]===type) {
@@ -2576,21 +2611,23 @@ $(document).ready(function(){
                         }
                         if (cnt===number&&checkOpen===0) {
                             check = true;
-                            worth[option][option2]+=number*number;
+                            worth[card][side]+=number*number;
                             }
                         }
                 }
                 }
                 if (check === true) {
-                    breakopen = false;
-                    break;
+                    best = number;
+                    //breakopen = false;
+                    //break;
                 }
             }
             number--
         }
 
         //return max
-        var returnValues = [number+1];
+        
+        var returnValues = [best];
         var max = 0;
         for( var i = 0 ; i<worth.length ; i++ ){
             for( var j = 0 ; j<worth[i].length ; j++ ){
@@ -2908,6 +2945,16 @@ $(document).ready(function(){
             for(var i = 0 ; i<4 ; i++){
                 finishLine(tnp[i][0],tnp[i][1],value);
             }
+        } else if (cnt11===8) {
+            if (value === 1) {
+                blueLines+=2;
+            } else if (value === 3){
+                greenLines+=2;
+            }
+            finishLine(x,y,value);
+            for(var i = 0 ; i<8 ; i++){
+                finishLine(tnp[i][0],tnp[i][1],value);
+            }
         }
         tnp = [];
         for(var i = 1 ; i < 5 ; i++) { //check later for edges
@@ -2932,6 +2979,16 @@ $(document).ready(function(){
             }
             finishLine(x,y,value);
             for(var i = 0 ; i<4 ; i++){
+                finishLine(tnp[i][0],tnp[i][1],value);
+            }
+        } else if (cnt12===8) {
+            if (value === 1) {
+                blueLines+=2;
+            } else if (value === 3){
+                greenLines+=2;
+            }
+            finishLine(x,y,value);
+            for(var i = 0 ; i<8 ; i++){
                 finishLine(tnp[i][0],tnp[i][1],value);
             }
         }
@@ -2960,6 +3017,16 @@ $(document).ready(function(){
             for(var i = 0 ; i<4 ; i++){
                 finishLine(tnp[i][0],tnp[i][1],value);
             }
+        } else if (cnt13===8) {
+            if (value === 1) {
+                blueLines+=2;
+            } else if (value === 3){
+                greenLines+=2;
+            }
+            finishLine(x,y,value);
+            for(var i = 0 ; i<8 ; i++){
+                finishLine(tnp[i][0],tnp[i][1],value);
+            }
         }
         tnp = [];
         for(var i = 1 ; i < 5 ; i++) { //check later for edges
@@ -2984,6 +3051,16 @@ $(document).ready(function(){
             }
             finishLine(x,y,value);
             for(var i = 0 ; i<4 ; i++){
+                finishLine(tnp[i][0],tnp[i][1],value);
+            }
+        } else if (cnt21===8) {
+            if (value === 1) {
+                blueLines+=2;
+            } else if (value === 3){
+                greenLines+=2;
+            }
+            finishLine(x,y,value);
+            for(var i = 0 ; i<8 ; i++){
                 finishLine(tnp[i][0],tnp[i][1],value);
             }
         }
