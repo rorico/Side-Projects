@@ -234,9 +234,16 @@
 
 $(document).ready(function(){
     //settings
-    var maxGame = 10000;
+    var maxGame = 1000;
     var speed = 500;
     var human = [false,false,false,false];
+    //game play
+    function playBlue (player){
+        playAI(player,1,true);
+    }
+    function playGreen (player){
+        playAIphil(player,3,true);
+    }
     
     $('#speed').val(speed);
     $('#speed').keyup(function () {
@@ -246,10 +253,10 @@ $(document).ready(function(){
         }
     });
     $(window).keydown(function(e) {
-        if (e.keyCode == 38) {
+        if (e.keyCode == 38) { //up key
             speed++;
             $('#speed').val(speed);
-        } else if (e.keyCode == 40&&speed>0) {
+        } else if (e.keyCode == 40&&speed>0) { //down key
             speed--;
             $('#speed').val(speed);
         }
@@ -281,26 +288,15 @@ $(document).ready(function(){
     var unpauseable = false;
     var thispause = true;
     $(window).keypress(function(e) {
-        if (e.keyCode == 0 || e.keyCode == 32) {
-            if (thispause) {
-                thispause = false;
-                if (pauseable) {
-                    keepgoing = !keepgoing;
-                    if (keepgoing) {
-                        $('#pause').css('display','none');
-                        if (unpauseable) {
-                            unpauseable = false;
-                            delayedStart(turnN,gameN);
-                        }
-                    } else {
-                        $('#pause').css('display','block');
-                    }
-                }
-            }
-            thispause = true;
+        if (e.keyCode == 0 || e.keyCode == 32) { //spacebar
+            pause();
         }
     });
     $(document).click(function(){
+        pause();
+    });
+
+    function pause() {
         if (thispause) {
             thispause = false;
             if (pauseable) {
@@ -317,8 +313,7 @@ $(document).ready(function(){
             }
         }
         thispause = true;
-    });
-
+    }
     var board = [];
     var deck = [];
     var greenwin = 0;
@@ -688,13 +683,7 @@ $(document).ready(function(){
         delayedStart(turnN+1,gameN);
     }
 
-    //game play
-    function playBlue (player){
-        playAI(player,1,true);
-    }
-    function playGreen (player){
-        playAIphil(player,3,true);
-    }
+    
 
     //start of different AIs
     function playHybrid (player,value){
@@ -2431,7 +2420,6 @@ $(document).ready(function(){
                             } else if(points[x-i][y-i]!==0){
                                 checkOpen++;
                             }
-                            console.log(x-i,y-i);
                         } else {
                             removed+=5-i;
                             break;
@@ -2444,7 +2432,6 @@ $(document).ready(function(){
                             } else if(points[x+i][y+i]!==0){
                                 checkOpen++;
                             }
-                            console.log(x+i,y+i);
                         } else {
                             checkremove = false;
                             break;
@@ -2455,7 +2442,6 @@ $(document).ready(function(){
                         worth[card][side]+=number*number;
                     }
                     for(var i = removed + 1 ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
-                            console.log(x+i,y+i);
                         if (points[x+i-5][y+i-5]===type) {
                             cnt--;
                         } else if (points[x+i-5][y+i-5]!==0){
