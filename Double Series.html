@@ -236,7 +236,7 @@ $(document).ready(function(){
     //settings
     var maxGame = 1000;
     var speed = 500;
-    var human = [false,false,false,false];
+    var human = [true,false,false,false];
     //game play
     function playBlue (player){
         playAI(player,1,true);
@@ -646,6 +646,7 @@ $(document).ready(function(){
         if (animate) {
             $('#'+position).addClass('choose');
         }
+        $('#'+position).unbind();
         $('#'+position).bind('click',{player:player,x:x,y:y,value:value,card:card}, function(event) {
             event.stopPropagation();
             $('.choose').unbind('click');
@@ -667,6 +668,7 @@ $(document).ready(function(){
         if (animate) {
             $('#'+position).addClass('choose');
         }
+        $('#'+position).unbind();
         $('#'+position).bind('click',{player:player,x:x,y:y,value:value,card:card}, function(event) {
             event.stopPropagation();
             $('.choose').unbind('click');
