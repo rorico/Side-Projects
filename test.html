@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Hi Helen</title>
+</head>
+
+<body>
+
+<p>Hi Helen</p>
+<div id="game">
+    <div id="enemy"></div>
+    <div id="board"></div>
+    <div id="mine"></div>
+</div>
+<script type="text/javascript">
+    
+    
+    for (var i = 1 ; i <= 52 ; i++)
+    {
+        deck.push(i);
+    }
+    shuffle(deck);
+ 
+    //create deck //deal deck
+    var player1 = [];
+    var player2 = [];
+    maxCards = 52;
+    handLength = 6;
+    for (var i = maxCards - handLength ; i < maxCards ; i++)
+    {
+        player1.push(deck[i]);
+    }
+    for (var i = maxCards - 2 * handLength ; i < maxCards - handLength ; i++)
+    {
+        player2.push(deck[i]);
+    }
+    
+    
+    
+    
+    //shuffle deck
+    function shuffle(array) {
+        var currentIndex = array.length, temporaryValue, randomIndex ;
+      
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+      
+          // Pick a remaining element...
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex -= 1;
+      
+          // And swap it with the current element.
+          temporaryValue = array[currentIndex];
+          array[currentIndex] = array[randomIndex];
+          array[randomIndex] = temporaryValue;
+        }
+      
+        return array;
+    }
+    function changeToCards(number) {
+        var card = "";
+        switch ((number-1)%13) {
+            case 0:
+                card = "A";
+                break;
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+                card = ((number-1)%13);
+                break;
+            case 10:
+                card = "J";
+                break;
+            case 11:
+                card = "Q";
+                break;
+            case 12:
+                card = "K";
+                break;
+            default:
+                card = "error";
+                break;
+        }
+        switch ((number-1)/13) {
+            case 0:
+                card += " &#9671";
+                break;
+            case 1:
+                card += " &#9827";
+                break;
+            case 2:
+                card += " &#9825";
+                break;
+            case 3:
+                card += " &#9824";
+                break;
+            default:
+                card += " error2";
+                break;
+        }
+        return card;
+    }
+</script>
+</body>
+</html>

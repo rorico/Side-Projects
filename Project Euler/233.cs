@@ -29,9 +29,13 @@ class dkafldjaf
 			//break;
 			//}
 			//Console.WriteLine(i);
-			if( cnt>max )
+			if( cnt==180 )
 			{
-				Console.WriteLine(i + " " + cnt);
+				//Console.WriteLine(i + " " + cnt);
+				wp(i);
+				Console.Write(" | ");
+				wp(cnt);
+				Console.WriteLine();
 				max=cnt;
 			}
 		}
@@ -44,6 +48,30 @@ class dkafldjaf
 			if (x%i==0){
 				x/=i;
 				//Console.Write(" "+i);
+				if(check!=i)
+				{
+					num+=i+" ";
+					check = i;
+				}
+				i--;
+			}
+		}
+		string[] nums = num.Split(' ');
+		int[] output = new int[nums.Length-1];
+		for( int i = 0 ; i< nums.Length-1 ; i++ )
+		{
+			output[i] = int.Parse(nums[i]);
+		}
+		return output;
+	}
+	static int[] wp(int x){
+		int check = 0;
+		string num = "";
+		for (int i = 2 ; x!=1 ; i++)
+		{
+			if (x%i==0){
+				x/=i;
+				Console.Write(" "+i);
 				if(check!=i)
 				{
 					num+=i+" ";
