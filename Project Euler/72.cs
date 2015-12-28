@@ -6,10 +6,10 @@ class dkafldjaf
 	{
 		long z = 0;
 		int cnt = 2;
-		int[] a= new int[(int)1e9];
+		int[] a= new int[(int)50];
 		a[0]=1;
 		a[1]=1;
-		for ( int i=0; a[cnt-1]<1e6 ; i++)
+		for ( int i=0; a[cnt-1]<8 ; i++)
 		{
 			a[cnt]=a[i]+a[i+1];
 			cnt++;

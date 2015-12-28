@@ -8,8 +8,11 @@ class dkafldjaf
 		double test = 0;
 		double range = 0;
 		int max = 0;
-		for ( int i = 1 ; ; i++)
+		for ( int i = 1 ;  i<200; i++)
 		{
+			//if(!prime(i)){
+			//	continue;
+			//}
 			//int i = 10000;
 			cnt = 0;
 			range = (i/1.41421356);
@@ -22,6 +25,8 @@ class dkafldjaf
 					cnt++;	
 				}
 			}
+			Console.WriteLine(i + " | " + cnt);
+			continue;
 			cnt = (cnt * 2 + 1) * 4;
 			//if(cnt == 420)
 			//{
@@ -29,17 +34,28 @@ class dkafldjaf
 			//break;
 			//}
 			//Console.WriteLine(i);
-			if( cnt==180 )
-			{
+			//if( cnt>max )
+			//{
 				//Console.WriteLine(i + " " + cnt);
+				
+				Console.Write(i + " | ");
 				wp(i);
 				Console.Write(" | ");
-				wp(cnt);
+				wp((cnt-4)/8);	
+				Console.Write(" | " + cnt);
 				Console.WriteLine();
 				max=cnt;
-			}
+			//}
+			//break;
 		}
 	}
+
+	/*int recursive(int num, int count){
+		for (int i = 0 ; i< x ; i++){
+			recursive()
+		}
+	}*/
+
 	static int[] p(int x){
 		int check = 0;
 		string num = "";
@@ -65,6 +81,9 @@ class dkafldjaf
 		return output;
 	}
 	static int[] wp(int x){
+		if(x<=0){
+			return null;
+		}
 		int check = 0;
 		string num = "";
 		for (int i = 2 ; x!=1 ; i++)
