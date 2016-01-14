@@ -9,6 +9,26 @@ def relPrime(num1,num2):
 		if num1%i == 0 and num2%i == 0:
 			return False
 	return True
+
+end = math.floor(1e6 + 1)
+nums = [0] * end
+total = 0
+for i in range(2,len(nums)):
+	k = i-1
+	if nums[i] == 0:
+		total+=k
+		for j in range(2*i,end,i):
+			nums[j]+=k
+	else:
+		k2 = k-nums[i]
+		total+=k-nums[i]
+		for j in range(2*i,end,i):
+			nums[j]+=k2
+
+	#print(i,total)
+
+print(total)
+sys.exit(0)
 cnt = 0
 for i in range(2,21):
 	cnt2 = 0
