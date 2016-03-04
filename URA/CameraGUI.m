@@ -37,7 +37,7 @@ function varargout = CameraGUI(varargin)
 
 % Edit the above text to modify the response to help CameraGUI
 
-% Last Modified by GUIDE v2.5 21-Jan-2016 17:48:08
+% Last Modified by GUIDE v2.5 25-Feb-2016 16:28:04
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -93,7 +93,13 @@ handles.vid=vid;
 handles.src=src;
 handles.hImage=hImage;
 handles.resolution=resolution;
+handles.imWidth=imWidth;
+handles.imHeight=imHeight;
 handles.mycam=mycam;
+
+%TESTESTSETSET
+handles.calibrate = [];
+%TESTESTSETEST
 
 % Populate supported resolution menu
 for i = 1:size(resolution,1)/2;
@@ -107,43 +113,67 @@ frameRates=frameRates';
 set(handles.SupportedFrameRates, 'String', frameRates);
 
 % Move Exposure slider to default position
-handles.maxExposure=-2;
-handles.minExposure = -13;
+ExposureInfo = propinfo(src,'Exposure');
+ExposureRange = ExposureInfo.ConstraintValue();
+handles.minExposure = ExposureRange(1);
+handles.maxExposure = ExposureRange(2);
+% handles.maxExposure=13;
+% handles.minExposure = 0;
 handles.defaultExposure=handles.src.Exposure;
 exposureSlider=double(abs(handles.defaultExposure-handles.minExposure))/double(abs(handles.maxExposure-handles.minExposure));
 set(handles.Exposure, 'value', exposureSlider);
 
 % Move Brightness slider to default position
-handles.maxBrightness = 30;
-handles.minBrightness = -10;
+BrightnessInfo = propinfo(src,'Brightness');
+BrightnessRange = BrightnessInfo.ConstraintValue();
+handles.minBrightness = BrightnessRange(1);
+handles.maxBrightness = BrightnessRange(2);
+% handles.maxBrightness = 30;
+% handles.minBrightness = -10;
 handles.defaultBrightness=handles.src.Brightness;
 brightnessSlider=double(abs(handles.defaultBrightness-handles.minBrightness))/double(abs(handles.maxBrightness-handles.minBrightness));
 set(handles.Brightness, 'value', brightnessSlider);
 
 % Move Gain slider to default position
-handles.maxGain = 63;
-handles.minGain = 16;
+GainInfo = propinfo(src,'Gain');
+GainRange = GainInfo.ConstraintValue();
+handles.minGain = GainRange(1);
+handles.maxGain = GainRange(2);
+% handles.maxGain = 63;
+% handles.minGain = 16;
 handles.defaultGain=handles.src.Gain;
 gainSlider=double(abs(handles.defaultGain-handles.minGain))/double(abs(handles.maxGain-handles.minGain));
 set(handles.Gain, 'value', gainSlider);
 
 % Move Contrast slider to default position
-handles.maxContrast = 30;
-handles.minContrast = -10;
+ContrastInfo = propinfo(src,'Contrast');
+ContrastRange = ContrastInfo.ConstraintValue();
+handles.minContrast = ContrastRange(1);
+handles.maxContrast = ContrastRange(2);
+% handles.maxContrast = 30;
+% handles.minContrast = -10;
 handles.defaultContrast=handles.src.Contrast;
 contrastSlider=double(abs(handles.defaultContrast-handles.minContrast))/double(abs(handles.maxContrast-handles.minContrast));
 set(handles.Contrast, 'value', contrastSlider);
 
 % Move Gamma slider to default position
-handles.maxGamma = 500;
-handles.minGamma = 1;
+GammaInfo = propinfo(src,'Gamma');
+GammaRange = GammaInfo.ConstraintValue();
+handles.minGamma = GammaRange(1);
+handles.maxGamma = GammaRange(2);
+% handles.maxGamma = 500;
+% handles.minGamma = 1;
 handles.defaultGamma=handles.src.Gamma;
 gammaSlider=double(abs(handles.defaultGamma-handles.minGamma))/double(abs(handles.maxGamma-handles.minGamma));
 set(handles.Gamma, 'value', gammaSlider);
 
 % Move Sharpness slider to default position
-handles.maxSharpness = 14;
-handles.minSharpness = 0;
+SharpnessInfo = propinfo(src,'Sharpness');
+SharpnessRange = SharpnessInfo.ConstraintValue();
+handles.minSharpness = SharpnessRange(1);
+handles.maxSharpness = SharpnessRange(2);
+% handles.maxSharpness = 14;
+% handles.minSharpness = 0;
 handles.defaultSharpness=handles.src.Sharpness;
 sharpnesSlider=double(abs(handles.defaultSharpness-handles.minSharpness))/double(abs(handles.maxSharpness-handles.minSharpness));
 set(handles.Sharpness, 'value', sharpnesSlider);
@@ -229,6 +259,8 @@ stoppreview(vid);
 axes(handles.PreviewAxes);
 preview(vid, hImage_new);
 handles.vid=vid;
+handles.imWidth=imWidth;
+handles.imHeight=imHeight;
 
 % Display new resolution on axes
 src = getselectedsource(vid);
@@ -310,8 +342,6 @@ function Exposure_Callback(hObject, eventdata, handles)
 
 
 slider_value=get(hObject,'value');
-% exposureVal= round(handles.minExposure + abs(handles.maxExposure-handles.minExposure)*slider_value); % Convert slider value to normalized exposure value  
-% handles.src.Exposure = exposureVal;
 exposureVal= handles.minExposure + abs(handles.maxExposure-handles.minExposure)*slider_value;
 set(handles.src, 'Exposure', exposureVal);
 % Change exposure from auto to manual
@@ -461,22 +491,17 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
 end
 
 
-% --- Executes on button press in ExposureManual.
-function ExposureManual_Callback(hObject, eventdata, handles)
-% hObject    handle to ExposureManual (see GCBO)
+% --- Executes when selected object is changed in ExposureAuto.
+function ExposureAutomatic_SelectionChangedFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in ExposureAuto 
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of ExposureManual
-value=get(hObject, 'Value');
-if value == 1 % Manual Exposure
-    handles.src.ExposureMode = 'Manual';
-    set(hObject, 'Value',1);
-    set(handles.ExposureAuto, 'Value',0); 
+value = get(eventdata.NewValue, 'tag');
+if strcmp(value,'ExposureManual')
+    handles.src.ExposureAuto = 'Off';
 else % Auto Exposure
-    handles.src.ExposureMode = 'Auto';
-    set(hObject, 'Value',0);
-    set(handles.ExposureAuto, 'Value',1); 
+    handles.src.ExposureAuto = 'On';
     % Reset exposure to default
     exposure=handles.src.Exposure;
     exposureSlider=double(abs(exposure-handles.minExposure))/double(abs(handles.maxExposure-handles.minExposure));
@@ -484,75 +509,23 @@ else % Auto Exposure
 end
 guidata(hObject,handles);
 
-
-% --- Executes on button press in ExposureAuto.
-function ExposureAuto_Callback(hObject, eventdata, handles)
-% hObject    handle to ExposureAuto (see GCBO)
+% --- Executes when selected object is changed in GainAutomatic.
+function GainAutomatic_SelectionChangedFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in GainAutomatic 
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of ExposureAuto
-value=get(hObject, 'Value');
-if value == 1 % Auto exposure
-    handles.src.ExposureMode = 'Auto';
-    set(hObject, 'Value',1);
-    set(handles.ExposureManual, 'Value',0); 
+value = get(eventdata.NewValue, 'tag');
+if strcmp(value,'GainManual')
+    handles.src.GainAuto = 'Off';
+else % Auto Exposure
+    handles.src.GainAuto = 'On';
     % Reset exposure to default
-    exposure=handles.src.Exposure;
-    exposureSlider=double(abs(exposure-handles.minExposure))/double(abs(handles.maxExposure-handles.minExposure));
-    set(handles.Exposure,'value',exposureSlider); % Moves slider to default position
-else % Manual Exposure
-    handles.src.ExposureMode = 'Manual';
-    set(hObject, 'Value',0);
-    set(handles.ExposureManual, 'Value',1); 
-end
-guidata(hObject,handles);
-
-
-% --- Executes on button press in GainManual.
-function GainManual_Callback(hObject, eventdata, handles)
-% hObject    handle to GainManual (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of GainManual
-value=get(hObject, 'Value');
-if value == 1 % Manual Gain
-    handles.src.GainMode = 'Manual';
-    set(hObject, 'Value',1);
-    set(handles.GainAuto, 'Value',0); 
-else % Auto Gain
-    handles.src.GainMode = 'Auto';
-    set(hObject, 'Value',0);
-    set(handles.GainAuto, 'Value',1); 
     gain=handles.src.Gain;
     gainSlider=double(abs(gain-handles.minGain))/double(abs(handles.maxGain-handles.minGain));
     set(handles.Gain,'value',gainSlider); % Moves slider to default position
 end
 guidata(hObject,handles);
-
-% --- Executes on button press in GainAuto.
-function GainAuto_Callback(hObject, eventdata, handles)
-% hObject    handle to GainAuto (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of GainAuto
-value=get(hObject, 'Value');
-if value == 1 % Auto Gain
-    handles.src.GainMode = 'Auto';
-    set(hObject, 'Value',1);
-    set(handles.GainManual, 'Value',0); 
-    gain=handles.src.Gain;
-    gainSlider=double(abs(gain-handles.minGain))/double(abs(handles.maxGain-handles.minGain));
-    set(handles.Gain,'value',gainSlider); % Moves slider to default position
-else % Manual Gain
-    handles.src.GainMode = 'Manual';
-    set(hObject, 'Value',0);
-    set(handles.GainManual, 'Value',1); 
-end
-guidata(hObject,handles);
-
 
 % --- Executes on button press in BrightnessDefault.
 function BrightnessDefault_Callback(hObject, eventdata, handles)
@@ -584,9 +557,9 @@ set(handles.Gamma,'value',gammaSlider); % Moves slider to default position
 handles.src.Gamma=handles.defaultGamma;
 guidata(hObject,handles);
 
-% --- Executes on button press in SharpnesDefault.
-function SharpnesDefault_Callback(hObject, eventdata, handles)
-% hObject    handle to SharpnesDefault (see GCBO)
+% --- Executes on button press in SharpnessDefault.
+function SharpnessDefault_Callback(hObject, eventdata, handles)
+% hObject    handle to SharpnessDefault (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 sharpnessSlider=double(abs(handles.defaultSharpness-handles.minSharpness))/double(abs(handles.Sharpness-handles.minSharpness));
@@ -678,7 +651,7 @@ else
 %             plot(x,y, 'r.', 'MarkerSize', 5);        
         end
         
-        brightness_curr= sum(sum(img_ROI_Y)); % Calculate brightness
+        brightness_curr = sum(sum(img_ROI_Y)); % Calculate brightness
         
         % Delay between measurements based on frame rate
         time_delay = 1/(str2num(handles.src.FrameRate));
@@ -699,8 +672,25 @@ else
             brightness = [brightness brightness_curr];
         end
         
+        
+        yvals = ROI(2):(ROI(2)+ROI(4));
+        calibration = handles.calibrate;
+        if size(calibration,2) >= 2
+            x1 = calibration(:,1);
+            x2 = calibration(:,2);
+            m = (x1(1)-x2(1))/(x1(2)-x2(2));
+            x0 = x1(1) - (x1(2) - ROI(2))*m;
+            yvals = yvals * m + x0;
+        elseif size(calibration,2) == 1
+            x1 = calibration(:,1);
+            m = 0.2*x1(1)/size(img,2); %0.2 picked arbitrarily
+            x0 = x1(1) - (x1(2) - ROI(2))*m;
+            yvals = yvals * m + x0;
+        end
+            
         axes(handles.ReadingAxes);
-        plot(time,brightness,'-');
+        plot(yvals,mean(img_ROI_Y,1),'-');
+%         plot(time,brightness,'-');
         i=i+1;   
     end
 end
@@ -766,14 +756,8 @@ if get(hObject, 'Value')==1
     handles.box=rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
     
     % Checks to see if drawn rectange is within camera preview window
-    resolution_index = get(handles.SupportedResolutions, 'Value');
-    resolution = handles.resolution(4-resolution_index,:);
-    width=744;%str2num(resolution(7:9));
-    height=480;%str2num(resolution(11:13));
-    resolution
-    ROI_flip
-    height
-    width
+    width=handles.imWidth;
+    height=handles.imHeight;
     if round(ROI_flip(1) + ROI_flip(3)) > height || round(ROI_flip(2) + ROI_flip(4)) > width
         h=errordlg('Please Reselect Box Within Camera Streaming Window');
     end
@@ -801,3 +785,70 @@ if get(hObject, 'Value')==1
 else
     set(hObject, 'String', 'Pause Recording');
 end
+
+
+% --- Executes on button press in Calibrate.
+function Calibrate_Callback(hObject, eventdata, handles)
+% hObject    handle to Calibrate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+wavelengthInputs = inputdlg('Enter Wavelength','Calibration Wavelength',1,{'500nm'});
+wavelengthStr = wavelengthInputs{1};
+if isempty(wavelengthStr)
+    h=errordlg('Enter Wavelength');
+else
+    if wavelengthStr(end) ~= 'm'
+        h=errordlg('Enter Wavelength in terms of meters (m)');
+    else
+        prefix = wavelengthStr(end-1);
+        unitIndex = size(wavelengthStr,2) - 1;
+        multiplier = 1;
+        if prefix == 'm'
+            multiplier = 1e-3;
+        elseif prefix == 'u'
+            multiplier = 1e-6;
+        elseif prefix == 'n'
+            multiplier = 1e-9;
+        elseif prefix == 'p'
+            multiplier = 1e-12;
+        elseif prefix == 'f'
+            multiplier = 1e-15;
+        else 
+            [num, status] = str2num(prefix)
+            if status
+                unitIndex = size(wavelengthStr,2);
+            else
+                h=errordlg('Cannot understand units');
+            end
+        end
+        [wavelength, status] = str2num(wavelengthStr(1:unitIndex-1));
+        wavelength = wavelength * multiplier;
+        if status ~= 1
+            h=errordlg('Cannot understand digits');
+        else
+            %the wavelength is processed and turned into a number
+            img = getsnapshot(handles.vid);
+            img_Y = rgb2ycbcr(img);
+            img_Y = img_Y(:,:,1);
+            [maxLine, index] = max(sum(img_Y));
+            
+            
+            % Display line used
+            axes(handles.PreviewAxes);
+            handles.box=rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 2);
+            wavelength
+            handles.calibrate = [handles.calibrate [wavelength index]'];
+            handles.calibrate
+        end
+    end
+end
+guidata(hObject,handles);
+
+
+% --- Executes on button press in resetCalibration.
+function resetCalibration_Callback(hObject, eventdata, handles)
+% hObject    handle to resetCalibration (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.calibrate = [];
+guidata(hObject,handles);
