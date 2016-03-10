@@ -37,7 +37,7 @@ function varargout = CameraGUI(varargin)
 
 % Edit the above text to modify the response to help CameraGUI
 
-% Last Modified by GUIDE v2.5 25-Feb-2016 16:28:04
+% Last Modified by GUIDE v2.5 06-Mar-2016 18:12:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -71,7 +71,7 @@ function CameraGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % Initialize camera
 handles.output = hObject;
 caminfo = imaqhwinfo;
-mycam = char(caminfo.InstalledAdaptors(2));
+mycam = char(caminfo.InstalledAdaptors(1));
 mycaminfo = imaqhwinfo(mycam);
 resolution = char(mycaminfo.DeviceInfo.SupportedFormats());
 vid = videoinput(mycam, 1,resolution(3,:)); % set default resoultion to full res
@@ -99,6 +99,11 @@ handles.mycam=mycam;
 
 %TESTESTSETSET
 handles.calibrate = [];
+handles.calibrateDisplay = [];
+handles.readingXval = [];
+handles.readingYval = [];
+handles.cursorAuto = true;
+handles.cursorX = true;
 %TESTESTSETEST
 
 % Populate supported resolution menu
@@ -117,8 +122,6 @@ ExposureInfo = propinfo(src,'Exposure');
 ExposureRange = ExposureInfo.ConstraintValue();
 handles.minExposure = ExposureRange(1);
 handles.maxExposure = ExposureRange(2);
-% handles.maxExposure=13;
-% handles.minExposure = 0;
 handles.defaultExposure=handles.src.Exposure;
 exposureSlider=double(abs(handles.defaultExposure-handles.minExposure))/double(abs(handles.maxExposure-handles.minExposure));
 set(handles.Exposure, 'value', exposureSlider);
@@ -128,8 +131,6 @@ BrightnessInfo = propinfo(src,'Brightness');
 BrightnessRange = BrightnessInfo.ConstraintValue();
 handles.minBrightness = BrightnessRange(1);
 handles.maxBrightness = BrightnessRange(2);
-% handles.maxBrightness = 30;
-% handles.minBrightness = -10;
 handles.defaultBrightness=handles.src.Brightness;
 brightnessSlider=double(abs(handles.defaultBrightness-handles.minBrightness))/double(abs(handles.maxBrightness-handles.minBrightness));
 set(handles.Brightness, 'value', brightnessSlider);
@@ -139,8 +140,6 @@ GainInfo = propinfo(src,'Gain');
 GainRange = GainInfo.ConstraintValue();
 handles.minGain = GainRange(1);
 handles.maxGain = GainRange(2);
-% handles.maxGain = 63;
-% handles.minGain = 16;
 handles.defaultGain=handles.src.Gain;
 gainSlider=double(abs(handles.defaultGain-handles.minGain))/double(abs(handles.maxGain-handles.minGain));
 set(handles.Gain, 'value', gainSlider);
@@ -150,8 +149,6 @@ ContrastInfo = propinfo(src,'Contrast');
 ContrastRange = ContrastInfo.ConstraintValue();
 handles.minContrast = ContrastRange(1);
 handles.maxContrast = ContrastRange(2);
-% handles.maxContrast = 30;
-% handles.minContrast = -10;
 handles.defaultContrast=handles.src.Contrast;
 contrastSlider=double(abs(handles.defaultContrast-handles.minContrast))/double(abs(handles.maxContrast-handles.minContrast));
 set(handles.Contrast, 'value', contrastSlider);
@@ -161,8 +158,6 @@ GammaInfo = propinfo(src,'Gamma');
 GammaRange = GammaInfo.ConstraintValue();
 handles.minGamma = GammaRange(1);
 handles.maxGamma = GammaRange(2);
-% handles.maxGamma = 500;
-% handles.minGamma = 1;
 handles.defaultGamma=handles.src.Gamma;
 gammaSlider=double(abs(handles.defaultGamma-handles.minGamma))/double(abs(handles.maxGamma-handles.minGamma));
 set(handles.Gamma, 'value', gammaSlider);
@@ -172,8 +167,6 @@ SharpnessInfo = propinfo(src,'Sharpness');
 SharpnessRange = SharpnessInfo.ConstraintValue();
 handles.minSharpness = SharpnessRange(1);
 handles.maxSharpness = SharpnessRange(2);
-% handles.maxSharpness = 14;
-% handles.minSharpness = 0;
 handles.defaultSharpness=handles.src.Sharpness;
 sharpnesSlider=double(abs(handles.defaultSharpness-handles.minSharpness))/double(abs(handles.maxSharpness-handles.minSharpness));
 set(handles.Sharpness, 'value', sharpnesSlider);
@@ -588,32 +581,22 @@ else
         set(hObject, 'String', 'Start Recording');
     end
     
-    i=1;
-    time=[];
-    brightness=[];
+    time_curr = 0;
+    past=[];
+    axes(handles.ReadingAxes);
     
     % Continues to record until specified to stop
     while get(hObject, 'Value')==1
-        saturated_index=[];
-        
-        %Checks to see if time history has changed
-        time_idx = get(handles.TimeHistory, 'Value');
-        time_str = get(handles.TimeHistory, 'String');
-        timeHistory_curr = str2num(cell2mat(time_str(time_idx)));
-        if handles.timeHistory ~= timeHistory_curr      
-            cla(handles.ReadingAxes);
-            i=1;
-            time=[];
-            brightness=[];
-            handles.timeHistory=timeHistory_curr;
-        end
         
         % Pauses capture when pause button is clicked. Resumed when clicked
         % again
         while get(handles.Pause,'Value')==1
+            datacursormode on;
             pause(1);
             continue;
         end
+        datacursormode off;
+        
         
         img=getsnapshot(handles.vid); % Capture preview image
         ROI=round(handles.ROI_flip);
@@ -623,76 +606,72 @@ else
         % brightness
         img_ROI_YCbCr = rgb2ycbcr(img_ROI);
         img_ROI_Y = img_ROI_YCbCr(:,:,1);
-        saturated_index = find(img_ROI_Y == 235); % Checks if pixels are saturated
-     
-        % Send error message if some pixels are saturated
-        if ~isempty(saturated_index) && i==1
-            h=msgbox('WARNING: Some Pixels Are Saturated. Try Lowering Exposure Level', 'Error', 'error');
-            waitfor(h);
-%             saturationWarning=questdlg('WARNING: Some Pixels Are Saturated. Try Lowering Exposure Level', 'Pixels Saturated', 'Ignore', 'Change Exposure Level');
-%             switch saturationWarning
-%                 case 'Ignore'
-%                     
-%                 case 'Change Exposure Level'
-%                     set(handles.SelectROI, 'Value',0);
-%                     set(handles.SelectROI, 'String', 'Select Box');
-%                     set(hObject, 'Value',0);
-%                     set(hObject, 'String', 'Start Recording');
-%                     delete(handles.box);
-%                     break;
-%             end
-            % Can also make saturated pixels red, but too computationally
-            % expensive
-%             [m n]=ind2sub([ROI(3) ROI(4)],saturated_index);
-%             x=n+ROI(2);
-%             y=m+ROI(1);
-%             axes(handles.PreviewAxes);
-%             hold on
-%             plot(x,y, 'r.', 'MarkerSize', 5);        
+        
+        %Checks to see if time history has changed
+        time_idx = get(handles.TimeHistory, 'Value');
+        time_str = get(handles.TimeHistory, 'String');
+        timeHistory_curr = str2num(cell2mat(time_str(time_idx)));
+        if handles.timeHistory ~= timeHistory_curr
+            handles.timeHistory = timeHistory_curr;
         end
         
-        brightness_curr = sum(sum(img_ROI_Y)); % Calculate brightness
         
         % Delay between measurements based on frame rate
         time_delay = 1/(str2num(handles.src.FrameRate));
-        pause(time_delay);
+        time_curr = time_curr + time_delay;
         
-        if i==1
-            time_curr=time_delay;
-        else
-            time_curr = time(end)+time_delay;
-        end
+        % Only keep number of data points specified by 'timeHistory
         
-        % Only keep number of data points specified by 'timeHistory'
         if time_curr > handles.timeHistory
-            time = [time(2:end) time_curr];
-            brightness = [brightness(2:end), brightness_curr];
+            index = ceil((time_curr - handles.timeHistory)/time_delay);
+            index = min(index,size(past,1));
+            past = past(index + 1:end,:);
+            time_curr = time_curr - time_delay * index;
         else
-            time=[time time_curr];
-            brightness = [brightness brightness_curr];
         end
+        past = [past;mean(img_ROI_Y,1)];
         
-        
-        yvals = ROI(2):(ROI(2)+ROI(4));
+        xvals = ROI(2):(ROI(2)+ROI(4));
         calibration = handles.calibrate;
         if size(calibration,2) >= 2
             x1 = calibration(:,1);
             x2 = calibration(:,2);
             m = (x1(1)-x2(1))/(x1(2)-x2(2));
-            x0 = x1(1) - (x1(2) - ROI(2))*m;
-            yvals = yvals * m + x0;
+            b = x1(1) - m * x1(2);
+            xvals = xvals * m + x0;
         elseif size(calibration,2) == 1
             x1 = calibration(:,1);
             m = 0.2*x1(1)/size(img,2); %0.2 picked arbitrarily
-            x0 = x1(1) - (x1(2) - ROI(2))*m;
-            yvals = yvals * m + x0;
+            b = x1(1) - m * x1(2);
+        else
+            m = 1;
+            b = 0;
         end
+        xvals = xvals * m + b;
             
-        axes(handles.ReadingAxes);
-        plot(yvals,mean(img_ROI_Y,1),'-');
-%         plot(time,brightness,'-');
-        i=i+1;   
+        yvals = mean(past,1);
+        handles.readingXval = yvals;
+        handles.readingXval = xvals;
+        guidata(hObject,handles);
+        if handles.cursorAuto
+            [maxLine, index] = max(yvals);
+            set(handles.readingY,'String',maxLine);
+            set(handles.readingX,'String',xvals(index));
+        else
+            x = handles.cursorX;
+            i = 1 + (x - xvals(1)) / m;
+            y2 = yvals(ceil(i));
+            y1 = yvals(floor(i));
+            m = y2 - y1;
+            y = y1 + (i - floor(i)) * m;
+            set(handles.readingY,'String',y);
+        end
+        plot(xvals,yvals,'-');
+        ylabel('average hits');
+        xlabel('wavelength (m)');
+        pause(time_delay);
     end
+    datacursormode on % show cursors after stop recording
 end
 
 
@@ -723,6 +702,7 @@ function TimeHistory_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+set(hObject, 'Value', 2);   % default 1 sec
 time_idx = get(hObject, 'Value');
 time_str = get(hObject, 'String');
 handles.timeHistory = str2num(cell2mat(time_str(time_idx)));
@@ -753,7 +733,7 @@ if get(hObject, 'Value')==1
     
     % Display drawn rectange
     axes(handles.PreviewAxes);
-    handles.box=rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
+    handles.selectBox=rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
     
     % Checks to see if drawn rectange is within camera preview window
     width=handles.imWidth;
@@ -764,7 +744,7 @@ if get(hObject, 'Value')==1
 else 
     % Delete box/ROI object to allow for user to reselect another
     set(hObject, 'String', 'Select Box');
-    delete(handles.box);
+    delete(handles.selectBox);
     handles.ROI=[];
     handles.ROI_flip=[];
     set(handles.Capture, 'Value', 0);
@@ -835,8 +815,7 @@ else
             
             % Display line used
             axes(handles.PreviewAxes);
-            handles.box=rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 2);
-            wavelength
+            handles.calibrateDisplay = [handles.calibrateDisplay rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 2)];
             handles.calibrate = [handles.calibrate [wavelength index]'];
             handles.calibrate
         end
@@ -851,4 +830,59 @@ function resetCalibration_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.calibrate = [];
+for i = size(handles.calibrateDisplay,2):1:-1
+    rect = handles.calibrateDisplay(i)
+    delete(rect)
+end
+handles.calibrateDisplay
 guidata(hObject,handles);
+
+
+
+function readingX_Callback(hObject, eventdata, handles)
+% hObject    handle to readingX (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of readingX as text
+%        str2double(get(hObject,'String')) returns contents of readingX as a double
+
+handles.cursorAuto = false;
+handles.cursorX = str2double(get(hObject,'String'));
+handles.cursorAuto
+guidata(hObject,handles);
+
+% --- Executes during object creation, after setting all properties.
+function readingX_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to readingX (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function readingY_Callback(hObject, eventdata, handles)
+% hObject    handle to readingY (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of readingY as text
+%        str2double(get(hObject,'String')) returns contents of readingY as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function readingY_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to readingY (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
