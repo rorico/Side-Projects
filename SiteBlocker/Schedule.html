@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Schedule</title>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="jquery/jquery-ui.css">
+    <style>
+        body{
+            font-family: 'Times New Roman';
+            font-size: 100%;
+        }
+        div{
+            text-align: center;
+        }
+        div p{
+            position:relative;
+            margin:0;
+        }
+        #container{
+            float:left;
+            display:inline;;
+        }
+        #datepicker{
+            text-align:center;
+            width:200px;
+        }
+        .placeholder{
+            display:block;
+            width:302px;
+        }
+        .placeborder{
+            border-bottom:1px rgb(228, 228, 228) solid;
+        }
+        .class{
+            width:300px;
+            border:1px solid black;
+            font-size:13px;
+            vertical-align: middle;
+            overflow:hidden;
+        }
+        .timeline{
+            border-top: 1px solid black;
+            float:left;
+            display:inline;
+        }
+        .timeslot{
+            background-color:rgb(228, 228, 228);
+            display:block;
+            width:16px;
+            height:50px;
+        }
+        .timeslot.half{
+            height:25px;
+        }
+        .timeslot.timeslotBorder{
+            height:49px;
+            border-bottom: 1px solid black;
+        }
+        .timeslot.half.timeslotBorder{
+            height:24px;
+            border-bottom: 1px solid black;
+        }
+        .timeslot.number{
+            width:18px;
+            line-height:50px;
+        }
+        .timeslot.right{
+            width:8px;
+        }
+        .timeslot.right.halftimeslotBorder{
+            height:24px;
+            border-bottom: 1px solid gray;
+        }
+        #side{
+            float:left;
+            height:600px;
+            border-left: 1px solid rgb(228, 228, 228);
+        }
+        #holder{
+            width:100%;
+            text-align:center;
+            justify-content:center;
+            display:flex;
+        }
+        .day{
+            float:left;
+            display:inline;
+            border:none;
+        }
+        #nowHolder{
+            width:0px;
+            height:0px;
+            position:relative;
+        }
+        #now{
+            width:402px;
+            border-top:1px solid red;
+            position:absolute;
+            display:none;
+            text-align: right;
+            color:red;
+            font-size:12px;
+        }
+        .TUT{
+            border-color:orange;
+        }
+        .SEM{
+            border-color:blue;
+        }
+        .LEC{
+            border-color:green;
+        }
+        .LAB{
+            border-color:red;
+        }
+        
+        #calendar{
+            width:65%;
+            display:inline-block;
+        }
+        #alarmContainer{
+            float:right;
+            width:30%;
+            border-radius:5px;
+            height:100%;
+            border:1px black solid;
+        }
+        .alarm{
+            border-radius:5px;
+            border:1px black solid;
+            margin:10px;
+        }
+        
+        #setTimer{
+            width:70px;
+        }
+        .alarmTitle{
+            float:left;
+            height:50px;
+            width:50px;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 50px;
+            border-right:1px solid black;
+            display:inline-block;
+        }
+        .alarmData{
+            height:50px;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 50px;
+            display:inline-block;
+        }
+        .notSet{
+            opacity:0.3;
+        }
+    </style>
+</head>
+
+<body>
+<div id="calendar">
+<div style="height:22px;">
+<input type="button" value="Prev" id="prev" onclick="javascript:prev();">
+<input type="text" id="datepicker">
+<input type="button" value="Next" id="next" onclick="javascript:next();">
+<input type="button" value="Show Week" id="button" onclick="javascript:weekView();">
+</div>
+<div id="holder"><div>
+<div class="timeline">
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+</div>
+<div class="timeline">
+    <div class="timeslot number half"></div>
+    <div class="timeslot number">8</div>
+    <div class="timeslot number">9</div>
+    <div class="timeslot number">10</div>
+    <div class="timeslot number">11</div>
+    <div class="timeslot number">12</div>
+    <div class="timeslot number">1</div>
+    <div class="timeslot number">2</div>
+    <div class="timeslot number">3</div>
+    <div class="timeslot number">4</div>
+    <div class="timeslot number">5</div>
+    <div class="timeslot number">6</div>
+    <div class="timeslot number half timeslotBorder"></div>
+</div>
+<div class="timeline">
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+</div>
+<div class="timeline">
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+</div>
+<div id="container"><div id="currentDay" class="day"><div id="nowHolder"><div id="now"></div></div></div></div>
+</div></div></div>
+<div id="alarmContainer">
+    <div id="timer" class="alarm">Alarm
+    <p style="margin:10px;">Set alarm to sound in <input id="setTimer" value="5" type="number"/> minutes <input type="button" value="SET" onclick="setTimer();"/></p>
+    </div>
+    <div id="alarms" class="alarm">
+        <div class="alarm notSet"><div class="alarmTitle">1</div><div id="alarm1" class="alarmData">Not Set</div></div>
+        <div class="alarm notSet"><div class="alarmTitle">2</div><div id="alarm2" class="alarmData">Not Set</div></div>
+        <div class="alarm notSet"><div class="alarmTitle">3</div><div id="alarm3" class="alarmData">Not Set</div></div>
+        <div class="alarm notSet"><div class="alarmTitle">4</div><div id="alarm4" class="alarmData">Not Set</div></div>
+        <div class="alarm notSet"><div class="alarmTitle">5</div><div id="alarm5" class="alarmData">Not Set</div></div>
+    </div>
+</div>
+
+<script type="text/javascript" src="schedule.js"></script>
+</body>
+</html>
