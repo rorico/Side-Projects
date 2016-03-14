@@ -4,7 +4,23 @@ var info;
 
 chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var background = backgroundPage;
+
+    //schedule
     info = background.scheduleInfo;
+    $( "#datepicker" ).datepicker({
+        onSelect: function(dateText) {
+            if ($('#button').val()=="Show Week") {
+                changeDate($( "#datepicker" ).datepicker("getDate"));
+            } else {
+                showWeek($( "#datepicker" ).datepicker("getDate"));
+            }
+        },
+        dateFormat: "DD MM d, yy"
+    });
+    $( "#datepicker" ).datepicker("setDate", new Date());
+    showSchedule('#currentDay', new Date(),true);
+
+    //alarms
     alarms = background.alarms;
     playAlarmCheck = background.playAlarmCheck;
     for (var i = 0 ; i < alarms.length ; i++) {
@@ -200,19 +216,6 @@ var startTime = 700; //7AM
 var endTime = 1900; //7PM
 
 $(function() {
-    $( "#datepicker" ).datepicker({
-        onSelect: function(dateText) {
-            if ($('#button').val()=="Show Week") {
-                changeDate($( "#datepicker" ).datepicker("getDate"));
-            } else {
-                showWeek($( "#datepicker" ).datepicker("getDate"));
-            }
-        },
-        dateFormat: "DD MM d, yy"
-    });
-    $( "#datepicker" ).datepicker("setDate", new Date());
-    //scheduleChanges();
-    showSchedule('#currentDay', new Date(),true);
 });
 function weekView() {
     var date = $( "#datepicker" ).datepicker("getDate");
