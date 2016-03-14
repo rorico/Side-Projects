@@ -3,7 +3,7 @@ var inputBufferTime = 10000;
 var inputStartTime = new Date() - inputBufferTime;
 var deletes = false;
 
-var time = new Date();
+var time = new Date() - 1000;
 var currentTimer = "5";
 function changeTimer(digit) {
     var now = new Date();

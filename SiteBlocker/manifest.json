@@ -3,7 +3,7 @@
   "version": "1.0",
   "description": "Time",
   "permissions": ["webRequest", "webRequestBlocking",
-                  "<all_urls>","tabs"],
+                  "<all_urls>","tabs","alarms"],
   "content_scripts": [ {
       "all_frames": true,
       "js": ["jquery.min.js","contentScript.js"],

@@ -4,9 +4,6 @@ var playAlarmCheck;
 chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var background = backgroundPage;
     alarms = background.alarms;
-    console.log(alarms);
-    console.log(new Date());
-    console.log((new Date()).toLocaleTimeString());
     playAlarmCheck = background.playAlarmCheck;
     for (var i = 0 ; i < alarms.length ; i++) {
         if (alarms[i][0] == 1) {

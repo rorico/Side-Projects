@@ -17,8 +17,28 @@ chrome.webRequest.onBeforeRequest.addListener(
     ],
     types: ["main_frame"]
   },
-  ["blocking"]);
+  ["blocking"]
+);
 
+//set alarm for every half hour after 10pm
+//sets alarm when it rings so can't stop before
+sleepAlarmStart = 22;
+sleepAlarmEnd = 6;
+setSleepAlarm();
+chrome.alarms.onAlarm.addListener(function(){
+  setAlarm(0);
+  setSleepAlarm();
+});
+function setSleepAlarm(){
+  date = new Date();
+  date.setMinutes(Math.floor(date.getMinutes()/30) + 30);
+  if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
+    date.setHours(sleepAlarmStart);
+    date.setMinutes(0);
+    date.setSeconds(0);
+  }
+  chrome.alarms.create("sleep", {when:+date});
+}
 
 //code for alarms
 //note chrome.alarms exists
@@ -32,7 +52,7 @@ function setAlarm(delay) {
             var alarmTime = new Date();
             alarmTime.setMinutes(alarmTime.getMinutes()+delay);
             var alarm = setTimeout(function(){
-                alarms[i][0] = 2;
+                alarms[i][0] = 2; 
                 playAlarmCheck = true;
                 playAlarm();
             },delay*60000);
