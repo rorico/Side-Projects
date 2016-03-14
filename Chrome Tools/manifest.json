@@ -1,0 +1,20 @@
+{
+  "name": "Chrome Tools",
+  "version": "1.0",
+  "description": "Various tools to help with organization and time management",
+  "permissions": ["webRequest","webRequestBlocking","<all_urls>","tabs","alarms"],
+  "background": {
+    "page": "background/background.html"
+  },
+  "content_scripts": [{
+      "all_frames": true,
+      "js": ["jquery.min.js","contentScript/contentScript.js"],
+      "matches": ["<all_urls>"]
+  }],
+  "browser_action": {
+      "default_popup": "browserAction/browserAction.html",
+      "default_title": "Chrome Tools"
+  },
+  "web_accessible_resources": ["*"],
+  "manifest_version": 2
+}
