@@ -102,16 +102,16 @@ function changeTimer(digit) {
 var deletes = false;
 $(window).keydown(function(e) {
     switch (e.keyCode) {
-        case 110:        //n
+        case 78:        //n
             setToday();
             break;
-        case 109:        //m
+        case 77:        //m
             weekView();
             break;
-        case 44:        //,
+        case 188:        //,
             prev();
             break;
-        case 46:        //.
+        case 190:        //.
             next();
             break;
         case 83:        //s

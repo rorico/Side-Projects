@@ -47,7 +47,7 @@ $(window).keydown(function(e) {
             break;
         case 82:        //r
             if(e.altKey){
-                window.open(chrome.extension.getURL("Schedule.html"));
+                window.open(chrome.extension.getURL("/SchedulePage/Schedule.html"));
             } else {
                 sendRequest("setAlarm",60);
             }

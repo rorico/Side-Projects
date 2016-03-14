@@ -6,7 +6,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       if (today[i][0][1] > position) {
         break;
       } else if (today[i][0][2] > position) {
-        return {redirectUrl: chrome.extension.getURL("Schedule.html")};
+        return {redirectUrl: chrome.extension.getURL("/SchedulePage/Schedule.html")};
       }
     }
   },
