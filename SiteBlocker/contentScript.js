@@ -1,5 +1,4 @@
 var inputMode = false;
-var altPressed = false;
 var inputBufferTime = 10000;
 var inputStartTime = new Date() - inputBufferTime;
 var deletes = false;
@@ -17,11 +16,8 @@ function changeTimer(digit) {
 }
 $(window).keydown(function(e) {
     switch (e.keyCode) {
-        case 18:        //alt
-            altPressed = true;
-            break;
         case 83:        //s
-            sendRequest("setAlarm",currentTimer - 1 + 1); //cast to int
+            sendRequest("setAlarm",+currentTimer); //cast to int
             break;
         case 68:        //d
             deletes = true;
@@ -33,28 +29,28 @@ $(window).keydown(function(e) {
             sendRequest("snooze");
             break;
         case 81:        //q
-            if(altPressed){
+            if(e.altKey){
                 inputStartTime = new Date();                    //turn on input
             } else {
                 sendRequest("setAlarm",5);
             }
             break;
         case 87:        //w
-            if(altPressed){
+            if(e.altKey){
                 inputStartTime = new Date() - inputBufferTime;  //turn off input
             } else {
                 sendRequest("setAlarm",15);
             }
             break;
         case 69:        //e
-            if(altPressed){
-                window.open(chrome.extension.getURL("Schedule.html"));
-            } else {
-                sendRequest("setAlarm",30);
-            }
+            sendRequest("setAlarm",30);
             break;
         case 82:        //r
-            sendRequest("setAlarm",60);
+            if(e.altKey){
+                window.open(chrome.extension.getURL("Schedule.html"));
+            } else {
+                sendRequest("setAlarm",60);
+            }
             break;
         case 48:        //0
         case 49:        //1
@@ -93,14 +89,10 @@ $(window).keydown(function(e) {
             break;
         
     }
-});
-$(window).keyup(function(e) {
+}).keyup(function(e) {
     switch (e.keyCode) {
         case 68:        //d
             deletes = false;
-            break;
-        case 18:        //alt
-            altPressed = false;
             break;
     }
 });

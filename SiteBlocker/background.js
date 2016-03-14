@@ -20,31 +20,25 @@ chrome.webRequest.onBeforeRequest.addListener(
   ["blocking"]);
 
 
-
-var alarms = [false,false,false,false,false];
-var alarmTimes = [false,false,false,false,false];
+//code for alarms
+//note chrome.alarms exists
+//consider changing to this later
+var alarms = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]; //state, alarm time, alarm object
 var audio = new Audio('alarm.mp3');
 var playAlarmCheck = false;
 function setAlarm(delay) {
     for (var i = 0 ; i<alarms.length ;i++) {
-        if (alarms[i]===false) {
+        if (!alarms[i][0]) {
             var alarmTime = new Date();
             alarmTime.setMinutes(alarmTime.getMinutes()+delay);
-            alarmTimes[i] = alarmTime;
             var alarm = setTimeout(function(){
-                alarms[i] = true;
+                alarms[i][0] = 2;
                 playAlarmCheck = true;
                 playAlarm();
             },delay*60000);
-            alarms[i] = alarm;
+            alarms[i] = [1,alarmTime,alarm];
             break;
         }
-    }
-}
-function removeAlarm(alarmNumber) {
-    if (alarms[alarmNumber]!==false) {
-        clearTimeout(alarms[alarmNumber]);
-        alarms[alarmNumber] = false;
     }
 }
 
@@ -56,25 +50,18 @@ function playAlarm() {
     },3000);
 }
 
-function getTime(date) {
-    var hours = date.getHours();
-    var suffix = " AM";
-    if (hours>=13) {
-        hours-=12;
-        suffix = " PM";
-    } else if (hours===12) {
-        suffix = " PM";
-    } else if (hours===0) {
-        hours = 12;
+function removeAlarm(alarmNumber) {
+    if (alarms[alarmNumber][0]) {
+        clearTimeout(alarms[alarmNumber][2]);
+        alarms[alarmNumber][0] = 0;
     }
-    var time = hours + ":" + ('0'+date.getMinutes()).slice(-2) + ":" + ('0'+date.getSeconds()).slice(-2) + suffix;
-    return time;
 }
+
 
 function stopAlarm() {
     if (playAlarmCheck) {
         for (var i = 0 ; i<alarms.length ; i++) {
-            if (alarms[i]===true) {
+            if (alarms[i][0]===2) {
                 removeAlarm(i);
             }
         }
@@ -111,7 +98,4 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
       break;
 
   }
-  console.log(a);
-  console.log(b);
-  console.log(c);
 });

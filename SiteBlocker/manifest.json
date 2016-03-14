@@ -6,7 +6,7 @@
                   "<all_urls>","tabs"],
   "content_scripts": [ {
       "all_frames": true,
-      "js": ["jquery.min.js","contentScript.js" ],
+      "js": ["jquery.min.js","contentScript.js"],
       "matches": [ "<all_urls>" ]
    } ],
    "browser_action": {
