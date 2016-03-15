@@ -28,6 +28,7 @@ function setAlarm(delay) {
             break;
         }
     }
+    sendRequest("setAlarm",delay);
 }
 
 function showAlarm(date,index) {
@@ -41,6 +42,7 @@ function removeAlarm(alarmNumber) {
         $('#alarm'+(alarmNumber+1)).html("Not Set");
         $('#alarm'+(alarmNumber+1)).parent().addClass("notSet");
     }
+    sendRequest("removeAlarm",alarmNumber);
 }
 
 function stopAlarm() {
@@ -51,6 +53,7 @@ function stopAlarm() {
             }
         }
     }
+    sendRequest("stopAlarm");
 }
 
 function changeTime(change) {
@@ -65,6 +68,7 @@ function snooze() {
         stopAlarm();
         setAlarm(5);
     }
+    sendRequest("snooze");
 }
 
 time = new Date();
@@ -86,37 +90,30 @@ $(window).keydown(function(e) {
     switch (e.keyCode) {
         case 83:        //s
             setAlarm(+$('#setTimer').val());
-            sendRequest("setAlarm",+$('#setTimer').val()); //cast to int
             break;
         case 68:        //d
             deletes = true;
             break;
         case 65:        //a
             stopAlarm();
-            sendRequest("stopAlarm");
             break;
         case 88:        //x
             snooze();
-            sendRequest("snooze");
             break;
         case 81:        //q
             setAlarm(5);
-            sendRequest("setAlarm",5);
             break;
         case 87:        //w
             setAlarm(15);
-            sendRequest("setAlarm",15);
             break;
         case 69:        //e
             setAlarm(30);
-            sendRequest("setAlarm",30);
             break;
         case 82:        //r
             if(e.altKey){
                 window.open(chrome.extension.getURL("/SchedulePage/Schedule.html"));
             } else {
                 setAlarm(60);
-                sendRequest("setAlarm",60);
             }
             break;
         case 48:        //0
@@ -129,7 +126,6 @@ $(window).keydown(function(e) {
             if (deletes) {
                 i = e.keyCode-49;
                 removeAlarm(i);
-                sendRequest("removeAlarm",i);
                 break;
             }
         case 55:        //6
@@ -147,7 +143,6 @@ $(window).keydown(function(e) {
             if (deletes) {
                 i = e.keyCode-49;
                 removeAlarm(i);
-                sendRequest("removeAlarm",i);
                 break;
             }
         case 102:        //6

@@ -1,7 +1,7 @@
 //set alarm for every half hour after 10pm
 //sets alarm when it rings so can't stop before
-sleepAlarmStart = 22;
-sleepAlarmEnd = 6;
+sleepAlarmStart = 22;   //10pm
+sleepAlarmEnd = 6;      //6am
 setSleepAlarm();
 chrome.alarms.onAlarm.addListener(function(){
   setAlarm(0);
@@ -9,7 +9,6 @@ chrome.alarms.onAlarm.addListener(function(){
 });
 function setSleepAlarm(){
   date = new Date();
-  date.setMinutes(0);
   date.setSeconds(0);
   date.setMinutes(Math.floor(date.getMinutes()/30)*30 + 30);
   if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
@@ -90,8 +89,6 @@ function snooze() {
 chrome.runtime.onMessage.addListener(function(a, b, c) {
   action = a.action;
   switch(a.action) {
-    case "setTimer":
-      break;
     case "stopAlarm":
       stopAlarm();
       break;
@@ -104,6 +101,5 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
     case "removeAlarm":
       removeAlarm(a.input);
       break;
-
   }
 });

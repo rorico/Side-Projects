@@ -31,6 +31,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
     }
 });
+
 $('#timerButton').click(setTimer);
 function setTimer() {
     var delay = +$('#setTimer').val();
@@ -46,7 +47,7 @@ function setAlarm(delay) {
             break;
         }
     }
-    sendRequest("setAlarm",delay); //cast to int
+    sendRequest("setAlarm",delay);
 }
 
 function showAlarm(date,index) {
