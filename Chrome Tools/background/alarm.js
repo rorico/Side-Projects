@@ -9,11 +9,11 @@ chrome.alarms.onAlarm.addListener(function(){
 });
 function setSleepAlarm(){
   date = new Date();
-  date.setMinutes(Math.floor(date.getMinutes()/30) + 30);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMinutes(Math.floor(date.getMinutes()/30)*30 + 30);
   if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
     date.setHours(sleepAlarmStart);
-    date.setMinutes(0);
-    date.setSeconds(0);
   }
   chrome.alarms.create("sleep", {when:+date});
 }
@@ -21,17 +21,21 @@ function setSleepAlarm(){
 //code for alarms
 //note chrome.alarms exists
 //consider changing to this later
+chrome.browserAction.setBadgeBackgroundColor({color:"#0000FF"});        //blue
 var alarms = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]; //state, alarm time, alarm object
+var alarmCnt = 0;
 var audio = new Audio('alarm.mp3');
-var playAlarmCheck = false;
+var playAlarmCheck = [false];   //array so that it is pass by reference
 function setAlarm(delay) {
     for (var i = 0 ; i<alarms.length ;i++) {
         if (!alarms[i][0]) {
             var alarmTime = new Date();
             alarmTime.setMinutes(alarmTime.getMinutes()+delay);
+            chrome.browserAction.setBadgeText({text:(++alarmCnt).toString()});
             var alarm = setTimeout(function(){
+                chrome.browserAction.setBadgeBackgroundColor({color:"#FF0000"});  //red
                 alarms[i][0] = 2; 
-                playAlarmCheck = true;
+                playAlarmCheck[0] = true;
                 playAlarm();
             },delay*60000);
             alarms[i] = [1,alarmTime,alarm];
@@ -42,7 +46,7 @@ function setAlarm(delay) {
 
 function playAlarm() {
     setInterval(function(){
-        if (playAlarmCheck) {
+        if (playAlarmCheck[0]) {
             audio.play();
         }
     },3000);
@@ -50,6 +54,11 @@ function playAlarm() {
 
 function removeAlarm(alarmNumber) {
     if (alarms[alarmNumber][0]) {
+        if(--alarmCnt){
+          chrome.browserAction.setBadgeText({text:(alarmCnt).toString()});
+        } else {
+          chrome.browserAction.setBadgeText({text:""});
+        }
         clearTimeout(alarms[alarmNumber][2]);
         alarms[alarmNumber][0] = 0;
     }
@@ -57,20 +66,21 @@ function removeAlarm(alarmNumber) {
 
 
 function stopAlarm() {
-    if (playAlarmCheck) {
+    if (playAlarmCheck[0]) {
         for (var i = 0 ; i<alarms.length ; i++) {
             if (alarms[i][0]===2) {
                 removeAlarm(i);
             }
         }
-        playAlarmCheck = false;
+        playAlarmCheck[0] = false;
         audio.pause();
         audio.currentTime = 0;
+        chrome.browserAction.setBadgeBackgroundColor({color:"#0000FF"});        //blue
     }
 }
 
 function snooze() {
-    if (playAlarmCheck) {
+    if (playAlarmCheck[0]) {
         stopAlarm();
         setAlarm(5);
     }

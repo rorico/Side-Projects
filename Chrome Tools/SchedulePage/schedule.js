@@ -9,7 +9,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     info = background.scheduleInfo;
     $( "#datepicker" ).datepicker({
         onSelect: function(dateText) {
-            if ($('#button').val()=="Show Week") {
+            if ($('#showWeek').val()=="Show Week") {
                 changeDate($( "#datepicker" ).datepicker("getDate"));
             } else {
                 showWeek($( "#datepicker" ).datepicker("getDate"));
@@ -31,9 +31,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
     }
 });
-
+$('#timerButton').click(setTimer);
 function setTimer() {
-    var delay = parseInt($('#setTimer').val());
+    var delay = +$('#setTimer').val();
     setAlarm(delay);
 }
 
@@ -46,6 +46,7 @@ function setAlarm(delay) {
             break;
         }
     }
+    sendRequest("setAlarm",delay); //cast to int
 }
 
 function showAlarm(date,index) {
@@ -59,16 +60,18 @@ function removeAlarm(alarmNumber) {
         $('#alarm'+(alarmNumber+1)).html("Not Set");
         $('#alarm'+(alarmNumber+1)).parent().addClass("notSet");
     }
+    sendRequest("removeAlarm",alarmNumber);
 }
 
 function stopAlarm() {
-    if (playAlarmCheck) {
+    if (playAlarmCheck[0]) {
         for (var i = 0 ; i<alarms.length ; i++) {
             if (alarms[i][0]===2) {
                 removeAlarm(i);
             }
         }
     }
+    sendRequest("stopAlarm");
 }
 
 function changeTime(change) {
@@ -79,10 +82,11 @@ function changeTime(change) {
 }
 
 function snooze() {
-    if (playAlarmCheck) {
+    if (playAlarmCheck[0]) {
         stopAlarm();
         setAlarm(5);
     }
+    sendRequest("snooze");
 }
 
 time = new Date();
@@ -116,37 +120,30 @@ $(window).keydown(function(e) {
             break;
         case 83:        //s
             setAlarm(+$('#setTimer').val());
-            sendRequest("setAlarm",+$('#setTimer').val()); //cast to int
             break;
         case 68:        //d
             deletes = true;
             break;
         case 65:        //a
             stopAlarm();
-            sendRequest("stopAlarm");
             break;
         case 88:        //x
             snooze();
-            sendRequest("snooze");
             break;
         case 81:        //q
             setAlarm(5);
-            sendRequest("setAlarm",5);
             break;
         case 87:        //w
             setAlarm(15);
-            sendRequest("setAlarm",15);
             break;
         case 69:        //e
             setAlarm(30);
-            sendRequest("setAlarm",30);
             break;
         case 82:        //r
             if(e.altKey){
-                window.open(chrome.extension.getURL("Schedule.html"));
+                window.open(chrome.extension.getURL("/SchedulePage/Schedule.html"));
             } else {
                 setAlarm(60);
-                sendRequest("setAlarm",60);
             }
             break;
         case 48:        //0
@@ -159,7 +156,6 @@ $(window).keydown(function(e) {
             if (deletes) {
                 i = e.keyCode-49;
                 removeAlarm(i);
-                sendRequest("removeAlarm",i);
                 break;
             }
         case 55:        //6
@@ -177,7 +173,6 @@ $(window).keydown(function(e) {
             if (deletes) {
                 i = e.keyCode-49;
                 removeAlarm(i);
-                sendRequest("removeAlarm",i);
                 break;
             }
         case 102:        //6
@@ -215,21 +210,22 @@ var nowTimeOffset = 50;
 var startTime = 700; //7AM
 var endTime = 1900; //7PM
 
-$(function() {
-});
+$('#showWeek').click(weekView);
+$('#next').click(next);
+$('#prev').click(prev);
 function weekView() {
     var date = $( "#datepicker" ).datepicker("getDate");
-    if ($('#button').val()=="Show Week") {
-        $('#button').val("Show Day");
+    if ($('#showWeek').val()=="Show Week") {
+        $('#showWeek').val("Show Day");
         showWeek(date);
     } else {
-        $('#button').val("Show Week");
+        $('#showWeek').val("Show Week");
         changeDate(date);
     }
 }
 function next() {
     var date = $( "#datepicker" ).datepicker("getDate");
-    if ($('#button').val()=="Show Week") {
+    if ($('#showWeek').val()=="Show Week") {
         date.setDate(date.getDate() + 1);
         $( "#datepicker" ).datepicker("setDate",date);
         changeDate(date);
@@ -241,7 +237,7 @@ function next() {
 }
 function prev() {
     var date = $( "#datepicker" ).datepicker("getDate");
-    if ($('#button').val()=="Show Week") {
+    if ($('#showWeek').val()=="Show Week") {
         date.setDate(date.getDate() - 1);
         $( "#datepicker" ).datepicker("setDate",date);
         changeDate(date);
@@ -254,7 +250,7 @@ function prev() {
 function setToday() {
     var date = new Date();
     $( "#datepicker" ).datepicker("setDate",date);
-    if ($('#button').val()=="Show Week") {
+    if ($('#showWeek').val()=="Show Week") {
         changeDate(date);
     } else {
         showWeek(date);

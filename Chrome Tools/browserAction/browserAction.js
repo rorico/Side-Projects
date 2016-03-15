@@ -44,7 +44,7 @@ function removeAlarm(alarmNumber) {
 }
 
 function stopAlarm() {
-    if (playAlarmCheck) {
+    if (playAlarmCheck[0]) {
         for (var i = 0 ; i<alarms.length ; i++) {
             if (alarms[i][0]===2) {
                 removeAlarm(i);
@@ -61,7 +61,7 @@ function changeTime(change) {
 }
 
 function snooze() {
-    if (playAlarmCheck) {
+    if (playAlarmCheck[0]) {
         stopAlarm();
         setAlarm(5);
     }

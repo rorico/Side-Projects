@@ -8,7 +8,7 @@
   },
   "content_scripts": [{
       "all_frames": true,
-      "js": ["jquery.min.js","contentScript/contentScript.js"],
+      "js": ["jquery/jquery.min.js","contentScript/contentScript.js"],
       "matches": ["<all_urls>"]
   }],
   "browser_action": {

@@ -7,7 +7,7 @@ var time = new Date() - 1000;
 var currentTimer = "5";
 function changeTimer(digit) {
     var now = new Date();
-    if (now.getTime()-time.getTime()<1000) {
+    if (now-time<1000) {
         currentTimer += digit.toFixed(0);
     } else {
         currentTimer = digit;
