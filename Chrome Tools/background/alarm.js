@@ -22,6 +22,7 @@ function setSleepAlarm(){
 //note chrome.alarms exists
 //consider changing to this later
 chrome.browserAction.setBadgeBackgroundColor({color:"#0000FF"});        //blue
+chrome.browserAction.setBadgeText({text:""});                           //reset text
 var alarms = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]; //state, alarm time, alarm object
 var alarmCnt = 0;
 var audio = new Audio('alarm.mp3');

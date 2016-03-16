@@ -141,11 +141,7 @@ $(window).keydown(function(e) {
             setAlarm(30);
             break;
         case 82:        //r
-            if(e.altKey){
-                window.open(chrome.extension.getURL("/SchedulePage/Schedule.html"));
-            } else {
-                setAlarm(60);
-            }
+            setAlarm(60);
             break;
         case 48:        //0
         case 49:        //1
