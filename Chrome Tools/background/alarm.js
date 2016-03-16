@@ -13,6 +13,7 @@ function setSleepAlarm(){
   date.setMinutes(Math.floor(date.getMinutes()/30)*30 + 30);
   if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
     date.setHours(sleepAlarmStart);
+    date.setMinutes(0);
   }
   chrome.alarms.create("sleep", {when:+date});
 }
