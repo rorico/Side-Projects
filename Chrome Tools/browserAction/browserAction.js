@@ -14,6 +14,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 });
 
+$('#timerButton').click(setTimer);
 function setTimer() {
     var delay = +$('#setTimer').val();
     setAlarm(delay);
