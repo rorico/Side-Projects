@@ -89,7 +89,6 @@ function snooze() {
 
 
 chrome.runtime.onMessage.addListener(function(a, b, c) {
-  action = a.action;
   switch(a.action) {
     case "stopAlarm":
       stopAlarm();
