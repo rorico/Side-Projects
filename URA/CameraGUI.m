@@ -37,7 +37,7 @@ function varargout = CameraGUI(varargin)
 
 % Edit the above text to modify the response to help CameraGUI
 
-% Last Modified by GUIDE v2.5 06-Mar-2016 18:12:27
+% Last Modified by GUIDE v2.5 23-Mar-2016 14:39:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -71,10 +71,51 @@ function CameraGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % Initialize camera
 handles.output = hObject;
 caminfo = imaqhwinfo;
-mycam = char(caminfo.InstalledAdaptors(1));
+adaptors = caminfo.InstalledAdaptors();
+cnt = 1;
+cameraList = {};
+adaptorList = {};
+deviceNumbers = []; %assume these are all same size always
+for i = 1:size(adaptors,2)
+    adaptorName = char(adaptors(i));
+    adaptor = imaqhwinfo(adaptorName);
+    devices = adaptor.DeviceInfo();
+    for j = 1:size(devices,2)
+        cameraList{cnt} = devices(:,j).DeviceName;
+        adaptorList{cnt} = adaptorName;
+        deviceNumbers(cnt) = j;
+        cnt = cnt + 1;
+    end
+end
+
+%cameraList
+
+handles.cameraList=cameraList;
+handles.adaptorList=adaptorList;
+handles.deviceNumbers=deviceNumbers;
+guidata(hObject,handles);
+
+if isempty(adaptorList)
+    h=errordlg('No Cameras Attached');
+end
+%setup with first device
+set(handles.CameraList, 'String', cameraList);
+set(handles.CameraList, 'Value', 1);
+setup_camera(handles,hObject,1);
+
+function setup_camera(handles,hObject,cameraNumber)
+%function for changing camera
+%resets nearly all handles
+
+%first of list of connected devices
+adaptorList = handles.adaptorList;
+deviceNumbers = handles.deviceNumbers;
+mycam = adaptorList{cameraNumber};
 mycaminfo = imaqhwinfo(mycam);
-resolution = char(mycaminfo.DeviceInfo.SupportedFormats());
-vid = videoinput(mycam, 1,resolution(3,:)); % set default resoultion to full res
+devices = mycaminfo.DeviceInfo();
+resolution = char(devices(deviceNumbers(cameraNumber)).SupportedFormats());
+resolution_index = 1;   % set default resoultion to full res
+vid = videoinput(mycam, deviceNumbers(cameraNumber),resolution(resolution_index,:)); 
 src = getselectedsource(vid);
 
 % Set resolution of camera
@@ -102,15 +143,11 @@ handles.calibrate = [];
 handles.calibrateDisplay = [];
 handles.readingXval = [];
 handles.readingYval = [];
-handles.cursorAuto = true;
-handles.cursorX = true;
 %TESTESTSETEST
 
 % Populate supported resolution menu
-for i = 1:size(resolution,1)/2;
-supportedResolutions{4-i}=resolution(i,:);
-end
-set(handles.SupportedResolutions, 'String', supportedResolutions)
+set(handles.SupportedResolutions, 'String', resolution);
+set(handles.SupportedResolutions, 'Value', resolution_index);
 
 % Populate supported framerate menu
 frameRates = set(src, 'FrameRate');
@@ -118,61 +155,84 @@ frameRates=frameRates';
 set(handles.SupportedFrameRates, 'String', frameRates);
 
 % Move Exposure slider to default position
-ExposureInfo = propinfo(src,'Exposure');
-ExposureRange = ExposureInfo.ConstraintValue();
-handles.minExposure = ExposureRange(1);
-handles.maxExposure = ExposureRange(2);
-handles.defaultExposure=handles.src.Exposure;
-exposureSlider=double(abs(handles.defaultExposure-handles.minExposure))/double(abs(handles.maxExposure-handles.minExposure));
-set(handles.Exposure, 'value', exposureSlider);
+if isprop(src,'Exposure')
+    ExposureInfo = propinfo(src,'Exposure');
+    ExposureRange = ExposureInfo.ConstraintValue();
+    handles.minExposure = ExposureRange(1);
+    handles.maxExposure = ExposureRange(2);
+    handles.defaultExposure=handles.src.Exposure;
+    exposureSlider=double(abs(handles.defaultExposure-handles.minExposure))/double(abs(handles.maxExposure-handles.minExposure));
+    set(handles.Exposure, 'value', exposureSlider);
+else
+    set(handles.Exposure, 'Enable', 'off');
+end
 
 % Move Brightness slider to default position
-BrightnessInfo = propinfo(src,'Brightness');
-BrightnessRange = BrightnessInfo.ConstraintValue();
-handles.minBrightness = BrightnessRange(1);
-handles.maxBrightness = BrightnessRange(2);
-handles.defaultBrightness=handles.src.Brightness;
-brightnessSlider=double(abs(handles.defaultBrightness-handles.minBrightness))/double(abs(handles.maxBrightness-handles.minBrightness));
-set(handles.Brightness, 'value', brightnessSlider);
+if isprop(src,'Brightness')
+    BrightnessInfo = propinfo(src,'Brightness');
+    BrightnessRange = BrightnessInfo.ConstraintValue();
+    handles.minBrightness = BrightnessRange(1);
+    handles.maxBrightness = BrightnessRange(2);
+    handles.defaultBrightness=handles.src.Brightness;
+    brightnessSlider=double(abs(handles.defaultBrightness-handles.minBrightness))/double(abs(handles.maxBrightness-handles.minBrightness));
+    set(handles.Brightness, 'value', brightnessSlider);
+else
+    set(handles.Brightness, 'Enable', 'off');
+end
 
 % Move Gain slider to default position
-GainInfo = propinfo(src,'Gain');
-GainRange = GainInfo.ConstraintValue();
-handles.minGain = GainRange(1);
-handles.maxGain = GainRange(2);
-handles.defaultGain=handles.src.Gain;
-gainSlider=double(abs(handles.defaultGain-handles.minGain))/double(abs(handles.maxGain-handles.minGain));
-set(handles.Gain, 'value', gainSlider);
+if isprop(src,'Gain')
+    GainInfo = propinfo(src,'Gain');
+    GainRange = GainInfo.ConstraintValue();
+    handles.minGain = GainRange(1);
+    handles.maxGain = GainRange(2);
+    handles.defaultGain=handles.src.Gain;
+    gainSlider=double(abs(handles.defaultGain-handles.minGain))/double(abs(handles.maxGain-handles.minGain));
+    set(handles.Gain, 'value', gainSlider);
+else
+    set(handles.Gain, 'Enable', 'off');
+end
 
 % Move Contrast slider to default position
-ContrastInfo = propinfo(src,'Contrast');
-ContrastRange = ContrastInfo.ConstraintValue();
-handles.minContrast = ContrastRange(1);
-handles.maxContrast = ContrastRange(2);
-handles.defaultContrast=handles.src.Contrast;
-contrastSlider=double(abs(handles.defaultContrast-handles.minContrast))/double(abs(handles.maxContrast-handles.minContrast));
-set(handles.Contrast, 'value', contrastSlider);
+if isprop(src,'Contrast')
+    ContrastInfo = propinfo(src,'Contrast');
+    ContrastRange = ContrastInfo.ConstraintValue();
+    handles.minContrast = ContrastRange(1);
+    handles.maxContrast = ContrastRange(2);
+    handles.defaultContrast=handles.src.Contrast;
+    contrastSlider=double(abs(handles.defaultContrast-handles.minContrast))/double(abs(handles.maxContrast-handles.minContrast));
+    set(handles.Contrast, 'value', contrastSlider);
+else
+    set(handles.Contrast, 'Enable', 'off');
+end
 
 % Move Gamma slider to default position
-GammaInfo = propinfo(src,'Gamma');
-GammaRange = GammaInfo.ConstraintValue();
-handles.minGamma = GammaRange(1);
-handles.maxGamma = GammaRange(2);
-handles.defaultGamma=handles.src.Gamma;
-gammaSlider=double(abs(handles.defaultGamma-handles.minGamma))/double(abs(handles.maxGamma-handles.minGamma));
-set(handles.Gamma, 'value', gammaSlider);
+if isprop(src,'Gamma')
+    GammaInfo = propinfo(src,'Gamma');
+    GammaRange = GammaInfo.ConstraintValue();
+    handles.minGamma = GammaRange(1);
+    handles.maxGamma = GammaRange(2);
+    handles.defaultGamma=handles.src.Gamma;
+    gammaSlider=double(abs(handles.defaultGamma-handles.minGamma))/double(abs(handles.maxGamma-handles.minGamma));
+    set(handles.Gamma, 'value', gammaSlider);
+else
+    set(handles.Gamma, 'Enable', 'off');
+end
 
 % Move Sharpness slider to default position
-SharpnessInfo = propinfo(src,'Sharpness');
-SharpnessRange = SharpnessInfo.ConstraintValue();
-handles.minSharpness = SharpnessRange(1);
-handles.maxSharpness = SharpnessRange(2);
-handles.defaultSharpness=handles.src.Sharpness;
-sharpnesSlider=double(abs(handles.defaultSharpness-handles.minSharpness))/double(abs(handles.maxSharpness-handles.minSharpness));
-set(handles.Sharpness, 'value', sharpnesSlider);
+if isprop(src,'Sharpness')
+    SharpnessInfo = propinfo(src,'Sharpness');
+    SharpnessRange = SharpnessInfo.ConstraintValue();
+    handles.minSharpness = SharpnessRange(1);
+    handles.maxSharpness = SharpnessRange(2);
+    handles.defaultSharpness=handles.src.Sharpness;
+    sharpnesSlider=double(abs(handles.defaultSharpness-handles.minSharpness))/double(abs(handles.maxSharpness-handles.minSharpness));
+    set(handles.Sharpness, 'value', sharpnesSlider);
+else
+    set(handles.Sharpness, 'Enable', 'off');
+end
 
 guidata(hObject,handles);
-
 
 % This sets up the initial plot - only do when we are invisible
 % so window can get raised using CameraGUI.
@@ -242,7 +302,7 @@ cla;
 
 % Change video object resolution Settings
 resolution_index = get(handles.SupportedResolutions, 'Value');
-vid=videoinput(handles.mycam, 1,handles.resolution(4-resolution_index,:));
+vid=videoinput(handles.mycam, 1,handles.resolution(resolution_index,:));
 vidRes = vid.VideoResolution;
 imWidth = vidRes(1);
 imHeight = vidRes(2);
@@ -583,7 +643,9 @@ else
     
     time_curr = 0;
     past=[];
-    axes(handles.ReadingAxes);
+    pastX = [0,0];
+    pastY = [0,0];
+    pastCursor = 0;
     
     % Continues to record until specified to stop
     while get(hObject, 'Value')==1
@@ -653,22 +715,46 @@ else
         handles.readingXval = yvals;
         handles.readingXval = xvals;
         guidata(hObject,handles);
-        if handles.cursorAuto
+        if ~str2num(get(handles.cursorAuto,'String'))
             [maxLine, index] = max(yvals);
             set(handles.readingY,'String',maxLine);
             set(handles.readingX,'String',xvals(index));
         else
-            x = handles.cursorX;
+            x = str2num(get(handles.readingX,'String'));
             i = 1 + (x - xvals(1)) / m;
             y2 = yvals(ceil(i));
             y1 = yvals(floor(i));
             m = y2 - y1;
             y = y1 + (i - floor(i)) * m;
-            set(handles.readingY,'String',y);
+            if y ~= pastCursor
+                set(handles.readingY,'String',y);
+            else
+                pastCursor = y;
+            end
         end
+        axes(handles.ReadingAxes);
         plot(xvals,yvals,'-');
         ylabel('average hits');
         xlabel('wavelength (m)');
+        if str2num(get(handles.yLimAuto,'String'))
+            ylimits = str2num(get(handles.yLim,'String'));
+            if ~isempty(ylimits)
+                ylim(ylimits)
+            end
+        elseif ylim ~= pastY%~strcmp(get(handles.yLim,'String'),mat2str(ylim))
+            set(handles.yLim,'String',mat2str(ylim));
+            pastY = ylim;
+        end
+        
+        if str2num(get(handles.xLimAuto,'String'))
+            xlimits = str2num(get(handles.xLim,'String'));
+            if ~isempty(xlimits)
+                xlim(xlimits)
+            end
+        elseif xlim ~= pastX%~strcmp(get(handles.yLim,'String'),mat2str(ylim))
+            set(handles.xLim,'String',mat2str(xlim));
+            pastX = xlim;
+        end
         pause(time_delay);
     end
     datacursormode on % show cursors after stop recording
@@ -846,10 +932,7 @@ function readingX_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of readingX as text
 %        str2double(get(hObject,'String')) returns contents of readingX as a double
-
-handles.cursorAuto = false;
-handles.cursorX = str2double(get(hObject,'String'));
-handles.cursorAuto
+set(handles.cursorAuto,'String','1');
 guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -882,6 +965,154 @@ function readingY_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function yLim_Callback(hObject, eventdata, handles)
+% hObject    handle to yLim (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of yLim as text
+%        str2double(get(hObject,'String')) returns contents of yLim as a double
+set(handles.yLimAuto,'String','1');
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function yLim_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to yLim (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function xLim_Callback(hObject, eventdata, handles)
+% hObject    handle to xLim (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of xLim as text
+%        str2double(get(hObject,'String')) returns contents of xLim as a double
+set(handles.xLimAuto,'String','1');
+guidata(hObject,handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function xLim_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xLim (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function xLimAuto_Callback(hObject, eventdata, handles)
+% hObject    handle to xLimAuto (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of xLimAuto as text
+%        str2double(get(hObject,'String')) returns contents of xLimAuto as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function xLimAuto_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to xLimAuto (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function yLimAuto_Callback(hObject, eventdata, handles)
+% hObject    handle to yLimAuto (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of yLimAuto as text
+%        str2double(get(hObject,'String')) returns contents of yLimAuto as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function yLimAuto_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to yLimAuto (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function cursorAuto_Callback(hObject, eventdata, handles)
+% hObject    handle to cursorAuto (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of cursorAuto as text
+%        str2double(get(hObject,'String')) returns contents of cursorAuto as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function cursorAuto_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cursorAuto (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in CameraList.
+function CameraList_Callback(hObject, eventdata, handles)
+% hObject    handle to CameraList (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns CameraList contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from CameraList
+axes(handles.PreviewAxes);
+cla;
+
+% Change video object resolution Settings
+camera_index = get(handles.CameraList, 'Value');
+setup_camera(handles,hObject,camera_index);   
+
+
+% --- Executes during object creation, after setting all properties.
+function CameraList_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to CameraList (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
