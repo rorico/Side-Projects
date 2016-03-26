@@ -12,7 +12,29 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             showAlarm(alarms[i][1],i);
         }
     }
+    var timeLeft = background.timeLeft;
+    var startTime = background.startTime;
+    var wastingTime = background.wastingTime;
+    if (wastingTime) {
+        timeLeft -= new Date() - startTime;
+        if(timeLeft < 0) {
+            timeLeft = 0;
+        }
+    }
+    countDown(timeLeft,wastingTime);
 });
+
+function countDown(time,on) {
+    $('#test').html(MinutesSecondsFormat(time));
+    if(on && time>0) {
+        delay = (time-1)%1000+1;
+        setTimeout(function(){countDown(time - delay,on);},delay);
+    }
+}
+
+function MinutesSecondsFormat(milli) {
+    return Math.floor(milli/60000)  + ":" + ("0" + Math.floor((milli%60000)/1000)).slice(-2);
+}
 
 $('#timerButton').click(setTimer);
 function setTimer() {

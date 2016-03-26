@@ -3,9 +3,11 @@
 sleepAlarmStart = 22;   //10pm
 sleepAlarmEnd = 6;      //6am
 setSleepAlarm();
-chrome.alarms.onAlarm.addListener(function(){
-  setAlarm(0);
-  setSleepAlarm();
+chrome.alarms.onAlarm.addListener(function(alarm){
+  if(alarm.name=='sleep') {
+    setAlarm(0);
+    setSleepAlarm();
+  }
 });
 function setSleepAlarm(){
   date = new Date();
