@@ -15,20 +15,82 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var timeLeft = background.timeLeft;
     var startTime = background.startTime;
     var wastingTime = background.wastingTime;
+    var timeCurrent = new Date() - startTime;
     if (wastingTime) {
-        timeLeft -= new Date() - startTime;
+        timeLeft -= timeCurrent;
         if(timeLeft < 0) {
             timeLeft = 0;
         }
     }
     countDown(timeLeft,wastingTime);
-});
 
+    var timeLine = background.timeLine;
+    var parentWidth = $('#timeLine').width();
+    var timeLeft = 400;
+    var totalTime = timeCurrent/36000;
+    var cnt = 0;    //used to set hovers
+    if(totalTime < 100) {
+        $('#timeLine').prepend('<div style="width:' + totalTime + '%" id="timeLine'+cnt+'" class="timeLine ' + timeType(wastingTime) + '"></div>');
+        setHover(cnt,[timeCurrent,wastingTime,"look up you lazy son of a"]);
+        for (var i = timeLine.length - 1 ; i != -1 ; i--) {
+            var percentage = timeLine[i][0]/36000;
+            if(totalTime + percentage>=100) {
+                $('#timeLine').prepend('<div style="width:' + (100 - totalTime) + '%" id="timeLine'+cnt+'" class="timeLine ' + timeType(timeLine[i][1]) + '"></div>');
+                setHover(cnt,timeLine[i]);
+                totalTime = 100;
+                break;
+            }
+            totalTime += percentage;
+            $('#timeLine').prepend('<div style="width:' + percentage + '%" id="timeLine'+cnt+'" class="timeLine ' + timeType(timeLine[i][1]) + '"></div>');
+            setHover(cnt,timeLine[i]);
+        }
+        if(totalTime <= 100) {
+            $('#timeLine').prepend('<div style="width:' + (100 - totalTime) + '%" id="timeLine'+cnt+'" class="timeLine"></div>');
+        }
+    } else {
+        $('#timeLine').prepend('<div style="width:' + 100 + '%" id="timeLine'+cnt+'" class="timeLine ' + timeType(wastingTime) + '"></div>');
+        setHover(cnt,[timeCurrent,wastingTime,"look up you lazy son of a"]);
+    }
+    updateTimeLine();
+    function setHover(num,info) {
+        $('#timeLine'+num).hover(function(){
+            $('#timeLine').append('<div id="try">URL:' + info[2] + '<br />Time spent:'+MinutesSecondsFormat(info[0])+'</div>');
+        },function(){
+            $('#try').remove();
+        });
+        cnt++;
+    }
+});
 function countDown(time,on) {
     $('#test').html(MinutesSecondsFormat(time));
     if(on && time>0) {
         delay = (time-1)%1000+1;
-        setTimeout(function(){countDown(time - delay,on);},delay);
+        setTimeout(function(){
+            countDown(time - delay,on);
+        },delay);
+    }
+}
+
+function updateTimeLine() {
+    setInterval(function(){
+        var parentWidth = $('#timeLine').width();
+        var width = 1000/3600000 * parentWidth;
+        $('#timeLine').last().width(($('#timeLine').last().width - width));
+        var percentage = $('#timeLine').first().width();
+        while(percentage<width) {
+            width -= percentage;
+            $('#timeLine').first().remove();
+            percentage = $('#timeLine').first().width();
+        }
+        $('#timeLine').first().width((percentage - width));
+    },1000);
+}
+
+function timeType(number) {
+    if(number) {
+        return "wasting";
+    } else {
+        return "using";
     }
 }
 

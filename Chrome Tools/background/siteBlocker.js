@@ -3,6 +3,7 @@ var startTime = new Date();
 var wastingTime = false;
 var timeLeft = 600000; //start at 10 mins
 var alarm;
+var timeLine = [];
 var urls = [
   "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
   "http://threesjs.com/"
@@ -66,6 +67,8 @@ chrome.storage.sync.get('redirects', function(items) {
 chrome.tabs.onActivated.addListener(function(activeInfo){
   //console.log(activeInfo);
   chrome.tabs.get(activeInfo.tabId, function(tab){
+    var timeSpent = new Date() - startTime; 
+    timeLine.push([timeSpent,wastingTime,tab.url]);
     if(wastingTime) {
       var timeSpent = new Date() - startTime; 
       var timeDelay = 3600000 - timeSpent;  //every hour
@@ -86,6 +89,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo){
       wastingTime = true;
       recordTimer();
     } else {
+      startTime = new Date();
       wastingTime = false;
 
     }
