@@ -1,6 +1,7 @@
 var pastTime = new Date();
 var startTime = new Date();
 var wastingTime = false;
+var pastUrl;
 var timeLeft = 600000; //start at 10 mins
 var alarm;
 var timeLine = [];
@@ -34,13 +35,12 @@ chrome.storage.sync.get('redirects', function(items) {
         }
         setTimeout(function(){
           timeLeft += timeSpent;
-          console.log(timeSpent);
-          console.log(timeLeft);
         },timeDelay);
       }
       if(timeLeft>0) {
         startTime = new Date();
         recordTimer();
+        pastUrl = info.url;
         wastingTime = true;
       } else {
         return redirect(info);
@@ -68,7 +68,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo){
   //console.log(activeInfo);
   chrome.tabs.get(activeInfo.tabId, function(tab){
     var timeSpent = new Date() - startTime; 
-    timeLine.push([timeSpent,wastingTime,tab.url]);
+    timeLine.push([timeSpent,wastingTime,pastUrl]);
     if(wastingTime) {
       var timeSpent = new Date() - startTime; 
       var timeDelay = 3600000 - timeSpent;  //every hour
@@ -91,8 +91,8 @@ chrome.tabs.onActivated.addListener(function(activeInfo){
     } else {
       startTime = new Date();
       wastingTime = false;
-
     }
+    pastUrl = tab.url;
   });
 });
 

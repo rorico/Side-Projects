@@ -15,6 +15,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var timeLeft = background.timeLeft;
     var startTime = background.startTime;
     var wastingTime = background.wastingTime;
+    var pastUrl = background.pastUrl;
     var timeCurrent = new Date() - startTime;
     if (wastingTime) {
         timeLeft -= timeCurrent;
@@ -24,76 +25,104 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
     countDown(timeLeft,wastingTime);
 
+    $('#info').html(formatInfo(pastUrl,timeCurrent));
     var timeLine = background.timeLine;
-    var parentWidth = $('#timeLine').width();
-    var timeLeft = 400;
-    var totalTime = timeCurrent/36000;
+    var parentWidth = 360;
+    var timeLeft = parentWidth;
     var cnt = 0;    //used to set hovers
-    if(totalTime < 100) {
-        $('#timeLine').prepend('<div style="width:' + totalTime + '%" id="timeLine'+cnt+'" class="timeLine ' + timeType(wastingTime) + '"></div>');
-        setHover(cnt,[timeCurrent,wastingTime,"look up you lazy son of a"]);
+    var hover = false;
+    if(addTimeLine([timeCurrent,wastingTime,pastUrl],false)){
         for (var i = timeLine.length - 1 ; i != -1 ; i--) {
-            var percentage = timeLine[i][0]/36000;
-            if(totalTime + percentage>=100) {
-                $('#timeLine').prepend('<div style="width:' + (100 - totalTime) + '%" id="timeLine'+cnt+'" class="timeLine ' + timeType(timeLine[i][1]) + '"></div>');
-                setHover(cnt,timeLine[i]);
-                totalTime = 100;
+            if(!addTimeLine(timeLine[i],true)) {
                 break;
             }
-            totalTime += percentage;
-            $('#timeLine').prepend('<div style="width:' + percentage + '%" id="timeLine'+cnt+'" class="timeLine ' + timeType(timeLine[i][1]) + '"></div>');
-            setHover(cnt,timeLine[i]);
         }
-        if(totalTime <= 100) {
-            $('#timeLine').prepend('<div style="width:' + (100 - totalTime) + '%" id="timeLine'+cnt+'" class="timeLine"></div>');
+        if(timeLeft > 0) {
+            $('#timeLine').prepend('<div style="width:' + timeLeft + 'px" class="timeLine"></div>');
         }
-    } else {
-        $('#timeLine').prepend('<div style="width:' + 100 + '%" id="timeLine'+cnt+'" class="timeLine ' + timeType(wastingTime) + '"></div>');
-        setHover(cnt,[timeCurrent,wastingTime,"look up you lazy son of a"]);
     }
     updateTimeLine();
+    function addTimeLine(info,hover) {        //returns true if not done
+        var time = info[0]/3600000 * parentWidth;
+        var ret = true;
+        if(time >= timeLeft) {
+            time = timeLeft;
+            timeLeft = 0;
+            ret = false;
+        } else {
+            timeLeft -= time;
+        }
+        var classAddon = '';
+        if(time >= 2) {
+            time -= 2;
+            classAddon = ' timeLineBlock';
+        }
+        $('#timeLine').prepend('<div style="width:' + time + 'px" id="timeLine' + cnt + '" class="timeLine ' + timeType(info[1]) + classAddon + '"></div>');
+        if (hover) {
+            setHover(cnt,info);
+        }
+        return ret;
+    }
     function setHover(num,info) {
         $('#timeLine'+num).hover(function(){
-            $('#timeLine').append('<div id="try">URL:' + info[2] + '<br />Time spent:'+MinutesSecondsFormat(info[0])+'</div>');
+            hover = true;
+            $('#info').html(formatInfo(info[2],info[0]));
         },function(){
-            $('#try').remove();
+            hover = false;
+            $('#info').html(formatInfo(pastUrl,timeCurrent));
         });
         cnt++;
     }
-});
-function countDown(time,on) {
-    $('#test').html(MinutesSecondsFormat(time));
-    if(on && time>0) {
-        delay = (time-1)%1000+1;
-        setTimeout(function(){
-            countDown(time - delay,on);
-        },delay);
-    }
-}
-
-function updateTimeLine() {
-    setInterval(function(){
-        var parentWidth = $('#timeLine').width();
-        var width = 1000/3600000 * parentWidth;
-        $('#timeLine').last().width(($('#timeLine').last().width - width));
-        var percentage = $('#timeLine').first().width();
-        while(percentage<width) {
-            width -= percentage;
-            $('#timeLine').first().remove();
-            percentage = $('#timeLine').first().width();
+    function countDown(time,on) {
+        $('#test').html(MinutesSecondsFormat(time));
+        if(on && time>0) {
+            delay = (time-1)%1000+1;
+            setTimeout(function(){
+                countDown(time - delay,on);
+            },delay);
         }
-        $('#timeLine').first().width((percentage - width));
-    },1000);
-}
-
-function timeType(number) {
-    if(number) {
-        return "wasting";
-    } else {
-        return "using";
     }
-}
 
+    function updateTimeLine() {
+        var parentWidth = $('#timeLine').width();
+        var delay = 3600000/parentWidth;
+        setInterval(function(){
+            var width = 1;
+            $('#timeLine div:last-child').width(($('#timeLine div:last-child').width() + width));
+            var percentage = $('#timeLine div:first-child').width();
+            while(percentage<width) {
+                width -= percentage;
+                $('#timeLine div:first-child').remove();
+                percentage = $('#timeLine div:first-child').width();
+            }
+            $('#timeLine div:first-child').width((percentage - width));
+        },delay);
+        setInterval(function(){
+            timeCurrent += 1000;
+            if(!hover) {
+                $('#info').html(formatInfo(pastUrl,timeCurrent));
+            }
+        },1000);
+    }
+
+    function timeType(number) {
+        if(number) {
+            return "wasting";
+        } else {
+            return "using";
+        }
+    }
+    function formatInfo(url,time) {
+        if(url.length>50) { //quite arbitrarily picked
+            var index;
+            while((index = url.lastIndexOf("/"))>50) {
+                url = url.substring(0,index);
+            }
+            url += "/...";
+        }
+        return 'URL:' + url + '<br />Time spent:'+MinutesSecondsFormat(time);
+    }
+});
 function MinutesSecondsFormat(milli) {
     return Math.floor(milli/60000)  + ":" + ("0" + Math.floor((milli%60000)/1000)).slice(-2);
 }
