@@ -1,4 +1,3 @@
-var pastTime = new Date();
 var startTime = new Date();
 var wastingTime = false;
 var pastUrl;
@@ -11,8 +10,10 @@ var urls = [
 ]
 chrome.storage.sync.get('redirects', function(items) {
   var redirects = items.redirects;
-  chrome.webRequest.onBeforeRequest.addListener(
-    function(info) {
+  chrome.webRequest.onBeforeRequest.addListener(function(info) {
+    if(info.url == chrome.extension.getURL("/browserAction/browserAction.html")) return;  //don't record browser action
+    var wasting = matchesURL(info.url);
+    if(wasting) {
       var now = new Date();
       var position = now.getHours()*100+now.getMinutes()/0.6;
       for (var i = 0 ; i < today.length ; i++) {
@@ -22,42 +23,25 @@ chrome.storage.sync.get('redirects', function(items) {
           return redirect(info);
         }
       }
-      if(wastingTime) {
-        var timeSpent = new Date() - startTime; 
-        var timeDelay = 120000 - timeSpent;
-        if (timeSpent > timeLeft) {
-          timeDelay -= timeLeft - timeSpent;
-          timeSpent = timeLeft;
-          timeLeft = 0;
-        } else {
-          clearTimeout(alarm);
-          timeLeft -= timeSpent;
-        }
-        setTimeout(function(){
-          timeLeft += timeSpent;
-        },timeDelay);
-      }
-      if(timeLeft>0) {
-        startTime = new Date();
-        recordTimer();
-        pastUrl = info.url;
-        wastingTime = true;
-      } else {
-        return redirect(info);
-      }
-    },
-    {
-      urls: urls,
-      types: ["main_frame"]
-    },
+    }
+    handleNewPage(wasting,info.url);
+    if(wasting && timeLeft<=0) {
+      return redirect(info);
+    }
+
+  },
+  {
+    urls: ["<all_urls>"],
+    types: ["main_frame"]
+  },
     ["blocking"]
   );
   function redirect(info){
-    if (!redirects){
+    /*if (!redirects){
       redirects = [];
     }
     redirects.push([+new Date(),info.url,1]);
-    chrome.storage.sync.set({'redirects': redirects});
+    chrome.storage.sync.set({'redirects': redirects});*/
     return {redirectUrl: chrome.extension.getURL("/SchedulePage/Schedule.html")};
   }
 });
@@ -65,36 +49,39 @@ chrome.storage.sync.get('redirects', function(items) {
 
 
 chrome.tabs.onActivated.addListener(function(activeInfo){
-  //console.log(activeInfo);
   chrome.tabs.get(activeInfo.tabId, function(tab){
+    handleNewPage(matchesURL(tab.url),tab.url);
+  });
+});
+
+function handleNewPage(newWasting,url) {
     var timeSpent = new Date() - startTime; 
     timeLine.push([timeSpent,wastingTime,pastUrl]);
     if(wastingTime) {
       var timeSpent = new Date() - startTime; 
-      var timeDelay = 3600000 - timeSpent;  //every hour
-      if (timeSpent > timeLeft) {
-        timeDelay -= timeLeft - timeSpent;  //delay return for however longer past
-        timeSpent = timeLeft;               //return only the part that didn't go past
-        timeLeft = 0;
-      } else {
-        clearTimeout(alarm);
-        timeLeft -= timeSpent;
-      }
-      setTimeout(function(){
-        timeLeft += timeSpent;
-      },timeDelay);
+      var timeDelay = 3600000 - timeSpent;  //return time spent every hour
+      clearTimeout(alarm);
+      timeLeft -= timeSpent;
+      returnTime(timeSpent,timeDelay);
     }
-    if (matchesURL(tab.url)) {
-      startTime = new Date();
-      wastingTime = true;
+    if (newWasting) {
       recordTimer();
-    } else {
-      startTime = new Date();
-      wastingTime = false;
     }
-    pastUrl = tab.url;
-  });
-});
+    wastingTime = newWasting;
+    startTime = new Date();
+    pastUrl = url;
+}
+
+function returnTime(time,delay) {
+  setTimeout(function(){
+    if(timeLeft < 0 && timeLeft < time) {
+      timeLeft = 0;
+      returnTime(time-timeLeft,timeLeft);
+    } else {
+      timeLeft += time;
+    }
+  },delay);
+}
 
 function matchesURL(url) {
   for (var i = 0 ; i < urls.length ; i++) {
