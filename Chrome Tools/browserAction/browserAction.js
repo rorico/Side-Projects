@@ -113,11 +113,11 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
     }
     function formatInfo(url,time) {
-        if(url.length>50) { //quite arbitrarily picked
-            var index;
-            while((index = url.lastIndexOf("/"))>50) {
+        if(url.length>40) { //quite arbitrarily picked
+            do {
+                var index = url.lastIndexOf("/");
                 url = url.substring(0,index);
-            }
+            } while(index > 40);
             url += "/...";
         }
         return 'URL:' + url + '<br />Time spent:'+MinutesSecondsFormat(time);
