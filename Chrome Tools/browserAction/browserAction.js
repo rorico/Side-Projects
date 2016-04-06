@@ -19,9 +19,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var timeCurrent = new Date() - startTime;
     if (wastingTime) {
         timeLeft -= timeCurrent;
-        if(timeLeft < 0) {
-            timeLeft = 0;
-        }
+    }
+    if(timeLeft < 0) {
+        timeLeft = 0;
     }
     countDown(timeLeft,wastingTime);
 
