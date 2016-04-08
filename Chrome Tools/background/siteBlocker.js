@@ -1,6 +1,8 @@
 var startTime = new Date();
 var wastingTime = false;
-var pastUrl = "";
+var url = "";
+var title = "";
+var tabId = -1;
 var timeLeft = 600000; //start at 10 mins
 var alarm;
 var timeLine = [];
@@ -20,7 +22,7 @@ chrome.storage.sync.get('redirects', function(items) {
         return redirect(info);
       }
     }
-    handleNewPage(true,info.url);
+    handleNewPage(true,info.url,info.title);
     if(timeLeft <= 0) {
       return redirect(info);
     }
@@ -44,40 +46,45 @@ chrome.storage.sync.get('redirects', function(items) {
 
 
 chrome.tabs.onActivated.addListener(function(activeInfo){
+  this.tabId = activeInfo.tabId;
   chrome.tabs.get(activeInfo.tabId, function(tab){
-    handleNewPage(matchesURL(tab.url),tab.url);
+    handleNewPage(matchesURL(tab.url),tab.url,tab.title);
   });
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
-  if(changeInfo && changeInfo.status === "loading") {
-    handleNewPage(matchesURL(tab.url),tab.url);
+  if(changeInfo && changeInfo.status === "loading" && tabId == this.tabId) {
+    handleNewPage(matchesURL(tab.url),tab.url,tab.title);
+  } else if(changeInfo && changeInfo.title && tabId == this.tabId) {
+    title = changeInfo.title;
   }
 });
 
-function handleNewPage(newWasting,url) {
+function handleNewPage(newWasting,newUrl,newTitle) {
+  var timeSpent = new Date() - startTime; 
+  timeLine.push([timeSpent,wastingTime,url,title]);
+  if(wastingTime) {
     var timeSpent = new Date() - startTime; 
-    timeLine.push([timeSpent,wastingTime,pastUrl]);
-    if(wastingTime) {
-      var timeSpent = new Date() - startTime; 
-      var timeDelay = 3600000 - timeSpent;  //return time spent every hour
-      clearTimeout(alarm);
-      timeLeft -= timeSpent;
-      returnTime(timeSpent,timeDelay);
-    }
-    if (newWasting) {
-      setReminder(timeLeft);
-    }
-    wastingTime = newWasting;
-    startTime = new Date();
-    pastUrl = url;
+    var timeDelay = 3600000 - timeSpent;  //return time spent every hour
+    clearTimeout(alarm);
+    timeLeft -= timeSpent;
+    returnTime(timeSpent,timeDelay);
+  }
+  if (newWasting) {
+    setReminder(timeLeft);
+  }
+  wastingTime = newWasting;
+  startTime = new Date();
+  url = newUrl;
+  title = newTitle;
 }
 
 function returnTime(time,delay) {
   setTimeout(function(){
-    if(timeLeft < 0 && timeLeft < time) {
+    if(timeLeft < 0 && -timeLeft < time) {
+      delay = -timeLeft;
       timeLeft = 0;
-      returnTime(time-timeLeft,timeLeft);
+      returnTime(time+timeLeft,delay);
     } else {
       timeLeft += time;
     }
