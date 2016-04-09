@@ -160,8 +160,8 @@
         }
         #timeLineHolder{
             border:1px solid black;
-            border-radius: 2px;
             display: inline-block;
+            border-radius: 2px;
         }
         .timeLine{
             height:50px;
@@ -180,6 +180,22 @@
         #info{      
             word-wrap: break-word;
         }
+        #axis{
+            height:4px;
+        }
+        .axisPart{
+            display:inline-block;
+            float:left;
+            padding:0;
+            height:3px;
+            width:59px;
+            border-right:1px solid black;
+            border-bottom: 1px solid black;
+        }
+        .axisPart.end{
+            width:60px;
+            border-right:0;
+        }
     </style>
 </head>
 
@@ -195,7 +211,7 @@
     <div class="alarm notSet"><div class="alarmTitle">5</div><div id="alarm5" class="alarmData">Not Set</div></div>
 </div>
 <div id="test"></div>
-<div id="timeLineHolder"><div id="timeLine"></div></div>
+<div id="timeLineHolder"><div id="axis"><div class="axisPart"></div><div class="axisPart"></div><div class="axisPart"></div><div class="axisPart"></div><div class="axisPart"></div><div class="axisPart end"></div></div><div id="timeLine"></div></div>
 <div id="info"></div>
 <script type="text/javascript" src="browserAction.js"></script>
 </body>
