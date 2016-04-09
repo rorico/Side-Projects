@@ -30,6 +30,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var timeLine = background.timeLine;
     var parentWidth = 360;
     var timeLeft = parentWidth;
+    var offset = 0;
     var cnt = 0;    //used to set hovers
     var hover = false;
     if(addTimeLine([timeCurrent,wastingTime,url],false)){
@@ -45,7 +46,13 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     updateTimeLine();
     
     function addTimeLine(info,hover) {        //returns true if not done
-        var time = info[0]/3600000 * parentWidth;
+        var time = info[0]/3600000 * parentWidth + offset;
+        offset = time%1;
+        time = Math.floor(time);
+        if(time < 1 && hover) {
+            offset += time;
+            return true;
+        }
         var ret = true;
         if(time >= timeLeft) {
             time = timeLeft;
@@ -55,7 +62,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             timeLeft -= time;
         }
         var classAddon = '';
-        if(time >= 2) {
+        if(time >= 3) {
             time -= 2;
             classAddon = ' timeLineBlock';
         }
