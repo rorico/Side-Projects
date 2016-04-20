@@ -37,7 +37,7 @@ function varargout = CameraGUI(varargin)
 
 % Edit the above text to modify the response to help CameraGUI
 
-% Last Modified by GUIDE v2.5 23-Mar-2016 14:39:51
+% Last Modified by GUIDE v2.5 20-Apr-2016 11:27:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -96,11 +96,8 @@ for i = 1:size(adaptors,2)
         cnt = cnt + 1;
     end
 end
-if ~isempty(preferencesFile)
-    save(preferencesFile);
-end
-%cameraList
 
+%cameraList
 handles.cameraList=cameraList;
 handles.adaptorList=adaptorList;
 handles.deviceNumbers=deviceNumbers;
@@ -117,6 +114,17 @@ end
 set(handles.CameraList, 'String', cameraList);
 set(handles.CameraList, 'Value', 1);
 setup_camera(handles,hObject,defaultCamera);
+
+try
+    a = arduino();
+    shield = addon(a, 'Adafruit/MotorShieldV2');
+    motor = stepper(shield, 2, 200, 'RPM', 1);
+    handles.motor = motor;
+catch exception
+    set(handles.clockwise, 'Enable', 'off');
+    set(handles.counterclockwise, 'Enable', 'off');
+end
+guidata(hObject,handles);
 
 
 function setup_camera(handles,hObject,cameraNumber)
@@ -355,11 +363,6 @@ else
         set(hObject, 'String', 'Start Recording');
     end
     
-    time_curr = 0;
-    past=[];
-    pastX = [0,0];
-    pastY = [0,0];
-    pastCursor = 0;
     
     if get(hObject, 'Value') == 1   %start recording
         if isdeployed
@@ -371,6 +374,12 @@ else
             stop(handles.vid);
         end
     end
+    
+    time_curr = 0;
+    past=[];
+    pastX = [0,0];
+    pastY = [0,0];
+    pastCursor = 0;
     
     % Continues to record until specified to stop
     while get(hObject, 'Value')==1
@@ -1159,3 +1168,18 @@ function CameraList_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in clockwise.
+function clockwise_Callback(hObject, eventdata, handles)
+% hObject    handle to clockwise (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+move(handles.motor,1);
+
+% --- Executes on button press in counterclockwise.
+function counterclockwise_Callback(hObject, eventdata, handles)
+% hObject    handle to counterclockwise (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+move(handles.motor,-1);
