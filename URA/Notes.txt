@@ -21,4 +21,7 @@ src.exposureMode = 'Auto' to src.exposureAuto = 'On'
 exposure and gain don't update on the bar, but they do change the camera.
 
 
-    
+one rotation is about 36nm
+width of camera is about 40nm
+
+connecting camera to new computer - download adaptor (outside of matlab)

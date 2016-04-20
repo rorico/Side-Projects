@@ -67,10 +67,19 @@ function CameraGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to CameraGUI (see VARARGIN)
 
 % Choose default command line output for CameraGUI
+preferencesFile = which('Preferences.txt');
+defaultCamera = 1;
+if ~isempty(preferencesFile)
+    preferences = load(preferencesFile,'-mat')
+    if isprop(preferences,'cameraNumber')
+        defaultCamera = preferences.CameraNumber;
+    end
+end
 
+%imaqregister(strcat(pwd,'\TISImaq_R2013.dll'))
 % Initialize camera
 handles.output = hObject;
-caminfo = imaqhwinfo;
+caminfo = imaqhwinfo
 adaptors = caminfo.InstalledAdaptors();
 cnt = 1;
 cameraList = {};
@@ -78,7 +87,7 @@ adaptorList = {};
 deviceNumbers = []; %assume these are all same size always
 for i = 1:size(adaptors,2)
     adaptorName = char(adaptors(i));
-    adaptor = imaqhwinfo(adaptorName);
+    adaptor = imaqhwinfo(adaptorName)
     devices = adaptor.DeviceInfo();
     for j = 1:size(devices,2)
         cameraList{cnt} = devices(:,j).DeviceName;
@@ -87,26 +96,34 @@ for i = 1:size(adaptors,2)
         cnt = cnt + 1;
     end
 end
-
+if ~isempty(preferencesFile)
+    save(preferencesFile);
+end
 %cameraList
 
 handles.cameraList=cameraList;
 handles.adaptorList=adaptorList;
 handles.deviceNumbers=deviceNumbers;
+handles.preferencesFile=preferencesFile;
 guidata(hObject,handles);
 
 if isempty(adaptorList)
     h=errordlg('No Cameras Attached');
+elseif defaultCamera >= cnt
+    defaultCamera = 1;
 end
+
 %setup with first device
 set(handles.CameraList, 'String', cameraList);
 set(handles.CameraList, 'Value', 1);
-setup_camera(handles,hObject,1);
+setup_camera(handles,hObject,defaultCamera);
 
 function setup_camera(handles,hObject,cameraNumber)
 %function for changing camera
 %resets nearly all handles
-
+if ~isempty(handles.preferencesFile)
+    save(handles.preferencesFile,'cameraNumber','-append');
+end
 %first of list of connected devices
 adaptorList = handles.adaptorList;
 deviceNumbers = handles.deviceNumbers;
@@ -115,9 +132,11 @@ mycaminfo = imaqhwinfo(mycam);
 devices = mycaminfo.DeviceInfo();
 resolution = char(devices(deviceNumbers(cameraNumber)).SupportedFormats());
 resolution_index = 1;   % set default resoultion to full res
-vid = videoinput(mycam, deviceNumbers(cameraNumber),resolution(resolution_index,:)); 
+vid = videoinput(mycam, deviceNumbers(cameraNumber),strtrim(resolution(resolution_index,:)));
 src = getselectedsource(vid);
 
+triggerconfig(vid, 'manual');   %set this for later usage
+    
 % Set resolution of camera
 vidRes = vid.VideoResolution;
 imWidth = vidRes(1);
@@ -137,6 +156,7 @@ handles.resolution=resolution;
 handles.imWidth=imWidth;
 handles.imHeight=imHeight;
 handles.mycam=mycam;
+handles.device=deviceNumbers(cameraNumber);
 
 %TESTESTSETSET
 handles.calibrate = [];
@@ -163,6 +183,7 @@ if isprop(src,'Exposure')
     handles.defaultExposure=handles.src.Exposure;
     exposureSlider=double(abs(handles.defaultExposure-handles.minExposure))/double(abs(handles.maxExposure-handles.minExposure));
     set(handles.Exposure, 'value', exposureSlider);
+    set(handles.Exposure, 'Enable', 'on');
 else
     set(handles.Exposure, 'Enable', 'off');
 end
@@ -176,6 +197,7 @@ if isprop(src,'Brightness')
     handles.defaultBrightness=handles.src.Brightness;
     brightnessSlider=double(abs(handles.defaultBrightness-handles.minBrightness))/double(abs(handles.maxBrightness-handles.minBrightness));
     set(handles.Brightness, 'value', brightnessSlider);
+    set(handles.Brightness, 'Enable', 'on');
 else
     set(handles.Brightness, 'Enable', 'off');
 end
@@ -189,6 +211,7 @@ if isprop(src,'Gain')
     handles.defaultGain=handles.src.Gain;
     gainSlider=double(abs(handles.defaultGain-handles.minGain))/double(abs(handles.maxGain-handles.minGain));
     set(handles.Gain, 'value', gainSlider);
+    set(handles.Gain, 'Enable', 'on');
 else
     set(handles.Gain, 'Enable', 'off');
 end
@@ -202,6 +225,7 @@ if isprop(src,'Contrast')
     handles.defaultContrast=handles.src.Contrast;
     contrastSlider=double(abs(handles.defaultContrast-handles.minContrast))/double(abs(handles.maxContrast-handles.minContrast));
     set(handles.Contrast, 'value', contrastSlider);
+    set(handles.Contrast, 'Enable', 'on');
 else
     set(handles.Contrast, 'Enable', 'off');
 end
@@ -215,6 +239,7 @@ if isprop(src,'Gamma')
     handles.defaultGamma=handles.src.Gamma;
     gammaSlider=double(abs(handles.defaultGamma-handles.minGamma))/double(abs(handles.maxGamma-handles.minGamma));
     set(handles.Gamma, 'value', gammaSlider);
+    set(handles.Gamma, 'Enable', 'on');
 else
     set(handles.Gamma, 'Enable', 'off');
 end
@@ -228,12 +253,12 @@ if isprop(src,'Sharpness')
     handles.defaultSharpness=handles.src.Sharpness;
     sharpnesSlider=double(abs(handles.defaultSharpness-handles.minSharpness))/double(abs(handles.maxSharpness-handles.minSharpness));
     set(handles.Sharpness, 'value', sharpnesSlider);
+    set(handles.Sharpness, 'Enable', 'on');
 else
     set(handles.Sharpness, 'Enable', 'off');
 end
 
 guidata(hObject,handles);
-
 % This sets up the initial plot - only do when we are invisible
 % so window can get raised using CameraGUI.
 
@@ -302,7 +327,7 @@ cla;
 
 % Change video object resolution Settings
 resolution_index = get(handles.SupportedResolutions, 'Value');
-vid=videoinput(handles.mycam, 1,handles.resolution(resolution_index,:));
+vid=videoinput(handles.mycam, handles.device, strtrim(handles.resolution(resolution_index,:)));
 vidRes = vid.VideoResolution;
 imWidth = vidRes(1);
 imHeight = vidRes(2);
@@ -647,6 +672,17 @@ else
     pastY = [0,0];
     pastCursor = 0;
     
+    if get(hObject, 'Value') == 1   %start recording
+        if isdeployed
+            start(handles.vid);
+        end
+    else                            %stop recording
+        datacursormode on % show cursors after stop recording
+        if isdeployed
+            stop(handles.vid);
+        end
+    end
+    
     % Continues to record until specified to stop
     while get(hObject, 'Value')==1
         
@@ -655,12 +691,16 @@ else
         while get(handles.Pause,'Value')==1
             datacursormode on;
             pause(1);
-            continue;
         end
         datacursormode off;
         
         
         img=getsnapshot(handles.vid); % Capture preview image
+        if isdeployed
+            axes(handles.PreviewAxes);
+            image(img);
+            rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
+        end
         ROI=round(handles.ROI_flip);
         img_ROI=img(ROI(1):ROI(1)+ROI(3), ROI(2):ROI(2)+ROI(4),:); % Selects only boxed region of image
         
@@ -700,7 +740,6 @@ else
             x2 = calibration(:,2);
             m = (x1(1)-x2(1))/(x1(2)-x2(2));
             b = x1(1) - m * x1(2);
-            xvals = xvals * m + x0;
         elseif size(calibration,2) == 1
             x1 = calibration(:,1);
             m = 0.2*x1(1)/size(img,2); %0.2 picked arbitrarily
@@ -735,7 +774,7 @@ else
         axes(handles.ReadingAxes);
         plot(xvals,yvals,'-');
         ylabel('average hits');
-        xlabel('wavelength (m)');
+        xlabel('wavelength (nm)');
         if str2num(get(handles.yLimAuto,'String'))
             ylimits = str2num(get(handles.yLim,'String'));
             if ~isempty(ylimits)
@@ -757,7 +796,6 @@ else
         end
         pause(time_delay);
     end
-    datacursormode on % show cursors after stop recording
 end
 
 
@@ -858,53 +896,55 @@ function Calibrate_Callback(hObject, eventdata, handles)
 % hObject    handle to Calibrate (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-wavelengthInputs = inputdlg('Enter Wavelength','Calibration Wavelength',1,{'500nm'});
+wavelengthInputs = inputdlg('Enter Wavelength (nm)','Calibration Wavelength',1,{'500'});
+if isempty(wavelengthInputs)
+    return
+end
 wavelengthStr = wavelengthInputs{1};
 if isempty(wavelengthStr)
     h=errordlg('Enter Wavelength');
 else
-    if wavelengthStr(end) ~= 'm'
-        h=errordlg('Enter Wavelength in terms of meters (m)');
-    else
-        prefix = wavelengthStr(end-1);
+    prefix = wavelengthStr(end-1);
+    unitIndex = size(wavelengthStr,2);
+    multiplier = 1;
+    if wavelengthStr(end) == 'm'
         unitIndex = size(wavelengthStr,2) - 1;
-        multiplier = 1;
         if prefix == 'm'
-            multiplier = 1e-3;
+            multiplier = 1e6;
         elseif prefix == 'u'
-            multiplier = 1e-6;
+            multiplier = 1e3;
         elseif prefix == 'n'
-            multiplier = 1e-9;
+            multiplier = 1;
         elseif prefix == 'p'
-            multiplier = 1e-12;
+            multiplier = 1e-3;
         elseif prefix == 'f'
-            multiplier = 1e-15;
-        else 
-            [num, status] = str2num(prefix)
+            multiplier = 1e-6;
+        else    %if just 'm'
+            [num, status] = str2num(prefix);
             if status
                 unitIndex = size(wavelengthStr,2);
             else
                 h=errordlg('Cannot understand units');
             end
         end
-        [wavelength, status] = str2num(wavelengthStr(1:unitIndex-1));
-        wavelength = wavelength * multiplier;
-        if status ~= 1
-            h=errordlg('Cannot understand digits');
-        else
-            %the wavelength is processed and turned into a number
-            img = getsnapshot(handles.vid);
-            img_Y = rgb2ycbcr(img);
-            img_Y = img_Y(:,:,1);
-            [maxLine, index] = max(sum(img_Y));
-            
-            
-            % Display line used
-            axes(handles.PreviewAxes);
-            handles.calibrateDisplay = [handles.calibrateDisplay rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 2)];
-            handles.calibrate = [handles.calibrate [wavelength index]'];
-            handles.calibrate
-        end
+    end
+    [wavelength, status] = str2num(wavelengthStr(1:unitIndex-1));
+    wavelength = wavelength * multiplier;
+    if status ~= 1
+        h=errordlg('Cannot understand digits');
+    else
+        %the wavelength is processed and turned into a number
+        img = getsnapshot(handles.vid);
+        img_Y = rgb2ycbcr(img);
+        img_Y = img_Y(:,:,1);
+        [maxLine, index] = max(sum(img_Y));
+
+
+        % Display line used
+        axes(handles.PreviewAxes);
+        handles.calibrateDisplay = [handles.calibrateDisplay rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 2)];
+        handles.calibrate = [handles.calibrate [wavelength index]'];
+        handles.calibrate
     end
 end
 guidata(hObject,handles);
