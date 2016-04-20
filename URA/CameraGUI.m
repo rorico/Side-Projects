@@ -70,7 +70,7 @@ function CameraGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 preferencesFile = which('Preferences.txt');
 defaultCamera = 1;
 if ~isempty(preferencesFile)
-    preferences = load(preferencesFile,'-mat')
+    preferences = load(preferencesFile,'-mat',['cameraNumber'])
     if isprop(preferences,'cameraNumber')
         defaultCamera = preferences.CameraNumber;
     end
@@ -117,6 +117,7 @@ end
 set(handles.CameraList, 'String', cameraList);
 set(handles.CameraList, 'Value', 1);
 setup_camera(handles,hObject,defaultCamera);
+
 
 function setup_camera(handles,hObject,cameraNumber)
 %function for changing camera
@@ -268,6 +269,327 @@ guidata(hObject,handles);
 % uiwait(handles.figure1);
 
 
+% --- Executes on button press in SupportedResolutions.
+function SupportedResolutions_Callback(hObject, eventdata, handles)
+% hObject    handle to ROI (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+axes(handles.PreviewAxes);
+cla;
+
+% Change video object resolution Settings
+resolution_index = get(handles.SupportedResolutions, 'Value');
+vid=videoinput(handles.mycam, handles.device, strtrim(handles.resolution(resolution_index,:)));
+vidRes = vid.VideoResolution;
+imWidth = vidRes(1);
+imHeight = vidRes(2);
+nBands = vid.NumberOfBands;
+hImage_new = image( zeros(imHeight, imWidth, nBands) );
+stoppreview(vid);
+axes(handles.PreviewAxes);
+preview(vid, hImage_new);
+handles.vid=vid;
+handles.imWidth=imWidth;
+handles.imHeight=imHeight;
+
+% Display new resolution on axes
+src = getselectedsource(vid);
+frameRates = set(src, 'FrameRate');
+frameRates=frameRates';
+
+% Refresh preview
+set(handles.SupportedFrameRates, 'String', frameRates)
+
+handles.vid=vid;
+handles.src=src;
+guidata(hObject,handles);
+   
+
+
+% --- Executes on selection change in SupportedFrameRates.
+function SupportedFrameRates_Callback(hObject, eventdata, handles)
+% hObject    handle to SupportedFrameRates (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns SupportedFrameRates contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from SupportedFrameRates
+axes(handles.PreviewAxes);
+cla;
+
+% Change video object frame rate settings
+frameRates = set(handles.src, 'FrameRate');
+frameRate_index = get(handles.SupportedFrameRates, 'Value');
+stoppreview(handles.vid);
+handles.src.FrameRate = frameRates{frameRate_index};
+vidRes = handles.vid.VideoResolution;
+imWidth = vidRes(1);
+imHeight = vidRes(2);
+nBands = handles.vid.NumberOfBands;
+hImage = image( zeros(imHeight, imWidth, nBands) );
+
+% Refresh preview
+axes(handles.PreviewAxes);
+preview(handles.vid, hImage);
+
+guidata(hObject,handles);
+
+
+% --- Executes on button press in Capture.
+function Capture_Callback(hObject, eventdata, handles)
+% hObject    handle to Capture (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of Capture
+
+% Checks to see if there is a box selected
+if get(handles.SelectROI, 'Value')==0
+    h=errordlg('Please Select Box within Camera Window Before Recording');
+else
+    
+    % Toggle string on button
+    if get(hObject, 'Value')==1
+        set(hObject, 'String', 'Stop Recording');
+    else
+        set(hObject, 'String', 'Start Recording');
+    end
+    
+    time_curr = 0;
+    past=[];
+    pastX = [0,0];
+    pastY = [0,0];
+    pastCursor = 0;
+    
+    if get(hObject, 'Value') == 1   %start recording
+        if isdeployed
+            start(handles.vid);
+        end
+    else                            %stop recording
+        datacursormode on % show cursors after stop recording
+        if isdeployed
+            stop(handles.vid);
+        end
+    end
+    
+    % Continues to record until specified to stop
+    while get(hObject, 'Value')==1
+        
+        % Pauses capture when pause button is clicked. Resumed when clicked
+        % again
+        while get(handles.Pause,'Value')==1
+            datacursormode on;
+            pause(1);
+        end
+        datacursormode off;
+        
+        
+        img=getsnapshot(handles.vid); % Capture preview image
+        if isdeployed
+            axes(handles.PreviewAxes);
+            image(img);
+            rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
+        end
+        ROI=round(handles.ROI_flip);
+        img_ROI=img(ROI(1):ROI(1)+ROI(3), ROI(2):ROI(2)+ROI(4),:); % Selects only boxed region of image
+        
+        % Convert from RGB to YCbCr space and uses Y channel to determine
+        % brightness
+        img_ROI_YCbCr = rgb2ycbcr(img_ROI);
+        img_ROI_Y = img_ROI_YCbCr(:,:,1);
+        
+        %Checks to see if time history has changed
+        time_idx = get(handles.TimeHistory, 'Value');
+        time_str = get(handles.TimeHistory, 'String');
+        timeHistory_curr = str2num(cell2mat(time_str(time_idx)));
+        if handles.timeHistory ~= timeHistory_curr
+            handles.timeHistory = timeHistory_curr;
+        end
+        
+        
+        % Delay between measurements based on frame rate
+        time_delay = 1/(str2num(handles.src.FrameRate));
+        time_curr = time_curr + time_delay;
+        
+        % Only keep number of data points specified by 'timeHistory
+        
+        if time_curr > handles.timeHistory
+            index = ceil((time_curr - handles.timeHistory)/time_delay);
+            index = min(index,size(past,1));
+            past = past(index + 1:end,:);
+            time_curr = time_curr - time_delay * index;
+        else
+        end
+        past = [past;mean(img_ROI_Y,1)];
+        
+        xvals = ROI(2):(ROI(2)+ROI(4));
+        calibration = handles.calibrate;
+        if size(calibration,2) >= 2
+            x1 = calibration(:,1);
+            x2 = calibration(:,2);
+            m = (x1(1)-x2(1))/(x1(2)-x2(2));
+            b = x1(1) - m * x1(2);
+        elseif size(calibration,2) == 1
+            x1 = calibration(:,1);
+            m = 0.2*x1(1)/size(img,2); %0.2 picked arbitrarily
+            b = x1(1) - m * x1(2);
+        else
+            m = 1;
+            b = 0;
+        end
+        xvals = xvals * m + b;
+            
+        yvals = mean(past,1);
+        handles.readingXval = yvals;
+        handles.readingXval = xvals;
+        guidata(hObject,handles);
+        if ~str2num(get(handles.cursorAuto,'String'))
+            [maxLine, index] = max(yvals);
+            set(handles.readingY,'String',maxLine);
+            set(handles.readingX,'String',xvals(index));
+        else
+            x = str2num(get(handles.readingX,'String'));
+            i = 1 + (x - xvals(1)) / m;
+            y2 = yvals(ceil(i));
+            y1 = yvals(floor(i));
+            m = y2 - y1;
+            y = y1 + (i - floor(i)) * m;
+            if y ~= pastCursor
+                set(handles.readingY,'String',y);
+            else
+                pastCursor = y;
+            end
+        end
+        axes(handles.ReadingAxes);
+        plot(xvals,yvals,'-');
+        ylabel('average hits');
+        xlabel('wavelength (nm)');
+        if str2num(get(handles.yLimAuto,'String'))
+            ylimits = str2num(get(handles.yLim,'String'));
+            if ~isempty(ylimits)
+                ylim(ylimits)
+            end
+        elseif ylim ~= pastY%~strcmp(get(handles.yLim,'String'),mat2str(ylim))
+            set(handles.yLim,'String',mat2str(ylim));
+            pastY = ylim;
+        end
+        
+        if str2num(get(handles.xLimAuto,'String'))
+            xlimits = str2num(get(handles.xLim,'String'));
+            if ~isempty(xlimits)
+                xlim(xlimits)
+            end
+        elseif xlim ~= pastX%~strcmp(get(handles.yLim,'String'),mat2str(ylim))
+            set(handles.xLim,'String',mat2str(xlim));
+            pastX = xlim;
+        end
+        pause(time_delay);
+    end
+end
+
+
+% --- Executes on button press in SelectROI.
+function SelectROI_Callback(hObject, eventdata, handles)
+% hObject    handle to SelectROI (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of SelectROI
+
+if get(hObject, 'Value')==1
+    set(hObject, 'String', 'UnSelect Box');
+    % Promt user to draw a rectange
+    ROI = getrect;
+    
+    % Need to flip ROI because dimensions of image is flipped
+    ROI_flip = ones(1,4);
+    ROI_flip(1) = ROI(2);
+    ROI_flip(2) = ROI(1);
+    ROI_flip(3) = ROI(4);
+    ROI_flip(4) = ROI(3);
+    handles.ROI_flip=ROI_flip;
+    handles.ROI=ROI;
+    
+    % Display drawn rectange
+    axes(handles.PreviewAxes);
+    handles.selectBox=rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
+    
+    % Checks to see if drawn rectange is within camera preview window
+    width=handles.imWidth;
+    height=handles.imHeight;
+    if round(ROI_flip(1) + ROI_flip(3)) > height || round(ROI_flip(2) + ROI_flip(4)) > width
+        h=errordlg('Please Reselect Box Within Camera Streaming Window');
+    end
+else 
+    % Delete box/ROI object to allow for user to reselect another
+    set(hObject, 'String', 'Select Box');
+    delete(handles.selectBox);
+    handles.ROI=[];
+    handles.ROI_flip=[];
+    set(handles.Capture, 'Value', 0);
+    set(handles.Capture, 'String', 'Start Recording')
+end
+guidata(hObject,handles);
+
+
+% --- Executes on button press in Calibrate.
+function Calibrate_Callback(hObject, eventdata, handles)
+% hObject    handle to Calibrate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+wavelengthInputs = inputdlg('Enter Wavelength (nm)','Calibration Wavelength',1,{'500'});
+if isempty(wavelengthInputs)
+    return
+end
+wavelengthStr = wavelengthInputs{1};
+if isempty(wavelengthStr)
+    h=errordlg('Enter Wavelength');
+else
+    prefix = wavelengthStr(end-1);
+    unitIndex = size(wavelengthStr,2);
+    multiplier = 1;
+    if wavelengthStr(end) == 'm'
+        unitIndex = size(wavelengthStr,2) - 1;
+        if prefix == 'm'
+            multiplier = 1e6;
+        elseif prefix == 'u'
+            multiplier = 1e3;
+        elseif prefix == 'n'
+            multiplier = 1;
+        elseif prefix == 'p'
+            multiplier = 1e-3;
+        elseif prefix == 'f'
+            multiplier = 1e-6;
+        else    %if just 'm'
+            [num, status] = str2num(prefix);
+            if status
+                unitIndex = size(wavelengthStr,2);
+            else
+                h=errordlg('Cannot understand units');
+            end
+        end
+    end
+    [wavelength, status] = str2num(wavelengthStr(1:unitIndex-1));
+    wavelength = wavelength * multiplier;
+    if status ~= 1
+        h=errordlg('Cannot understand digits');
+    else
+        %the wavelength is processed and turned into a number
+        img = getsnapshot(handles.vid);
+        img_Y = rgb2ycbcr(img);
+        img_Y = img_Y(:,:,1);
+        [maxLine, index] = max(sum(img_Y));
+
+
+        % Display line used
+        axes(handles.PreviewAxes);
+        handles.calibrateDisplay = [handles.calibrateDisplay rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 2)];
+        handles.calibrate = [handles.calibrate [wavelength index]'];
+        handles.calibrate
+    end
+end
+guidata(hObject,handles);
+
 % --- Outputs from this function are returned to the command line.
 function varargout = CameraGUI_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -317,42 +639,6 @@ end
 
 delete(handles.figure1)
 
-% --- Executes on button press in SupportedResolutions.
-function SupportedResolutions_Callback(hObject, eventdata, handles)
-% hObject    handle to ROI (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-axes(handles.PreviewAxes);
-cla;
-
-% Change video object resolution Settings
-resolution_index = get(handles.SupportedResolutions, 'Value');
-vid=videoinput(handles.mycam, handles.device, strtrim(handles.resolution(resolution_index,:)));
-vidRes = vid.VideoResolution;
-imWidth = vidRes(1);
-imHeight = vidRes(2);
-nBands = vid.NumberOfBands;
-hImage_new = image( zeros(imHeight, imWidth, nBands) );
-stoppreview(vid);
-axes(handles.PreviewAxes);
-preview(vid, hImage_new);
-handles.vid=vid;
-handles.imWidth=imWidth;
-handles.imHeight=imHeight;
-
-% Display new resolution on axes
-src = getselectedsource(vid);
-frameRates = set(src, 'FrameRate');
-frameRates=frameRates';
-
-% Refresh preview
-set(handles.SupportedFrameRates, 'String', frameRates)
-
-handles.vid=vid;
-handles.src=src;
-guidata(hObject,handles);
-   
-
 
 % --- Executes during object creation, after setting all properties.
 function SupportedResolutions_CreateFcn(hObject, eventdata, handles)
@@ -366,34 +652,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
      set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on selection change in SupportedFrameRates.
-function SupportedFrameRates_Callback(hObject, eventdata, handles)
-% hObject    handle to SupportedFrameRates (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns SupportedFrameRates contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from SupportedFrameRates
-axes(handles.PreviewAxes);
-cla;
-
-% Change video object frame rate settings
-frameRates = set(handles.src, 'FrameRate');
-frameRate_index = get(handles.SupportedFrameRates, 'Value');
-stoppreview(handles.vid);
-handles.src.FrameRate = frameRates{frameRate_index};
-vidRes = handles.vid.VideoResolution;
-imWidth = vidRes(1);
-imHeight = vidRes(2);
-nBands = handles.vid.NumberOfBands;
-hImage = image( zeros(imHeight, imWidth, nBands) );
-
-% Refresh preview
-axes(handles.PreviewAxes);
-preview(handles.vid, hImage);
-
-guidata(hObject,handles);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -646,158 +904,6 @@ handles.src.Sharpness=handles.defaultSharpness;
 guidata(hObject,handles);
 
 
-% --- Executes on button press in Capture.
-function Capture_Callback(hObject, eventdata, handles)
-% hObject    handle to Capture (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of Capture
-
-% Checks to see if there is a box selected
-if get(handles.SelectROI, 'Value')==0
-    h=errordlg('Please Select Box within Camera Window Before Recording');
-else
-    
-    % Toggle string on button
-    if get(hObject, 'Value')==1
-        set(hObject, 'String', 'Stop Recording');
-    else
-        set(hObject, 'String', 'Start Recording');
-    end
-    
-    time_curr = 0;
-    past=[];
-    pastX = [0,0];
-    pastY = [0,0];
-    pastCursor = 0;
-    
-    if get(hObject, 'Value') == 1   %start recording
-        if isdeployed
-            start(handles.vid);
-        end
-    else                            %stop recording
-        datacursormode on % show cursors after stop recording
-        if isdeployed
-            stop(handles.vid);
-        end
-    end
-    
-    % Continues to record until specified to stop
-    while get(hObject, 'Value')==1
-        
-        % Pauses capture when pause button is clicked. Resumed when clicked
-        % again
-        while get(handles.Pause,'Value')==1
-            datacursormode on;
-            pause(1);
-        end
-        datacursormode off;
-        
-        
-        img=getsnapshot(handles.vid); % Capture preview image
-        if isdeployed
-            axes(handles.PreviewAxes);
-            image(img);
-            rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
-        end
-        ROI=round(handles.ROI_flip);
-        img_ROI=img(ROI(1):ROI(1)+ROI(3), ROI(2):ROI(2)+ROI(4),:); % Selects only boxed region of image
-        
-        % Convert from RGB to YCbCr space and uses Y channel to determine
-        % brightness
-        img_ROI_YCbCr = rgb2ycbcr(img_ROI);
-        img_ROI_Y = img_ROI_YCbCr(:,:,1);
-        
-        %Checks to see if time history has changed
-        time_idx = get(handles.TimeHistory, 'Value');
-        time_str = get(handles.TimeHistory, 'String');
-        timeHistory_curr = str2num(cell2mat(time_str(time_idx)));
-        if handles.timeHistory ~= timeHistory_curr
-            handles.timeHistory = timeHistory_curr;
-        end
-        
-        
-        % Delay between measurements based on frame rate
-        time_delay = 1/(str2num(handles.src.FrameRate));
-        time_curr = time_curr + time_delay;
-        
-        % Only keep number of data points specified by 'timeHistory
-        
-        if time_curr > handles.timeHistory
-            index = ceil((time_curr - handles.timeHistory)/time_delay);
-            index = min(index,size(past,1));
-            past = past(index + 1:end,:);
-            time_curr = time_curr - time_delay * index;
-        else
-        end
-        past = [past;mean(img_ROI_Y,1)];
-        
-        xvals = ROI(2):(ROI(2)+ROI(4));
-        calibration = handles.calibrate;
-        if size(calibration,2) >= 2
-            x1 = calibration(:,1);
-            x2 = calibration(:,2);
-            m = (x1(1)-x2(1))/(x1(2)-x2(2));
-            b = x1(1) - m * x1(2);
-        elseif size(calibration,2) == 1
-            x1 = calibration(:,1);
-            m = 0.2*x1(1)/size(img,2); %0.2 picked arbitrarily
-            b = x1(1) - m * x1(2);
-        else
-            m = 1;
-            b = 0;
-        end
-        xvals = xvals * m + b;
-            
-        yvals = mean(past,1);
-        handles.readingXval = yvals;
-        handles.readingXval = xvals;
-        guidata(hObject,handles);
-        if ~str2num(get(handles.cursorAuto,'String'))
-            [maxLine, index] = max(yvals);
-            set(handles.readingY,'String',maxLine);
-            set(handles.readingX,'String',xvals(index));
-        else
-            x = str2num(get(handles.readingX,'String'));
-            i = 1 + (x - xvals(1)) / m;
-            y2 = yvals(ceil(i));
-            y1 = yvals(floor(i));
-            m = y2 - y1;
-            y = y1 + (i - floor(i)) * m;
-            if y ~= pastCursor
-                set(handles.readingY,'String',y);
-            else
-                pastCursor = y;
-            end
-        end
-        axes(handles.ReadingAxes);
-        plot(xvals,yvals,'-');
-        ylabel('average hits');
-        xlabel('wavelength (nm)');
-        if str2num(get(handles.yLimAuto,'String'))
-            ylimits = str2num(get(handles.yLim,'String'));
-            if ~isempty(ylimits)
-                ylim(ylimits)
-            end
-        elseif ylim ~= pastY%~strcmp(get(handles.yLim,'String'),mat2str(ylim))
-            set(handles.yLim,'String',mat2str(ylim));
-            pastY = ylim;
-        end
-        
-        if str2num(get(handles.xLimAuto,'String'))
-            xlimits = str2num(get(handles.xLim,'String'));
-            if ~isempty(xlimits)
-                xlim(xlimits)
-            end
-        elseif xlim ~= pastX%~strcmp(get(handles.yLim,'String'),mat2str(ylim))
-            set(handles.xLim,'String',mat2str(xlim));
-            pastX = xlim;
-        end
-        pause(time_delay);
-    end
-end
-
 
 % --- Executes on selection change in TimeHistory.
 function TimeHistory_Callback(hObject, eventdata, handles)
@@ -833,50 +939,6 @@ handles.timeHistory = str2num(cell2mat(time_str(time_idx)));
 guidata(hObject,handles);
 
 
-% --- Executes on button press in SelectROI.
-function SelectROI_Callback(hObject, eventdata, handles)
-% hObject    handle to SelectROI (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of SelectROI
-
-if get(hObject, 'Value')==1
-    set(hObject, 'String', 'UnSelect Box');
-    % Promt user to draw a rectange
-    ROI = getrect;
-    
-    % Need to flip ROI because dimensions of image is flipped
-    ROI_flip = ones(1,4);
-    ROI_flip(1) = ROI(2);
-    ROI_flip(2) = ROI(1);
-    ROI_flip(3) = ROI(4);
-    ROI_flip(4) = ROI(3);
-    handles.ROI_flip=ROI_flip;
-    handles.ROI=ROI;
-    
-    % Display drawn rectange
-    axes(handles.PreviewAxes);
-    handles.selectBox=rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
-    
-    % Checks to see if drawn rectange is within camera preview window
-    width=handles.imWidth;
-    height=handles.imHeight;
-    if round(ROI_flip(1) + ROI_flip(3)) > height || round(ROI_flip(2) + ROI_flip(4)) > width
-        h=errordlg('Please Reselect Box Within Camera Streaming Window');
-    end
-else 
-    % Delete box/ROI object to allow for user to reselect another
-    set(hObject, 'String', 'Select Box');
-    delete(handles.selectBox);
-    handles.ROI=[];
-    handles.ROI_flip=[];
-    set(handles.Capture, 'Value', 0);
-    set(handles.Capture, 'String', 'Start Recording')
-end
-guidata(hObject,handles);
-
-
 % --- Executes on button press in Pause.
 function Pause_Callback(hObject, eventdata, handles)
 % hObject    handle to Pause (see GCBO)
@@ -889,66 +951,6 @@ if get(hObject, 'Value')==1
 else
     set(hObject, 'String', 'Pause Recording');
 end
-
-
-% --- Executes on button press in Calibrate.
-function Calibrate_Callback(hObject, eventdata, handles)
-% hObject    handle to Calibrate (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-wavelengthInputs = inputdlg('Enter Wavelength (nm)','Calibration Wavelength',1,{'500'});
-if isempty(wavelengthInputs)
-    return
-end
-wavelengthStr = wavelengthInputs{1};
-if isempty(wavelengthStr)
-    h=errordlg('Enter Wavelength');
-else
-    prefix = wavelengthStr(end-1);
-    unitIndex = size(wavelengthStr,2);
-    multiplier = 1;
-    if wavelengthStr(end) == 'm'
-        unitIndex = size(wavelengthStr,2) - 1;
-        if prefix == 'm'
-            multiplier = 1e6;
-        elseif prefix == 'u'
-            multiplier = 1e3;
-        elseif prefix == 'n'
-            multiplier = 1;
-        elseif prefix == 'p'
-            multiplier = 1e-3;
-        elseif prefix == 'f'
-            multiplier = 1e-6;
-        else    %if just 'm'
-            [num, status] = str2num(prefix);
-            if status
-                unitIndex = size(wavelengthStr,2);
-            else
-                h=errordlg('Cannot understand units');
-            end
-        end
-    end
-    [wavelength, status] = str2num(wavelengthStr(1:unitIndex-1));
-    wavelength = wavelength * multiplier;
-    if status ~= 1
-        h=errordlg('Cannot understand digits');
-    else
-        %the wavelength is processed and turned into a number
-        img = getsnapshot(handles.vid);
-        img_Y = rgb2ycbcr(img);
-        img_Y = img_Y(:,:,1);
-        [maxLine, index] = max(sum(img_Y));
-
-
-        % Display line used
-        axes(handles.PreviewAxes);
-        handles.calibrateDisplay = [handles.calibrateDisplay rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 2)];
-        handles.calibrate = [handles.calibrate [wavelength index]'];
-        handles.calibrate
-    end
-end
-guidata(hObject,handles);
-
 
 % --- Executes on button press in resetCalibration.
 function resetCalibration_Callback(hObject, eventdata, handles)
