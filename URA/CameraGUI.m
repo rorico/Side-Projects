@@ -70,10 +70,23 @@ function CameraGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 preferencesFile = which('Preferences.txt');
 defaultCamera = 1;
 if ~isempty(preferencesFile)
-    preferences = load(preferencesFile,'-mat',['cameraNumber'])
-    if isprop(preferences,'cameraNumber')
-        defaultCamera = preferences.CameraNumber;
+    preferences = load(preferencesFile,'-mat','cameraNumber');
+    if isfield(preferences,'cameraNumber')
+        defaultCamera = preferences.cameraNumber;
     end
+end
+
+try
+    a = arduino();
+    shield = addon(a, 'Adafruit/MotorShieldV2');
+    motor = stepper(shield, 2, 200, 'RPM', 1);
+    handles.motor = motor;
+catch exception
+    exception
+    exception.message
+    exception.stack
+    set(handles.clockwise, 'Enable', 'off');
+    set(handles.counterclockwise, 'Enable', 'off');
 end
 
 %imaqregister(strcat(pwd,'\TISImaq_R2013.dll'))
@@ -114,25 +127,13 @@ end
 set(handles.CameraList, 'String', cameraList);
 set(handles.CameraList, 'Value', 1);
 setup_camera(handles,hObject,defaultCamera);
-
-try
-    a = arduino();
-    shield = addon(a, 'Adafruit/MotorShieldV2');
-    motor = stepper(shield, 2, 200, 'RPM', 1);
-    handles.motor = motor;
-catch exception
-    set(handles.clockwise, 'Enable', 'off');
-    set(handles.counterclockwise, 'Enable', 'off');
-end
-guidata(hObject,handles);
-
+% can't have a "guidata(hObject,handles);" after setup_camera
 
 function setup_camera(handles,hObject,cameraNumber)
 %function for changing camera
 %resets nearly all handles
-if ~isempty(handles.preferencesFile)
-    save(handles.preferencesFile,'cameraNumber','-append');
-end
+
+
 %first of list of connected devices
 adaptorList = handles.adaptorList;
 deviceNumbers = handles.deviceNumbers;
@@ -167,12 +168,42 @@ handles.imHeight=imHeight;
 handles.mycam=mycam;
 handles.device=deviceNumbers(cameraNumber);
 
-%TESTESTSETSET
+
+%used to store calibration variables and graph data
 handles.calibrate = [];
-handles.calibrateDisplay = [];
+handles.calibrateM = 1;
+handles.calibrateB = 0;
+handles.calibrateI = 0;
+handles.calibrateDisplay1 = [];
+handles.calibrateDisplay2 = [];
 handles.readingXval = [];
 handles.readingYval = [];
-%TESTESTSETEST
+if ~isempty(handles.preferencesFile)
+    preferences = load(handles.preferencesFile,'-mat','cameraNumber','calibrate','calibrateM','calibrateB','calibrateI');
+    if isfield(preferences,'cameraNumber') && preferences.cameraNumber == cameraNumber
+        if isfield(preferences,'calibrate')
+            handles.calibrate = preferences.calibrate;
+            %display the calibrations
+            calibration = preferences.calibrate;
+            axes(handles.PreviewAxes);
+            if size(calibration,2) >= 1
+                handles.calibrateDisplay1 = rectangle('Position',[calibration(2,1),1,1,imHeight], 'EdgeColor', 'r', 'Linewidth', 1);
+            end
+            if size(calibration,2) >= 2
+                handles.calibrateDisplay2 = rectangle('Position',[calibration(2,2),1,1,imHeight], 'EdgeColor', 'r', 'Linewidth', 1);
+            end
+        end
+        if isfield(preferences,'calibrateM')
+            handles.calibrateM = preferences.calibrateM;
+        end
+        if isfield(preferences,'calibrateB')
+            handles.calibrateB = preferences.calibrateB;
+        end
+        if isfield(preferences,'calibrateI')
+            handles.calibrateI = preferences.calibrateI;
+        end
+    end
+end
 
 % Populate supported resolution menu
 set(handles.SupportedResolutions, 'String', resolution);
@@ -182,6 +213,7 @@ set(handles.SupportedResolutions, 'Value', resolution_index);
 frameRates = set(src, 'FrameRate');
 frameRates=frameRates';
 set(handles.SupportedFrameRates, 'String', frameRates);
+
 
 % Move Exposure slider to default position
 if isprop(src,'Exposure')
@@ -266,7 +298,10 @@ if isprop(src,'Sharpness')
 else
     set(handles.Sharpness, 'Enable', 'off');
 end
-
+%save some settings after setting things
+if ~isempty(handles.preferencesFile)
+    save(handles.preferencesFile,'cameraNumber','-append');
+end
 guidata(hObject,handles);
 % This sets up the initial plot - only do when we are invisible
 % so window can get raised using CameraGUI.
@@ -394,10 +429,19 @@ else
         
         
         img=getsnapshot(handles.vid); % Capture preview image
+        
         if isdeployed
             axes(handles.PreviewAxes);
             image(img);
             rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
+            
+            calibration = handles.calibrate;
+            if size(calibration,2) >= 1
+                handles.calibrateDisplay1 = rectangle('Position',[calibration(2,1),1,1,size(img,2)], 'EdgeColor', 'r', 'Linewidth', 1);
+            end
+            if size(calibration,2) >= 2
+                handles.calibrateDisplay2 = rectangle('Position',[calibration(2,2),1,1,size(img,2)], 'EdgeColor', 'r', 'Linewidth', 1);
+            end
         end
         ROI=round(handles.ROI_flip);
         img_ROI=img(ROI(1):ROI(1)+ROI(3), ROI(2):ROI(2)+ROI(4),:); % Selects only boxed region of image
@@ -433,23 +477,14 @@ else
         
         xvals = ROI(2):(ROI(2)+ROI(4));
         calibration = handles.calibrate;
+        label = 'index';
         if size(calibration,2) >= 2
-            x1 = calibration(:,1);
-            x2 = calibration(:,2);
-            m = (x1(1)-x2(1))/(x1(2)-x2(2));
-            b = x1(1) - m * x1(2);
-        elseif size(calibration,2) == 1
-            x1 = calibration(:,1);
-            m = 0.2*x1(1)/size(img,2); %0.2 picked arbitrarily
-            b = x1(1) - m * x1(2);
-        else
-            m = 1;
-            b = 0;
+            label = 'wavelength (nm)';
         end
-        xvals = xvals * m + b;
+        xvals = xvals * handles.calibrateM + handles.calibrateB;
             
         yvals = mean(past,1);
-        handles.readingXval = yvals;
+        handles.readingYval = yvals;
         handles.readingXval = xvals;
         guidata(hObject,handles);
         if ~str2num(get(handles.cursorAuto,'String'))
@@ -458,7 +493,7 @@ else
             set(handles.readingX,'String',xvals(index));
         else
             x = str2num(get(handles.readingX,'String'));
-            i = 1 + (x - xvals(1)) / m;
+            i = 1 + (x - xvals(1)) / handles.calibrateM;
             y2 = yvals(ceil(i));
             y1 = yvals(floor(i));
             m = y2 - y1;
@@ -469,16 +504,19 @@ else
                 pastCursor = y;
             end
         end
+        
+        
         axes(handles.ReadingAxes);
         plot(xvals,yvals,'-');
         ylabel('average hits');
-        xlabel('wavelength (nm)');
+        xlabel(label);
+        
         if str2num(get(handles.yLimAuto,'String'))
             ylimits = str2num(get(handles.yLim,'String'));
             if ~isempty(ylimits)
                 ylim(ylimits)
             end
-        elseif ylim ~= pastY%~strcmp(get(handles.yLim,'String'),mat2str(ylim))
+        elseif ylim ~= pastY
             set(handles.yLim,'String',mat2str(ylim));
             pastY = ylim;
         end
@@ -488,10 +526,11 @@ else
             if ~isempty(xlimits)
                 xlim(xlimits)
             end
-        elseif xlim ~= pastX%~strcmp(get(handles.yLim,'String'),mat2str(ylim))
+        elseif xlim ~= pastX
             set(handles.xLim,'String',mat2str(xlim));
             pastX = xlim;
         end
+        
         pause(time_delay);
     end
 end
@@ -506,28 +545,29 @@ function SelectROI_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of SelectROI
 
 if get(hObject, 'Value')==1
-    set(hObject, 'String', 'UnSelect Box');
     % Promt user to draw a rectange
     ROI = getrect;
-    
     % Need to flip ROI because dimensions of image is flipped
     ROI_flip = ones(1,4);
     ROI_flip(1) = ROI(2);
     ROI_flip(2) = ROI(1);
     ROI_flip(3) = ROI(4);
     ROI_flip(4) = ROI(3);
-    handles.ROI_flip=ROI_flip;
-    handles.ROI=ROI;
-    
-    % Display drawn rectange
-    axes(handles.PreviewAxes);
-    handles.selectBox=rectangle('Position',handles.ROI, 'EdgeColor', 'r', 'Linewidth', 2);
     
     % Checks to see if drawn rectange is within camera preview window
     width=handles.imWidth;
     height=handles.imHeight;
-    if round(ROI_flip(1) + ROI_flip(3)) > height || round(ROI_flip(2) + ROI_flip(4)) > width
+    if round(ROI_flip(1) + ROI_flip(3)) > height || round(ROI_flip(2) + ROI_flip(4)) > width || ROI_flip(1) < 0 || ROI_flip(2) < 0
         h=errordlg('Please Reselect Box Within Camera Streaming Window');
+        set(hObject, 'Value', 0);
+    else
+        % Display drawn rectange
+        axes(handles.PreviewAxes);
+        handles.selectBox=rectangle('Position',ROI, 'EdgeColor', 'r', 'Linewidth', 2);
+        
+        handles.ROI_flip=ROI_flip;
+        handles.ROI=ROI;
+        set(hObject, 'String', 'UnSelect Box');
     end
 else 
     % Delete box/ROI object to allow for user to reselect another
@@ -558,7 +598,7 @@ else
     unitIndex = size(wavelengthStr,2);
     multiplier = 1;
     if wavelengthStr(end) == 'm'
-        unitIndex = size(wavelengthStr,2) - 1;
+        unitIndex = size(wavelengthStr,2) - 2;
         if prefix == 'm'
             multiplier = 1e6;
         elseif prefix == 'u'
@@ -569,16 +609,16 @@ else
             multiplier = 1e-3;
         elseif prefix == 'f'
             multiplier = 1e-6;
-        else    %if just 'm'
+        else    %if just 'm' with no prefix
             [num, status] = str2num(prefix);
             if status
-                unitIndex = size(wavelengthStr,2);
+                unitIndex = size(wavelengthStr,2) - 1;
             else
                 h=errordlg('Cannot understand units');
             end
         end
     end
-    [wavelength, status] = str2num(wavelengthStr(1:unitIndex-1));
+    [wavelength, status] = str2num(wavelengthStr(1:unitIndex));
     wavelength = wavelength * multiplier;
     if status ~= 1
         h=errordlg('Cannot understand digits');
@@ -587,14 +627,43 @@ else
         img = getsnapshot(handles.vid);
         img_Y = rgb2ycbcr(img);
         img_Y = img_Y(:,:,1);
-        [maxLine, index] = max(sum(img_Y));
+        [~, index] = max(sum(img_Y));
 
 
+        cIndex = handles.calibrateI;
         % Display line used
         axes(handles.PreviewAxes);
-        handles.calibrateDisplay = [handles.calibrateDisplay rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 2)];
-        handles.calibrate = [handles.calibrate [wavelength index]'];
-        handles.calibrate
+        if cIndex
+            handles.calibrateDisplay1 = rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 1);
+        else
+            handles.calibrateDisplay2 = rectangle('Position',[index,1,1,size(img_Y,2)], 'EdgeColor', 'r', 'Linewidth', 1);
+        end
+        
+        
+        handles.calibrate(:,cIndex + 1) = [wavelength index]';
+        calibration = handles.calibrate;
+        % set up m and b for mx + b to be used to scale graph
+        if size(calibration,2) >= 2
+            x1 = calibration(:,1);
+            x2 = calibration(:,2);
+            m = (x1(1)-x2(1))/(x1(2)-x2(2));
+            b = x1(1) - m * x1(2);
+        elseif size(calibration,2) == 1
+            x1 = calibration(:,1);
+            m = 0.2*x1(1)/size(img,2); %0.2 picked arbitrarily
+            b = x1(1) - m * x1(2);
+        end
+        handles.calibrateM = m;
+        handles.calibrateB = b;
+        handles.calibrateI = ~cIndex;
+        
+        if ~isempty(handles.preferencesFile)
+            calibrate = handles.calibrate;
+            calibrateB = handles.calibrateB;
+            calibrateI = handles.calibrateI;
+            calibrateM = handles.calibrateM;
+            save(handles.preferencesFile,'calibrate','calibrateM','calibrateB','calibrateI','-append');
+        end
     end
 end
 guidata(hObject,handles);
@@ -967,11 +1036,19 @@ function resetCalibration_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.calibrate = [];
-for i = size(handles.calibrateDisplay,2):1:-1
-    rect = handles.calibrateDisplay(i)
-    delete(rect)
+handles.calibrateM = 1;
+handles.calibrateB = 0;
+handles.calibrateI = 0;
+delete(handles.calibrateDisplay1);
+delete(handles.calibrateDisplay2);
+
+if ~isempty(handles.preferencesFile)
+    calibrate = handles.calibrate;
+    calibrateB = handles.calibrateB;
+    calibrateI = handles.calibrateI;
+    calibrateM = handles.calibrateM;
+    save(handles.preferencesFile,'calibrate','calibrateM','calibrateB','calibrateI','-append');
 end
-handles.calibrateDisplay
 guidata(hObject,handles);
 
 
@@ -984,6 +1061,20 @@ function readingX_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of readingX as text
 %        str2double(get(hObject,'String')) returns contents of readingX as a double
 set(handles.cursorAuto,'String','1');
+
+%if the graph isn't currently being updated
+if ~get(handles.Capture, 'Value')
+    xvals = handles.readingXval
+    yvals = handles.readingYval
+    x = str2num(get(hObject,'String'));
+    handles.calibrateM
+    i = 1 + (x - xvals(1)) / handles.calibrateM
+    y2 = yvals(ceil(i));
+    y1 = yvals(floor(i));
+    m = y2 - y1;
+    y = y1 + (i - floor(i)) * m;
+    set(handles.readingY,'String',y);
+end
 guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -1031,6 +1122,12 @@ function yLim_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of yLim as text
 %        str2double(get(hObject,'String')) returns contents of yLim as a double
 set(handles.yLimAuto,'String','1');
+
+%if the graph isn't currently being updated
+if ~get(handles.Capture, 'Value')
+    axes(handles.ReadingAxes);
+    ylim(str2num(get(hObject,'String')));
+end
 guidata(hObject,handles);
 
 
@@ -1056,6 +1153,12 @@ function xLim_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'String') returns contents of xLim as text
 %        str2double(get(hObject,'String')) returns contents of xLim as a double
 set(handles.xLimAuto,'String','1');
+
+%if the graph isn't currently being updated
+if ~get(handles.Capture, 'Value')
+    axes(handles.ReadingAxes);
+    xlim(str2num(get(hObject,'String')));
+end
 guidata(hObject,handles);
 
 
