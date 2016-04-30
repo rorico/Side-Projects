@@ -33,6 +33,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var offset = 0;
     var cnt = 0;    //used to set hovers
     var hover = false;
+    var click = false;
     if(addTimeLine([timeCurrent,wastingTime,url],false)){
         for (var i = timeLine.length - 1 ; i != -1 ; i--) {
             if(!addTimeLine(timeLine[i],true)) {
@@ -67,23 +68,31 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             classAddon = ' timeLineBlock';
         }
         $('#timeLine').prepend('<div style="width:' + time + 'px" id="timeLine' + cnt + '" class="timeLine ' + timeType(info[1]) + classAddon + '"></div>');
+        setClick(info);
         if (hover) {
-            setHover(cnt,info);
+            setHover(info);
         }
         return ret;
     }
 
-    function setHover(num,info) {
-        $('#timeLine'+num).hover(function(){
+    function setHover(info) {
+        $('#timeLine'+cnt).hover(function(){
             hover = true;
             $('#info').html(formatInfo(info[2],info[0],info[3]));
         },function(){
-            hover = false;
-            $('#info').html(formatInfo(url,timeCurrent,title));
+            if(!click){
+                hover = false;
+                $('#info').html(formatInfo(url,timeCurrent,title));
+            }
         });
         cnt++;
     }
-
+    function setClick(info) {
+        $('#timeLine'+cnt).click(function(){
+            click = true;
+            $('#info').html(formatInfo(info[2],info[0],info[3]));
+        });
+    }
     function countDown(time,on) {
         $('#test').html(MinutesSecondsFormat(time));
         if(on && time>0) {
