@@ -42,6 +42,7 @@ chrome.storage.sync.get('redirects', function(items) {
   }
 });
 
+//set-up first time when opened
 chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab){
   handleNewPage(matchesURL(tab.url),tab.url,tab.title);
 })
