@@ -22,8 +22,7 @@ chrome.storage.sync.get('redirects', function(items) {
         return redirect(info);
       }
     }
-    handleNewPage(true,info.url,info.title);
-    if(timeLeft <= 0) {
+    if(timeLeft <= (now - startTime) * wastingTime) {
       return redirect(info);
     }
   },
@@ -43,8 +42,6 @@ chrome.storage.sync.get('redirects', function(items) {
   }
 });
 
-
-
 chrome.tabs.onActivated.addListener(function(activeInfo){
   this.tabId = activeInfo.tabId;
   chrome.tabs.get(activeInfo.tabId, function(tab){
@@ -60,7 +57,30 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
   }
 });
 
+
+/* does not measure when switching to outside chrome
+var focused = true;
+var out = [0,0,0];
+chrome.windows.onFocusChanged.addListener(function(windowId){
+  chrome.tabs.query({windowId:chrome.windows.WINDOW_ID_CURRENT}, function(tabs){
+    handleFocus(!!tabs.length);
+  });
+});
+
+function handleFocus(newFocused){
+  if(newFocused != focused) {
+    if(newFocused) {
+      handleNewPage(out[0],out[1],out[2]);
+    } else {
+      out = [wastingTime,url,title];
+      handleNewPage(false,"","Not Chrome");
+    }
+  }
+  focused = newFocused;
+}*/
+
 function handleNewPage(newWasting,newUrl,newTitle) {
+  stopAllAlarms(2);
   var timeSpent = new Date() - startTime; 
   timeLine.push([timeSpent,wastingTime,url,title]);
   if(wastingTime) {
@@ -73,8 +93,8 @@ function handleNewPage(newWasting,newUrl,newTitle) {
   if (newWasting) {
     setReminder(timeLeft);
   }
-  wastingTime = newWasting;
   startTime = new Date();
+  wastingTime = newWasting;
   url = newUrl;
   title = newTitle;
 }
@@ -84,7 +104,7 @@ function returnTime(time,delay) {
     if(timeLeft < 0 && -timeLeft < time) {
       delay = -timeLeft;
       timeLeft = 0;
-      returnTime(time+timeLeft,delay);
+      returnTime(time-delay,delay);
     } else {
       timeLeft += time;
     }
@@ -108,7 +128,7 @@ function setReminder(time){
   }
   alarm = setTimeout(function(){ 
     if(timeLeft === timeLeftP) {
-      setAlarm(0);
+      setAlarm(0,2);
     } else {
       setReminder(timeLeftP - timeLeft);
     }

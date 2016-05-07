@@ -72,7 +72,7 @@ function stopAlarm() {
             }
         }
     }
-    sendRequest("stopAlarm");
+    sendRequest("stopAllAlarms");
 }
 
 function changeTime(change) {

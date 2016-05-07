@@ -5,7 +5,7 @@ sleepAlarmEnd = 6;      //6am
 setSleepAlarm();
 chrome.alarms.onAlarm.addListener(function(alarm){
   if(alarm.name=='sleep') {
-    setAlarm(0);
+    setAlarm(0,1);
     setSleepAlarm();
   }
 });
@@ -21,64 +21,72 @@ function setSleepAlarm(){
 }
 
 //code for alarms
-//note chrome.alarms exists
-//consider changing to this later
 chrome.browserAction.setBadgeBackgroundColor({color:"#0000FF"});        //blue
 chrome.browserAction.setBadgeText({text:""});                           //reset text
-var alarms = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]; //state, alarm time, alarm object
+var alarms = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]; //state, alarm time, alarm object, type
+//types : 0 - regular
+//        1 - sleep alarm
+//        2 - block alert
+
 var alarmCnt = 0;
+var ringingCnt = 0;
 var audio = new Audio('alarm.mp3');
 var playAlarmCheck = [false];   //array so that it is pass by reference
-function setAlarm(delay) {
+function setAlarm(delay,type) {
     for (var i = 0 ; i<alarms.length ;i++) {
         if (!alarms[i][0]) {
             var alarmTime = new Date();
             alarmTime.setMinutes(alarmTime.getMinutes()+delay);
             chrome.browserAction.setBadgeText({text:(++alarmCnt).toString()});
+
             var alarm = setTimeout(function(){
                 chrome.browserAction.setBadgeBackgroundColor({color:"#FF0000"});  //red
+                ringingCnt++;
                 alarms[i][0] = 2; 
                 playAlarmCheck[0] = true;
-                playAlarm();
+                var interval = setInterval(function(){
+                    if (playAlarmCheck[0]) {
+                        audio.play();
+                    } else {
+                        clearInterval(interval);
+                    }
+                },3000);
             },delay*60000);
-            alarms[i] = [1,alarmTime,alarm];
+
+            alarms[i] = [1,alarmTime,alarm,type];
             break;
         }
     }
 }
 
-function playAlarm() {
-    setInterval(function(){
-        if (playAlarmCheck[0]) {
-            audio.play();
-        }
-    },3000);
-}
-
-function removeAlarm(alarmNumber) {
-    if (alarms[alarmNumber][0]) {
+function removeAlarm(alarmNumber,type) {
+    //unspecified type is a catchall,
+    //type 2 needs specific call
+    if (alarms[alarmNumber][0] && ((typeof type === 'undefined' && alarms[alarmNumber][3] !== 2) || alarms[alarmNumber][3] == type)) {
         if(--alarmCnt){
           chrome.browserAction.setBadgeText({text:(alarmCnt).toString()});
         } else {
           chrome.browserAction.setBadgeText({text:""});
+        }
+        //check if ringing
+        if (playAlarmCheck[0] && alarms[alarmNumber][0]===2 && --ringingCnt === 0) {
+            playAlarmCheck[0] = false;
+            audio.pause();
+            audio.currentTime = 0;
+            chrome.browserAction.setBadgeBackgroundColor({color:"#0000FF"});        //blue
         }
         clearTimeout(alarms[alarmNumber][2]);
         alarms[alarmNumber][0] = 0;
     }
 }
 
-
-function stopAlarm() {
+function stopAllAlarms(type) {
     if (playAlarmCheck[0]) {
         for (var i = 0 ; i<alarms.length ; i++) {
             if (alarms[i][0]===2) {
-                removeAlarm(i);
+                removeAlarm(i,type);
             }
         }
-        playAlarmCheck[0] = false;
-        audio.pause();
-        audio.currentTime = 0;
-        chrome.browserAction.setBadgeBackgroundColor({color:"#0000FF"});        //blue
     }
 }
 
@@ -92,8 +100,8 @@ function snooze() {
 
 chrome.runtime.onMessage.addListener(function(a, b, c) {
   switch(a.action) {
-    case "stopAlarm":
-      stopAlarm();
+    case "stopAllAlarms":
+      stopAllAlarms();
       break;
     case "snooze":
       snooze:
