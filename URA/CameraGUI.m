@@ -1,7 +1,7 @@
 function varargout = CameraGUI(varargin)
 % CAMERAGUI MATLAB code for CameraGUI.fig
 %
-% Bryan Dang Dec 2015
+% Daniel Chen Apr 2016
 %
 % CameraGUI is a graphical user interface to allow for the control of
 % parameters of the camera such as exposure, gain, brightness, contrast,
@@ -37,7 +37,7 @@ function varargout = CameraGUI(varargin)
 
 % Edit the above text to modify the response to help CameraGUI
 
-% Last Modified by GUIDE v2.5 20-Apr-2016 11:27:16
+% Last Modified by GUIDE v2.5 21-Apr-2016 18:09:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -67,32 +67,44 @@ function CameraGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % varargin   command line arguments to CameraGUI (see VARARGIN)
 
 % Choose default command line output for CameraGUI
-preferencesFile = which('Preferences.txt');
-defaultCamera = 1;
-if ~isempty(preferencesFile)
-    preferences = load(preferencesFile,'-mat','cameraNumber');
-    if isfield(preferences,'cameraNumber')
-        defaultCamera = preferences.cameraNumber;
-    end
-end
 
+%connect to arduino
 try
     a = arduino();
     shield = addon(a, 'Adafruit/MotorShieldV2');
     motor = stepper(shield, 2, 200, 'RPM', 1);
     handles.motor = motor;
 catch exception
+    %if can't connect to arduino, display error, disable rotation buttons
     exception
     exception.message
-    exception.stack
     set(handles.clockwise, 'Enable', 'off');
     set(handles.counterclockwise, 'Enable', 'off');
 end
 
-%imaqregister(strcat(pwd,'\TISImaq_R2013.dll'))
+
+preferencesFile = which('Preferences.txt');
+defaultCamera = 1;
+defaultAdaptor = '';
+defaultCameraName = '';
+defaultResolution = 1;
+savedResolution = 1;
+if ~isempty(preferencesFile)
+    preferences = load(preferencesFile,'-mat','adaptor','cameraName','resolution')
+    if isfield(preferences,'adaptor')
+        defaultAdaptor = preferences.adaptor;
+    end
+    if isfield(preferences,'cameraName')
+        defaultCameraName = preferences.cameraName;
+    end
+    if isfield(preferences,'resolution')
+        savedResolution = preferences.resolution;
+    end
+end
+
 % Initialize camera
 handles.output = hObject;
-caminfo = imaqhwinfo
+caminfo = imaqhwinfo;
 adaptors = caminfo.InstalledAdaptors();
 cnt = 1;
 cameraList = {};
@@ -100,12 +112,16 @@ adaptorList = {};
 deviceNumbers = []; %assume these are all same size always
 for i = 1:size(adaptors,2)
     adaptorName = char(adaptors(i));
-    adaptor = imaqhwinfo(adaptorName)
+    adaptor = imaqhwinfo(adaptorName);
     devices = adaptor.DeviceInfo();
     for j = 1:size(devices,2)
         cameraList{cnt} = devices(:,j).DeviceName;
         adaptorList{cnt} = adaptorName;
         deviceNumbers(cnt) = j;
+        if strcmp(defaultAdaptor,adaptorName) && strcmp(defaultCameraName,cameraList{cnt})
+            defaultCamera = cnt;
+            defaultResolution = savedResolution;
+        end
         cnt = cnt + 1;
     end
 end
@@ -115,82 +131,29 @@ handles.cameraList=cameraList;
 handles.adaptorList=adaptorList;
 handles.deviceNumbers=deviceNumbers;
 handles.preferencesFile=preferencesFile;
-guidata(hObject,handles);
+
+set(handles.CameraList, 'String', cameraList);
+set(handles.CameraList, 'Value', defaultCamera);
 
 if isempty(adaptorList)
     h=errordlg('No Cameras Attached');
-elseif defaultCamera >= cnt
-    defaultCamera = 1;
-end
-
-%setup with first device
-set(handles.CameraList, 'String', cameraList);
-set(handles.CameraList, 'Value', 1);
-setup_camera(handles,hObject,defaultCamera);
-% can't have a "guidata(hObject,handles);" after setup_camera
-
-function setup_camera(handles,hObject,cameraNumber)
-%function for changing camera
-%resets nearly all handles
-
-
-%first of list of connected devices
-adaptorList = handles.adaptorList;
-deviceNumbers = handles.deviceNumbers;
-mycam = adaptorList{cameraNumber};
-mycaminfo = imaqhwinfo(mycam);
-devices = mycaminfo.DeviceInfo();
-resolution = char(devices(deviceNumbers(cameraNumber)).SupportedFormats());
-resolution_index = 1;   % set default resoultion to full res
-vid = videoinput(mycam, deviceNumbers(cameraNumber),strtrim(resolution(resolution_index,:)));
-src = getselectedsource(vid);
-
-triggerconfig(vid, 'manual');   %set this for later usage
+else
+    %setup with first device
+    handles = setup_camera(handles,hObject,defaultCamera,defaultResolution);
     
-% Set resolution of camera
-vidRes = vid.VideoResolution;
-imWidth = vidRes(1);
-imHeight = vidRes(2);
-nBands = vid.NumberOfBands;
-hImage = image( zeros(imHeight, imWidth, nBands) );
-
-% Preview camera on GUI
-axes(handles.PreviewAxes);
-preview(vid, hImage);
-
-% Save everything in handles
-handles.vid=vid;
-handles.src=src;
-handles.hImage=hImage;
-handles.resolution=resolution;
-handles.imWidth=imWidth;
-handles.imHeight=imHeight;
-handles.mycam=mycam;
-handles.device=deviceNumbers(cameraNumber);
-
-
-%used to store calibration variables and graph data
-handles.calibrate = [];
-handles.calibrateM = 1;
-handles.calibrateB = 0;
-handles.calibrateI = 0;
-handles.calibrateDisplay1 = [];
-handles.calibrateDisplay2 = [];
-handles.readingXval = [];
-handles.readingYval = [];
-if ~isempty(handles.preferencesFile)
-    preferences = load(handles.preferencesFile,'-mat','cameraNumber','calibrate','calibrateM','calibrateB','calibrateI');
-    if isfield(preferences,'cameraNumber') && preferences.cameraNumber == cameraNumber
+    %setup calibrations
+    if ~isempty(handles.preferencesFile)
+        preferences = load(handles.preferencesFile,'-mat','calibrate','calibrateM','calibrateB','calibrateI');
         if isfield(preferences,'calibrate')
             handles.calibrate = preferences.calibrate;
             %display the calibrations
             calibration = preferences.calibrate;
             axes(handles.PreviewAxes);
             if size(calibration,2) >= 1
-                handles.calibrateDisplay1 = rectangle('Position',[calibration(2,1),1,1,imHeight], 'EdgeColor', 'r', 'Linewidth', 1);
+                handles.calibrateDisplay1 = rectangle('Position',[calibration(2,1),1,1,handles.imHeight], 'EdgeColor', 'r', 'Linewidth', 1);
             end
             if size(calibration,2) >= 2
-                handles.calibrateDisplay2 = rectangle('Position',[calibration(2,2),1,1,imHeight], 'EdgeColor', 'r', 'Linewidth', 1);
+                handles.calibrateDisplay2 = rectangle('Position',[calibration(2,2),1,1,handles.imHeight], 'EdgeColor', 'r', 'Linewidth', 1);
             end
         end
         if isfield(preferences,'calibrateM')
@@ -204,16 +167,99 @@ if ~isempty(handles.preferencesFile)
         end
     end
 end
+guidata(hObject,handles);
+% This sets up the initial plot - only do when we are invisible
+% so window can get raised using CameraGUI.
+
+
+%need to update handles when using this function, otherwise will be reset
+function handles = setup_camera(handles,hObject,cameraNumber,resolution_index)
+%function for changing camera
+%resets nearly all handles
+
+%first of list of connected devices
+adaptorList = handles.adaptorList;
+deviceNumbers = handles.deviceNumbers;
+mycam = adaptorList{cameraNumber};
+mycaminfo = imaqhwinfo(mycam);
+devices = mycaminfo.DeviceInfo();
+resolution = char(devices(deviceNumbers(cameraNumber)).SupportedFormats());
 
 % Populate supported resolution menu
 set(handles.SupportedResolutions, 'String', resolution);
 set(handles.SupportedResolutions, 'Value', resolution_index);
 
-% Populate supported framerate menu
-frameRates = set(src, 'FrameRate');
-frameRates=frameRates';
-set(handles.SupportedFrameRates, 'String', frameRates);
+handles.mycam = mycam;
+handles.device = deviceNumbers(cameraNumber);
+handles.resolution = resolution;
 
+handles = setup_resolution(handles,hObject,resolution_index);
+
+%save some settings after setting things
+if ~isempty(handles.preferencesFile)
+    adaptor = mycam;
+    cameraName = devices(deviceNumbers(cameraNumber)).DeviceName();
+    save(handles.preferencesFile,'adaptor','cameraName','-append');
+end
+guidata(hObject,handles);
+
+%need to update handles when using this function, otherwise will be reset
+function handles = setup_resolution(handles,hObject,resolution_index)
+%function for changing camera
+%resets nearly all handles
+% hObject    handle to ROI (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%save resolution
+if ~isempty(handles.preferencesFile)
+    resolution = resolution_index;
+    save(handles.preferencesFile,'resolution','-append');
+end
+
+% Change video object resolution Settings
+vid = videoinput(handles.mycam, handles.device, strtrim(handles.resolution(resolution_index,:)));
+src = getselectedsource(vid);
+triggerconfig(vid, 'manual');   %set to help make taking snapshots later faster
+
+% Clear preview display
+axes(handles.PreviewAxes);
+cla;
+
+% Set resolution of camera
+vidRes = vid.VideoResolution;
+imWidth = vidRes(1);
+imHeight = vidRes(2);
+nBands = vid.NumberOfBands;
+hImage = image( zeros(imHeight, imWidth, nBands) );
+
+% Update framerates
+frameRates = set(src,'FrameRate');
+frameRates = frameRates';
+set(handles.SupportedFrameRates, 'String', frameRates)
+
+% Preview camera on GUI
+axes(handles.PreviewAxes);
+preview(vid, hImage);
+
+% Save everything in handles
+handles.vid=vid;
+handles.src=src;
+handles.hImage=hImage;
+handles.imWidth=imWidth;
+handles.imHeight=imHeight;
+
+
+%used to store calibration variables and graph data
+handles.calibrateRotation = 36; %default from measured data
+handles.calibrate = [];
+handles.calibrateM = 1;
+handles.calibrateB = 0;
+handles.calibrateI = 0;
+handles.calibrateDisplay1 = [];
+handles.calibrateDisplay2 = [];
+handles.readingXval = [];
+handles.readingYval = [];
 
 % Move Exposure slider to default position
 if isprop(src,'Exposure')
@@ -298,14 +344,7 @@ if isprop(src,'Sharpness')
 else
     set(handles.Sharpness, 'Enable', 'off');
 end
-%save some settings after setting things
-if ~isempty(handles.preferencesFile)
-    save(handles.preferencesFile,'cameraNumber','-append');
-end
 guidata(hObject,handles);
-% This sets up the initial plot - only do when we are invisible
-% so window can get raised using CameraGUI.
-
 
 
 % UIWAIT makes CameraGUI wait for user response (see UIRESUME)
@@ -317,34 +356,12 @@ function SupportedResolutions_Callback(hObject, eventdata, handles)
 % hObject    handle to ROI (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-axes(handles.PreviewAxes);
-cla;
 
+% Stop current video
+stoppreview(handles.vid);
 % Change video object resolution Settings
 resolution_index = get(handles.SupportedResolutions, 'Value');
-vid=videoinput(handles.mycam, handles.device, strtrim(handles.resolution(resolution_index,:)));
-vidRes = vid.VideoResolution;
-imWidth = vidRes(1);
-imHeight = vidRes(2);
-nBands = vid.NumberOfBands;
-hImage_new = image( zeros(imHeight, imWidth, nBands) );
-stoppreview(vid);
-axes(handles.PreviewAxes);
-preview(vid, hImage_new);
-handles.vid=vid;
-handles.imWidth=imWidth;
-handles.imHeight=imHeight;
-
-% Display new resolution on axes
-src = getselectedsource(vid);
-frameRates = set(src, 'FrameRate');
-frameRates=frameRates';
-
-% Refresh preview
-set(handles.SupportedFrameRates, 'String', frameRates)
-
-handles.vid=vid;
-handles.src=src;
+handles = setup_resolution(handles,hObject,resolution_index);
 guidata(hObject,handles);
    
 
@@ -357,24 +374,11 @@ function SupportedFrameRates_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns SupportedFrameRates contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from SupportedFrameRates
-axes(handles.PreviewAxes);
-cla;
 
 % Change video object frame rate settings
 frameRates = set(handles.src, 'FrameRate');
 frameRate_index = get(handles.SupportedFrameRates, 'Value');
-stoppreview(handles.vid);
 handles.src.FrameRate = frameRates{frameRate_index};
-vidRes = handles.vid.VideoResolution;
-imWidth = vidRes(1);
-imHeight = vidRes(2);
-nBands = handles.vid.NumberOfBands;
-hImage = image( zeros(imHeight, imWidth, nBands) );
-
-% Refresh preview
-axes(handles.PreviewAxes);
-preview(handles.vid, hImage);
-
 guidata(hObject,handles);
 
 
@@ -471,14 +475,13 @@ else
             index = min(index,size(past,1));
             past = past(index + 1:end,:);
             time_curr = time_curr - time_delay * index;
-        else
         end
         past = [past;mean(img_ROI_Y,1)];
         
         xvals = ROI(2):(ROI(2)+ROI(4));
         calibration = handles.calibrate;
         label = 'index';
-        if size(calibration,2) >= 2
+        if ~isempty(calibration)
             label = 'wavelength (nm)';
         end
         xvals = xvals * handles.calibrateM + handles.calibrateB;
@@ -531,6 +534,7 @@ else
             pastX = xlim;
         end
         
+        %same timing as framerate
         pause(time_delay);
     end
 end
@@ -641,21 +645,8 @@ else
         
         
         handles.calibrate(:,cIndex + 1) = [wavelength index]';
-        calibration = handles.calibrate;
-        % set up m and b for mx + b to be used to scale graph
-        if size(calibration,2) >= 2
-            x1 = calibration(:,1);
-            x2 = calibration(:,2);
-            m = (x1(1)-x2(1))/(x1(2)-x2(2));
-            b = x1(1) - m * x1(2);
-        elseif size(calibration,2) == 1
-            x1 = calibration(:,1);
-            m = 0.2*x1(1)/size(img,2); %0.2 picked arbitrarily
-            b = x1(1) - m * x1(2);
-        end
-        handles.calibrateM = m;
-        handles.calibrateB = b;
         handles.calibrateI = ~cIndex;
+        handles = calculate_calibration(hObject, handles);
         
         if ~isempty(handles.preferencesFile)
             calibrate = handles.calibrate;
@@ -663,6 +654,112 @@ else
             calibrateI = handles.calibrateI;
             calibrateM = handles.calibrateM;
             save(handles.preferencesFile,'calibrate','calibrateM','calibrateB','calibrateI','-append');
+        end
+    end
+end
+guidata(hObject,handles);
+
+% --- Executes on button press in clockwise.
+function clockwise_Callback(hObject, eventdata, handles)
+% hObject    handle to clockwise (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+move(handles.motor,-1);
+calibration = handles.calibrate;
+rotation = handles.calibrateRotation;
+for i = 1:size(calibration,2)
+    handles.calibrate(1,i) = calibration(1,i) + rotation;
+end
+%recalculate calibrations
+handles = calculate_calibration(hObject, handles);
+guidata(hObject,handles);
+
+% --- Executes on button press in counterclockwise.
+function counterclockwise_Callback(hObject, eventdata, handles)
+% hObject    handle to counterclockwise (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+move(handles.motor,1);
+calibration = handles.calibrate;
+rotation = handles.calibrateRotation;
+for i = 1:size(calibration,2)
+    handles.calibrate(1,i) = calibration(1,i) - rotation;
+end
+%recalculate calibrations
+handles = calculate_calibration(hObject, handles);
+guidata(hObject,handles);
+
+function handles = calculate_calibration(hObject, handles)
+calibration = handles.calibrate;
+% set up m and b for mx + b to be used to scale graph
+if size(calibration,2) >= 2
+    x1 = calibration(:,1);
+    x2 = calibration(:,2);
+    m = (x1(1)-x2(1))/(x1(2)-x2(2));
+    b = x1(1) - m * x1(2);
+elseif size(calibration,2) == 1
+    x1 = calibration(:,1);
+    m = 40/handles.imWidth; %width is about 40 nm
+    b = x1(1) - m * x1(2);
+end
+handles.calibrateM = m;
+handles.calibrateB = b;
+
+if ~isempty(handles.preferencesFile)
+    calibrate = handles.calibrate;
+    calibrateB = handles.calibrateB;
+    calibrateM = handles.calibrateM;
+    save(handles.preferencesFile,'calibrate','calibrateM','calibrateB','-append');
+end
+guidata(hObject,handles);
+
+% --- Executes on button press in CalibrateRotation.
+function CalibrateRotation_Callback(hObject, eventdata, handles)
+% hObject    handle to CalibrateRotation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+wavelengthInputs = inputdlg('Enter Wavelength (nm)','Calibration Wavelength',1,{'36'});
+if isempty(wavelengthInputs)
+    return
+end
+wavelengthStr = wavelengthInputs{1};
+if isempty(wavelengthStr)
+    h=errordlg('Enter Wavelength');
+else
+    prefix = wavelengthStr(end-1);
+    unitIndex = size(wavelengthStr,2);
+    multiplier = 1;
+    if wavelengthStr(end) == 'm'
+        unitIndex = size(wavelengthStr,2) - 2;
+        if prefix == 'm'
+            multiplier = 1e6;
+        elseif prefix == 'u'
+            multiplier = 1e3;
+        elseif prefix == 'n'
+            multiplier = 1;
+        elseif prefix == 'p'
+            multiplier = 1e-3;
+        elseif prefix == 'f'
+            multiplier = 1e-6;
+        else    %if just 'm' with no prefix
+            [num, status] = str2num(prefix);
+            if status
+                unitIndex = size(wavelengthStr,2) - 1;
+            else
+                h=errordlg('Cannot understand units');
+            end
+        end
+    end
+    [wavelength, status] = str2num(wavelengthStr(1:unitIndex));
+    wavelength = wavelength * multiplier;
+    if status ~= 1
+        h=errordlg('Cannot understand digits');
+    else
+        %the wavelength is processed and turned into a number
+        handles.calibrateRotation = wavelength;
+        if ~isempty(handles.preferencesFile)
+            calibrateRotation = handles.calibrateRotation;
+            save(handles.preferencesFile,'calibrateRotation','-append');
         end
     end
 end
@@ -1257,7 +1354,7 @@ cla;
 
 % Change video object resolution Settings
 camera_index = get(handles.CameraList, 'Value');
-setup_camera(handles,hObject,camera_index);   
+setup_camera(handles,hObject,camera_index,1);   
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1272,17 +1369,3 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on button press in clockwise.
-function clockwise_Callback(hObject, eventdata, handles)
-% hObject    handle to clockwise (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-move(handles.motor,1);
-
-% --- Executes on button press in counterclockwise.
-function counterclockwise_Callback(hObject, eventdata, handles)
-% hObject    handle to counterclockwise (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-move(handles.motor,-1);

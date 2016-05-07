@@ -1,5 +1,3 @@
-Had to hard code certain parts to work on laptop.
-
 CameraGUI_OpeningFcn
     mycam = char(caminfo.InstalledAdaptors(2));
     change number based on adaptor corresponding to camera
@@ -7,8 +5,6 @@ CameraGUI_OpeningFcn
 
 SelectROI_Callback
     height and width
-        
-remember to change SelectROI_Callback to check for boxes outside of negative side
 
 
 problems with choosing and deleting boxes on the preview axes.
