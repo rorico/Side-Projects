@@ -32,6 +32,8 @@ var alarmCnt = 0;
 var ringingCnt = 0;
 var audio = new Audio('alarm.mp3');
 var playAlarmCheck = [false];   //array so that it is pass by reference
+
+//returns [alarmNumber, alarm timestamp]
 function setAlarm(delay,type) {
     for (var i = 0 ; i<alarms.length ;i++) {
         if (!alarms[i][0]) {
@@ -54,11 +56,14 @@ function setAlarm(delay,type) {
             },delay*60000);
 
             alarms[i] = [1,alarmTime,alarm,type];
-            break;
+            sendRequest("setAlarm",[i,+alarmTime]);
+            return [i,+alarmTime];
         }
     }
+    return [-1,0];
 }
 
+//returns true if alarm is removed
 function removeAlarm(alarmNumber,type) {
     //unspecified type is a catchall,
     //type 2 needs specific call
@@ -77,40 +82,57 @@ function removeAlarm(alarmNumber,type) {
         }
         clearTimeout(alarms[alarmNumber][2]);
         alarms[alarmNumber][0] = 0;
+        sendRequest("removeAlarm",alarmNumber);
+        return true;
     }
+    return false;
 }
 
+//returns true if any alarms are stopped
 function stopAllAlarms(type) {
+    var ret = false;
     if (playAlarmCheck[0]) {
         for (var i = 0 ; i<alarms.length ; i++) {
             if (alarms[i][0]===2) {
-                removeAlarm(i,type);
+                ret |= removeAlarm(i,type);
             }
         }
     }
+    return ret;
 }
 
 function snooze() {
-    if (playAlarmCheck[0]) {
-        stopAlarm();
+    //if any alarms are stopped, set another in 5 minutes;
+    if (stopAllAlarms()) {
         setAlarm(5);
     }
 }
 
+//for displaying in an open browser action
+function sendRequest(action,input){
+    chrome.runtime.sendMessage({
+        from: "background",
+        action: action,
+        input: input
+    });
+}
 
+//get requests from browserAction
 chrome.runtime.onMessage.addListener(function(a, b, c) {
-  switch(a.action) {
-    case "stopAllAlarms":
-      stopAllAlarms();
-      break;
-    case "snooze":
-      snooze:
-      break;
-    case "setAlarm":
-      setAlarm(a.input);
-      break;
-    case "removeAlarm":
-      removeAlarm(a.input);
-      break;
+  if(a.from === "browserAction") {
+    switch(a.action) {
+      case "stopAllAlarms":
+        stopAllAlarms();
+        break;
+      case "snooze":
+        snooze();
+        break;
+      case "setAlarm":
+        setAlarm(a.input);
+        break;
+      case "removeAlarm":
+        removeAlarm(a.input);
+        break;
+    }
   }
 });

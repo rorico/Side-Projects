@@ -153,6 +153,26 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 });
 
+$('#timerButton').click(setTimer);
+function setTimer() {
+    var delay = +$('#setTimer').val();
+    setAlarm(delay);
+}
+
+time = new Date();
+currentTimer = "";
+function changeTimer(digit) {
+    now = new Date();
+    if (now-time<1000) {
+        currentTimer += digit.toFixed(0);
+        $('#setTimer').val(currentTimer);
+    } else {
+        currentTimer = digit;
+        $('#setTimer').val(currentTimer);
+    }
+    time = new Date();
+}
+
 var deletes = false;
 $(window).keydown(function(e) {
     switch (e.keyCode) {
@@ -163,7 +183,7 @@ $(window).keydown(function(e) {
             deletes = true;
             break;
         case 65:        //a
-            stopAlarm();
+            stopAllAlarms();
             break;
         case 88:        //x
             snooze();
@@ -188,8 +208,7 @@ $(window).keydown(function(e) {
         case 53:
         case 54:        //5
             if (deletes) {
-                i = e.keyCode-49;
-                removeAlarm(i);
+                removeAlarm(e.keyCode-49);
                 break;
             }
         case 55:        //6
@@ -205,8 +224,7 @@ $(window).keydown(function(e) {
         case 100:
         case 101:       //5
             if (deletes) {
-                i = e.keyCode-49;
-                removeAlarm(i);
+                removeAlarm(e.keyCode-96);
                 break;
             }
         case 102:        //6
@@ -231,80 +249,62 @@ $(window).keydown(function(e) {
     }
 });
 
+//send requests to background
 function sendRequest(action,input){
     chrome.runtime.sendMessage({
+        from: "browserAction",
         action: action,
         input: input
     });
 }
 
-$('#timerButton').click(setTimer);
-function setTimer() {
-    var delay = +$('#setTimer').val();
-    setAlarm(delay);
-}
-
 function setAlarm(delay) {
-    for (var i = 0 ; i<alarms.length ;i++) {
-        if (!alarms[i][0]) {
-            var alarmTime = new Date();
-            alarmTime.setMinutes(alarmTime.getMinutes()+delay);
-            showAlarm(alarmTime,i);
-            break;
-        }
-    }
     sendRequest("setAlarm",delay);
 }
 
+function removeAlarm(alarmNumber) {
+    sendRequest("removeAlarm",alarmNumber);
+}
+
+function stopAllAlarms() {
+    sendRequest("stopAllAlarms");
+}
+
+function snooze() {
+    sendRequest("snooze");
+}
+
+//get from background to display
+chrome.runtime.onMessage.addListener(function(a, b, c) {
+    if(a.from === "background") {
+        switch(a.action) {
+            case "setAlarm":
+                input = a.input;
+                showAlarm(new Date(input[1]),input[0]);
+                break;
+            case "removeAlarm":
+                input = a.input;
+                showRemove(input);
+                break;
+        }
+    }
+});
+
 function showAlarm(date,index) {
-    var time = date.toLocaleTimeString()
+    var time = date.toLocaleTimeString();
     $('#alarm'+(index+1)).html("Alarm at "+time);
     $('#alarm'+(index+1)).parent().removeClass("notSet");
 }
 
-function removeAlarm(alarmNumber) {
-    if (alarms[alarmNumber][0]) {
-        $('#alarm'+(alarmNumber+1)).html("Not Set");
-        $('#alarm'+(alarmNumber+1)).parent().addClass("notSet");
-    }
-    sendRequest("removeAlarm",alarmNumber);
+function showRemove(alarmNumber) {
+    $('#alarm'+(alarmNumber+1)).html("Not Set");
+    $('#alarm'+(alarmNumber+1)).parent().addClass("notSet");
 }
 
-function stopAlarm() {
-    if (playAlarmCheck[0]) {
-        for (var i = 0 ; i<alarms.length ; i++) {
-            if (alarms[i][0]===2) {
-                removeAlarm(i);
-            }
-        }
-    }
-    sendRequest("stopAllAlarms");
-}
 
 function changeTime(change) {
     delay = parseInt($('#setTimer').val());
     if (change>0 || delay>0) {
         $('#setTimer').val(delay+change);
     }
-}
-
-function snooze() {
-    if (playAlarmCheck[0]) {
-        stopAlarm();
-        setAlarm(5);
-    }
-}
-
-time = new Date();
-currentTimer = "";
-function changeTimer(digit) {
-    now = new Date();
-    if (now-time<1000) {
-        currentTimer += digit.toFixed(0);
-        $('#setTimer').val(currentTimer);
-    } else {
-        currentTimer = digit;
-        $('#setTimer').val(currentTimer);
-    }
-    time = new Date();
 }
