@@ -4,20 +4,20 @@ sleepAlarmStart = 22;   //10pm
 sleepAlarmEnd = 6;      //6am
 setSleepAlarm();
 chrome.alarms.onAlarm.addListener(function(alarm){
-  if(alarm.name=='sleep') {
-    setAlarm(0,1);
-    setSleepAlarm();
-  }
+    if(alarm.name=='sleep') {
+        setAlarm(0,1);
+        setSleepAlarm();
+    }
 });
 function setSleepAlarm(){
-  date = new Date();
-  date.setSeconds(0);
-  date.setMinutes(Math.floor(date.getMinutes()/30)*30 + 30);
-  if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
-    date.setHours(sleepAlarmStart);
-    date.setMinutes(0);
-  }
-  chrome.alarms.create("sleep", {when:+date});
+    date = new Date();
+    date.setSeconds(0);
+    date.setMinutes(Math.floor(date.getMinutes()/30)*30 + 30);
+    if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
+        date.setHours(sleepAlarmStart);
+        date.setMinutes(0);
+    }
+    chrome.alarms.create("sleep", {when:+date});
 }
 
 //code for alarms
@@ -119,20 +119,20 @@ function sendRequest(action,input){
 
 //get requests from browserAction
 chrome.runtime.onMessage.addListener(function(a, b, c) {
-  if(a.from === "browserAction") {
-    switch(a.action) {
-      case "stopAllAlarms":
-        stopAllAlarms();
-        break;
-      case "snooze":
-        snooze();
-        break;
-      case "setAlarm":
-        setAlarm(a.input);
-        break;
-      case "removeAlarm":
-        removeAlarm(a.input);
-        break;
+    if(a.from === "browserAction") {
+        switch(a.action) {
+            case "stopAllAlarms":
+                stopAllAlarms();
+                break;
+            case "snooze":
+                snooze();
+                break;
+            case "setAlarm":
+                setAlarm(a.input);
+                break;
+            case "removeAlarm":
+                removeAlarm(a.input);
+                break;
+        }
     }
-  }
 });
