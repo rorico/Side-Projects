@@ -2,16 +2,16 @@ function playHuman(player,value) {
     var options = getOptions(players[player]);
     for (var i = 0 ; i<players[player].length ; i++) {
         $('#p'+player+'_'+i).addClass('choose');
-        if (options[i].length==0||options[i]==-1||options[i]==0) {
+        if (options[i].length===0||options[i]===-1||options[i]===0) {       //no possible moves, jacks
             $('#p'+player+'_'+i).addClass('special');
         }
         $('#p'+player+'_'+i).unbind('click');
-        $('#p'+player+'_'+i).bind('click',{player:player,i:i,value:value}, function(event) {
+        $('#p'+player+'_'+i).bind('click',{player:player,i:i,value:value,sides:options[i]}, function(event) {
             event.stopPropagation();
             $('.special').removeClass('special');
             $('.choose').unbind('click');
             $('.choose').removeClass('choose');
-            chooseCard(event.data.player,event.data.i,event.data.value);
+            chooseCard(event.data.player,event.data.i,event.data.value,event.data.sides);
         });
     }
     for (var card = 0 ; card<options.length ; card++) {
@@ -22,7 +22,7 @@ function playHuman(player,value) {
         }
     }
 }
-function chooseCard(player,card,value) {
+function chooseCard(player,card,value,sides) {
     
     $('#o'+player).append("<div class='choose option' id='back'>BACK</div>");
     $('#back').bind('click',{player:player,value:value}, function(event) {
@@ -32,24 +32,21 @@ function chooseCard(player,card,value) {
         $('.choose').removeClass('choose');
         playHuman(event.data.player,event.data.value);
     });
-    options = getOptions([players[player][card]]);
-    if (options[0]===0) {
-        var options = [];
-        options.push(addJR());
+    if (sides===0) {
+        sides = addJR();
     }
     
-    if (options[0]===-1) {
-        var options = [];
-        options.push(removeJR(value));
-        for (var side = 0 ; side<options[0].length ; side++) {
-            var x = options[0][side][0];
-            var y = options[0][side][1];
+    if (sides===-1) {
+        sides = removeJR(value);
+        for (var side = 0 ; side<sides.length ; side++) {
+            var x = sides[side][0];
+            var y = sides[side][1];
             showChooseRemove(player,x,y,value,card);
         }
         return;
     }
     
-    if (options[0].length===0) {
+    if (sides.length===0) {     //useless card
         $('#o'+player).append("<div class='choose option' id='remove'>REMOVE</div>");
         $('#remove').bind('click',{player:player,value:value,card:card}, function(event) {
             $('.option').remove();
@@ -61,9 +58,9 @@ function chooseCard(player,card,value) {
         });
     }
     
-    for (var side = 0 ; side<options[0].length ; side++) {
-        var x = options[0][side][0];
-        var y = options[0][side][1];
+    for (var side = 0 ; side<sides.length ; side++) {
+        var x = sides[side][0];
+        var y = sides[side][1];
         showChoose(player,x,y,value,card);
     }
 }

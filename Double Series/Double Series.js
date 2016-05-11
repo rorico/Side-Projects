@@ -106,7 +106,7 @@ var players = [];
 var blueLines = 0;
 var greenLines = 0;
 var cardsleft = maxCards - 4 * handLength - 1;
-var cardsplayed = [];
+var cardsPlayed = [];
 var gameEnd = false;
 var animate = true;
 $(document).ready(function(){
@@ -278,7 +278,7 @@ function drawCard(player,index,value,change) {
     if (showMoves) {
         showPlaces(player);
     }
-    cardsplayed.push(players[player][index]);
+    cardsPlayed.push(players[player][index]);
     if (cardsleft!==-1) {
         players[player][index] = deck[cardsleft];
         cardsleft--;
@@ -1214,7 +1214,7 @@ function restart (){
     if (animate) {
         $('#card_played').empty();
     }
-    cardsplayed = [];
+    cardsPlayed = [];
     cardsleft = maxCards - 4 * handLength - 1;
     blueLines = 0;
     greenLines = 0;
