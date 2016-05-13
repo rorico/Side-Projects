@@ -17,13 +17,13 @@ function playBest(player,value,offensive) {
                 var side = Math.floor(Math.random()*options2.length);
                 var x = options2[side][0];
                 var y = options2[side][1];
-                return [-1,card,[x,y]];
+                return [-1,removePos,[x,y]];
             }  else if (hasOnlyRemoveJ(players[player])){
                 options = removeJR(value);
                 var side = Math.floor(Math.random()*options.length);
                 var x = options[side][0];
                 var y = options[side][1];
-                return [-1,card,[x,y]];
+                return [-1,removePos,[x,y]];
             }
         }
 
@@ -35,13 +35,13 @@ function playBest(player,value,offensive) {
                 var side = Math.floor(Math.random()*options2.length);
                 var x = options2[side][0];
                 var y = options2[side][1];
-                return [1,card,[x,y]];
+                return [1,addPos,[x,y]];
             } else if (hasOnlyJ(players[player])){
                 options = addJR();
                 var side = Math.floor(Math.random()*options.length);
                 var x = options[side][0];
                 var y = options[side][1];
-                return [1,card,[x,y]];
+                return [1,addPos,[x,y]];
             }
         }
     }
