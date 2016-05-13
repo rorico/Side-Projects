@@ -1,12 +1,12 @@
 ::-webkit-scrollbar { 
     display: none; 
 }
-#one{
+#board{
     padding-bottom: 10px;
     color:white;
     text-align: center;
 }
-#one td{
+#board td{
     width:40px;
     height:40px;
     border:1px black solid;
@@ -14,26 +14,29 @@
 #scores td{
     width:75px;
 }
-#one .v0{
+#board .v0{
     color: black;
 }
-#one .v1{
+#board .v1{
     background-color: #191970;
 }
-#one .v2{
+#board .v2{
     background-color: #191970;
     width:34px;
     height:34px;
     border:4px #add8e6 solid;
 }
-#one .v3{
+#board .v3{
     background-color: #6e8b3d;
 }
-#one .v4{
+#board .v4{
     background-color: #6e8b3d;
     width:34px;
     height:34px;
     border:4px black solid;
+}
+#options{
+    float:right;
 }
 .c1{
     background-color: #191970;

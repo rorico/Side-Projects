@@ -109,8 +109,11 @@ var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 var gameEnd = false;
 var animate = true;
+var checkValid = false;
+var info = {board:board};
 $(document).ready(function(){
-    initialize();
+    createBoard();
+    newGame();
     delayedStart(0,0);
 });
 
@@ -131,8 +134,8 @@ function start(i,j){
             return;
         } else {
             if (players[player].length!==0) {
-                var result = [-2,-1,[-1,-1]]; //[action,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ
-                if (team===1) {
+                var result = [-2,-1,[-1,-1]]; //[action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ
+                if (team === 1) {
                     result = playBlue(player);
                 } else if (team === 3) {
                     result = playGreen(player);
@@ -146,9 +149,9 @@ function start(i,j){
                 if (action === 0) {    //throw away card
                     i--;                   //repeat turn
                 } else if (action === -1 ){
-                    value0(x,y);
+                    removePoint(x,y);
                 } else if (action === 1) {
-                    changeValue(x,y,team);
+                    addPoint(x,y,team);
                     checker(x,y);
                 }
                 drawCard(player,card,team);
@@ -162,7 +165,7 @@ function start(i,j){
         $('#pause').css('display','block');
     } else if(gameEnd){         //this allows for game ends shown at 0 speed
         gameEnd=false;
-        restart();
+        newGame();
         delayedStart(0,j+1);
     } else {                //end game
         if(greenLines>=2){
@@ -237,35 +240,40 @@ function noDelay() {
         $('#blueP').text(((bluewin/(j+1))*100).toFixed(2)+"%");
         $('#greenP').text(((greenwin/(j+1))*100).toFixed(2)+"%");
         $('#tieP').text(((ties/(j+1))*100).toFixed(2)+"%");
-        restart();
+        newGame();
     }
     showWorth();
 }
 //array of options that player can play
-//Output [card][side][row i, col yj]
-function getOptions(player){
+//Output [card][side][row x, col y]
+function getOptions(cards){
     var options = [];
-    for( var k = 0 ; k<player.length ; k++ )
+    for( var k = 0 ; k<cards.length ; k++ )
     {
-        var options1 = [];
-
+        var sides = [];
+        var card = cards[k];
         //if jacks, just push jacks
-        if (player[k]===0||player[k]===-1) {
-            options1=player[k];
+        if (card === 0||card === -1) {
+            sides = card;
         } else {
-            
-            for( var i = 0 ; i<board.length ; i++ )
+            var possible = [];
+            if(card === 1) {
+                possible = [[0,0],[0,9],[9,0],[9,9]];
+            } else if(card < 10) {
+                possible = [[0,card-1],[9,10-card]];
+            } else {
+                var x = Math.floor(card/10);
+                var y = card % 10;
+                possible = [[x,y],[9-x,9-y]];
+            }
+            for( var i = 0 ; i<possible.length ; i++ )
             {
-                for( var j = 0 ; j<board[i].length ; j++ )
-                {
-                    //checks if played on the board, adds to options
-                    if (board[i][j]===player[k]&&points[i][j]===0) {
-                        options1.push([i,j]);
-                    }
+                if (points[possible[i][0]][possible[i][1]]===0) {
+                    sides.push([possible[i][0],possible[i][1]]);
                 }
             }
         }
-        options.push(options1);
+        options.push(sides);
     }
     return options;
 }
@@ -1078,7 +1086,7 @@ function hasUselessCard(options) {
 
 //-----------------game functions--------------//
 //creates board and deck
-function initialize()
+function createBoard()
 {
     //creates indexes for rows 1 - 5
     for (var row = 0 ; row < 5 ; row++) {
@@ -1117,6 +1125,20 @@ function initialize()
         points.push(points[4-i].slice());
         pointworth.push(pointworth[4-i].slice());
     }
+
+    //create board display
+    var cnt = 1;
+    for(var i = 0 ; i<board.length ; i++)
+    {
+        $('#board').append('<tr id =board'+i+'></tr>');
+        for(var j = 0 ; j<board[i].length ; j++)
+        {
+            $('#board'+i).append('<td class="v'+points[i][j]+'" id="'+cnt+'">'+changeToCards(board[i][j])+'</td>');
+            cnt++;
+        }
+    }
+
+    //creates deck with 4 add Js, 4 remove Js, 4 corner pieces, and 2 of each other card
     for (var i = 2 ; i < 50 ; i++)
     {
         deck.push(i);
@@ -1125,60 +1147,22 @@ function initialize()
     for (var i = 0 ; i < 4 ; i++)
     {
         deck.push(1);
-    }
-    for (var i = 0 ; i < 4 ; i++)
-    {
         deck.push(0);
         deck.push(-1);
     }
-    shuffle(deck);
- 
-    //create deck //deal deck
-    var player1 = [];
-    var player2 = [];
-    var player3 = [];
-    var player4 = [];
-    for (var i = maxCards - handLength ; i < maxCards ; i++)
-    {
-        player1.push(deck[i]);
-    }
-    for (var i = maxCards - 2 * handLength ; i < maxCards - handLength ; i++)
-    {
-        player2.push(deck[i]);
-    }
-    for (var i = maxCards - 3 * handLength ; i < maxCards - 2 * handLength ; i++)
-    {
-        player3.push(deck[i]);
-    }
-    for (var i = maxCards - 4 * handLength ; i < maxCards - 3 * handLength ; i++)
-    {
-        player4.push(deck[i]);
-    }
-    players = [player1.slice(),player2.slice(),player3.slice(),player4.slice()];
-    showHands();
     
-    var cnt = 1;
-    for(var i = 0 ; i<board.length ; i++)
-    {
-        $('#one').append('<tr id =one'+i+'></tr>');
-        for(var j = 0 ; j<board[i].length ; j++)
-        {
-            $('#one'+i).append('<td class="v'+points[i][j]+'" id="'+cnt+'">'+changeToCards(board[i][j])+'</td>');
-            cnt++;
-        }
-    }
 }
 
 //restart game
-function restart (){
+function newGame(){
     for (var row = 0 ; row < 10 ; row++) {
         for( var col = 0 ; col< 10 ; col++)
         {
             points[row][col]=0;
         }
     }
+
     shuffle(deck);
-    
     var player1 = [];
     var player2 = [];
     var player3 = [];
@@ -1242,7 +1226,7 @@ function shuffle(array) {
 }
 
 //changes a value to 0 because of remove J
-function value0(x,y) {
+function removePoint(x,y) {
     points[x][y] = 0;
         var position = 10*x+y+1;
         if (animate) {
@@ -1252,7 +1236,7 @@ function value0(x,y) {
 }
 
 //changes value to given value of card played
-function changeValue(x,y,value) {
+function addPoint(x,y,value) {
     points[x][y] = value;
         var position = 10*x+y+1;
         if (animate) {
@@ -1338,6 +1322,19 @@ function showWorth() {
         }
     }
     showArray(pointworth,"#values");
+}
+function isEqual(array1,array2) {
+    for (var i = 0 ; i<array1.length ; i++) {
+        if (Array.isArray(array1[i])) {
+            if (!isEqual(array1[i],array2[i])) 
+                return false;
+        } else {
+            if(array1[i] !== array2[i]){
+                return false;
+            }
+        }
+    }
+    return true;
 }
 function showArray(data,container){
     if (Array.isArray(data)) {

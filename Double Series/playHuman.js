@@ -80,7 +80,7 @@ function showChoose(player,x,y,value,card) {
     });
 }
 function chooseSide(player,x,y,value,card) {
-    changeValue(x,y,value);
+    addPoint(x,y,value);
     checker(x,y);
     drawCard(player,card,value);
     $('.hide').removeClass('hide');
@@ -102,7 +102,7 @@ function showChooseRemove(player,x,y,value,card) {
     });
 }
 function chooseSideRemove(player,x,y,value,card) {
-    value0(x,y);
+    removePoint(x,y);
     drawCard(player,card,value);
     $('.hide').removeClass('hide');
     delayedStart(turnN+1,gameN);
