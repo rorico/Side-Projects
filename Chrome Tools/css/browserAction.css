@@ -1,0 +1,97 @@
+body{
+    font-family: 'Times New Roman';
+    font-size: 100%;
+    width:400px;
+    text-align:center;
+}
+div{
+    text-align: center;
+}
+div p{
+    position:relative;
+    margin:0;
+}
+#alarmContainer{
+    float:right;
+    width:30%;
+    border-radius:5px;
+    height:100%;
+    border:1px black solid;
+}
+#alarmText{
+    margin:10px;
+}
+.alarm{
+    border-radius:5px;
+    border:1px black solid;
+    margin:10px;
+}
+#setTimer{
+    width:70px;
+}
+.alarmTitle{
+    float:left;
+    height:50px;
+    width:50px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+    border-right:1px solid black;
+    display:inline-block;
+}
+.alarmData{
+    height:50px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+    display:inline-block;
+}
+.notSet{
+    opacity:0.3;
+}
+#timeLine{
+    height: 50px;
+    float:left;
+}
+#timeLineHolder{
+    border:1px solid black;
+    border-radius: 2px;
+    display: inline-block;
+}
+.timeLine{
+    height:48px;
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+    display:inline-block;
+}
+.timeLineBlock{
+    border: 1px solid white;
+    height:48px;
+}
+.wasting{
+    background-color: red;
+}
+.using{
+    background-color: black;
+}
+#info{      
+    word-wrap: break-word;
+}
+.axisPart{
+    display:inline-block;
+    float:left;
+    padding:0;
+    height:3px;
+    width:59px;
+    border-right:1px solid black;
+}
+.axisPart.top{
+    border-bottom: 1px solid black;
+}
+.axisPart.bot{
+    border-top: 1px solid black;
+}
+.axisPart.end{
+    width:60px;
+    border-right:0;
+}
