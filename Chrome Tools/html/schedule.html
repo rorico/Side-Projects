@@ -22,6 +22,9 @@
             float:left;
             display:inline;;
         }
+        #header{
+            height:30px;
+        }
         #datepicker{
             text-align:center;
             width:200px;
@@ -115,48 +118,12 @@
         .LAB{
             border-color:red;
         }
-        #alarmContainer{
-            float:right;
-            width:30%;
-            border-radius:5px;
-            height:100%;
-            border:1px black solid;
-        }
-        .alarm{
-            border-radius:5px;
-            border:1px black solid;
-            margin:10px;
-        }
-        
-        #setTimer{
-            width:70px;
-        }
-        .alarmTitle{
-            float:left;
-            height:50px;
-            width:50px;
-            text-align: center;
-            vertical-align: middle;
-            line-height: 50px;
-            border-right:1px solid black;
-            display:inline-block;
-        }
-        .alarmData{
-            height:50px;
-            text-align: center;
-            vertical-align: middle;
-            line-height: 50px;
-            display:inline-block;
-        }
-        .notSet{
-            opacity:0.3;
-        }
     </style>
 </head>
 
 <body>
 <div id="calendar">
-<div style="height:22px;">
+<div id="header">
 <input type="button" value="Prev" id="prev">
 <input type="text" id="datepicker">
 <input type="button" value="Next" id="next">
