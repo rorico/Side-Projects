@@ -39,7 +39,7 @@ chrome.storage.sync.get('redirects', function(items) {
         }
         redirects.push([+new Date(),info.url,1]);
         chrome.storage.sync.set({'redirects': redirects});*/
-        return {redirectUrl: chrome.extension.getURL("/SchedulePage/Schedule.html")};
+        return {redirectUrl: chrome.extension.getURL("/html/Schedule.html")};
     }
 });
 
