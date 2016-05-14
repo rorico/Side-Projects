@@ -16,6 +16,7 @@ chrome.storage.sync.get('redirects', function(items) {
         var now = new Date();
         var position = now.getHours()*100+now.getMinutes()/0.6;
         for (var i = 0 ; i < today.length ; i++) {
+            //today comes from scheduleInfo.js
             if (today[i][0][1] > position) {
                 break;
             } else if (today[i][0][2] > position) {
