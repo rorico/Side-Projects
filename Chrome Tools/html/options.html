@@ -2,8 +2,10 @@
 
 <html>
 <head>
-	<title>Schedule</title>
-    <script type="text/javascript" src="/jquery/jquery.min.js"></script>
+    <title>Chrome Tools Options</title>
+    <script type="text/javascript" src="/lib/jquery.min.js"></script>
+    <script type="text/javascript" src="/lib/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="/lib/jquery-ui.min.css">
     <style>
         body{
             font-family: 'Times New Roman';
@@ -154,73 +156,13 @@
         .notSet{
             opacity:0.3;
         }
-        #timeLine{
-            height: 50px;
-            float:left;
-        }
-        #timeLineHolder{
-            border:1px solid black;
-            border-radius: 2px;
-            display: inline-block;
-        }
-        .timeLine{
-            height:48px;
-            border-top: 1px solid white;
-            border-bottom: 1px solid white;
-            display:inline-block;
-        }
-        .wasting{
-            background-color: red;
-        }
-        .using{
-            background-color: black;
-        }
-        .timeLineBlock{
-            border: 1px solid white;
-            height:48px;
-        }
-        #info{      
-            word-wrap: break-word;
-        }
-        .axisPart{
-            display:inline-block;
-            float:left;
-            padding:0;
-            height:3px;
-            width:59px;
-            border-right:1px solid black;
-        }
-        .axisPart.top{
-            border-bottom: 1px solid black;
-        }
-        .axisPart.bot{
-            border-top: 1px solid black;
-        }
-        .axisPart.end{
-            width:60px;
-            border-right:0;
-        }
     </style>
 </head>
 
-<body style="width:400px;text-align:center;">
-<div id="timer" class="alarm">Alarm
-<p style="margin:10px;">Set alarm to sound in <input id="setTimer" value="5" type="number"/> minutes <input type="button" value="SET" id="timerButton"/></p>
-</div>
-<div id="alarms" class="alarm">
-    <div class="alarm notSet"><div class="alarmTitle">1</div><div id="alarm1" class="alarmData">Not Set</div></div>
-    <div class="alarm notSet"><div class="alarmTitle">2</div><div id="alarm2" class="alarmData">Not Set</div></div>
-    <div class="alarm notSet"><div class="alarmTitle">3</div><div id="alarm3" class="alarmData">Not Set</div></div>
-    <div class="alarm notSet"><div class="alarmTitle">4</div><div id="alarm4" class="alarmData">Not Set</div></div>
-    <div class="alarm notSet"><div class="alarmTitle">5</div><div id="alarm5" class="alarmData">Not Set</div></div>
-</div>
-<div id="test"></div>
-<div id="timeLineHolder">
-    <div id="axisTop"><div class="axisPart top"></div><div class="axisPart top"></div><div class="axisPart top"></div><div class="axisPart top"></div><div class="axisPart top"></div><div class="axisPart top end"></div></div>
-    <div id="timeLine"></div>
-    <div id="axisBot"><div class="axisPart bot"></div><div class="axisPart bot"></div><div class="axisPart bot"></div><div class="axisPart bot"></div><div class="axisPart bot"></div><div class="axisPart bot end"></div></div>
-</div>
-<div id="info"></div>
-<script type="text/javascript" src="browserAction.js"></script>
+<body>
+<div id="container" style="width:100%; height:400px;"></div>
+
+<script type="text/javascript" src="/lib/highcharts.js"></script>
+<script type="text/javascript" src="/js/options.js"></script>
 </body>
 </html>

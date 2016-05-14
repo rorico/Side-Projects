@@ -30,7 +30,7 @@ var alarms = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]; //state, alarm
 
 var alarmCnt = 0;
 var ringingCnt = 0;
-var audio = new Audio('alarm.mp3');
+var audio = new Audio('/alarm.mp3');
 var playAlarmCheck = [false];   //array so that it is pass by reference
 
 //returns [alarmNumber, alarm timestamp]
