@@ -23,7 +23,7 @@
       "description": "Open Schedule"
     }
   },
-  "options_page": "options.html",
+  "options_page": "html/options.html",
   "web_accessible_resources": ["*"],
   "manifest_version": 2
 }
