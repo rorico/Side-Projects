@@ -46,6 +46,7 @@ function setAlarm(delay,type) {
                 ringingCnt++;
                 alarms[i][0] = 2; 
                 playAlarmCheck[0] = true;
+                sendRequest("ringing",i);
                 var interval = setInterval(function(){
                     if (playAlarmCheck[0]) {
                         audio.play();
@@ -56,7 +57,7 @@ function setAlarm(delay,type) {
             },delay*60000);
 
             alarms[i] = [1,alarmTime,alarm,type];
-            sendRequest("setAlarm",[i,+alarmTime]);
+            sendRequest("setAlarm",[i,+alarmTime],type);
             return [i,+alarmTime];
         }
     }

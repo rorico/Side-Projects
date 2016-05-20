@@ -38,6 +38,7 @@ div p{
     line-height: 50px;
     border-right:1px solid black;
     display:inline-block;
+    border-color:inherit;
 }
 .alarmData{
     height:50px;
@@ -94,4 +95,12 @@ div p{
 .axisPart.end{
     width:60px;
     border-right:0;
+}
+.sleep{
+    border-color: blue;
+    color: blue;
+}
+.block{
+    border-color: red;
+    color: red;
 }

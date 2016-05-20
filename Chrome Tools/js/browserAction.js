@@ -1,15 +1,13 @@
-var alarms;
-var playAlarmCheck;
-
+var ringingAlarms = [0,0,0,0,0];
 chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var background = backgroundPage;
-    alarms = background.alarms;
-    playAlarmCheck = background.playAlarmCheck;
+    var alarms = background.alarms;
     for (var i = 0 ; i < alarms.length ; i++) {
         if (alarms[i][0] == 1) {
-            showAlarm(alarms[i][1],i);
+            showAlarm(alarms[i][1],i,alarms[i][3]);
         } else if (alarms[i][0] == 2) {
-            showAlarm(alarms[i][1],i);
+            showAlarm(alarms[i][1],i,alarms[i][3]);
+            showRinging(i);
         }
     }
     var timeLeft = background.timeLeft;
@@ -165,6 +163,10 @@ function changeTimer(digit) {
     now = new Date();
     if (now-time<1000) {
         currentTimer += digit.toFixed(0);
+        //limit to 3 digits
+        if (currentTimer.length > 3) {
+            currentTimer = currentTimer.substring(1);
+        }
         $('#setTimer').val(currentTimer);
     } else {
         currentTimer = digit;
@@ -173,9 +175,17 @@ function changeTimer(digit) {
     time = new Date();
 }
 
+var resetPhrase = "reset";
+var resetIndex = 0;
 var deletes = false;
 $(window).keydown(function(e) {
     switch (e.keyCode) {
+        //get lowercase ascii value of next part
+        case resetPhrase.charCodeAt(resetIndex) - 32:
+            if(++resetIndex === resetPhrase.length) {
+                resetTimeLine();
+            }
+            break;
         case 83:        //s
             setAlarm(+$('#setTimer').val());
             break;
@@ -188,19 +198,12 @@ $(window).keydown(function(e) {
         case 88:        //x
             snooze();
             break;
-        case 81:        //q
-            setAlarm(5);
-            break;
         case 87:        //w
             setAlarm(15);
             break;
         case 69:        //e
             setAlarm(30);
             break;
-        case 82:        //r
-            setAlarm(60);
-            break;
-        case 48:        //0
         case 49:        //1
         case 50:
         case 51:
@@ -215,10 +218,10 @@ $(window).keydown(function(e) {
         case 56:
         case 57:
         case 58:
+        case 48:        //0
             changeTimer(e.keyCode-48);
             break;
-        case 96:        //keypad 0
-        case 97:
+        case 97:        //keypad 1
         case 98:
         case 99:
         case 100:
@@ -231,6 +234,7 @@ $(window).keydown(function(e) {
         case 103:
         case 104:
         case 105:
+        case 96:        //keypad 0
             changeTimer(e.keyCode-96);
             break;
 
@@ -248,6 +252,11 @@ $(window).keydown(function(e) {
             break;
     }
 });
+
+function resetTimeLine() {
+    console.log("rest");
+    alert("test");
+}
 
 //send requests to background
 function sendRequest(action,input){
@@ -279,28 +288,56 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
     if(a.from === "background") {
         switch(a.action) {
             case "setAlarm":
-                input = a.input;
-                showAlarm(new Date(input[1]),input[0]);
+                var input = a.input;
+                showAlarm(new Date(input[1]),input[0],input[2]);
                 break;
             case "removeAlarm":
-                input = a.input;
-                showRemove(input);
+                showRemove(a.input);
+                break;
+            case "ringing":
+                showRinging(a.input);
                 break;
         }
     }
 });
 
-function showAlarm(date,index) {
+
+function alarmTypeOf(type) {
+    switch(type) {
+        case 1:
+            return "sleep";
+        case 2:
+            return "block";
+        default:
+            return "";
+    }
+}
+
+function showAlarm(date,alarmNumber,type) {
     var time = date.toLocaleTimeString();
-    $('#alarm'+(index+1)).html("Alarm at "+time);
-    $('#alarm'+(index+1)).parent().removeClass("notSet");
+    $('#alarmText'+(alarmNumber+1)).html("Alarm at "+time);
+    $('#alarm'+(alarmNumber+1)).removeClass("notSet");
+    $('#alarm'+(alarmNumber+1)).addClass(alarmTypeOf(type));
+    $('#alarm'+(alarmNumber+1)).bind("click",function(){
+        removeAlarm(alarmNumber);
+    });
 }
 
 function showRemove(alarmNumber) {
-    $('#alarm'+(alarmNumber+1)).html("Not Set");
-    $('#alarm'+(alarmNumber+1)).parent().addClass("notSet");
+    $('#alarmText'+(alarmNumber+1)).html("Not Set");
+    $('#alarm'+(alarmNumber+1)).addClass("notSet");
+    $('#alarm'+(alarmNumber+1)).unbind("click");
+    clearInterval(ringingAlarms[alarmNumber]);
+    $('#alarmText'+(alarmNumber+1)).css("visibility","visible");
 }
 
+function showRinging(alarmNumber) {
+    var visibility = "hidden";
+    ringingAlarms[alarmNumber] = setInterval(function(){
+        visibility = (visibility === "hidden" ? "visible" : "hidden");
+        $('#alarmText'+(alarmNumber+1)).css("visibility",visibility)
+    },300);
+}
 
 function changeTime(change) {
     delay = parseInt($('#setTimer').val());
