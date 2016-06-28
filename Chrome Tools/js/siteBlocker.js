@@ -6,6 +6,7 @@ var tabId = -1;
 var timeLeft = 600000; //start at 10 mins
 var alarm;
 var timeLine = [];
+var returnTimers = [];
 var urls = [
     "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
     "http://threesjs.com/"
@@ -106,7 +107,7 @@ function handleNewPage(newWasting,newUrl,newTitle) {
 }
 
 function returnTime(time,delay) {
-    setTimeout(function(){
+    timer = setTimeout(function(){
         if(timeLeft < 0 && -timeLeft < time) {
             delay = -timeLeft;
             timeLeft = 0;
@@ -115,6 +116,7 @@ function returnTime(time,delay) {
             timeLeft += time;
         }
     },delay);
+    returnTimers.push(timer);
 }
 
 function matchesURL(url) {
@@ -139,4 +141,17 @@ function setReminder(time){
             setReminder(timeLeftP - timeLeft);
         }
     },time);
+}
+
+function resetTime(){
+    for (var i = 0 ; i < returnTimers.length ; i++) {
+        clearTimeout(returnTimers[i]);
+    }
+    returnTimers = [];
+    timeLeft = 600000;
+    timeLine = [];
+    //set-up first time when opened
+    chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab){
+        handleNewPage(matchesURL(tab.url),tab.url,tab.title);
+    })
 }

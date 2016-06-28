@@ -257,6 +257,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     });
 
     function resetTimeLine() {
+        resetTime();
         console.log("rest");
         alert("test");
     }
