@@ -1,5 +1,5 @@
-var ringingAlarms = [0,0,0,0,0];
 chrome.runtime.getBackgroundPage(function (backgroundPage) {
+    var ringingAlarms = [0,0,0,0,0];
     var background = backgroundPage;
     var typeColors = backgroundPage.typeColors;
     var defaultColor = backgroundPage.defaultColor;
@@ -13,6 +13,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             showRinging(i);
         }
     }
+    var timeLineLength = background.timeLineLength;
     var timeLeft = background.timeLeft;
     var startTime = background.startTime;
     var wastingTime = background.wastingTime;
@@ -30,9 +31,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     $('#info').html(formatInfo(url,timeCurrent,title));
     var timeLine = background.timeLine;
     var parentWidth = 360;
-    var timeLeft = parentWidth;
+    var timeLineLeft = parentWidth;
     var offset = 0;
-    var cnt = 0;    //used to set hovers
     var hover = false;
     var click = false;
     if(addTimeLine([timeCurrent,wastingTime,url],false)){
@@ -41,14 +41,14 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 break;
             }
         }
-        if(timeLeft > 0) {
-            $('#timeLine').prepend('<div style="width:' + timeLeft + 'px" class="timeLine"></div>');
+        if(timeLineLeft > 0) {
+            $('#timeLine').prepend('<div style="width:' + timeLineLeft + 'px" class="timeLine"></div>');
         }
     }
     updateTimeLine();
-    
+
     function addTimeLine(info,hover) {        //returns true if not done
-        var time = info[0]/3600000 * parentWidth + offset;
+        var time = info[0]/timeLineLength * parentWidth + offset;
         offset = time%1;
         time = Math.floor(time);
         if(time < 1 && hover) {
@@ -56,28 +56,29 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             return true;
         }
         var ret = true;
-        if(time >= timeLeft) {
-            time = timeLeft;
-            timeLeft = 0;
+        if(time >= timeLineLeft) {
+            time = timeLineLeft;
+            timeLineLeft = 0;
             ret = false;
         } else {
-            timeLeft -= time;
+            timeLineLeft -= time;
         }
         var classAddon = '';
         if(time >= 3) {
             time -= 2;
             classAddon = ' timeLineBlock';
         }
-        $('#timeLine').prepend('<div style="width:' + time + 'px" id="timeLine' + cnt + '" class="timeLine ' + timeType(info[1]) + classAddon + '"></div>');
-        setClick(info);
+        var timeLineEntry = $('<div style="width:' + time + 'px;" class="timeLine ' + timeType(info[1]) + classAddon + '"></div>');
+        $('#timeLine').prepend(timeLineEntry);
+        setClick(timeLineEntry,info);
         if (hover) {
-            setHover(info);
+            setHover(timeLineEntry,info);
         }
         return ret;
     }
 
-    function setHover(info) {
-        $('#timeLine'+cnt).hover(function(){
+    function setHover(ele,info) {
+        ele.hover(function(){
             hover = true;
             $('#info').html(formatInfo(info[2],info[0],info[3]));
         },function(){
@@ -86,10 +87,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 $('#info').html(formatInfo(url,timeCurrent,title));
             }
         });
-        cnt++;
     }
-    function setClick(info) {
-        $('#timeLine'+cnt).click(function(){
+    function setClick(ele,info) {
+        ele.click(function(){
             click = true;
             $('#info').html(formatInfo(info[2],info[0],info[3]));
         });
@@ -106,7 +106,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function updateTimeLine() {
         var parentWidth = $('#timeLine').width();
-        var delay = 3600000/parentWidth;
+        var delay = timeLineLength/parentWidth;
         setInterval(function(){
             var width = 1;
             $('#timeLine div:last-child').width(($('#timeLine div:last-child').width() + width));
@@ -258,8 +258,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function resetTimeLine() {
         resetTime();
-        console.log("rest");
-        alert("test");
     }
 
     //send requests to background
