@@ -4,9 +4,12 @@ var url = "";
 var title = "";
 var tabId = -1;
 var timeLeft = 600000; //start at 10 mins
+var timeLineLength = 3600000; // 1 hour
 var alarm;
 var timeLine = [];
+var timeLineAsync = true;
 var returnTimers = [];
+var returnTimer = -1;
 var urls = [
     "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
     "http://threesjs.com/"
@@ -48,6 +51,7 @@ chrome.storage.sync.get('redirects', function(items) {
 chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab){
     handleNewPage(matchesURL(tab.url),tab.url,tab.title);
 })
+returnTime(timeLineLength - timeLeft);
 
 chrome.tabs.onActivated.addListener(function(activeInfo){
     this.tabId = activeInfo.tabId;
@@ -86,16 +90,33 @@ function handleFocus(newFocused){
     focused = newFocused;
 }*/
 
+//used to make sure there is no async problems, likely not needed
+function handleTimeLineAsync(action,load) {
+    while(!timeLineAsync) {
+        console.log("didn't think this situation would ever happen, good thing I coded this");
+    }
+    timeLineAsync = false;
+    if(action === "push") {
+        timeLine.push(load);
+    } else if(action === "remove") {
+        timeLine.splice(0,load);
+    } else if(action === "change") {
+        timeLine[load][1] = false;
+        timeLeft += timeLine[load][0];
+    } else {
+        console.log("this shouldn't happen");
+    }
+    timeLineAsync = true;
+}
+
 function handleNewPage(newWasting,newUrl,newTitle) {
     stopAllAlarms(2);
     var timeSpent = new Date() - startTime; 
-    timeLine.push([timeSpent,wastingTime,url,title]);
+    handleTimeLineAsync("push",[timeSpent,wastingTime,url,title,startTime]);
     if(wastingTime) {
         var timeSpent = new Date() - startTime; 
-        var timeDelay = 3600000 - timeSpent;    //return time spent every hour
         clearTimeout(alarm);
         timeLeft -= timeSpent;
-        returnTime(timeSpent,timeDelay);
     }
     if (newWasting) {
         setReminder(timeLeft);
@@ -106,7 +127,7 @@ function handleNewPage(newWasting,newUrl,newTitle) {
     title = newTitle;
 }
 
-function returnTime(time,delay) {
+function returnTimeOld(time,delay) {
     timer = setTimeout(function(){
         if(timeLeft < 0 && -timeLeft < time) {
             delay = -timeLeft;
@@ -117,6 +138,54 @@ function returnTime(time,delay) {
         }
     },delay);
     returnTimers.push(timer);
+}
+
+
+
+function returnTime(delay) {
+    returnTimer = setTimeout(function(){
+        var date = new Date() - timeLineLength;
+        var cnt = 0;
+        var timeTotal = 0;
+        var currentTimeOffset = (new Date() - startTime) * wastingTime;
+        //remove anything after limit
+        for (var i = 0 ; i < timeLine.length ; i++) {
+            //endtime is same as next starttime
+            var endTime = (i === timeLine.length - 1 ? timeLine[i][4] + timeLine[i][0] : timeLine[i+1][4]);
+            if (date > endTime) {
+                if (timeLine[i][1]) {
+                    timeLeft += timeLine[i][0];
+                }
+                cnt++;
+            } else {
+                timeTotal = timeLine[i][4] - date; //negative
+                break;
+            }
+        }
+        if(cnt) {
+            handleTimeLineAsync("remove",cnt);
+        }
+        //return time and calculate when to call function again
+        //ideally check again when can return time again
+        var changed = [];
+        for (var i = 0 ; i < timeLine.length ; i++) {
+            if(timeLine[i][1]){
+                if(timeLeft - currentTimeOffset > timeTotal) {
+                    handleTimeLineAsync("change",i);
+                    changed.push(i);
+                } else if(timeLine[i][1]){
+                    break;
+                }
+            }
+            timeTotal += timeLine[i][0];
+        }
+        if(timeTotal > timeLeft - currentTimeOffset) {
+            returnTime(timeTotal - timeLeft + currentTimeOffset);
+        } else {
+            //likely current page is on for a long time
+            returnTime(timeLineLength - timeLeft);
+        }
+    },delay);
 }
 
 function matchesURL(url) {
@@ -148,10 +217,13 @@ function resetTime(){
         clearTimeout(returnTimers[i]);
     }
     returnTimers = [];
+    clearTimeout(returnTimer);
     timeLeft = 600000;
     timeLine = [];
     //set-up first time when opened
     chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab){
         handleNewPage(matchesURL(tab.url),tab.url,tab.title);
-    })
+    });
+    returnTime(timeLineLength - timeLeft);
 }
+
