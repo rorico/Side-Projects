@@ -35,9 +35,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var offset = 0;
     var hover = false;
     var click = false;
+    var totalOffset = 0;
     if(addTimeLine([timeCurrent,wastingTime,url],false)){
         for (var i = timeLine.length - 1 ; i != -1 ; i--) {
-            if(!addTimeLine(timeLine[i],true)) {
+            if(!addTimeLine(timeLine[i],true,i)) {
                 break;
             }
         }
@@ -47,7 +48,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
     updateTimeLine();
 
-    function addTimeLine(info,hover) {        //returns true if not done
+    function addTimeLine(info,hover,num) {        //returns true if not done
         var time = info[0]/timeLineLength * parentWidth + offset;
         offset = time%1;
         time = Math.floor(time);
@@ -55,6 +56,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             offset += time;
             return true;
         }
+        console.log(time);
         var ret = true;
         if(time >= timeLineLeft) {
             time = timeLineLeft;
@@ -68,7 +70,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             time -= 2;
             classAddon = ' timeLineBlock';
         }
-        var timeLineEntry = $('<div style="width:' + time + 'px;" class="timeLine ' + timeType(info[1]) + classAddon + '"></div>');
+        var timeLineEntry = $('<div style="width:' + time + 'px;" class="timeLine ' + timeType(info[1]) + classAddon + '" id="timeLine' + num + '"></div>');
         $('#timeLine').prepend(timeLineEntry);
         setClick(timeLineEntry,info);
         if (hover) {
@@ -299,6 +301,15 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     break;
                 case "ringing":
                     showRinging(a.input);
+                    break;
+                case "timeLine":
+                    var input = a.input;
+                    var changes = input[1];
+                    var offset = input[0];
+                    totalOffset += offset;
+                    for(var i = 0 ; i < changes.length ; i++) {
+                        $('#timeLine' + (changes[i] + totalOffset)).removeClass(timeType(1)).addClass(timeType(0));
+                    }
                     break;
             }
         }

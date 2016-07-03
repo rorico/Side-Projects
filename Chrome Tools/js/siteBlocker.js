@@ -179,6 +179,9 @@ function returnTime(delay) {
             }
             timeTotal += timeLine[i][0];
         }
+        //if browser action is open, update values
+        sendRequest("timeLine",[cnt,changed]);
+
         if(timeTotal > timeLeft - currentTimeOffset) {
             returnTime(timeTotal - timeLeft + currentTimeOffset);
         } else {
@@ -227,3 +230,12 @@ function resetTime(){
     returnTime(timeLineLength - timeLeft);
 }
 
+
+//for displaying in an open browser action
+function sendRequest(action,input){
+    chrome.runtime.sendMessage({
+        from: "background",
+        action: action,
+        input: input
+    });
+}
