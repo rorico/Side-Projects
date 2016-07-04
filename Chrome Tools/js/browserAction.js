@@ -20,6 +20,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var url = background.url;
     var title = background.title;
     var timeCurrent = new Date() - startTime;
+    var countDownTimer = -1;
     if (wastingTime) {
         timeLeft -= timeCurrent;
     }
@@ -56,7 +57,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             offset += time;
             return true;
         }
-        console.log(time);
         var ret = true;
         if(time >= timeLineLeft) {
             time = timeLineLeft;
@@ -100,7 +100,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         $('#test').html(MinutesSecondsFormat(time));
         if(on && time>0) {
             delay = (time-1)%1000+1;
-            setTimeout(function(){
+            countDownTimer = setTimeout(function(){
                 countDown(time - delay,on);
             },delay);
         }
@@ -309,7 +309,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     totalOffset += offset;
                     for(var i = 0 ; i < changes.length ; i++) {
                         $('#timeLine' + (changes[i] + totalOffset)).removeClass(timeType(1)).addClass(timeType(0));
+                        timeLeft += timeLine[changes[i]][0];
                     }
+                    clearTimeout(countDownTimer);
+                    countDown(timeLeft,wastingTime);
                     break;
             }
         }
