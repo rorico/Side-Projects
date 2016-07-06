@@ -21,13 +21,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var title = background.title;
     var timeCurrent = new Date() - startTime;
     var countDownTimer = -1;
-    if (wastingTime) {
-        timeLeft -= timeCurrent;
-    }
-    if(timeLeft < 0) {
-        timeLeft = 0;
-    }
-    countDown(timeLeft,wastingTime);
+    countDown(timeLeft);
 
     $('#info').html(formatInfo(url,timeCurrent,title));
     var timeLine = background.timeLine;
@@ -96,12 +90,23 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             $('#info').html(formatInfo(info[2],info[0],info[3]));
         });
     }
-    function countDown(time,on) {
+
+    function countDown(timeLeft) {
+        if (wastingTime) {
+            timeLeft -= timeCurrent;
+        }
+        if(timeLeft < 0) {
+            timeOffset = timeLeft;
+            timeLeft = 0;
+        }
+        countDownFunction(timeLeft);
+    }
+    function countDownFunction(time) {
         $('#test').html(MinutesSecondsFormat(time));
-        if(on && time>0) {
+        if(wastingTime && time>0) {
             delay = (time-1)%1000+1;
             countDownTimer = setTimeout(function(){
-                countDown(time - delay,on);
+                countDownFunction(time - delay);
             },delay);
         }
     }
@@ -312,7 +317,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                         timeLeft += timeLine[changes[i]][0];
                     }
                     clearTimeout(countDownTimer);
-                    countDown(timeLeft,wastingTime);
+                    countDown(timeLeft);
                     break;
             }
         }
