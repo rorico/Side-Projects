@@ -3,8 +3,9 @@ var wastingTime = false;
 var url = "";
 var title = "";
 var tabId = -1;
-var timeLeft = 600000; //start at 10 mins
 var timeLineLength = 3600000; // 1 hour
+var startingTimeLeft = 600000; // 10 mins
+var timeLeft = startingTimeLeft;
 var alarm;
 var timeLine = [];
 var timeLineAsync = true;
@@ -221,7 +222,7 @@ function resetTime(){
     }
     returnTimers = [];
     clearTimeout(returnTimer);
-    timeLeft = 600000;
+    timeLeft = startingTimeLeft;
     timeLine = [];
     //set-up first time when opened
     chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab){
