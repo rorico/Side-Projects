@@ -115,15 +115,25 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         var parentWidth = $('#timeLine').width();
         var delay = timeLineLength/parentWidth;
         setInterval(function(){
-            var width = 1;
-            $('#timeLine div:last-child').width(($('#timeLine div:last-child').width() + width));
-            var percentage = $('#timeLine div:first-child').width();
-            while(percentage<width) {
-                width -= percentage;
-                $('#timeLine div:first-child').remove();
-                percentage = $('#timeLine div:first-child').width();
+            var newEle = $('#timeLine div:last-child');
+            var oldestEle = $('#timeLine div:first-child');
+            if(!newEle.hasClass("timeLineBlock") && newEle.width() + 1 >= 2) {
+                newEle.width(newEle.width() - 1);
+                newEle.addClass("timeLineBlock");
+            } else {
+                newEle.width(newEle.width() + 1);
             }
-            $('#timeLine div:first-child').width((percentage - width));
+            //oldest has 0 width, remove
+            while(!oldestEle.hasClass("timeLineBlock") && oldestEle.width() <= 0) {
+                oldestEle.remove();
+                oldestEle = $('#timeLine div:first-child');
+            }
+            if(oldestEle.hasClass("timeLineBlock") && oldestEle.width() - 1 <= 0) {
+                oldestEle.width(oldestEle.width() + 1);
+                oldestEle.removeClass("timeLineBlock");
+            } else {
+                oldestEle.width(oldestEle.width() - 1);
+            }
         },delay);
         setInterval(function(){
             timeCurrent += 1000;
