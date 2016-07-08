@@ -69,11 +69,14 @@ div p{
     border: 1px solid white;
     height:48px;
 }
-.wasting{
+.wasting0{
+    background-color: black;
+}
+.wasting1{
     background-color: red;
 }
-.using{
-    background-color: black;
+.wasting2{
+    background-color: #8C0000;
 }
 #info{      
     word-wrap: break-word;

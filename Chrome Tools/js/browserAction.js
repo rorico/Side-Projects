@@ -64,7 +64,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             time -= 2;
             classAddon = ' timeLineBlock';
         }
-        var timeLineEntry = $('<div style="width:' + time + 'px;" class="timeLine ' + timeType(info[1]) + classAddon + '" id="timeLine' + num + '"></div>');
+        var timeLineEntry = $('<div style="width:' + time + 'px;" class="timeLine wasting' + info[1] + classAddon + '" id="timeLine' + num + '"></div>');
         $('#timeLine').prepend(timeLineEntry);
         setClick(timeLineEntry,info);
         if (hover) {
@@ -323,8 +323,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     var offset = input[0];
                     totalOffset += offset;
                     for(var i = 0 ; i < changes.length ; i++) {
-                        $('#timeLine' + (changes[i] + totalOffset)).removeClass(timeType(1)).addClass(timeType(0));
-                        timeLeft += timeLine[changes[i]][0];
+                        $('#timeLine' + (changes[i][0] + totalOffset)).removeClass("wasting"+changes[i][1]).addClass("wasting0");
+                        timeLeft += changes[i][2];
                     }
                     clearTimeout(countDownTimer);
                     countDown(timeLeft);

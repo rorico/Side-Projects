@@ -11,10 +11,17 @@ var timeLine = [];
 var timeLineAsync = true;
 var returnTimers = [];
 var returnTimer = -1;
-var urls = [
+var displayTimer = -1;
+//sites that will block after time spent
+var urls = [[
     "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
-    "http://threesjs.com/"
-]
+    "http://threesjs.com/",
+],
+//sites that will spend time but not actively block
+[
+    "http://*.youtube.com/*", "https://*.youtube.com/*",
+    "http://*.imgur.com/*", "https://*.imgur.com/*"
+]];
 chrome.storage.sync.get('redirects', function(items) {
     var redirects = items.redirects;
     chrome.webRequest.onBeforeRequest.addListener(function(info) {
@@ -33,7 +40,7 @@ chrome.storage.sync.get('redirects', function(items) {
         }
     },
     {
-        urls: urls,
+        urls: urls[0],
         types: ["main_frame"]
     },
         ["blocking"]
@@ -102,7 +109,7 @@ function handleTimeLineAsync(action,load) {
     } else if(action === "remove") {
         timeLine.splice(0,load);
     } else if(action === "change") {
-        timeLine[load][1] = false;
+        timeLine[load][1] = 0;
         timeLeft += timeLine[load][0];
     } else {
         console.log("this shouldn't happen");
@@ -116,10 +123,12 @@ function handleNewPage(newWasting,newUrl,newTitle) {
     handleTimeLineAsync("push",[timeSpent,wastingTime,url,title,startTime]);
     if(wastingTime) {
         var timeSpent = new Date() - startTime; 
-        clearTimeout(alarm);
         timeLeft -= timeSpent;
+        if(wastingTime === 1) {
+            clearTimeout(alarm);
+        }
     }
-    if (newWasting) {
+    if (newWasting === 1) {
         setReminder(timeLeft);
     }
     startTime = new Date();
@@ -173,7 +182,7 @@ function returnTime(delay) {
             if(timeLine[i][1]){
                 if(timeLeft - currentTimeOffset > timeTotal) {
                     handleTimeLineAsync("change",i);
-                    changed.push(i);
+                    changed.push([i,timeLine[i][1],timeLine[i][0]]);
                 } else if(timeLine[i][1]){
                     break;
                 }
@@ -192,13 +201,16 @@ function returnTime(delay) {
     },delay);
 }
 
+//checks all levels and returns the level of url if matched, 0 if none
 function matchesURL(url) {
-    for (var i = 0 ; i < urls.length ; i++) {
-        if (new RegExp("^" + urls[i].replace(/\./g,"\\.").replace(/\*/g, ".*") + "$").test(url)){
-            return true;
+    for (var lvl = 0 ; lvl < urls.length ; lvl++) {
+        for (var i = 0 ; i < urls[lvl].length ; i++) {
+            if (new RegExp("^" + urls[lvl][i].replace(/\./g,"\\.").replace(/\*/g, ".*") + "$").test(url)){
+                return lvl + 1;
+            }
         }
     }
-    return false;
+    return 0;
 }
 
 function setReminder(time){
