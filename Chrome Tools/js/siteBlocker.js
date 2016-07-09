@@ -157,7 +157,7 @@ function returnTime(delay) {
         var date = new Date() - timeLineLength;
         var cnt = 0;
         var timeTotal = 0;
-        var currentTimeOffset = (new Date() - startTime) * wastingTime;
+        var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
         //remove anything after limit
         for (var i = 0 ; i < timeLine.length ; i++) {
             //endtime is same as next starttime
@@ -196,7 +196,7 @@ function returnTime(delay) {
             returnTime(timeTotal - timeLeft + currentTimeOffset);
         } else {
             //likely current page is on for a long time
-            returnTime(timeLineLength - timeLeft);
+            returnTime(timeLineLength - timeLeft + currentTimeOffset);
         }
     },delay);
 }
