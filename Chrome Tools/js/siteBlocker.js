@@ -20,7 +20,7 @@ var urls = [[
 //sites that will spend time but not actively block
 [
     "http://*.youtube.com/*", "https://*.youtube.com/*",
-    "http://*.imgur.com/*", "https://*.imgur.com/*"
+    "http://imgur.com/*", "https://imgur.com/*", "http://*.imgur.com/*", "https://*.imgur.com/*"
 ]];
 chrome.storage.sync.get('redirects', function(items) {
     var redirects = items.redirects;
