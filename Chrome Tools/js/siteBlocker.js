@@ -35,7 +35,8 @@ chrome.storage.sync.get('redirects', function(items) {
                 return redirect(info);
             }
         }
-        if(timeLeft <= (now - startTime) * wastingTime) {
+        var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
+        if(timeLeft <= currentTimeOffset) {
             return redirect(info);
         }
     },
