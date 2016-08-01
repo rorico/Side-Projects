@@ -256,26 +256,32 @@ function getOptions(cards){
         if (card === 0||card === -1) {
             sides = card;
         } else {
-            var possible = [];
-            if(card === 1) {
-                possible = [[0,0],[0,9],[9,0],[9,9]];
-            } else if(card < 10) {
-                possible = [[0,card-1],[9,10-card]];
-            } else {
-                var x = Math.floor(card/10);
-                var y = card % 10;
-                possible = [[x,y],[9-x,9-y]];
-            }
-            for( var i = 0 ; i<possible.length ; i++ )
-            {
-                if (points[possible[i][0]][possible[i][1]]===0) {
-                    sides.push([possible[i][0],possible[i][1]]);
-                }
-            }
+            sides = cardOptions(card);
         }
         options.push(sides);
     }
     return options;
+}
+
+function cardOptions(card){
+    var possible = [];
+    if(card === 1) {
+        possible = [[0,0],[0,9],[9,0],[9,9]];
+    } else if(card < 10) {
+        possible = [[0,card-1],[9,10-card]];
+    } else {
+        var x = Math.floor(card/10);
+        var y = card % 10;
+        possible = [[x,y],[9-x,9-y]];
+    }
+    var sides = [];
+    for( var i = 0 ; i<possible.length ; i++ )
+    {
+        if (points[possible[i][0]][possible[i][1]]===0) {
+            sides.push([possible[i][0],possible[i][1]]);
+        }
+    }
+    return sides;
 }
 
 //pick up new card
@@ -1365,6 +1371,7 @@ function hideHands(player) {
         }
     }
 }
+//change card numbers to corresponding card in game
 function changeToCards(number) {
     switch (number) {
         case -1:
