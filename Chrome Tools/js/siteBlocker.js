@@ -5,6 +5,10 @@ var title = "";
 var tabId = -1;
 var timeLineLength = 3600000; // 1 hour
 var startingTimeLeft = 600000; // 10 mins
+if(0) { // if in testing mode
+    timeLineLength = 120000; // 2 mins
+    startingTimeLeft = 60000; // 1 mins
+}
 var timeLeft = startingTimeLeft;
 var alarm;
 var timeLine = [];
@@ -230,11 +234,8 @@ function setReminder(time){
 }
 
 function resetTime(){
-    for (var i = 0 ; i < returnTimers.length ; i++) {
-        clearTimeout(returnTimers[i]);
-    }
-    returnTimers = [];
     clearTimeout(returnTimer);
+    startTime = new Date();
     timeLeft = startingTimeLeft;
     timeLine = [];
     //set-up first time when opened
