@@ -16,6 +16,7 @@ var timeLineAsync = true;
 var returnTimers = [];
 var returnTimer = -1;
 var displayTimer = -1;
+var displayTimeStarter = -1;
 //sites that will block after time spent
 var urls = [[
     "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
@@ -115,7 +116,7 @@ function handleTimeLineAsync(action,load) {
         timeLine.splice(0,load);
     } else if(action === "change") {
         timeLine[load][1] = 0;
-        timeLeft += timeLine[load][0];
+        changeTimeLeft(timeLine[load][0]);
     } else {
         console.log("this shouldn't happen");
     }
@@ -128,13 +129,16 @@ function handleNewPage(newWasting,newUrl,newTitle) {
     handleTimeLineAsync("push",[timeSpent,wastingTime,url,title,startTime]);
     if(wastingTime) {
         var timeSpent = new Date() - startTime; 
-        timeLeft -= timeSpent;
+        changeTimeLeft(-timeSpent);
         if(wastingTime === 1) {
             clearTimeout(alarm);
         }
     }
-    if (newWasting === 1) {
-        setReminder(timeLeft);
+    if(newWasting) {
+        countDownTimer();
+        if(newWasting === 1) {
+            setReminder(timeLeft);
+        }
     }
     startTime = new Date();
     wastingTime = newWasting;
@@ -142,26 +146,45 @@ function handleNewPage(newWasting,newUrl,newTitle) {
     title = newTitle;
 }
 
-function returnTimeOld(time,delay) {
-    timer = setTimeout(function(){
-        if(timeLeft < 0 && -timeLeft < time) {
-            delay = -timeLeft;
-            timeLeft = 0;
-            returnTime(time-delay,delay);
-        } else {
-            timeLeft += time;
-        }
-    },delay);
-    returnTimers.push(timer);
+function changeTimeLeft(change) {
+    timeLeft += change;
+    countDownTimer();
 }
 
-
+function countDownTimer() {
+    clearTimeout(displayTimeStarter);
+    clearInterval(displayTimer);
+    if(wastingTime && timeLeft > 0) {
+        var time = timeLeft;
+        chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
+        delay = (time-1)%1000+1;
+        displayTimeStarter = setTimeout(function(){
+            time -= delay;
+            if(wastingTime && time > 0) {
+                chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
+                displayTimer = setInterval(function(){
+                    if(wastingTime && time > 0) {
+                        time -= 1000;
+                        chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
+                    } else {
+                        clearInterval(displayTimer);
+                    }
+                },1000);
+            }
+        },delay);
+    }
+}
+    
+function MinutesSecondsFormat(milli) {
+    return Math.floor(milli/60000)  + ":" + ("0" + Math.floor((milli%60000)/1000)).slice(-2);
+}
 
 function returnTime(delay) {
     returnTimer = setTimeout(function(){
         var date = new Date() - timeLineLength;
         var cnt = 0;
         var timeTotal = 0;
+        var timeReturned = 0;
         var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
         //remove anything after limit
         for (var i = 0 ; i < timeLine.length ; i++) {
@@ -186,8 +209,8 @@ function returnTime(delay) {
         for (var i = 0 ; i < timeLine.length ; i++) {
             if(timeLine[i][1]){
                 if(timeLeft - currentTimeOffset > timeTotal) {
-                    handleTimeLineAsync("change",i);
                     changed.push([i,timeLine[i][1],timeLine[i][0]]);
+                    handleTimeLineAsync("change",i);
                 } else if(timeLine[i][1]){
                     break;
                 }
