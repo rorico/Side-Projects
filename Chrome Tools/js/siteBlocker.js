@@ -134,38 +134,43 @@ function handleNewPage(newWasting,newUrl,newTitle) {
             clearTimeout(alarm);
         }
     }
-    if(newWasting) {
-        countDownTimer();
-        if(newWasting === 1) {
-            setReminder(timeLeft);
-        }
-    }
     startTime = new Date();
     wastingTime = newWasting;
     url = newUrl;
     title = newTitle;
+    if(newWasting) {
+        if(newWasting === 1) {
+            setReminder(timeLeft);
+        }
+    }
+    countDownTimer();
 }
 
 function changeTimeLeft(change) {
     timeLeft += change;
-    countDownTimer();
+    //remember to call countDownTimer(); at end of processing 
 }
 
 function countDownTimer() {
     clearTimeout(displayTimeStarter);
     clearInterval(displayTimer);
-    if(wastingTime && timeLeft > 0) {
-        var time = timeLeft;
-        chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
-        delay = (time-1)%1000+1;
+    var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
+    var curTimeLeft = timeLeft - currentTimeOffset; //don't want to touch timeLeft variable
+    if(curTimeLeft < 0) {
+        curTimeLeft = 0;
+    }
+    chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
+    timerssss = new Date();
+    if(wastingTime && curTimeLeft > 0) {
+        delay = (curTimeLeft-1)%1000+1;
         displayTimeStarter = setTimeout(function(){
-            time -= delay;
-            if(wastingTime && time > 0) {
-                chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
+            curTimeLeft -= delay;
+            if(wastingTime && curTimeLeft > 0) {
+                chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
                 displayTimer = setInterval(function(){
-                    if(wastingTime && time > 0) {
-                        time -= 1000;
-                        chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
+                    curTimeLeft -= 1000;
+                    if(wastingTime && curTimeLeft > 0) {
+                        chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
                     } else {
                         clearInterval(displayTimer);
                     }
@@ -174,9 +179,10 @@ function countDownTimer() {
         },delay);
     }
 }
-    
+
 function MinutesSecondsFormat(milli) {
-    return Math.floor(milli/60000)  + ":" + ("0" + Math.floor((milli%60000)/1000)).slice(-2);
+    var secs = Math.ceil(milli/1000);
+    return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
 }
 
 function returnTime(delay) {
@@ -217,6 +223,7 @@ function returnTime(delay) {
             }
             timeTotal += timeLine[i][0];
         }
+        countDownTimer();
         //if browser action is open, update values
         sendRequest("timeLine",[cnt,changed]);
 

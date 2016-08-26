@@ -45,7 +45,8 @@ function setAlarm(delay,type) {
         if (!alarms[i][0]) {
             var alarmTime = new Date();
             alarmTime.setMinutes(alarmTime.getMinutes()+delay);
-            chrome.browserAction.setBadgeText({text:(++alarmCnt).toString()});
+            ++alarmCnt;
+            //chrome.browserAction.setBadgeText({text:(++alarmCnt).toString()});
             var alarm = setTimeout(function(){
                 ringAlarm(i,type);
             },delay*60000);
@@ -82,9 +83,9 @@ function removeAlarm(alarmNumber,type) {
     //type 2 needs specific call
     if (alarms[alarmNumber][0] && ((typeof type === 'undefined' && alarms[alarmNumber][3] !== 2) || alarms[alarmNumber][3] == type)) {
         if(--alarmCnt){
-          chrome.browserAction.setBadgeText({text:(alarmCnt).toString()});
+          //chrome.browserAction.setBadgeText({text:(alarmCnt).toString()});
         } else {
-          chrome.browserAction.setBadgeText({text:""});
+          //chrome.browserAction.setBadgeText({text:""});
         }
         //check if ringing
         if (playAlarmCheck[0] && alarms[alarmNumber][0]===2) {

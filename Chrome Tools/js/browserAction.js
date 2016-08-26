@@ -166,8 +166,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         return info;
     }
     
+
     function MinutesSecondsFormat(milli) {
-        return Math.floor(milli/60000)  + ":" + ("0" + Math.floor((milli%60000)/1000)).slice(-2);
+        var secs = Math.ceil(milli/1000);
+        return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
     }
 
     ////////////////////////events//////////////////////////////
