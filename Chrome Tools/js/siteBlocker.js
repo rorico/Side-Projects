@@ -169,7 +169,7 @@ function countDownTimer() {
                 chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
                 displayTimer = setInterval(function(){
                     curTimeLeft -= 1000;
-                    if(wastingTime && curTimeLeft > 0) {
+                    if(wastingTime && curTimeLeft >= 0) {
                         chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
                     } else {
                         clearInterval(displayTimer);
