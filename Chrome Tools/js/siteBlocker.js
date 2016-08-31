@@ -165,7 +165,7 @@ function countDownTimer() {
         delay = (curTimeLeft-1)%1000+1;
         displayTimeStarter = setTimeout(function(){
             curTimeLeft -= delay;
-            if(wastingTime && curTimeLeft > 0) {
+            if(wastingTime && curTimeLeft >= 0) {
                 chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
                 displayTimer = setInterval(function(){
                     curTimeLeft -= 1000;
