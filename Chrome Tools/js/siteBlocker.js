@@ -190,8 +190,8 @@ function returnTime(delay) {
         var date = new Date() - timeLineLength;
         var cnt = 0;
         var timeTotal = 0;
-        var timeReturned = 0;
-        var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
+        var currentTimeInterval = new Date() - startTime;
+        var currentTimeOffset = (wastingTime ? currentTimeInterval : 0);
         //remove anything after limit
         for (var i = 0 ; i < timeLine.length ; i++) {
             //endtime is same as next starttime
@@ -212,27 +212,27 @@ function returnTime(delay) {
         //return time and calculate when to call function again
         //ideally check again when can return time again
         var changed = [];
+        var completed = false;
         for (var i = 0 ; i < timeLine.length ; i++) {
-            if(timeLine[i][1]){
+            if(timeLine[i][1]) {
                 if(timeLeft - currentTimeOffset > timeTotal) {
                     changed.push([i,timeLine[i][1],timeLine[i][0]]);
                     handleTimeLineAsync("change",i);
-                } else if(timeLine[i][1]){
+                } else {
+                    completed = true;
                     break;
                 }
             }
             timeTotal += timeLine[i][0];
         }
+        //if reach end of the list, add current time
+        if (!completed) {
+            timeTotal += currentTimeInterval;
+        }
         countDownTimer();
         //if browser action is open, update values
         sendRequest("timeLine",[cnt,changed]);
-
-        if(timeTotal > timeLeft - currentTimeOffset) {
-            returnTime(timeTotal - timeLeft + currentTimeOffset);
-        } else {
-            //likely current page is on for a long time
-            returnTime(timeLineLength - timeLeft + currentTimeOffset);
-        }
+        returnTime(timeTotal - timeLeft + currentTimeOffset);
     },delay);
 }
 
