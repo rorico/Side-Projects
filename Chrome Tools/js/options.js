@@ -2,7 +2,7 @@ $(function () {
     chrome.storage.sync.get('redirects', function(items) {
         redirects = items.redirects;
         //assume sorted
-        if (redirects.length){
+        if (redirects && redirects.length){
             var timezoneOffset = (new Date()).getTimezoneOffset() * 60000;
             var series = [];
             var checked = [];
