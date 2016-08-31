@@ -3,8 +3,8 @@ var wastingTime = false;
 var url = "";
 var title = "";
 var tabId = -1;
-var timeLineLength = 3600000; // 1 hour
-var startingTimeLeft = 600000; // 10 mins
+var timeLineLength = 1800000; // 30 mins
+var startingTimeLeft = 300000; // 5 mins
 if(0) { // if in testing mode
     timeLineLength = 120000; // 2 mins
     startingTimeLeft = 60000; // 1 mins
