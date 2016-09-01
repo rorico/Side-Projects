@@ -4,7 +4,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var sameDOW = backgroundPage.sameDOW;
     var isInRange = backgroundPage.isInRange;
     var sort_by_date = backgroundPage.sort_by_date;
-    console.log(todaySchedule);
+
     var now = new Date();
     var startTime = 700;        //7AM
     var endTime = 1900;         //7PM
@@ -26,7 +26,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function showSchedule(container,date) {
         var today = todaySchedule(date);    //function in scheduleInfo.js
-        console.log(today);
         now = new Date();
         if (sameDay(date,now)) {
             nowTimeOffset = 50 * !weekMode;
@@ -80,7 +79,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function sameDay(day1,day2) {
-        return day1.getDate()==day2.getDate()&&day1.getMonth()==day2.getMonth()&&day1.getYear()==day2.getYear();
+        var date1 = new Date(day1);
+        var date2 = new Date(day2);
+        return date1.getDate()==date2.getDate()&&date1.getMonth()==date2.getMonth()&&date1.getYear()==date2.getYear();
     }
 
     function showNow() {
