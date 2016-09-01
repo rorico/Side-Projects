@@ -199,6 +199,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     var resetPhrase = "reset";
     var resetIndex = 0;
+    var VIPPhrase = "vip";
+    var VIPIndex = 0;
     var deletes = false;
     $(window).keydown(function(e) {
         switch (e.keyCode) {
@@ -206,6 +208,11 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             case resetPhrase.charCodeAt(resetIndex) - 32:
                 if(++resetIndex === resetPhrase.length) {
                     resetTimeLine();
+                }
+                break;
+            case VIPPhrase.charCodeAt(VIPIndex) - 32:
+                if(++VIPIndex === VIPPhrase.length) {
+                    VIP();
                 }
                 break;
             case 83:        //s
@@ -279,6 +286,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         resetTime();
     }
 
+    function VIP() {
+        sendRequest("VIP");
+    }
     //send requests to background
     function sendRequest(action,input){
         chrome.runtime.sendMessage({

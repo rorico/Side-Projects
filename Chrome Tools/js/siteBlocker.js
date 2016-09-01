@@ -17,6 +17,7 @@ var returnTimers = [];
 var returnTimer = -1;
 var displayTimer = -1;
 var displayTimeStarter = -1;
+var VIPtab = -1;
 //sites that will block after time spent
 var urls = [[
     "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
@@ -30,19 +31,21 @@ var urls = [[
 chrome.storage.sync.get('redirects', function(items) {
     var redirects = items.redirects;
     chrome.webRequest.onBeforeRequest.addListener(function(info) {
-        var now = new Date();
-        var position = now.getHours()*100+now.getMinutes()/0.6;
-        for (var i = 0 ; i < today.length ; i++) {
-            //today comes from scheduleInfo.js
-            if (today[i][0][1] > position) {
-                break;
-            } else if (today[i][0][2] > position) {
+        if(info.tabId != VIPtab) {
+            var now = new Date();
+            var position = now.getHours()*100+now.getMinutes()/0.6;
+            for (var i = 0 ; i < today.length ; i++) {
+                //today comes from scheduleInfo.js
+                if (today[i][0][1] > position) {
+                    break;
+                } else if (today[i][0][2] > position) {
+                    return redirect(info);
+                }
+            }
+            var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
+            if(timeLeft <= currentTimeOffset) {
                 return redirect(info);
             }
-        }
-        var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
-        if(timeLeft <= currentTimeOffset) {
-            return redirect(info);
         }
     },
     {
@@ -139,7 +142,7 @@ function handleNewPage(newWasting,newUrl,newTitle) {
     url = newUrl;
     title = newTitle;
     if(newWasting) {
-        if(newWasting === 1) {
+        if(newWasting === 1 && tabId !== VIPtab) {
             setReminder(timeLeft);
         }
     }
@@ -275,6 +278,10 @@ function resetTime(){
     returnTime(timeLineLength - timeLeft);
 }
 
+function makeCurrentTabVIP() {
+    stopAllAlarms(2);
+    VIPtab = tabId;
+}
 
 //for displaying in an open browser action
 function sendRequest(action,input){
@@ -284,3 +291,15 @@ function sendRequest(action,input){
         input: input
     });
 }
+
+
+//get requests from browserAction
+chrome.runtime.onMessage.addListener(function(a, b, c) {
+    if(a.from === "browserAction") {
+        switch(a.action) {
+            case "VIP":
+                makeCurrentTabVIP();
+                break;
+        }
+    }
+});
