@@ -202,13 +202,17 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         var front = "<div id='phraseFront'>";
         var back = "<div id='phraseBack'>";
         for(var i = 0 ; i < phrase.length ; i++) {
-            front += "<div id='phrase" + i + "' class='phrasePart'>" + phrase[i].toUpperCase() + "</div>";
-            back += "<div class='phrasePart'>" + phrase[i].toUpperCase() + "</div>";
+            front += "<div id='phrase" + i + "' class='phrasePart'>" + phrase[i] + "</div>";
+            back += "<div class='phrasePart'>" + phrase[i] + "</div>";
         }
         front += "</div>";
         back += "</div>";
         var html = "<div id='phrase'>" + front + back + "</div>";
         $("body").append(html);
+        var fontSize = 100;
+        while($("body").width() < $("#phraseFront").width()) {
+            $(".phrasePart").css("font-size",--fontSize);
+        }
         //center display
         var leftOffset = ($("body").width() - $("#phraseFront").width())/2;
         var topOffset = ($("body").height() - $("#phraseFront").height())/2;
@@ -232,7 +236,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         disappearInterval = setInterval(function(){
             opacity -= 0.01;
             $("#phrase").css("opacity",opacity);
-            if(opacity === 0) {
+            if(opacity <= 0) {
                 clearHotkey();
             }
         },10)
@@ -245,14 +249,15 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         $("#phrase").remove();
     }
     //order matters in terms of what gets checked first
-    var phrases = [["reset",resetTimeLine],["vip",VIP]];
+    //keep letters capitalized
+    var phrases = [["ABCDEFGHIJKLMNOPQRSTUVWXYZ",resetTimeLine],["VIP",VIP]];
     var currentPhrase = -1;
     var phraseIndex = 0;
     var deletes = false;
     $(window).keydown(function(e) {
         if(currentPhrase !== -1) {
             //get lowercase ascii value of next part
-            if(e.keyCode === phrases[currentPhrase][0].charCodeAt(phraseIndex) - 32) {
+            if(e.keyCode === phrases[currentPhrase][0].charCodeAt(phraseIndex)) {
                 found = true;
                 showHotkey(phraseIndex);
                 if(++phraseIndex === phrases[currentPhrase][0].length) {
@@ -264,7 +269,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         } else  {
             var found = false;
             for(var i = 0 ; i < phrases.length ; i++) {
-                if(e.keyCode === phrases[i][0].charCodeAt(0) - 32) {
+                if(e.keyCode === phrases[i][0].charCodeAt(0)) {
                     startShowHotkey(phrases[i][0]);
                     currentPhrase = i;
                     phraseIndex = 1;
