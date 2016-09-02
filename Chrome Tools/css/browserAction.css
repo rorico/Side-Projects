@@ -107,3 +107,29 @@ div p{
     border-color: red;
     color: red;
 }
+#phrase{
+    position:absolute;
+    z-index: 1;
+    left:0;
+    top:0;
+}
+.filled{
+    color:black;
+}
+.phrasePart{
+    display:inline;
+    font-size:100px;
+}
+#phraseFront{
+    position:absolute;
+    border:1px solid black;
+    border-radius: 5px;
+    z-index:2;
+    color:white;
+}
+#phraseBack{
+    position:absolute;
+    border:1px solid black;
+    border-radius: 5px;
+    background-color: white;
+}

@@ -300,6 +300,9 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
             case "VIP":
                 makeCurrentTabVIP();
                 break;
+            case "resetTime":
+                resetTime();
+                break;
         }
     }
 });

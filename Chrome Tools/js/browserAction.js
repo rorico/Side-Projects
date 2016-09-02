@@ -197,28 +197,75 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         time = new Date();
     }
 
+    function startShowHotkey(phrase) {
+        $("#phrase").remove();
+        var front = "<div id='phraseFront'>";
+        var back = "<div id='phraseBack'>";
+        for(var i = 0 ; i < phrase.length ; i++) {
+            front += "<div id='phrase" + i + "' class='phrasePart'>" + phrase[i].toUpperCase() + "</div>";
+            back += "<div class='phrasePart'>" + phrase[i].toUpperCase() + "</div>";
+        }
+        front += "</div>";
+        back += "</div>";
+        var html = "<div id='phrase'>" + front + back + "</div>";
+        $("body").append(html);
+        //center display
+        var leftOffset = ($("body").width() - $("#phraseFront").width())/2;
+        var topOffset = ($("body").height() - $("#phraseFront").height())/2;
+        $("#phraseFront").css("left",leftOffset);
+        $("#phraseFront").css("top",topOffset);
+        $("#phraseBack").css("left",leftOffset);
+        $("#phraseBack").css("top",topOffset);
+        $("#phrase0").addClass("filled");
+        disappearHotkey();
+    }
+
+    function showHotkey(index) {
+        $("#phrase" + index).addClass("filled");
+        disappearHotkey();
+    }
+
+    var disappearInterval;
+    function disappearHotkey() {
+        var opacity = 0.8;
+        clearInterval(disappearInterval);
+        disappearInterval = setInterval(function(){
+            opacity -= 0.01;
+            $("#phrase").css("opacity",opacity);
+            if(opacity === 0) {
+                clearHotkey();
+            }
+        },10)
+    }
+
+    function clearHotkey() {
+        currentPhrase = -1;
+        phraseIndex = 0;
+        clearInterval(disappearInterval);
+        $("#phrase").remove();
+    }
     //order matters in terms of what gets checked first
     var phrases = [["reset",resetTimeLine],["vip",VIP]];
     var currentPhrase = -1;
     var phraseIndex = 0;
     var deletes = false;
     $(window).keydown(function(e) {
-        var found = false;
         if(currentPhrase !== -1) {
             //get lowercase ascii value of next part
             if(e.keyCode === phrases[currentPhrase][0].charCodeAt(phraseIndex) - 32) {
                 found = true;
+                showHotkey(phraseIndex);
                 if(++phraseIndex === phrases[currentPhrase][0].length) {
                     phrases[currentPhrase][1]();
                 }
             } else {
-                currentPhrase = -1;
-                phraseIndex = 0;
+                clearHotkey();
             }
-        }
-        if(!found) {
+        } else  {
+            var found = false;
             for(var i = 0 ; i < phrases.length ; i++) {
                 if(e.keyCode === phrases[i][0].charCodeAt(0) - 32) {
+                    startShowHotkey(phrases[i][0]);
                     currentPhrase = i;
                     phraseIndex = 1;
                     found = true;
@@ -296,7 +343,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     });
 
     function resetTimeLine() {
-        resetTime();
+        sendRequest("resetTime");
     }
 
     function VIP() {
