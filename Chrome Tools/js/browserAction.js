@@ -197,82 +197,95 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         time = new Date();
     }
 
-    var resetPhrase = "reset";
-    var resetIndex = 0;
-    var VIPPhrase = "vip";
-    var VIPIndex = 0;
+    //order matters in terms of what gets checked first
+    var phrases = [["reset",resetTimeLine],["vip",VIP]];
+    var currentPhrase = -1;
+    var phraseIndex = 0;
     var deletes = false;
     $(window).keydown(function(e) {
-        switch (e.keyCode) {
+        var found = false;
+        if(currentPhrase !== -1) {
             //get lowercase ascii value of next part
-            case resetPhrase.charCodeAt(resetIndex) - 32:
-                if(++resetIndex === resetPhrase.length) {
-                    resetTimeLine();
+            if(e.keyCode === phrases[currentPhrase][0].charCodeAt(phraseIndex) - 32) {
+                found = true;
+                if(++phraseIndex === phrases[currentPhrase][0].length) {
+                    phrases[currentPhrase][1]();
                 }
-                break;
-            case VIPPhrase.charCodeAt(VIPIndex) - 32:
-                if(++VIPIndex === VIPPhrase.length) {
-                    VIP();
+            } else {
+                currentPhrase = -1;
+                phraseIndex = 0;
+            }
+        }
+        if(!found) {
+            for(var i = 0 ; i < phrases.length ; i++) {
+                if(e.keyCode === phrases[i][0].charCodeAt(0) - 32) {
+                    currentPhrase = i;
+                    phraseIndex = 1;
+                    found = true;
                 }
-                break;
-            case 83:        //s
-                setAlarm(+$('#setTimer').val());
-                break;
-            case 68:        //d
-                deletes = true;
-                break;
-            case 65:        //a
-                stopAllAlarms();
-                break;
-            case 88:        //x
-                snooze();
-                break;
-            case 87:        //w
-                setAlarm(15);
-                break;
-            case 69:        //e
-                setAlarm(30);
-                break;
-            case 49:        //1
-            case 50:
-            case 51:
-            case 52:
-            case 53:
-            case 54:        //5
-                if (deletes) {
-                    removeAlarm(e.keyCode-49);
-                    break;
-                }
-            case 55:        //6
-            case 56:
-            case 57:
-            case 58:
-            case 48:        //0
-                changeTimer(e.keyCode-48);
-                break;
-            case 97:        //keypad 1
-            case 98:
-            case 99:
-            case 100:
-            case 101:       //5
-                if (deletes) {
-                    removeAlarm(e.keyCode-96);
-                    break;
-                }
-            case 102:        //6
-            case 103:
-            case 104:
-            case 105:
-            case 96:        //keypad 0
-                changeTimer(e.keyCode-96);
-                break;
+            }
+            if(!found) {
+                switch (e.keyCode) {
+                    case 83:        //s
+                        setAlarm(+$('#setTimer').val());
+                        break;
+                    case 68:        //d
+                        deletes = true;
+                        break;
+                    case 65:        //a
+                        stopAllAlarms();
+                        break;
+                    case 88:        //x
+                        snooze();
+                        break;
+                    case 87:        //w
+                        setAlarm(15);
+                        break;
+                    case 69:        //e
+                        setAlarm(30);
+                        break;
+                    case 49:        //1
+                    case 50:
+                    case 51:
+                    case 52:
+                    case 53:
+                    case 54:        //5
+                        if (deletes) {
+                            removeAlarm(e.keyCode-49);
+                            break;
+                        }
+                    case 55:        //6
+                    case 56:
+                    case 57:
+                    case 58:
+                    case 48:        //0
+                        changeTimer(e.keyCode-48);
+                        break;
+                    case 97:        //keypad 1
+                    case 98:
+                    case 99:
+                    case 100:
+                    case 101:       //5
+                        if (deletes) {
+                            removeAlarm(e.keyCode-96);
+                            break;
+                        }
+                    case 102:        //6
+                    case 103:
+                    case 104:
+                    case 105:
+                    case 96:        //keypad 0
+                        changeTimer(e.keyCode-96);
+                        break;
 
-            case 38:        //up key
-                changeTime(1);
-                break;
-            case 40:        //down key
-                changeTime(-1);
-                break;
+                    case 38:        //up key
+                        changeTime(1);
+                        break;
+                    case 40:        //down key
+                        changeTime(-1);
+                        break;
+                }
+            }
         }
     }).keyup(function(e) {
         switch (e.keyCode) {
