@@ -32,7 +32,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var click = false;
     var totalOffset = 0;
     if(addTimeLine([timeCurrent,wastingTime,url],false)){
-        for (var i = timeLine.length - 1 ; i != -1 ; i--) {
+    var cnt = 0;
             if(!addTimeLine(timeLine[i],true,i)) {
                 break;
             }
@@ -396,11 +396,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     break;
                 case "timeLine":
                     var input = a.input;
-                    var changes = input[1];
-                    var offset = input[0];
-                    totalOffset += offset;
+                    var changes = input;
                     for(var i = 0 ; i < changes.length ; i++) {
-                        $('#timeLine' + (changes[i][0] + totalOffset)).removeClass("wasting"+changes[i][1]).addClass("wasting0");
+                        $('#timeLine' + changes[i][0]).removeClass("wasting"+changes[i][1]).addClass("wasting0");
                         timeLeft += changes[i][2];
                     }
                     clearTimeout(countDownTimer);

@@ -113,10 +113,10 @@ function handleTimeLineAsync(action,load) {
         console.log("didn't think this situation would ever happen, good thing I coded this");
     }
     timeLineAsync = false;
-    if(action === "push") {
-        timeLine.push(load);
+    if(action === "add") {
+        timeLine.unshift(load);
     } else if(action === "remove") {
-        timeLine.splice(0,load);
+        timeLine.splice(load[0],load[1]);
     } else if(action === "change") {
         timeLine[load][1] = 0;
         changeTimeLeft(timeLine[load][0]);
@@ -124,12 +124,13 @@ function handleTimeLineAsync(action,load) {
         console.log("this shouldn't happen");
     }
     timeLineAsync = true;
+    console.log(timeLine);
 }
 
 function handleNewPage(newWasting,newUrl,newTitle) {
     stopAllAlarms(2);
     var timeSpent = new Date() - startTime; 
-    handleTimeLineAsync("push",[timeSpent,wastingTime,url,title,startTime]);
+    handleTimeLineAsync("add",[timeSpent,wastingTime,url,title,startTime]);
     if(wastingTime) {
         var timeSpent = new Date() - startTime; 
         changeTimeLeft(-timeSpent);
@@ -191,14 +192,15 @@ function MinutesSecondsFormat(milli) {
 function returnTime(delay) {
     returnTimer = setTimeout(function(){
         var date = new Date() - timeLineLength;
+        var endingIndex = 0;
         var cnt = 0;
         var timeTotal = 0;
         var currentTimeInterval = new Date() - startTime;
         var currentTimeOffset = (wastingTime ? currentTimeInterval : 0);
         //remove anything after limit
-        for (var i = 0 ; i < timeLine.length ; i++) {
+        for(var i = timeLine.length - 1 ; i != -1 ; i--) {
             //endtime is same as next starttime
-            var endTime = (i === timeLine.length - 1 ? timeLine[i][4] + timeLine[i][0] : timeLine[i+1][4]);
+            var endTime = (i ? +timeLine[i][4] + timeLine[i][0]  : timeLine[i+1][4]);
             if (date > endTime) {
                 if (timeLine[i][1]) {
                     timeLeft += timeLine[i][0];
@@ -206,17 +208,18 @@ function returnTime(delay) {
                 cnt++;
             } else {
                 timeTotal = timeLine[i][4] - date; //negative
+                endingIndex = i + 1;
                 break;
             }
         }
         if(cnt) {
-            handleTimeLineAsync("remove",cnt);
+            handleTimeLineAsync("remove",[endingIndex,cnt]);
         }
         //return time and calculate when to call function again
         //ideally check again when can return time again
         var changed = [];
         var completed = false;
-        for (var i = 0 ; i < timeLine.length ; i++) {
+        for(var i = timeLine.length - 1 ; i != -1 ; i--) {
             if(timeLine[i][1]) {
                 if(timeLeft - currentTimeOffset > timeTotal) {
                     changed.push([i,timeLine[i][1],timeLine[i][0]]);
@@ -234,7 +237,7 @@ function returnTime(delay) {
         }
         countDownTimer();
         //if browser action is open, update values
-        sendRequest("timeLine",[cnt,changed]);
+        sendRequest("timeLine",changed);
         returnTime(timeTotal - timeLeft + currentTimeOffset);
     },delay);
 }
