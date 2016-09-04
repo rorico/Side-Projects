@@ -30,9 +30,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var offset = 0;
     var hover = false;
     var click = false;
-    var totalOffset = 0;
-    if(addTimeLine([timeCurrent,wastingTime,url],false)){
+    var currentTimePiece = -1;
     var cnt = 0;
+    if(addTimeLine([timeCurrent,wastingTime,url],false,-1)){
+        for (var i = 0; i < timeLine.length ; i++) {
             if(!addTimeLine(timeLine[i],true,i)) {
                 break;
             }
@@ -66,7 +67,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
         var timeLineEntry = $('<div style="width:' + time + 'px;" class="timeLine wasting' + info[1] + classAddon + '" id="timeLine' + num + '"></div>');
         $('#timeLine').prepend(timeLineEntry);
-        setClick(timeLineEntry,info);
+        setClick(timeLineEntry,info,num);
         if (hover) {
             setHover(timeLineEntry,info);
         }
@@ -84,16 +85,17 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             }
         });
     }
-    function setClick(ele,info) {
+    function setClick(ele,info,i) {
         ele.click(function(){
             click = true;
+            currentTimePiece = i;
             $('#info').html(formatInfo(info[2],info[0],info[3]));
         });
     }
 
     function countDown(timeLeft) {
         if (wastingTime) {
-            timeLeft -= timeCurrent;
+            timeLeft -= new Date() - startTime;
         }
         if(timeLeft < 0) {
             timeOffset = timeLeft;
@@ -101,6 +103,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
         countDownFunction(timeLeft);
     }
+
+    //not exactly accurate, not too important
     function countDownFunction(time) {
         $('#test').html(MinutesSecondsFormat(time));
         if(wastingTime && time>0) {
@@ -250,7 +254,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
     //order matters in terms of what gets checked first
     //keep letters capitalized
-    var phrases = [["ABCDEFGHIJKLMNOPQRSTUVWXYZ",resetTimeLine],["VIP",VIP]];
+    var phrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],["VIP",VIP],["CHANGE",change]];
     var currentPhrase = -1;
     var phraseIndex = 0;
     var deletes = false;
@@ -354,6 +358,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     function VIP() {
         sendRequest("VIP");
     }
+
+    function change() {
+        sendRequest("change",currentTimePiece);
+    }
     //send requests to background
     function sendRequest(action,input){
         chrome.runtime.sendMessage({
@@ -394,15 +402,17 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 case "ringing":
                     showRinging(a.input);
                     break;
-                case "timeLine":
-                    var input = a.input;
-                    var changes = input;
-                    for(var i = 0 ; i < changes.length ; i++) {
-                        $('#timeLine' + changes[i][0]).removeClass("wasting"+changes[i][1]).addClass("wasting0");
-                        timeLeft += changes[i][2];
-                    }
+                case "timer":
                     clearTimeout(countDownTimer);
-                    countDown(timeLeft);
+                    countDown(a.input);
+                    break;
+                case "change":
+                    var input = a.input;
+                    $('#timeLine' + input[0]).removeClass("wasting" + input[1]).addClass("wasting0");
+                    //if change isn't just to 0, will need to change this
+                    if(input[0] === -1) {
+                        wastingTime = 0;
+                    }
                     break;
             }
         }

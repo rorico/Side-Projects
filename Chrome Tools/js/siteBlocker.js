@@ -118,13 +118,20 @@ function handleTimeLineAsync(action,load) {
     } else if(action === "remove") {
         timeLine.splice(load[0],load[1]);
     } else if(action === "change") {
-        timeLine[load][1] = 0;
-        changeTimeLeft(timeLine[load][0]);
+        if(load === -1) {
+            sendRequest("change",[load,wastingTime]);
+            wastingTime = 0;
+        } else if(load < timeLine.length) {
+            sendRequest("change",[load,timeLine[load][1]]);
+            timeLine[load][1] = 0;
+            changeTimeLeft(timeLine[load][0]);
+        } else {
+            console.log("change to timeline out of bounds" + load + "/" + timeLine.length);
+        }
     } else {
         console.log("this shouldn't happen");
     }
     timeLineAsync = true;
-    console.log(timeLine);
 }
 
 function handleNewPage(newWasting,newUrl,newTitle) {
@@ -158,13 +165,14 @@ function changeTimeLeft(change) {
 function countDownTimer() {
     clearTimeout(displayTimeStarter);
     clearInterval(displayTimer);
+    //have the option to update browserAction every time, but accuracy isn't completely needed
+    sendRequest("timer",timeLeft);
     var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
     var curTimeLeft = timeLeft - currentTimeOffset; //don't want to touch timeLeft variable
     if(curTimeLeft < 0) {
         curTimeLeft = 0;
     }
     chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
-    timerssss = new Date();
     if(wastingTime && curTimeLeft > 0) {
         delay = (curTimeLeft-1)%1000+1;
         displayTimeStarter = setTimeout(function(){
@@ -236,8 +244,6 @@ function returnTime(delay) {
             timeTotal += currentTimeInterval;
         }
         countDownTimer();
-        //if browser action is open, update values
-        sendRequest("timeLine",changed);
         returnTime(timeTotal - timeLeft + currentTimeOffset);
     },delay);
 }
@@ -286,6 +292,13 @@ function makeCurrentTabVIP() {
     VIPtab = tabId;
 }
 
+function change(timeLineIndex) {
+    handleTimeLineAsync("change",timeLineIndex);
+    clearTimeout(returnTimer);
+    returnTime();
+    countDownTimer();
+}
+
 //for displaying in an open browser action
 function sendRequest(action,input){
     chrome.runtime.sendMessage({
@@ -305,6 +318,9 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
                 break;
             case "resetTime":
                 resetTime();
+                break;
+            case "change":
+                change(a.input);
                 break;
         }
     }
