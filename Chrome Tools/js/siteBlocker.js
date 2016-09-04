@@ -208,7 +208,7 @@ function returnTime(delay) {
         //remove anything after limit
         for(var i = timeLine.length - 1 ; i != -1 ; i--) {
             //endtime is same as next starttime
-            var endTime = (i ? +timeLine[i][4] + timeLine[i][0]  : timeLine[i+1][4]);
+            var endTime = (!i ? +timeLine[i][4] + timeLine[i][0]  : timeLine[i-1][4]);
             if (date > endTime) {
                 if (timeLine[i][1]) {
                     timeLeft += timeLine[i][0];
