@@ -28,6 +28,11 @@ var urls = [[
     "http://*.youtube.com/*", "https://*.youtube.com/*",
     "http://imgur.com/*", "https://imgur.com/*", "http://*.imgur.com/*", "https://*.imgur.com/*"
 ]];
+
+
+//set-up first time when opened
+startTimeLine();
+
 chrome.storage.sync.get('redirects', function(items) {
     var redirects = items.redirects;
     chrome.webRequest.onBeforeRequest.addListener(function(info) {
@@ -64,11 +69,12 @@ chrome.storage.sync.get('redirects', function(items) {
     }
 });
 
-//set-up first time when opened
-chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab){
-    handleNewPage(matchesURL(tab.url),tab.url,tab.title);
-})
-returnTime(timeLineLength - timeLeft);
+function startTimeLine() {
+    chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab){
+        handleNewPage(matchesURL(tab.url),tab.url,tab.title);
+    })
+    returnTime(timeLineLength - timeLeft);
+}
 
 chrome.tabs.onActivated.addListener(function(activeInfo){
     this.tabId = activeInfo.tabId;
@@ -280,11 +286,7 @@ function resetTime(){
     startTime = new Date();
     timeLeft = startingTimeLeft;
     timeLine = [];
-    //set-up first time when opened
-    chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab){
-        handleNewPage(matchesURL(tab.url),tab.url,tab.title);
-    });
-    returnTime(timeLineLength - timeLeft);
+    startTimeLine();
 }
 
 function makeCurrentTabVIP() {
