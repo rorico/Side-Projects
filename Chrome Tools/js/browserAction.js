@@ -3,7 +3,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var background = backgroundPage;
     var typeColors = backgroundPage.typeColors;
     var defaultColor = backgroundPage.defaultColor;
-    var resetTimeLine = backgroundPage.resetTime;
     var alarms = background.alarms;
     for (var i = 0 ; i < alarms.length ; i++) {
         if (alarms[i][0] == 1) {
@@ -25,13 +24,14 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     $('#info').html(formatInfo(url,timeCurrent,title));
     var timeLine = background.timeLine;
-    var parentWidth = 360;
+    var parentWidth = 360;      //keep unchanged
     var timeLineLeft = parentWidth;
     var offset = 0;
     var hover = false;
     var click = false;
     var currentTimePiece = -1;
-    var cnt = 0;
+    var updateTimeLineInterval = -1;
+    var timeCurrentInterval = -1;
     if(addTimeLine([timeCurrent,wastingTime,url],false,-1)){
         for (var i = 0; i < timeLine.length ; i++) {
             if(!addTimeLine(timeLine[i],true,i)) {
@@ -43,6 +43,33 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
     }
     updateTimeLine();
+
+    //may want to combine with start later
+    function restartTimeLine() {
+        clearInterval(updateTimeLineInterval);
+        clearInterval(timeCurrentInterval);
+        hover = false;
+        click = false;
+
+        //these values will probably be update from background when called
+        timeLeft = background.timeLeft;
+        startTime = background.startTime;
+        wastingTime = background.wastingTime;
+        url = background.url;
+        title = background.title;
+
+        //reset these to starting
+        timeCurrent = new Date() - startTime;
+        $('#info').html(formatInfo(url,timeCurrent,title));
+        timeLineLeft = parentWidth;
+        currentTimePiece = -1;
+        offset = 0;
+
+        $("#timeLine").empty();
+        addTimeLine([timeCurrent,wastingTime,url],false,-1);
+        $('#timeLine').prepend('<div style="width:' + timeLineLeft + 'px" class="timeLine"></div>');
+        updateTimeLine();
+    }
 
     function addTimeLine(info,hover,num) {        //returns true if not done
         var time = info[0]/timeLineLength * parentWidth + offset;
@@ -118,7 +145,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     function updateTimeLine() {
         var parentWidth = $('#timeLine').width();
         var delay = timeLineLength/parentWidth;
-        setInterval(function(){
+        updateTimeLineInterval = setInterval(function(){
             var newEle = $('#timeLine div:last-child');
             var oldestEle = $('#timeLine div:first-child');
             if(!newEle.hasClass("timeLineBlock") && newEle.width() + 1 >= 2) {
@@ -139,7 +166,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 oldestEle.width(oldestEle.width() - 1);
             }
         },delay);
-        setInterval(function(){
+        timeCurrentInterval = setInterval(function(){
             timeCurrent += 1000;
             if(!hover) {
                 $('#info').html(formatInfo(url,timeCurrent,title));
@@ -254,7 +281,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
     //order matters in terms of what gets checked first
     //keep letters capitalized
-    var phrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],["VIP",VIP],["CHANGE",change]];
+    var phrases = [["ZYX",resetTimeLine],["VIP",VIP],["CHANGE",change]];
     var currentPhrase = -1;
     var phraseIndex = 0;
     var deletes = false;
@@ -413,6 +440,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     if(input[0] === -1) {
                         wastingTime = 0;
                     }
+                    break;
+                case "reset":
+                    restartTimeLine();
                     break;
             }
         }

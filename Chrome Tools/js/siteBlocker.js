@@ -292,6 +292,7 @@ function resetTime(){
     timeLeft = startingTimeLeft;
     timeLine = [];
     startTimeLine();
+    sendRequest("reset");
 }
 
 function makeCurrentTabVIP() {
