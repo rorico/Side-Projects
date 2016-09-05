@@ -294,6 +294,10 @@ function makeCurrentTabVIP() {
 
 function change(timeLineIndex) {
     handleTimeLineAsync("change",timeLineIndex);
+    if(timeLeft >= 0) {
+        //clear incase
+        stopAllAlarms(2);
+    }
     clearTimeout(returnTimer);
     returnTime();
     countDownTimer();
