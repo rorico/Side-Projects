@@ -20,15 +20,14 @@ function setSleepAlarm() {
     chrome.alarms.create("sleep", {when:+date});
 }
 
-//code for alarms
-var alarms = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]; //state, alarm time, alarm object, type
+//[state, alarm time, alarm object, type]
+var alarms = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]; 
 //types : 0 - regular
 //        1 - sleep alarm
 //        2 - block alert
 
 var typeColors = ["#0000FF","#33FFFF","#FF0000"];   //["blue","teal","red"];
 var defaultColor = "#000000";   //black
-
 var alarmCnt = 0;
 var ringingCnt = 0;
 var ringingTypeCnt = [0,0,0];
@@ -77,6 +76,7 @@ function ringAlarm(alarmNumber,type) {
         }
     },3000);
 }
+
 //returns true if alarm is removed
 function removeAlarm(alarmNumber,type) {
     //unspecified type is a catchall,

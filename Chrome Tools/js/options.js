@@ -57,51 +57,49 @@ $(function () {
             all.push([dateObj + 3600000,0]);
             series.push({name:"All",data:all,visible: false});
             $('#container').highcharts({
-            chart: {
-                zoomType: 'x',
-                type: 'spline'
-            },
-            title: {
-                text: 'Redirects'
-            },
-            xAxis:{
-                type: 'datetime'
-            },
-            yAxis: {
+                chart: {
+                    zoomType: 'x',
+                    type: 'spline'
+                },
                 title: {
-                    text: 'Number of Redirects'
-                }
-            },
-            series: series,
-            plotOptions: {
-                area: {
-                    fillColor: {
-                        linearGradient: {
-                            x1: 0,
-                            y1: 0,
-                            x2: 0,
-                            y2: 1
+                    text: 'Redirects'
+                },
+                xAxis:{
+                    type: 'datetime'
+                },
+                yAxis: {
+                    title: {
+                        text: 'Number of Redirects'
+                    }
+                },
+                series: series,
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
                         },
-                        stops: [
-                            [0, Highcharts.getOptions().colors[0]],
-                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-                        ]
-                    },
-                    marker: {
-                        radius: 2
-                    },
-                    lineWidth: 1,
-                    states: {
-                        hover: {
-                            lineWidth: 1
-                        }
-                    },
-                    threshold: null
+                        marker: {
+                            radius: 2
+                        },
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null
+                    }
                 }
-            }
-        });
-
+            });
         }
-        
     });
 });

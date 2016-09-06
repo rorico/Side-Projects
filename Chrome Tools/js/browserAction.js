@@ -112,6 +112,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             }
         });
     }
+    
     function setClick(ele,info,i) {
         ele.click(function() {
             click = true;
