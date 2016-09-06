@@ -241,8 +241,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         var html = "<div id='phrase'>" + front + back + "</div>";
         $("body").append(html);
         var fontSize = 100;
-        while($("body").width() < $("#phraseFront").width()) {
-            $(".phrasePart").css("font-size",--fontSize);
+        if($("body").width() < $("#phraseFront").width()) {
+            fontSize = Math.floor(fontSize / ($("#phraseFront").width() / $("body").width()));
+            $(".phrasePart").css("font-size",fontSize);
         }
         //center display
         var leftOffset = ($("body").width() - $("#phraseFront").width())/2;
@@ -281,7 +282,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
     //order matters in terms of what gets checked first
     //keep letters capitalized
-    var phrases = [["ZYX",resetTimeLine],["VIP",VIP],["CHANGE",change]];
+    var phrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],["VIP",VIP],["CHANGE",change]];
     var currentPhrase = -1;
     var phraseIndex = 0;
     var deletes = false;
