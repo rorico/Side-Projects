@@ -99,14 +99,6 @@ div p{
     width:60px;
     border-right:0;
 }
-.sleep{
-    border-color: blue;
-    color: blue;
-}
-.block{
-    border-color: red;
-    color: red;
-}
 #phrase{
     position:absolute;
     z-index: 1;

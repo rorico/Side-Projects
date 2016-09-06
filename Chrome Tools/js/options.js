@@ -2,7 +2,7 @@ $(function () {
     chrome.storage.sync.get('redirects', function(items) {
         redirects = items.redirects;
         //assume sorted
-        if (redirects && redirects.length){
+        if (redirects && redirects.length) {
             var timezoneOffset = (new Date()).getTimezoneOffset() * 60000;
             var series = [];
             var checked = [];
@@ -24,7 +24,7 @@ $(function () {
                     var date = new Date(redirects[i][0]);
                     var dateObj = +new Date(date.getYear(),date.getMonth(),date.getDate(),date.getHours()) - timezoneOffset;
                     if (dateObj!=pastTime) {
-                        if(dateObj-pastTime > 3600000){ //1 hour
+                        if (dateObj-pastTime > 3600000) { //1 hour
                             data.push([pastTime + 3600000,0]);
                             data.push([dateObj - 3600000,0]);
                         }
@@ -44,7 +44,7 @@ $(function () {
                 var date = new Date(redirects[i][0]);
                 var dateObj = +new Date(date.getYear(),date.getMonth(),date.getDate(),date.getHours()) - timezoneOffset;
                 if (dateObj!=pastTime) {
-                    if(dateObj-pastTime > 3600000){ //1 hour
+                    if (dateObj-pastTime > 3600000) { //1 hour
                         all.push([pastTime + 3600000,0]);
                         all.push([dateObj - 3600000,0]);
                     }

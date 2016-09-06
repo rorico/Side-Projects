@@ -1,5 +1,5 @@
-$("#convert").click(function(){
-	var info = $('#input').val();
+$("#convert").click(function() {
+    var info = $('#input').val();
     //note, cannot store date objects, so convert to timestamp
     chrome.storage.sync.set({'scheduleInfo': parseData(info)});
     //reset input
@@ -7,9 +7,9 @@ $("#convert").click(function(){
 });
 
 function parseData(text) {
-	var info = [];
-	var beginning = "University of Waterloo";
-	var end = "Printer Friendly Page";
+    var info = [];
+    var beginning = "University of Waterloo";
+    var end = "Printer Friendly Page";
     var classTypes = ["SEM","TUT","LAB","LEC"];
     var content = text.substring(text.indexOf(beginning) + beginning.length,text.indexOf(end));
     var courses = content.split("Exam Information");
@@ -18,30 +18,29 @@ function parseData(text) {
         var lines = courses[i].split("\n");
         var courseName=[];
         var type = "";
-        var index = 0;
-        for (var j = 0 ; j < lines.length ; j++){
-        	var line = lines[j];
-        	if (/^[A-Z].+$/.test(line)){
-				var courseParts = line.split(" ");
-	            var courseCode = courseParts[0] + " " + courseParts[1];
-	            var courseDescription = "";
-	            for (var word = 2 ; word < courseParts.length - 1 ; word++) {
-	                courseDescription += courseParts[word]+" ";
-	            }
-	            courseDescription += courseParts[courseParts.length - 1];
-	            courseName = [courseCode,courseDescription];
-	            break;
-        	}
+        for (var j = 0 ; j < lines.length ; j++) {
+            var line = lines[j];
+            if (/^[A-Z].+$/.test(line)) {
+                var courseParts = line.split(" ");
+                var courseCode = courseParts[0] + " " + courseParts[1];
+                var courseDescription = "";
+                for (var word = 2 ; word < courseParts.length - 1 ; word++) {
+                    courseDescription += courseParts[word]+" ";
+                }
+                courseDescription += courseParts[courseParts.length - 1];
+                courseName = [courseCode,courseDescription];
+                break;
+            }
         }
         for (var j = 0 ; j < lines.length ; j++) {
-        	for(var k = 0 ; k < classTypes.length ; k++) {
-        		if (lines[j] == classTypes[k]){
-        			type = classTypes[k];
-        			break;
-        		}
-        	}
+            for (var k = 0 ; k < classTypes.length ; k++) {
+                if (lines[j] == classTypes[k]) {
+                    type = classTypes[k];
+                    break;
+                }
+            }
             if (/^[MTWTFh]{1,6} \d{1,2}:.+$/.test(lines[j])) {
-                courseInfo.push([getClassLength(lines[j]),lines[j+1],lines[j+2],parseDate(lines[j+3]),courseName,type])
+                courseInfo.push([getClassLength(lines[j]),lines[j+1],lines[j+2],parseDate(lines[j+3]),courseName,type]);
                 j+=4;
             }
         }
@@ -66,16 +65,16 @@ function parseDate(date) {
 }
 
 function getClassLength(range) {
-    words = range.split(" ");
-    startValue = parseTime(words[1]);
-	endValue = parseTime(words[3]);
+    var words = range.split(" ");
+    var startValue = parseTime(words[1]);
+    var endValue = parseTime(words[3]);
     return [words[0],startValue,endValue];
 }
 
-function parseTime(time){
-	timeParts = time.split(":");
-    timeHour = timeParts[0];
-    timeValue = timeHour * 100;
+function parseTime(time) {
+    var timeParts = time.split(":");
+    var timeHour = timeParts[0];
+    var timeValue = timeHour * 100;
     if (timeParts[1].indexOf("PM")>-1&&timeParts[0]!="12") {
         timeValue+=1200;
     }

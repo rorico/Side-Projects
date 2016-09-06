@@ -32,13 +32,13 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var currentTimePiece = -1;
     var updateTimeLineInterval = -1;
     var timeCurrentInterval = -1;
-    if(addTimeLine([timeCurrent,wastingTime,url],false,-1)){
+    if (addTimeLine([timeCurrent,wastingTime,url],false,-1)) {
         for (var i = 0; i < timeLine.length ; i++) {
-            if(!addTimeLine(timeLine[i],true,i)) {
+            if (!addTimeLine(timeLine[i],true,i)) {
                 break;
             }
         }
-        if(timeLineLeft > 0) {
+        if (timeLineLeft > 0) {
             $('#timeLine').prepend('<div style="width:' + timeLineLeft + 'px" class="timeLine"></div>');
         }
     }
@@ -75,12 +75,12 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         var time = info[0]/timeLineLength * parentWidth + offset;
         offset = time%1;
         time = Math.floor(time);
-        if(time < 1 && hover) {
+        if (time < 1 && hover) {
             offset += time;
             return true;
         }
         var ret = true;
-        if(time >= timeLineLeft) {
+        if (time >= timeLineLeft) {
             time = timeLineLeft;
             timeLineLeft = 0;
             ret = false;
@@ -88,7 +88,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             timeLineLeft -= time;
         }
         var classAddon = '';
-        if(time >= 3) {
+        if (time >= 3) {
             time -= 2;
             classAddon = ' timeLineBlock';
         }
@@ -102,18 +102,18 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function setHover(ele,info) {
-        ele.hover(function(){
+        ele.hover(function() {
             hover = true;
             $('#info').html(formatInfo(info[2],info[0],info[3]));
-        },function(){
-            if(!click){
+        },function() {
+            if (!click) {
                 hover = false;
                 $('#info').html(formatInfo(url,timeCurrent,title));
             }
         });
     }
     function setClick(ele,info,i) {
-        ele.click(function(){
+        ele.click(function() {
             click = true;
             currentTimePiece = i;
             $('#info').html(formatInfo(info[2],info[0],info[3]));
@@ -124,8 +124,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         if (wastingTime) {
             timeLeft -= new Date() - startTime;
         }
-        if(timeLeft < 0) {
-            timeOffset = timeLeft;
+        if (timeLeft < 0) {
             timeLeft = 0;
         }
         countDownFunction(timeLeft);
@@ -134,9 +133,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     //not exactly accurate, not too important
     function countDownFunction(time) {
         $('#test').html(MinutesSecondsFormat(time));
-        if(wastingTime && time>0) {
-            delay = (time-1)%1000+1;
-            countDownTimer = setTimeout(function(){
+        if (wastingTime && time>0) {
+            var delay = (time-1)%1000+1;
+            countDownTimer = setTimeout(function() {
                 countDownFunction(time - delay);
             },delay);
         }
@@ -145,10 +144,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     function updateTimeLine() {
         var parentWidth = $('#timeLine').width();
         var delay = timeLineLength/parentWidth;
-        updateTimeLineInterval = setInterval(function(){
+        updateTimeLineInterval = setInterval(function() {
             var newEle = $('#timeLine div:last-child');
             var oldestEle = $('#timeLine div:first-child');
-            if(!newEle.hasClass("timeLineBlock") && newEle.width() + 1 >= 2) {
+            if (!newEle.hasClass("timeLineBlock") && newEle.width() + 1 >= 2) {
                 newEle.width(newEle.width() - 1);
                 newEle.addClass("timeLineBlock");
             } else {
@@ -159,37 +158,30 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 oldestEle.remove();
                 oldestEle = $('#timeLine div:first-child');
             }
-            if(oldestEle.hasClass("timeLineBlock") && oldestEle.width() - 1 <= 0) {
+            if (oldestEle.hasClass("timeLineBlock") && oldestEle.width() - 1 <= 0) {
                 oldestEle.width(oldestEle.width() + 1);
                 oldestEle.removeClass("timeLineBlock");
             } else {
                 oldestEle.width(oldestEle.width() - 1);
             }
         },delay);
-        timeCurrentInterval = setInterval(function(){
+        timeCurrentInterval = setInterval(function() {
             timeCurrent += 1000;
-            if(!hover) {
+            if (!hover) {
                 $('#info').html(formatInfo(url,timeCurrent,title));
             }
         },1000);
-    }
-
-    function timeType(number) {
-        if(number) {
-            return "wasting";
-        } else {
-            return "using";
-        }
     }
 
     function formatInfo(url,time,title) {
         return shorten(title," ",50) + '<br />' + shorten(url,"/",50) + '<br />Time spent:' + MinutesSecondsFormat(time);
     }
 
-    function shorten(info,delim,limit){
-        if(info.length > limit) { //show be about a line (400px)
+    function shorten(info,delim,limit) {
+        if (info.length > limit) { //show be about a line (400px)
+            var index = 0;
             do {
-                var index = info.lastIndexOf(delim);
+                index = info.lastIndexOf(delim);
                 info = info.substring(0,index);
             } while(index > limit);
             info += delim + "...";
@@ -210,10 +202,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         setAlarm(delay);
     }
 
-    time = new Date();
-    currentTimer = "";
+    var time = new Date();
+    var currentTimer = "";
     function changeTimer(digit) {
-        now = new Date();
+        var now = new Date();
         if (now-time<1000) {
             currentTimer += digit.toFixed(0);
             //limit to 3 digits
@@ -232,7 +224,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         $("#phrase").remove();
         var front = "<div id='phraseFront'>";
         var back = "<div id='phraseBack'>";
-        for(var i = 0 ; i < phrase.length ; i++) {
+        for (var i = 0 ; i < phrase.length ; i++) {
             front += "<div id='phrase" + i + "' class='phrasePart'>" + phrase[i] + "</div>";
             back += "<div class='phrasePart'>" + phrase[i] + "</div>";
         }
@@ -241,7 +233,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         var html = "<div id='phrase'>" + front + back + "</div>";
         $("body").append(html);
         var fontSize = 100;
-        if($("body").width() < $("#phraseFront").width()) {
+        if ($("body").width() < $("#phraseFront").width()) {
             fontSize = Math.floor(fontSize / ($("#phraseFront").width() / $("body").width()));
             $(".phrasePart").css("font-size",fontSize);
         }
@@ -265,13 +257,13 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     function disappearHotkey() {
         var opacity = 0.8;
         clearInterval(disappearInterval);
-        disappearInterval = setInterval(function(){
+        disappearInterval = setInterval(function() {
             opacity -= 0.01;
             $("#phrase").css("opacity",opacity);
-            if(opacity <= 0) {
+            if (opacity <= 0) {
                 clearHotkey();
             }
-        },10)
+        },10);
     }
 
     function clearHotkey() {
@@ -287,12 +279,11 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var phraseIndex = 0;
     var deletes = false;
     $(window).keydown(function(e) {
-        if(currentPhrase !== -1) {
+        if (currentPhrase !== -1) {
             //get lowercase ascii value of next part
-            if(e.keyCode === phrases[currentPhrase][0].charCodeAt(phraseIndex)) {
-                found = true;
+            if (e.keyCode === phrases[currentPhrase][0].charCodeAt(phraseIndex)) {
                 showHotkey(phraseIndex);
-                if(++phraseIndex === phrases[currentPhrase][0].length) {
+                if (++phraseIndex === phrases[currentPhrase][0].length) {
                     phrases[currentPhrase][1]();
                 }
             } else {
@@ -300,15 +291,15 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             }
         } else  {
             var found = false;
-            for(var i = 0 ; i < phrases.length ; i++) {
-                if(e.keyCode === phrases[i][0].charCodeAt(0)) {
+            for (var i = 0 ; i < phrases.length ; i++) {
+                if (e.keyCode === phrases[i][0].charCodeAt(0)) {
                     startShowHotkey(phrases[i][0]);
                     currentPhrase = i;
                     phraseIndex = 1;
                     found = true;
                 }
             }
-            if(!found) {
+            if (!found) {
                 switch (e.keyCode) {
                     case 83:        //s
                         setAlarm(+$('#setTimer').val());
@@ -391,7 +382,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         sendRequest("change",currentTimePiece);
     }
     //send requests to background
-    function sendRequest(action,input){
+    function sendRequest(action,input) {
         chrome.runtime.sendMessage({
             from: "browserAction",
             action: action,
@@ -417,7 +408,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     //get from background to display
     chrome.runtime.onMessage.addListener(function(a, b, c) {
-        if(a.from === "background") {
+        if (a.from === "background") {
             switch(a.action) {
                 case "setAlarm":
                     var input = a.input;
@@ -438,7 +429,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     var input = a.input;
                     $('#timeLine' + input[0]).removeClass("wasting" + input[1]).addClass("wasting0");
                     //if change isn't just to 0, will need to change this
-                    if(input[0] === -1) {
+                    if (input[0] === -1) {
                         wastingTime = 0;
                     }
                     break;
@@ -449,24 +440,12 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
     });
 
-
-    function alarmTypeOf(type) {
-        switch(type) {
-            case 1:
-                return "sleep";
-            case 2:
-                return "block";
-            default:
-                return "";
-        }
-    }
-
     function showAlarm(date,alarmNumber,type) {
         var time = date.toLocaleTimeString();
         $('#alarmText'+(alarmNumber+1)).html("Alarm at "+time);
         $('#alarm'+(alarmNumber+1)).removeClass("notSet");
         $('#alarm'+(alarmNumber+1)).css({"color":typeColors[type],"border-color":typeColors[type]});
-        $('#alarm'+(alarmNumber+1)).bind("click",function(){
+        $('#alarm'+(alarmNumber+1)).bind("click",function() {
             removeAlarm(alarmNumber);
         });
     }
@@ -482,14 +461,14 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function showRinging(alarmNumber) {
         var visibility = "hidden";
-        ringingAlarms[alarmNumber] = setInterval(function(){
+        ringingAlarms[alarmNumber] = setInterval(function() {
             visibility = (visibility === "hidden" ? "visible" : "hidden");
-            $('#alarmText'+(alarmNumber+1)).css("visibility",visibility)
+            $('#alarmText'+(alarmNumber+1)).css("visibility",visibility);
         },300);
     }
 
     function changeTime(change) {
-        delay = parseInt($('#setTimer').val());
+        var delay = parseInt($('#setTimer').val());
         if (change>0 || delay>0) {
             $('#setTimer').val(delay+change);
         }

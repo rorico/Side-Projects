@@ -1,9 +1,5 @@
 chrome.runtime.getBackgroundPage(function (backgroundPage) {
-    var scheduleInfo = backgroundPage.scheduleInfo;
     var todaySchedule = backgroundPage.todaySchedule;
-    var sameDOW = backgroundPage.sameDOW;
-    var isInRange = backgroundPage.isInRange;
-    var sort_by_date = backgroundPage.sort_by_date;
 
     var now = new Date();
     var startTime = 700;        //7AM
@@ -32,15 +28,14 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             $(container).prepend("<div id='nowHolder'><div id='now'></div></div>");
             showNow();
         }
-        if (today.length==0) {
+        if (today.length === 0) {
             $(container).append("<div class='class' style='height:599px'><p style='top:285px'>No Classes Today</p></div>");
         } else {
-            
-            html = "<div class='placeholder placeborder' style='height:0px'></div>";
+            var html = "<div class='placeholder placeborder' style='height:0px'></div>";
             var length = (today[0][0][1]-startTime)/2;
-            while (length>50) {
+            while (length > 50) {
                 html += "<div class='placeholder placeborder' style='height:49px'></div>";
-                length-=50;
+                length -= 50;
             }
             html += "<div class='placeholder' style='height:"+(length-1) +"px'></div>";
             for (var i = 0 ; i < today.length ; i++) {
@@ -62,12 +57,12 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
                 var beginning = finish;
                 var end = endTime;
-                if (i!=today.length-1) {
+                if (i != today.length-1) {
                     end = today[i+1][0][1];
                 }
                 var next;
                 while ((next = Math.floor((beginning+100)/100)*100)<=end) {
-                    var length = next-beginning;
+                    length = next - beginning;
                     html += "<div class='placeholder placeborder' style='height:"+(length/2-1)+"px'></div>";
                     beginning += length;
                 }
@@ -92,19 +87,18 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             if (now.getHours()>=19||now.getHours()<=6) {
                 $('#now').css('display','none');
             } else {
+                var text = (now.getHours())+":"+('0'+now.getMinutes()).slice(-2)+"AM";
                 if (now.getHours()>=13) {
-                    var text = (now.getHours()-12)+":"+('0'+now.getMinutes()).slice(-2)+"PM";
+                    text = (now.getHours()-12)+":"+('0'+now.getMinutes()).slice(-2)+"PM";
                 } else if (now.getHours()==12) {
-                    var text = (now.getHours())+":"+('0'+now.getMinutes()).slice(-2)+"PM";
-                } else {
-                    var text = (now.getHours())+":"+('0'+now.getMinutes()).slice(-2)+"AM";
+                    text = (now.getHours())+":"+('0'+now.getMinutes()).slice(-2)+"PM";
                 }
                 $('#now').css('display','block');
                 $('#now').text(text);
                 $('#nowHolder').css('top',position);
                 $('#nowHolder').css('left',-nowTimeOffset);
             }
-            setTimeout(function(){
+            setTimeout(function() {
                 showNow();
             },delay*1000);
         }
@@ -183,11 +177,11 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         showSchedule("#currentDay",date);
     }
 
-    function showWeek(date){
+    function showWeek(date) {
         $('#container').empty();
         var start = date.getDay()-1;
         date.setDate(date.getDate()-start);    //set to monday
-        for (var i = 0 ; i<5 ; i++){
+        for (var i = 0 ; i<5 ; i++) {
             $('#container').append("<div id='D"+i+"' class='day'></div>");
             showSchedule('#D'+i, date);
             date.setDate(date.getDate()+1);

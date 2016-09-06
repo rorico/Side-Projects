@@ -2,13 +2,13 @@ var scheduleInfo;
 var date = new Date();
 var today;
 chrome.storage.sync.get('scheduleInfo', function(items) {
-	if(items.scheduleInfo) {
-		scheduleInfo = items.scheduleInfo;
-		today = todaySchedule(date);
-	} else {
-		scheduleInfo = [];
-		today = [];
-	}
+    if (items.scheduleInfo) {
+        scheduleInfo = items.scheduleInfo;
+        today = todaySchedule(date);
+    } else {
+        scheduleInfo = [];
+        today = [];
+    }
 });
 
 function todaySchedule(date) {
@@ -20,8 +20,8 @@ function todaySchedule(date) {
             }
         }
     }
-	today.sort(sort_by_date);
-	return today;
+    today.sort(sort_by_date);
+    return today;
 }
 
 /* used to add a timeslot somewhere, not used yet
@@ -32,7 +32,7 @@ function add(dayOfW,startT,endT,room,teacher,startD,endD,courseCode,courseInfo,t
 function sameDOW(date,DOW) { //same day of week
     var dayOfWeek = (new Date(date)).getDay();
     var day = -1;
-    switch(dayOfWeek){
+    switch(dayOfWeek) {
         case 1:
             day = 'M';
             break;

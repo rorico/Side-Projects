@@ -1,16 +1,16 @@
 //set alarm for every half hour after 10pm
 //sets alarm when it rings so can't stop before
-sleepAlarmStart = 22;   //10pm
-sleepAlarmEnd = 6;      //6am
+var sleepAlarmStart = 22;   //10pm
+var sleepAlarmEnd = 6;      //6am
 setSleepAlarm();
-chrome.alarms.onAlarm.addListener(function(alarm){
-    if(alarm.name=='sleep') {
+chrome.alarms.onAlarm.addListener(function(alarm) {
+    if (alarm.name=='sleep') {
         setAlarm(0,1);
         setSleepAlarm();
     }
 });
-function setSleepAlarm(){
-    date = new Date();
+function setSleepAlarm() {
+    var date = new Date();
     date.setSeconds(0);
     date.setMinutes(Math.floor(date.getMinutes()/30)*30 + 30);
     if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
@@ -47,7 +47,7 @@ function setAlarm(delay,type) {
             alarmTime.setMinutes(alarmTime.getMinutes()+delay);
             ++alarmCnt;
             //chrome.browserAction.setBadgeText({text:(++alarmCnt).toString()});
-            var alarm = setTimeout(function(){
+            var alarm = setTimeout(function() {
                 ringAlarm(i,type);
             },delay*60000);
 
@@ -69,7 +69,7 @@ function ringAlarm(alarmNumber,type) {
     alarms[alarmNumber][0] = 2;
     playAlarmCheck[0] = true;
     sendRequest("ringing",alarmNumber);
-    var interval = setInterval(function(){
+    var interval = setInterval(function() {
         if (playAlarmCheck[0]) {
             audio.play();
         } else {
@@ -82,7 +82,7 @@ function removeAlarm(alarmNumber,type) {
     //unspecified type is a catchall,
     //type 2 needs specific call
     if (alarms[alarmNumber][0] && ((typeof type === 'undefined' && alarms[alarmNumber][3] !== 2) || alarms[alarmNumber][3] == type)) {
-        if(--alarmCnt){
+        if (--alarmCnt) {
           //chrome.browserAction.setBadgeText({text:(alarmCnt).toString()});
         } else {
           //chrome.browserAction.setBadgeText({text:""});
@@ -135,7 +135,7 @@ function snooze() {
 }
 
 //for displaying in an open browser action
-function sendRequest(action,input){
+function sendRequest(action,input) {
     chrome.runtime.sendMessage({
         from: "background",
         action: action,
@@ -145,7 +145,7 @@ function sendRequest(action,input){
 
 //get requests from browserAction
 chrome.runtime.onMessage.addListener(function(a, b, c) {
-    if(a.from === "browserAction") {
+    if (a.from === "browserAction") {
         switch(a.action) {
             case "stopAllAlarms":
                 stopAllAlarms();
