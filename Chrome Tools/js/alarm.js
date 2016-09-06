@@ -142,23 +142,3 @@ function sendRequest(action,input) {
         input: input
     });
 }
-
-//get requests from browserAction
-chrome.runtime.onMessage.addListener(function(a, b, c) {
-    if (a.from === "browserAction") {
-        switch(a.action) {
-            case "stopAllAlarms":
-                stopAllAlarms();
-                break;
-            case "snooze":
-                snooze();
-                break;
-            case "setAlarm":
-                setAlarm(a.input,0);
-                break;
-            case "removeAlarm":
-                removeAlarm(a.input);
-                break;
-        }
-    }
-});

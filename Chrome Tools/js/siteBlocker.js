@@ -316,21 +316,3 @@ function sendRequest(action,input) {
         input: input
     });
 }
-
-
-//get requests from browserAction
-chrome.runtime.onMessage.addListener(function(a, b, c) {
-    if (a.from === "browserAction") {
-        switch(a.action) {
-            case "VIP":
-                makeCurrentTabVIP();
-                break;
-            case "resetTime":
-                resetTime();
-                break;
-            case "change":
-                change(a.input);
-                break;
-        }
-    }
-});
