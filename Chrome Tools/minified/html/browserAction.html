@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Schedule</title>
+    <script type="text/javascript" src="/lib/jquery.min.js"></script>
+    <link rel="stylesheet" href="/css/browserAction.css">
+</head>
+
+<body>
+<div id="timer" class="alarm">Alarm
+<p id="alarmText">Set alarm to sound in <input id="setTimer" value="5" type="number"/> minutes <input type="button" value="SET" id="timerButton"/></p>
+</div>
+<div id="alarms" class="alarm">
+    <div id="alarm1" class="alarm notSet"><div class="alarmTitle">1</div><div id="alarmText1" class="alarmData">Not Set</div></div>
+    <div id="alarm2" class="alarm notSet"><div class="alarmTitle">2</div><div id="alarmText2" class="alarmData">Not Set</div></div>
+    <div id="alarm3" class="alarm notSet"><div class="alarmTitle">3</div><div id="alarmText3" class="alarmData">Not Set</div></div>
+    <div id="alarm4" class="alarm notSet"><div class="alarmTitle">4</div><div id="alarmText4" class="alarmData">Not Set</div></div>
+    <div id="alarm5" class="alarm notSet"><div class="alarmTitle">5</div><div id="alarmText5" class="alarmData">Not Set</div></div>
+</div>
+<div id="test"></div>
+<div id="timeLineHolder">
+    <div id="axisTop"><div class="axisPart top"></div><div class="axisPart top"></div><div class="axisPart top"></div><div class="axisPart top"></div><div class="axisPart top"></div><div class="axisPart top end"></div></div>
+    <div id="timeLine"></div>
+    <div id="axisBot"><div class="axisPart bot"></div><div class="axisPart bot"></div><div class="axisPart bot"></div><div class="axisPart bot"></div><div class="axisPart bot"></div><div class="axisPart bot end"></div></div>
+</div>
+<div id="info"></div>
+<script type="text/javascript" src="/js/browserAction.js"></script>
+</body>
+</html>
