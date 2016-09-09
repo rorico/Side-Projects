@@ -1206,6 +1206,10 @@ body .ui-tooltip {
     <script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
     <style>
+        body{
+            font-family: 'Times New Roman';
+            font-size: 100%;
+        }
         div{
             text-align: center;
         }
@@ -1217,17 +1221,18 @@ body .ui-tooltip {
             float:left;
             display:inline;;
         }
+        #header{
+            height:30px;
+        }
         #datepicker{
-        	text-align:center;
-        	width:200px;
+            text-align:center;
+            width:200px;
         }
         .placeholder{
             display:block;
             width:302px;
         }
-        .placeholder1{
-            display:block;
-            width:302px;
+        .placeborder{
             border-bottom:1px rgb(228, 228, 228) solid;
         }
         .class{
@@ -1237,7 +1242,7 @@ body .ui-tooltip {
             vertical-align: middle;
             overflow:hidden;
         }
-        #timeline{
+        .timeline{
             border-top: 1px solid black;
             float:left;
             display:inline;
@@ -1245,13 +1250,30 @@ body .ui-tooltip {
         .timeslot{
             background-color:rgb(228, 228, 228);
             display:block;
-            width:50px;
+            width:16px;
+            height:50px;
+        }
+        .timeslot.half{
             height:25px;
         }
-        .timeslot.bottom{
+        .timeslot.timeslotBorder{
+            height:49px;
             border-bottom: 1px solid black;
+        }
+        .timeslot.half.timeslotBorder{
             height:24px;
-            line-height:28px;
+            border-bottom: 1px solid black;
+        }
+        .timeslot.number{
+            width:18px;
+            line-height:50px;
+        }
+        .timeslot.right{
+            width:8px;
+        }
+        .timeslot.right.halftimeslotBorder{
+            height:24px;
+            border-bottom: 1px solid gray;
         }
         #side{
             float:left;
@@ -1300,187 +1322,270 @@ body .ui-tooltip {
 
 <body>
 <div id="calendar">
-<div style="height:22px;">
-<input type="button" value="Prev" id="prev" onclick="javascript:prev();">
+<div id="header">
+<input type="button" value="Prev" id="prev">
 <input type="text" id="datepicker">
-<input type="button" value="Next" id="next" onclick="javascript:next();">
-<input type="button" value="Show Week" id="button" onclick="javascript:weekView();">
+<input type="button" value="Next" id="next">
+<input type="button" value="Show Week" id="showWeek">
 </div>
 <div id="holder"><div>
-<div id="timeline">
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">8</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">9</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">10</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">11</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">12</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">1</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">2</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">3</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">4</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">5</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">6</div>
-    <div class="timeslot"></div>
-    <div class="timeslot bottom">7</div>
+<div class="timeline">
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+    <div class="timeslot timeslotBorder"></div>
+</div>
+<div class="timeline">
+    <div class="timeslot number half"></div>
+    <div class="timeslot number">8</div>
+    <div class="timeslot number">9</div>
+    <div class="timeslot number">10</div>
+    <div class="timeslot number">11</div>
+    <div class="timeslot number">12</div>
+    <div class="timeslot number">1</div>
+    <div class="timeslot number">2</div>
+    <div class="timeslot number">3</div>
+    <div class="timeslot number">4</div>
+    <div class="timeslot number">5</div>
+    <div class="timeslot number">6</div>
+    <div class="timeslot number half timeslotBorder"></div>
+</div>
+<div class="timeline">
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+    <div class="timeslot right timeslotBorder"></div>
+</div>
+<div class="timeline">
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
+    <div class="timeslot right half halftimeslotBorder"></div>
+    <div class="timeslot right half timeslotBorder"></div>
 </div>
 <div id="container"><div id="currentDay" class="day"><div id="nowHolder"><div id="now"></div></div></div></div>
 </div></div></div>
-
 <script type="text/javascript">
     var dayToday = new Date();
     var nowTimeOffset = 50;
-    var info = [[[["Th",1650,1733.3333333333333],"QNC 1502","Adam Neale",[new Date("Thu Jan 07 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 200A","- ECE Practice"],"SEM"]],[[["M",1350,1533.3333333333333],"CPH 1346","Oleg Michailovich",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 204A","- Numerical Methods 1"],"LAB"]],[[["M",950,1033.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["TTh",1050,1133.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Tue Jan 05 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Jan 07 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 07 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Jan 21 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 21 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Feb 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Feb 04 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Feb 25 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Feb 25 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Mar 10 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Mar 10 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Mar 24 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 24 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["W",1650,1733.3333333333333],"QNC 1502","Staff",[new Date("Wed Jan 06 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"TUT"]],[[["TWTh",950,1033.3333333333333],"MC 4020","Gordon Agnew",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Jan 14 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 14 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Jan 28 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 28 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Feb 11 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Feb 11 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Mar 03 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Mar 03 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Mar 17 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 17 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Mar 31 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 31 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LEC"],[["T",1750,1833.3333333333333],"QNC 1502","Staff",[new Date("Tue Jan 05 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"TUT"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Jan 14 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 14 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Jan 28 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 28 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Feb 11 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Feb 11 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Mar 03 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Mar 03 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Mar 17 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 17 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Mar 31 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 31 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LAB"]],[[["TWTh",850,933.3333333333334],"MC 4020","David Nairn",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Jan 12 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 12 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Jan 26 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 26 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Feb 09 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 09 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Mar 01 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 01 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Mar 15 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 15 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Mar 29 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 29 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["M",1550,1633.3333333333333],"QNC 1502","Staff",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"TUT"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Jan 13 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Wed Jan 13 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Jan 27 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Wed Jan 27 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Feb 10 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Wed Feb 10 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Mar 02 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Wed Mar 02 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Mar 16 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Wed Mar 16 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Mar 30 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Wed Mar 30 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"]],[[["MWF",1050,1133.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Jan 05 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 05 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Jan 19 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 19 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Feb 02 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 02 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Feb 23 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 23 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Mar 08 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 08 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Mar 22 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 22 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["M",1650,1733.3333333333333],"QNC 1502","Staff",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"TUT"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Jan 12 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 12 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Jan 26 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 26 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Feb 09 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 09 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Mar 01 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 01 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Mar 15 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 15 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Mar 29 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 29 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"]],[[["MF",850,933.3333333333334],"MC 4020","Karim Karim",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["F",950,1033.3333333333333],"MC 4020","Karim Karim",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Jan 12 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 12 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Jan 26 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 26 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Feb 09 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 09 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Mar 01 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 01 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Mar 15 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 15 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Mar 29 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 29 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["F",1550,1633.3333333333333],"E5 5106","Staff",[new Date("Fri Jan 08 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"TUT"]],[[["MWF",1150,1233.3333333333333],"MC 4020","Ryan Trelford",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Jan 05 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 05 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Jan 19 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 19 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Feb 02 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 02 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Feb 23 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 23 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Mar 08 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 08 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Mar 22 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 22 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["M",1750,1833.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["MATH 215","- Linear Alg for Engineering"],"TUT"]],[]];
+    var scheduleInfo = [[[["Th",1650,1733.3333333333333],"QNC 1502","Adam Neale",[new Date("Thu Jan 07 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 200A","- ECE Practice"],"SEM"]],[[["M",1350,1533.3333333333333],"CPH 1346","Oleg Michailovich",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 204A","- Numerical Methods 1"],"LAB"]],[[["M",950,1033.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["TTh",1050,1133.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Tue Jan 05 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Jan 07 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 07 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Jan 21 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 21 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Feb 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Feb 04 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Feb 25 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Feb 25 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Mar 10 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Mar 10 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Shahla Ali Akbari",[new Date("Thu Mar 24 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 24 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"LEC"],[["W",1650,1733.3333333333333],"QNC 1502","Staff",[new Date("Wed Jan 06 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 205","- Adv Calculus (Elec.&Comp.Eng.)"],"TUT"]],[[["TWTh",950,1033.3333333333333],"MC 4020","Gordon Agnew",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Jan 14 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 14 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Jan 28 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 28 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Feb 11 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Feb 11 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Mar 03 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Mar 03 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Mar 17 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 17 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LEC"],[["Th",1150,1233.3333333333333],"MC 4020","Gordon Agnew",[new Date("Thu Mar 31 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 31 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LEC"],[["T",1750,1833.3333333333333],"QNC 1502","Staff",[new Date("Tue Jan 05 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"TUT"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Jan 14 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 14 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Jan 28 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Jan 28 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Feb 11 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Feb 11 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Mar 03 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Thu Mar 03 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Mar 17 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 17 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LAB"],[["Th",1350,1633.3333333333333],"E2 2363","Staff",[new Date("Thu Mar 31 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Thu Mar 31 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 222","- Digital Computers"],"LAB"]],[[["TWTh",850,933.3333333333334],"MC 4020","David Nairn",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Jan 12 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 12 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Jan 26 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 26 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Feb 09 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 09 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Mar 01 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 01 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Mar 15 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 15 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","David Nairn",[new Date("Tue Mar 29 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 29 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LEC"],[["M",1550,1633.3333333333333],"QNC 1502","Staff",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"TUT"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Jan 13 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Wed Jan 13 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Jan 27 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Wed Jan 27 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Feb 10 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Wed Feb 10 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Mar 02 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Wed Mar 02 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Mar 16 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Wed Mar 16 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"],[["W",1350,1633.3333333333333],"E2 3344","Staff",[new Date("Wed Mar 30 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Wed Mar 30 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 240","- Electronic Circuits 1"],"LAB"]],[[["MWF",1050,1133.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Jan 05 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 05 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Jan 19 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 19 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Feb 02 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 02 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Feb 23 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 23 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Mar 08 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 08 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Ladan Tahvildari",[new Date("Tue Mar 22 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 22 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"LEC"],[["M",1650,1733.3333333333333],"QNC 1502","Staff",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"TUT"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Jan 12 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 12 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Jan 26 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 26 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Feb 09 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 09 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Mar 01 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 01 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Mar 15 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 15 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"],[["T",1350,1633.3333333333333],"RCH 108","Staff",[new Date("Tue Mar 29 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 29 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 250","- Algorithms & Data Structures"],"LAB"]],[[["MF",850,933.3333333333334],"MC 4020","Karim Karim",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["F",950,1033.3333333333333],"MC 4020","Karim Karim",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Jan 12 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 12 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Jan 26 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 26 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Feb 09 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 09 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Mar 01 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 01 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Mar 15 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 15 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["T",1150,1233.3333333333333],"MC 4020","Karim Karim",[new Date("Tue Mar 29 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 29 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"LEC"],[["F",1550,1633.3333333333333],"E5 5106","Staff",[new Date("Fri Jan 08 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["ECE 290","- Eng Profession, Ethics, Law"],"TUT"]],[[["MWF",1150,1233.3333333333333],"MC 4020","Ryan Trelford",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Jan 05 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 05 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Jan 19 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Jan 19 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Feb 02 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 02 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Feb 23 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Feb 23 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Mar 08 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Tue Mar 08 2016 23:59:59 GMT-0500 (Eastern Standard Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["T",1650,1733.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Tue Mar 22 2016 00:00:00 GMT-0400 (Eastern Daylight Time)"),new Date("Tue Mar 22 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["MATH 215","- Linear Alg for Engineering"],"LEC"],[["M",1750,1833.3333333333333],"QNC 1502","Ryan Trelford",[new Date("Mon Jan 04 2016 00:00:00 GMT-0500 (Eastern Standard Time)"),new Date("Mon Apr 04 2016 23:59:59 GMT-0400 (Eastern Daylight Time)")],["MATH 215","- Linear Alg for Engineering"],"TUT"]],[]];
     //get info from parseScheduleData.html
-    
-    $(function() {
-        $( "#datepicker" ).datepicker({
-            onSelect: function(dateText) {
-                if ($('#button').val()=="Show Week") {
-                    changeDate(dateText);
-                } else {
-                    showWeek(dateText);
-                }
-            },
-            dateFormat: "DD MM d, yy"
-        });
-        $( "#datepicker" ).datepicker("setDate", new Date());
-        //scheduleChanges();
-        showSchedule('#currentDay', new Date());
-    });
-    function weekView() {
-        var date = $( "#datepicker" ).datepicker("getDate");
-        if ($('#button').val()=="Show Week") {
-            $('#button').val("Show Day");
-            showWeek(date);
-        } else {
-            $('#button').val("Show Week");
-            changeDate(date);
-        }
-    }
-    function next() {
-        var date = $( "#datepicker" ).datepicker("getDate");
-        if ($('#button').val()=="Show Week") {
-            date.setDate(date.getDate() + 1);
-            $( "#datepicker" ).datepicker("setDate",date);
-            changeDate(date);
-        } else {
-            date.setDate(date.getDate() + 7);
-            $( "#datepicker" ).datepicker("setDate",date);
-            showWeek(date);
-        }
-    }
-    function prev() {
-        var date = $( "#datepicker" ).datepicker("getDate");
-        if ($('#button').val()=="Show Week") {
-            date.setDate(date.getDate() - 1);
-            $( "#datepicker" ).datepicker("setDate",date);
-            changeDate(date);
-        } else {
-            date.setDate(date.getDate() - 7);
-            $( "#datepicker" ).datepicker("setDate",date);
-            showWeek(date);
-        }
-    }
-    function setToday() {
-    	var date = new Date();
-        $( "#datepicker" ).datepicker("setDate",date);
-        if ($('#button').val()=="Show Week") {
-            changeDate(date);
-        } else {
-            showWeek(date);
-        }
-    }
-    
-    function scheduleChanges() {
-    }
-    
-    function add(dayOfW,startT,endT,room,teacher,startD,endD,courseCode,courseInfo,type) {
-        info.push([[[dayOfW,startT,endT],room,teacher,[startD,endD],[courseCode,courseInfo],type]])
-    }
-    
-    
-    function showSchedule(container,date) {
-        var today = [];
-        for (var i = 0 ; i < info.length ; i++) {
-            for (var j = 0 ; j < info[i].length ; j++) {
-                if (sameDOW(date,info[i][j][0][0])&&isInRange(date,info[i][j][3])) {
-                    today.push(info[i][j]);
-                }
-            }
-        }
-        if (date.getDate()==dayToday.getDate()&&date.getMonth()==dayToday.getMonth()) {
-            if (container=='#currentDay') {
-                nowTimeOffset = 50;
+        var now = new Date();
+    var startTime = 700;        //7AM
+    var endTime = 1900;         //7PM
+    var nowTimeOffset = 50;     //for showing now bar
+    var weekMode = false;
+
+    $( "#datepicker" ).datepicker({
+        onSelect: function(dateText) {
+            if (weekMode) {
+                showWeek($( "#datepicker" ).datepicker("getDate"));
             } else {
-                nowTimeOffset = 0;
+                changeDate($( "#datepicker" ).datepicker("getDate"));
             }
+        },
+        dateFormat: "DD MM d, yy"
+    });
+    $( "#datepicker" ).datepicker("setDate", now);
+    showSchedule('#currentDay', now);
+
+    function showSchedule(container,date) {
+        var today = todaySchedule(date);    //function in scheduleInfo.js
+        now = new Date();
+        if (sameDay(date,now)) {
+            nowTimeOffset = 50 * !weekMode;
             $(container).prepend("<div id='nowHolder'><div id='now'></div></div>");
             showNow();
         }
-        if (today.length==0) {
+        if (today.length === 0) {
             $(container).append("<div class='class' style='height:599px'><p style='top:285px'>No Classes Today</p></div>");
         } else {
-            today.sort(sort_by_date);
-            
-            $(container).append("<div class='placeholder placeholder1' style='height:0px'></div>");
-            var length = (today[0][0][1]-700)/2;
-            while (length>=50) {
-                $(container).append("<div class='placeholder placeholder1' style='height:49px'></div>");
-                length-=50;
+            var html = "<div class='placeholder placeborder' style='height:0px'></div>";
+            var length = (today[0][0][1]-startTime)/2;
+            while (length > 50) {
+                html += "<div class='placeholder placeborder' style='height:49px'></div>";
+                length -= 50;
             }
-            $(container).append("<div class='placeholder' style='height:"+length+"px'></div>");
+            html += "<div class='placeholder' style='height:"+(length-1) +"px'></div>";
             for (var i = 0 ; i < today.length ; i++) {
-                var height = (today[i][0][2]-today[i][0][1])/2-2;
-                var html = "<div class='class "+today[i][5]+"' style='max-height:"+height+"px;height:"+height+"px'><p style='top:"+(height-30.4)/2+"px'>";
-                if (container!="#currentDay") {
-                	html += today[i][4][0]+" - "+today[i][5]+"<br />"+today[i][1];
+                var start = today[i][0][1];
+                var finish = today[i][0][2];
+                var classType = today[i][5];
+                var classCode = today[i][4][0];
+                var classInfo = today[i][4][1];
+                var location = today[i][1];
+
+                var height = (finish-start)/2-2 + 1;
+                html += "<div class='class "+classType+"' style='max-height:"+height+"px;height:"+height+"px'><p style='top:"+(height-30.4)/2+"px'>";
+                if (weekMode) {
+                    html += classCode+" - "+classType+"<br />"+location;
                 } else {
-                	html += today[i][4][0]+" "+today[i][4][1]+" - "+today[i][5]+"<br />"+today[i][1];
+                    html += classCode+" "+classInfo+" - "+classType+"<br />"+location;
                 }
                 html += "</p></div>";
-                $(container).append(html);
-                if (i!=today.length-1) {
-                    var end = today[i+1][0][1];
-                    var beginning = today[i][0][2];
-                    while (Math.floor((beginning+100)/100)*100<=end) {
-                        var length1 = Math.floor((beginning+100)/100)*100 - beginning;
-                        $(container).append("<div class='placeholder placeholder1' style='height:"+(length1/2-1)+"px'></div>");
-                        beginning+=length1;
-                    }
-                    $(container).append("<div class='placeholder' style='height:"+(end-beginning)/2+"px'></div>");
+
+                var beginning = finish;
+                var end = endTime;
+                if (i != today.length-1) {
+                    end = today[i+1][0][1];
                 }
+                var next;
+                while ((next = Math.floor((beginning+100)/100)*100)<=end) {
+                    length = next - beginning;
+                    html += "<div class='placeholder placeborder' style='height:"+(length/2-1)+"px'></div>";
+                    beginning += length;
+                }
+                html += "<div class='placeholder' style='height:"+((end-beginning)/2-1)+"px'></div>";
             }
-            var end = 1900;
-            var beginning = today[today.length-1][0][2];
-            while (Math.floor((beginning+100)/100)*100<=end) {
-                var length1 = Math.floor((beginning+100)/100)*100 - beginning;
-                $(container).append("<div class='placeholder placeholder1' style='height:"+(length1/2-1)+"px'></div>");
-                beginning+=length1;
-            }
+            $(container).append(html);
         }
-        $(container).parent().append("<div id='side'></div>");
-        
+        $(container).parent().append("<div id='side'></div>");    
     }
-    function changeDate(date) {
+
+    function sameDay(day1,day2) {
+        var date1 = new Date(day1);
+        var date2 = new Date(day2);
+        return date1.getDate()==date2.getDate()&&date1.getMonth()==date2.getMonth()&&date1.getYear()==date2.getYear();
+    }
+
+    function showNow() {
+        if ($('#now').size()>0) {
+            now = new Date();
+            var delay = 60-now.getSeconds();
+            var position = (now.getHours()-7)*50+now.getMinutes()/1.2;
+            if (now.getHours()>=19||now.getHours()<=6) {
+                $('#now').css('display','none');
+            } else {
+                var text = (now.getHours())+":"+('0'+now.getMinutes()).slice(-2)+"AM";
+                if (now.getHours()>=13) {
+                    text = (now.getHours()-12)+":"+('0'+now.getMinutes()).slice(-2)+"PM";
+                } else if (now.getHours()==12) {
+                    text = (now.getHours())+":"+('0'+now.getMinutes()).slice(-2)+"PM";
+                }
+                $('#now').css('display','block');
+                $('#now').text(text);
+                $('#nowHolder').css('top',position);
+                $('#nowHolder').css('left',-nowTimeOffset);
+            }
+            setTimeout(function() {
+                showNow();
+            },delay*1000);
+        }
+    }
+
+    $(window).keydown(function(e) {
+        switch (e.keyCode) {
+            case 78:        //n
+                setToday();
+                break;
+            case 77:        //m
+                weekView();
+                break;
+            case 188:        //,
+                prev();
+                break;
+            case 190:        //.
+                next();
+                break;
+        }
+    });
+
+    $('#showWeek').click(weekView);
+    $('#next').click(next);
+    $('#prev').click(prev);
+
+    function weekView() {
+        var date = $( "#datepicker" ).datepicker("getDate");
+        weekMode = !weekMode;
+        if (weekMode) {
+            $('#showWeek').val("Show Day");
+            showWeek(date);
+        } else {
+            $('#showWeek').val("Show Week");
+            changeDate(date);
+        }
+    }
+
+    function next() {
+        var date = $( "#datepicker" ).datepicker("getDate");
+        if (weekMode) {
+            date.setDate(date.getDate() + 7);
+            showWeek(date);
+        } else {
+            date.setDate(date.getDate() + 1);
+            changeDate(date);
+        }
+        $( "#datepicker" ).datepicker("setDate",date);
+    }
+
+    function prev() {
+        var date = $( "#datepicker" ).datepicker("getDate");
+        if (weekMode) {
+            date.setDate(date.getDate() - 7);
+            showWeek(date);
+        } else {
+            date.setDate(date.getDate() - 1);
+            changeDate(date);
+        }
+        $( "#datepicker" ).datepicker("setDate",date);
+    }
+
+    function setToday() {
+        now = new Date();
+        $( "#datepicker" ).datepicker("setDate",now);
+        if (weekMode) {
+            showWeek(now);
+        } else {
+            changeDate(now);
+        }
+    }
+
+    function changeDate(date) { //single day
         $('#container').empty();
         $('#container').append("<div id='currentDay' class='day'></div>");
         showSchedule("#currentDay",date);
     }
-    function showWeek(date){
+
+    function showWeek(date) {
         $('#container').empty();
         var start = date.getDay()-1;
-        date.setDate(date.getDate()-start);	//set to monday
-        for (var i = 0 ; i<5 ; i++){
+        date.setDate(date.getDate()-start);    //set to monday
+        for (var i = 0 ; i<5 ; i++) {
             $('#container').append("<div id='D"+i+"' class='day'></div>");
             showSchedule('#D'+i, date);
             date.setDate(date.getDate()+1);
@@ -1491,10 +1596,29 @@ body .ui-tooltip {
         $('#now').width((length-100)/5);
         showNow();
     }
+
+    function todaySchedule(date) {
+        var today = [];
+        for (var i = 0 ; i < scheduleInfo.length ; i++) {
+            for (var j = 0 ; j < scheduleInfo[i].length ; j++) {
+                if (sameDOW(date,scheduleInfo[i][j][0][0])&&isInRange(date,scheduleInfo[i][j][3])) {
+                    today.push(scheduleInfo[i][j]);
+                }
+            }
+        }
+        today.sort(sort_by_date);
+        return today;
+    }
+
+    /* used to add a timeslot somewhere, not used yet
+    function add(dayOfW,startT,endT,room,teacher,startD,endD,courseCode,courseInfo,type) {
+        info.push([[[dayOfW,startT,endT],room,teacher,[startD,endD],[courseCode,courseInfo],type]])
+    }*/
+
     function sameDOW(date,DOW) { //same day of week
-        var dayOfWeek = date.getDay();
+        var dayOfWeek = (new Date(date)).getDay();
         var day = -1;
-        switch(dayOfWeek){
+        switch(dayOfWeek) {
             case 1:
                 day = 'M';
                 break;
@@ -1519,44 +1643,16 @@ body .ui-tooltip {
         }
         return false;
     }
+
     function isInRange(date,range) {
         return (date>=range[0]&&date<=range[1]);
     }
+
     function sort_by_date(a,b) {
         if (a[0][1] < b[0][1]) return -1;
         if (a[0][1] > b[0][1]) return 1;
         return 0;
     }
-    function showNow() {
-        if ($('#now').size()>0) {
-            var now = new Date();
-            var delay = 60-now.getSeconds();
-            var position = (now.getHours()-7)*50+now.getMinutes()/1.2;
-            if (now.getHours()>=19||now.getHours()<=6) {
-                $('#now').css('display','none');
-                /*setTimeout(function(){
-                    showNow();
-                },delay*1000+(6-now.getHours())*3600000+(59-now.getMinutes)*60000);
-                return;*/
-            } else {
-                if (now.getHours()>=13) {
-                    var text = (now.getHours()-12)+":"+('0'+now.getMinutes()).slice(-2)+"PM";
-                } else if (now.getHours()==12) {
-                    var text = (now.getHours())+":"+('0'+now.getMinutes()).slice(-2)+"PM";
-                } else {
-                    var text = (now.getHours())+":"+('0'+now.getMinutes()).slice(-2)+"AM";
-                }
-                $('#now').css('display','block');
-                $('#now').text(text);
-                $('#nowHolder').css('top',position);
-                $('#nowHolder').css('left',-nowTimeOffset);
-            }
-            setTimeout(function(){
-                showNow();
-            },delay*1000);
-        }
-    }
-    
 </script>
 </body>
 </html>
