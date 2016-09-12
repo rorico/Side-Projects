@@ -13,9 +13,10 @@
 <script type="text/javascript">
     $("#convert").click(function(){
         var info = $('#input').val();
+        var parsed = parseData(info);
         $('p').empty();
-        showArray(parseData(info));
-        var fileText = templateInfoPart1 + JSON.stringify(parseData(info)) + templateInfoPart2;
+        showArray(parsed);
+        var fileText = templateInfoPart1 + JSON.stringify(parsed) + templateInfoPart2;
         download('schedule.html', fileText);
     })
     

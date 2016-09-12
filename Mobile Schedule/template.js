@@ -1315,6 +1315,9 @@ var templateInfoPart1 = '<!DOCTYPE html>\n'+
 '        .LAB{\n'+
 '            border-color:red;\n'+
 '        }\n'+
+'        .TST{\n'+
+'            border-color:brown;\n'+
+'        }\n'+
 '    </style>\n'+
 '</head>\n'+
 '\n'+
@@ -1399,16 +1402,16 @@ var templateInfoPart1 = '<!DOCTYPE html>\n'+
 '<div id="container"><div id="currentDay" class="day"><div id="nowHolder"><div id="now"></div></div></div></div>\n'+
 '</div></div></div>\n'+
 '<script type="text/javascript">\n'+
-'    var dayToday = new Date();\n'+
 '    var nowTimeOffset = 50;\n'+
 '    var scheduleInfo =';
 var templateInfoPart2 = ';\n'+
 '    //get info from parseScheduleData.html\n'+
-'        var now = new Date();\n'+
+'    var now = new Date();\n'+
 '    var startTime = 700;        //7AM\n'+
 '    var endTime = 1900;         //7PM\n'+
 '    var nowTimeOffset = 50;     //for showing now bar\n'+
 '    var weekMode = false;\n'+
+'    var offset = 0;\n'+
 '\n'+
 '    $( "#datepicker" ).datepicker({\n'+
 '        onSelect: function(dateText) {\n'+
@@ -1434,46 +1437,53 @@ var templateInfoPart2 = ';\n'+
 '        if (today.length === 0) {\n'+
 '            $(container).append("<div class=\'class\' style=\'height:599px\'><p style=\'top:285px\'>No Classes Today</p></div>");\n'+
 '        } else {\n'+
-'            var html = "<div class=\'placeholder placeborder\' style=\'height:0px\'></div>";\n'+
-'            var length = (today[0][0][1]-startTime)/2;\n'+
-'            while (length > 50) {\n'+
-'                html += "<div class=\'placeholder placeborder\' style=\'height:49px\'></div>";\n'+
-'                length -= 50;\n'+
+'            addTimeSlot(container,"placeholder placeborder",0,1);\n'+
+'            var length = today[0][0][1] - startTime - 1;\n'+
+'            while (length > 100) {\n'+
+'                addTimeSlot(container,"placeholder placeborder",100,1);\n'+
+'                length -= 100;\n'+
 '            }\n'+
-'            html += "<div class=\'placeholder\' style=\'height:"+(length-1) +"px\'></div>";\n'+
+'            addTimeSlot(container,"placeholder",length,0);\n'+
 '            for (var i = 0 ; i < today.length ; i++) {\n'+
 '                var start = today[i][0][1];\n'+
 '                var finish = today[i][0][2];\n'+
-'                var classType = today[i][5];\n'+
-'                var classCode = today[i][4][0];\n'+
-'                var classInfo = today[i][4][1];\n'+
+'                var classType = today[i][4];\n'+
+'                var classCode = today[i][3][0];\n'+
+'                var className = today[i][3][1];\n'+
 '                var location = today[i][1];\n'+
 '\n'+
-'                var height = (finish-start)/2-2 + 1;\n'+
-'                html += "<div class=\'class "+classType+"\' style=\'max-height:"+height+"px;height:"+height+"px\'><p style=\'top:"+(height-30.4)/2+"px\'>";\n'+
-'                if (weekMode) {\n'+
-'                    html += classCode+" - "+classType+"<br />"+location;\n'+
-'                } else {\n'+
-'                    html += classCode+" "+classInfo+" - "+classType+"<br />"+location;\n'+
-'                }\n'+
-'                html += "</p></div>";\n'+
+'                var height = finish - start + 1;\n'+
+'                var classInfo = [classCode + (weekMode ? "" : " " + className) + " - " + classType, location];\n'+
+'                addTimeSlot(container,"class " + classType,height,2,classInfo);\n'+
 '\n'+
 '                var beginning = finish;\n'+
 '                var end = endTime;\n'+
-'                if (i != today.length-1) {\n'+
-'                    end = today[i+1][0][1];\n'+
+'                if (i != today.length - 1) {\n'+
+'                    end = today[i+1][0][1] - 1;\n'+
 '                }\n'+
 '                var next;\n'+
 '                while ((next = Math.floor((beginning+100)/100)*100)<=end) {\n'+
 '                    length = next - beginning;\n'+
-'                    html += "<div class=\'placeholder placeborder\' style=\'height:"+(length/2-1)+"px\'></div>";\n'+
+'                    addTimeSlot(container,"placeholder placeborder",length,1);\n'+
 '                    beginning += length;\n'+
 '                }\n'+
-'                html += "<div class=\'placeholder\' style=\'height:"+((end-beginning)/2-1)+"px\'></div>";\n'+
+'                addTimeSlot(container,"placeholder",end-beginning,0);\n'+
 '            }\n'+
-'            $(container).append(html);\n'+
 '        }\n'+
-'        $(container).parent().append("<div id=\'side\'></div>");    \n'+
+'        $(container).parent().append("<div id=\'side\'></div>");\n'+
+'    }\n'+
+'\n'+
+'    function addTimeSlot(container,classType,time,borderAmount,content) {\n'+
+'        var height = time/2;\n'+
+'        var thisHeight = height + offset - borderAmount;\n'+
+'        offset = thisHeight % 1;\n'+
+'        thisHeight = Math.floor(thisHeight);\n'+
+'\n'+
+'        var thisContent = "";\n'+
+'        if (content && content.length) {\n'+
+'            thisContent = "<p style=\'top:" + (thisHeight - 15.2 * content.length)/2 + "px\'>" + content.join("<br />") + "</p>";\n'+
+'        }\n'+
+'        $(container).append("<div class=\'" + classType + "\' style=\'max-height:" + thisHeight + "px;height:" + thisHeight + "px\'>" + thisContent + "</div>");\n'+
 '    }\n'+
 '\n'+
 '    function sameDay(day1,day2) {\n'+
@@ -1599,9 +1609,12 @@ var templateInfoPart2 = ';\n'+
 '    function todaySchedule(date) {\n'+
 '        var today = [];\n'+
 '        for (var i = 0 ; i < scheduleInfo.length ; i++) {\n'+
-'            for (var j = 0 ; j < scheduleInfo[i].length ; j++) {\n'+
-'                if (sameDOW(date,scheduleInfo[i][j][0][0])&&isInRange(date,scheduleInfo[i][j][3])) {\n'+
-'                    today.push(scheduleInfo[i][j]);\n'+
+'            for (var j = 0 ; j < scheduleInfo[i][1].length ; j++) {\n'+
+'                for (var k = 0 ; k < scheduleInfo[i][1][j][1].length ; k++) {\n'+
+'                    var thisInfo = scheduleInfo[i][1][j][1][k];\n'+
+'                    if (sameDOW(date,thisInfo[0][0])&&isInRange(date,thisInfo[2])) {\n'+
+'                        today.push([thisInfo[0],thisInfo[1],thisInfo[2],scheduleInfo[i][0],scheduleInfo[i][1][j][0]]);\n'+
+'                    }\n'+
 '                }\n'+
 '            }\n'+
 '        }\n'+
