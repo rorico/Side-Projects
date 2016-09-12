@@ -12,12 +12,12 @@
 <script type="text/javascript" src="template.js"></script>
 <script type="text/javascript">
     $("#convert").click(function(){
-        var info = $('#input').val();
+        var info = $("#input").val();
         var parsed = parseData(info);
-        $('p').empty();
+        $("p").empty();
         showArray(parsed);
         var fileText = templateInfoPart1 + JSON.stringify(parsed) + templateInfoPart2;
-        download('schedule.html', fileText);
+        download("schedule.html", fileText);
     })
     
     function parseData(text) {
@@ -104,34 +104,35 @@
         return timeValue;
     }
 
+    //likely don't need, use JSON.stringify
     function showArray(data){
         if (Array.isArray(data)) {
-            $('p').append('[');
+            $("p").append("[");
             for(var i = 0 ; i<data.length ; i++) {
                 showArray(data[i]);
                 if (i!=data.length-1) {
-                    $('p').append(',');
+                    $("p").append(",");
                 }
             }
-            $('p').append(']');
-        } else if (typeof data.getMonth === 'function') {
-            $('p').append('new Date("'+data+'")');
-        } else if (typeof data === 'string') {
-            $('p').append('"'+data+'"');
+            $("p").append("]");
+        } else if (typeof data.getMonth === "function") {
+            $("p").append("new Date(\""+data+"\")");
+        } else if (typeof data === "string") {
+            $("p").append("\""+data+"\"");
         } else {
-            $('p').append(data);
+            $("p").append(data);
         }
     }
 
 
     function download(filename, text) {
-        var pom = document.createElement('a');
-        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        pom.setAttribute('download', filename);
+        var pom = document.createElement("a");
+        pom.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
+        pom.setAttribute("download", filename);
 
         if (document.createEvent) {
-            var event = document.createEvent('MouseEvents');
-            event.initEvent('click', true, true);
+            var event = document.createEvent("MouseEvents");
+            event.initEvent("click", true, true);
             pom.dispatchEvent(event);
         }
         else {
