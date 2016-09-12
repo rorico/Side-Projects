@@ -138,44 +138,6 @@
             pom.click();
         }
     }
-    //download('test.txt', 'Hello world!');
-
-/*    function readTextFile(file) {
-        var rawFile = new XMLHttpRequest();
-        rawFile.open("GET", file, false);
-        rawFile.onreadystatechange = function () {
-            if(rawFile.readyState === 4) {
-                if(rawFile.status === 200 || rawFile.status == 0) {
-                    var allText = rawFile.responseText;
-                    console.log(allText);
-                    alert(allText);
-                }
-            }
-        }
-        rawFile.send(null);
-    }
-
-    //readTextFile("schedule.html")
-
-    // Check for the various File API support.
-if (window.File && window.FileReader && window.FileList && window.Blob) {
-  // Great success! All the File APIs are supported.
-} else {
-  alert('The File APIs are not fully supported in this browser.');
-}
-function previewFile(file) {
-
-  var reader  = new FileReader();
-
-  reader.onloadend = function () {
-    console.log(reader.result);
-  }
-  reader.readAsDataURL(file);
-}
-//previewFile(new FileReader("schedule.html"));
-$.get("schedule.html",function(data){
-    console.log(data);
-});*/
 </script>
 </body>
 </html>
