@@ -1585,7 +1585,7 @@ body .ui-tooltip {
 
     function changeDate(date) { //single day
         $("#container").empty();
-        $("#container").append("<div id="currentDay" class="day"></div>");
+        $("#container").append("<div id='currentDay' class='day'></div>");
         showSchedule("#currentDay",date);
     }
 
@@ -1594,7 +1594,7 @@ body .ui-tooltip {
         var start = date.getDay()-1;
         date.setDate(date.getDate()-start);    //set to monday
         for (var i = 0 ; i<5 ; i++) {
-            $("#container").append("<div id="D"+i+"" class="day"></div>");
+            $("#container").append("<div id='D"+i+"' class='day'></div>");
             showSchedule("#D"+i, date);
             date.setDate(date.getDate()+1);
         }
