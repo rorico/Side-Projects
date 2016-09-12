@@ -1,5 +1,5 @@
 $(function () { 
-    chrome.storage.sync.get('redirects', function(items) {
+    chrome.storage.sync.get("redirects", function(items) {
         redirects = items.redirects;
         //assume sorted
         if (redirects && redirects.length) {
@@ -56,20 +56,20 @@ $(function () {
             }
             all.push([dateObj + 3600000,0]);
             series.push({name:"All",data:all,visible: false});
-            $('#container').highcharts({
+            $("#container").highcharts({
                 chart: {
-                    zoomType: 'x',
-                    type: 'spline'
+                    zoomType: "x",
+                    type: "spline"
                 },
                 title: {
-                    text: 'Redirects'
+                    text: "Redirects"
                 },
                 xAxis:{
-                    type: 'datetime'
+                    type: "datetime"
                 },
                 yAxis: {
                     title: {
-                        text: 'Number of Redirects'
+                        text: "Number of Redirects"
                     }
                 },
                 series: series,
@@ -84,7 +84,7 @@ $(function () {
                             },
                             stops: [
                                 [0, Highcharts.getOptions().colors[0]],
-                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get("rgba")]
                             ]
                         },
                         marker: {

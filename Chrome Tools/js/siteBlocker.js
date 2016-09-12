@@ -31,7 +31,7 @@ var urls = [[
 //set-up first time when opened
 startTimeLine();
 
-chrome.storage.sync.get('redirects', function(items) {
+chrome.storage.sync.get("redirects", function(items) {
     //var redirects = items.redirects;
     chrome.webRequest.onBeforeRequest.addListener(function(info) {
         if (info.tabId != VIPtab) {
@@ -62,7 +62,7 @@ chrome.storage.sync.get('redirects', function(items) {
             redirects = [];
         }
         redirects.push([+new Date(),info.url,1]);
-        chrome.storage.sync.set({'redirects': redirects});*/
+        chrome.storage.sync.set({"redirects": redirects});*/
         return {redirectUrl: chrome.extension.getURL("/html/Schedule.html")};
     }
 });

@@ -22,7 +22,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var countDownTimer = -1;
     countDown(timeLeft);
 
-    $('#info').html(formatInfo(url,timeCurrent,title));
+    $("#info").html(formatInfo(url,timeCurrent,title));
     var timeLine = background.timeLine;
     var parentWidth = 360;      //keep unchanged
     var timeLineLeft = parentWidth;
@@ -39,7 +39,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             }
         }
         if (timeLineLeft > 0) {
-            $('#timeLine').prepend('<div style="width:' + timeLineLeft + 'px" class="timeLine"></div>');
+            $("#timeLine").prepend("<div style='width:" + timeLineLeft + "px' class='timeLine'></div>");
         }
     }
     updateTimeLine();
@@ -60,14 +60,14 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
         //reset these to starting
         timeCurrent = new Date() - startTime;
-        $('#info').html(formatInfo(url,timeCurrent,title));
+        $("#info").html(formatInfo(url,timeCurrent,title));
         timeLineLeft = parentWidth;
         currentTimePiece = -1;
         offset = 0;
 
         $("#timeLine").empty();
         addTimeLine([timeCurrent,wastingTime,url],false,-1);
-        $('#timeLine').prepend('<div style="width:' + timeLineLeft + 'px" class="timeLine"></div>');
+        $("#timeLine").prepend("<div style='width:" + timeLineLeft + "px' class='timeLine'></div>");
         updateTimeLine();
     }
 
@@ -87,13 +87,13 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         } else {
             timeLineLeft -= time;
         }
-        var classAddon = '';
+        var classAddon = "";
         if (time >= 3) {
             time -= 2;
-            classAddon = ' timeLineBlock';
+            classAddon = " timeLineBlock";
         }
-        var timeLineEntry = $('<div style="width:' + time + 'px;" class="timeLine wasting' + info[1] + classAddon + '" id="timeLine' + num + '"></div>');
-        $('#timeLine').prepend(timeLineEntry);
+        var timeLineEntry = $("<div style='width:" + time + "px;' class='timeLine wasting" + info[1] + classAddon + "' id='timeLine" + num + "'></div>");
+        $("#timeLine").prepend(timeLineEntry);
         setClick(timeLineEntry,info,num);
         if (hover) {
             setHover(timeLineEntry,info);
@@ -104,11 +104,11 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     function setHover(ele,info) {
         ele.hover(function() {
             hover = true;
-            $('#info').html(formatInfo(info[2],info[0],info[3]));
+            $("#info").html(formatInfo(info[2],info[0],info[3]));
         },function() {
             if (!click) {
                 hover = false;
-                $('#info').html(formatInfo(url,timeCurrent,title));
+                $("#info").html(formatInfo(url,timeCurrent,title));
             }
         });
     }
@@ -133,7 +133,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     //not exactly accurate, not too important
     function countDownFunction(time) {
-        $('#test').html(MinutesSecondsFormat(time));
+        $("#test").html(MinutesSecondsFormat(time));
         if (wastingTime && time>0) {
             var delay = (time-1)%1000+1;
             countDownTimer = setTimeout(function() {
@@ -143,11 +143,11 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function updateTimeLine() {
-        var parentWidth = $('#timeLine').width();
+        var parentWidth = $("#timeLine").width();
         var delay = timeLineLength/parentWidth;
         updateTimeLineInterval = setInterval(function() {
-            var newEle = $('#timeLine div:last-child');
-            var oldestEle = $('#timeLine div:first-child');
+            var newEle = $("#timeLine div:last-child");
+            var oldestEle = $("#timeLine div:first-child");
             if (!newEle.hasClass("timeLineBlock") && newEle.width() + 1 >= 2) {
                 newEle.width(newEle.width() - 1);
                 newEle.addClass("timeLineBlock");
@@ -157,7 +157,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             //oldest has 0 width, remove
             while(!oldestEle.hasClass("timeLineBlock") && oldestEle.width() <= 0) {
                 oldestEle.remove();
-                oldestEle = $('#timeLine div:first-child');
+                oldestEle = $("#timeLine div:first-child");
             }
             if (oldestEle.hasClass("timeLineBlock") && oldestEle.width() - 1 <= 0) {
                 oldestEle.width(oldestEle.width() + 1);
@@ -169,13 +169,13 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         timeCurrentInterval = setInterval(function() {
             timeCurrent += 1000;
             if (!hover) {
-                $('#info').html(formatInfo(url,timeCurrent,title));
+                $("#info").html(formatInfo(url,timeCurrent,title));
             }
         },1000);
     }
 
     function formatInfo(url,time,title) {
-        return shorten(title," ",50) + '<br />' + shorten(url,"/",50) + '<br />Time spent:' + MinutesSecondsFormat(time);
+        return shorten(title," ",50) + "<br />" + shorten(url,"/",50) + "<br />Time spent:" + MinutesSecondsFormat(time);
     }
 
     function shorten(info,delim,limit) {
@@ -197,9 +197,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     ////////////////////////events//////////////////////////////
-    $('#timerButton').click(setTimer);
+    $("#timerButton").click(setTimer);
     function setTimer() {
-        var delay = +$('#setTimer').val();
+        var delay = +$("#setTimer").val();
         setAlarm(delay);
     }
 
@@ -213,10 +213,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             if (currentTimer.length > 3) {
                 currentTimer = currentTimer.substring(1);
             }
-            $('#setTimer').val(currentTimer);
+            $("#setTimer").val(currentTimer);
         } else {
             currentTimer = digit;
-            $('#setTimer').val(currentTimer);
+            $("#setTimer").val(currentTimer);
         }
         time = new Date();
     }
@@ -303,7 +303,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             if (!found) {
                 switch (e.keyCode) {
                     case 83:        //s
-                        setAlarm(+$('#setTimer').val());
+                        setAlarm(+$("#setTimer").val());
                         break;
                     case 68:        //d
                         deletes = true;
@@ -428,7 +428,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     break;
                 case "change":
                     var input = a.input;
-                    $('#timeLine' + input[0]).removeClass("wasting" + input[1]).addClass("wasting0");
+                    $("#timeLine" + input[0]).removeClass("wasting" + input[1]).addClass("wasting0");
                     //if change isn't just to 0, will need to change this
                     if (input[0] === -1) {
                         wastingTime = 0;
@@ -443,20 +443,20 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function showAlarm(date,alarmNumber,type) {
         var time = date.toLocaleTimeString();
-        $('#alarmText'+(alarmNumber+1)).html("Alarm at "+time);
-        $('#alarm'+(alarmNumber+1)).removeClass("notSet");
-        $('#alarm'+(alarmNumber+1)).css({"color":typeColors[type],"border-color":typeColors[type]});
-        $('#alarm'+(alarmNumber+1)).bind("click",function() {
+        $("#alarmText"+(alarmNumber+1)).html("Alarm at "+time);
+        $("#alarm"+(alarmNumber+1)).removeClass("notSet");
+        $("#alarm"+(alarmNumber+1)).css({"color":typeColors[type],"border-color":typeColors[type]});
+        $("#alarm"+(alarmNumber+1)).bind("click",function() {
             removeAlarm(alarmNumber);
         });
     }
 
     function showRemove(alarmNumber,type) {
-        $('#alarmText'+(alarmNumber+1)).html("Not Set");
-        $('#alarm'+(alarmNumber+1)).addClass("notSet");
-        $('#alarm'+(alarmNumber+1)).unbind("click");
-        $('#alarm'+(alarmNumber+1)).css({"color":defaultColor,"border-color":defaultColor});
-        $('#alarmText'+(alarmNumber+1)).css("visibility","visible");
+        $("#alarmText"+(alarmNumber+1)).html("Not Set");
+        $("#alarm"+(alarmNumber+1)).addClass("notSet");
+        $("#alarm"+(alarmNumber+1)).unbind("click");
+        $("#alarm"+(alarmNumber+1)).css({"color":defaultColor,"border-color":defaultColor});
+        $("#alarmText"+(alarmNumber+1)).css("visibility","visible");
         clearInterval(ringingAlarms[alarmNumber]);
     }
 
@@ -464,14 +464,14 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         var visibility = "hidden";
         ringingAlarms[alarmNumber] = setInterval(function() {
             visibility = (visibility === "hidden" ? "visible" : "hidden");
-            $('#alarmText'+(alarmNumber+1)).css("visibility",visibility);
+            $("#alarmText"+(alarmNumber+1)).css("visibility",visibility);
         },300);
     }
 
     function changeTime(change) {
-        var delay = parseInt($('#setTimer').val());
+        var delay = parseInt($("#setTimer").val());
         if (change>0 || delay>0) {
-            $('#setTimer').val(delay+change);
+            $("#setTimer").val(delay+change);
         }
     }
 });

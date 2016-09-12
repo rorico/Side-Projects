@@ -4,7 +4,7 @@ var sleepAlarmStart = 22;   //10pm
 var sleepAlarmEnd = 6;      //6am
 setSleepAlarm();
 chrome.alarms.onAlarm.addListener(function(alarm) {
-    if (alarm.name=='sleep') {
+    if (alarm.name=="sleep") {
         setAlarm(0,1);
         setSleepAlarm();
     }
@@ -32,7 +32,7 @@ var alarmCnt = 0;
 var ringingCnt = 0;
 var ringingTypeCnt = [0,0,0];
 var ringingTypeMax = -1;
-var audio = new Audio('/alarm.mp3');
+var audio = new Audio("/alarm.mp3");
 var playAlarmCheck = [false];   //array so that it is pass by reference
 
 chrome.browserAction.setBadgeBackgroundColor({color:defaultColor});
@@ -81,7 +81,7 @@ function ringAlarm(alarmNumber,type) {
 function removeAlarm(alarmNumber,type) {
     //unspecified type is a catchall,
     //type 2 needs specific call
-    if (alarms[alarmNumber][0] && ((typeof type === 'undefined' && alarms[alarmNumber][3] !== 2) || alarms[alarmNumber][3] == type)) {
+    if (alarms[alarmNumber][0] && ((typeof type === "undefined" && alarms[alarmNumber][3] !== 2) || alarms[alarmNumber][3] == type)) {
         if (--alarmCnt) {
           //chrome.browserAction.setBadgeText({text:(alarmCnt).toString()});
         } else {

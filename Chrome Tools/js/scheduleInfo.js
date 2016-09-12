@@ -3,7 +3,7 @@ var date = new Date();
 var today;
 setScheduleInfo();
 function setScheduleInfo() {
-    chrome.storage.sync.get('scheduleInfo', function(items) {
+    chrome.storage.sync.get("scheduleInfo", function(items) {
         if (items.scheduleInfo) {
             scheduleInfo = items.scheduleInfo;
             today = todaySchedule(date);
@@ -40,19 +40,19 @@ function sameDOW(date,DOW) { //same day of week
     var day = -1;
     switch(dayOfWeek) {
         case 1:
-            day = 'M';
+            day = "M";
             break;
         case 2:
-            day = 'T';
+            day = "T";
             break;
         case 3:
-            day = 'W';
+            day = "W";
             break;
         case 4:
-            day = 'Th';
+            day = "Th";
             break;
         case 5:
-            day = 'F';
+            day = "F";
             break;
     }
     if (DOW.indexOf(day) > -1) {
