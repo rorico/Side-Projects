@@ -56,7 +56,7 @@
                     }
                 }
                 if (/^[MTWTFh]{1,6} \d{1,2}:.+$/.test(lines[j])) {
-                    currentInfo.push([getClassLength(lines[j]),lines[j+1],lines[j+2],parseDate(lines[j+3])])
+                    currentInfo.push([getClassLength(lines[j]),lines[j+1],parseDate(lines[j+3])])
                     j+=4;
                 }
             }
