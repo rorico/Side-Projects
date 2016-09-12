@@ -1,54 +1,62 @@
 $("#convert").click(function() {
-    var info = $('#input').val();
+    var info = $("#input").val();
     //note, cannot store date objects, so convert to timestamp
-    chrome.storage.sync.set({'scheduleInfo': parseData(info)});
+    chrome.storage.sync.set({"scheduleInfo": parseData(info)});
+    sendRequest("resetSchedule");
     //reset input
-    $('#input').val("");
+    $("#input").val("");
 });
 
 function parseData(text) {
     var info = [];
     var beginning = "University of Waterloo";
     var end = "Printer Friendly Page";
-    var classTypes = ["SEM","TUT","LAB","LEC"];
+    var classTypes = ["SEM","TUT","LAB","LEC","TST"];
     var content = text.substring(text.indexOf(beginning) + beginning.length,text.indexOf(end));
     var courses = content.split("Exam Information");
-    for (var i = 0 ; i < courses.length ; i++) {
+    //last one is empty
+    for (var i = 0 ; i < courses.length - 1 ; i++) {
         var courseInfo = [];
         var lines = courses[i].split("\n");
-        var courseName=[];
+        var courseName = [];
+        var currentInfo = [];
         var type = "";
-        for (var j = 0 ; j < lines.length ; j++) {
+        var index = 0;
+        for (var j = 0 ; j < lines.length ; j++){
             var line = lines[j];
-            if (/^[A-Z].+$/.test(line)) {
+            if (/^[A-Z].+$/.test(line)){
                 var courseParts = line.split(" ");
                 var courseCode = courseParts[0] + " " + courseParts[1];
-                var courseDescription = "";
-                for (var word = 2 ; word < courseParts.length - 1 ; word++) {
-                    courseDescription += courseParts[word]+" ";
-                }
-                courseDescription += courseParts[courseParts.length - 1];
+                var courseDescription = line.substring(courseCode.length);
                 courseName = [courseCode,courseDescription];
                 break;
             }
         }
         for (var j = 0 ; j < lines.length ; j++) {
-            for (var k = 0 ; k < classTypes.length ; k++) {
-                if (lines[j] == classTypes[k]) {
+            for(var k = 0 ; k < classTypes.length ; k++) {
+                if (lines[j] == classTypes[k]){
+                    if(currentInfo.length) {
+                        courseInfo.push([type,currentInfo]);
+                        currentInfo = [];
+                    }
                     type = classTypes[k];
                     break;
                 }
             }
             if (/^[MTWTFh]{1,6} \d{1,2}:.+$/.test(lines[j])) {
-                courseInfo.push([getClassLength(lines[j]),lines[j+1],lines[j+2],parseDate(lines[j+3]),courseName,type]);
+                currentInfo.push([getClassLength(lines[j]),lines[j+1],parseDate(lines[j+3])])
                 j+=4;
             }
         }
-        info.push(courseInfo);
+        if(currentInfo.length) {
+            courseInfo.push([type,currentInfo]);
+            currentInfo = [];
+        }
+        info.push([courseName,courseInfo]);
     }
     return info;
 }
-
+//remember to reset
 function parseDate(date) {
     var returnValues = [];
     var dates = date.split(" - ");
@@ -81,4 +89,13 @@ function parseTime(time) {
     timeParts[1]=timeParts[1].slice(0,-2); //remove pm/am
     timeValue+=((timeParts[1])/(0.6));
     return timeValue;
+}
+
+//send requests to background
+function sendRequest(action,input) {
+    chrome.runtime.sendMessage({
+        from: "options",
+        action: action,
+        input: input
+    });
 }

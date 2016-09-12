@@ -1,22 +1,28 @@
 var scheduleInfo;
 var date = new Date();
 var today;
-chrome.storage.sync.get('scheduleInfo', function(items) {
-    if (items.scheduleInfo) {
-        scheduleInfo = items.scheduleInfo;
-        today = todaySchedule(date);
-    } else {
-        scheduleInfo = [];
-        today = [];
-    }
-});
+setScheduleInfo();
+function setScheduleInfo() {
+    chrome.storage.sync.get('scheduleInfo', function(items) {
+        if (items.scheduleInfo) {
+            scheduleInfo = items.scheduleInfo;
+            today = todaySchedule(date);
+        } else {
+            scheduleInfo = [];
+            today = [];
+        }
+    });
+}
 
 function todaySchedule(date) {
     var today = [];
     for (var i = 0 ; i < scheduleInfo.length ; i++) {
-        for (var j = 0 ; j < scheduleInfo[i].length ; j++) {
-            if (sameDOW(date,scheduleInfo[i][j][0][0])&&isInRange(date,scheduleInfo[i][j][3])) {
-                today.push(scheduleInfo[i][j]);
+        for (var j = 0 ; j < scheduleInfo[i][1].length ; j++) {
+            for (var k = 0 ; k < scheduleInfo[i][1][j][1].length ; k++) {
+                var thisInfo = scheduleInfo[i][1][j][1][k];
+                if (sameDOW(date,thisInfo[0][0])&&isInRange(date,thisInfo[2])) {
+                    today.push([thisInfo[0],thisInfo[1],scheduleInfo[i][0],scheduleInfo[i][1][j][0]]);
+                }
             }
         }
     }

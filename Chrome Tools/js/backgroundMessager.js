@@ -27,5 +27,12 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
                 removeAlarm(a.input);
                 break;
         }
+    } else if (a.from === "options") {
+        switch(a.action) {
+            //from scheduleInfo.js
+            case "resetSchedule":
+                setScheduleInfo();
+                break;
+        }
     }
 });
