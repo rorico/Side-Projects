@@ -81,12 +81,12 @@ chrome.storage.sync.get("redirects", function(items) {
 
     function getWebsiteName(name) {
         name = (name ? name : "unnamed");
-        ret = name;
+        var ret = name;
         switch(nameLevel) {
             case 2:
-                base = getBaseUrl(name);
+                var base = getBaseUrl(name);
                 var lookFor = "reddit.com/r/";
-                var index = name.indexOf("reddit.com/r/");
+                var index = name.indexOf(lookFor);
                 if (index !== -1) {
                     var rest = name.substring(index + lookFor.length);
                     var subreddit = rest.substring(0,rest.indexOf("/"));
