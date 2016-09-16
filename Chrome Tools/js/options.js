@@ -1,5 +1,6 @@
 chrome.storage.sync.get("redirects", function(items) {
     var redirects = items.redirects;
+    var nameLevel = 2;
     var timezoneOffset = (new Date()).getTimezoneOffset() * 60000;
     var hourAmount = 3600000; //num of millisec
     //assume sorted
@@ -77,9 +78,43 @@ chrome.storage.sync.get("redirects", function(items) {
             }
         });
     }
-    //depending on how specific we want to categorize websites, may want to improve this logic
+
     function getWebsiteName(name) {
-        return (name ? name : "unnamed");
+        name = (name ? name : "unnamed");
+        ret = name;
+        switch(nameLevel) {
+            case 2:
+                base = getBaseUrl(name);
+                var lookFor = "reddit.com/r/";
+                var index = name.indexOf("reddit.com/r/");
+                if (index !== -1) {
+                    var rest = name.substring(index + lookFor.length);
+                    var subreddit = rest.substring(0,rest.indexOf("/"));
+                    ret = base + " -> " + subreddit;
+                } else {
+                    ret = base;
+                }
+                break;
+            case 1:
+                ret = getBaseUrl(name);
+                break;
+            case 0:
+                ret = name;
+                break;
+        }
+        return ret;
+    }
+
+    function getBaseUrl(url) {
+        var parts = url.split("/");
+        if (parts[2]) {
+            var subparts = parts[2].split(".");
+            if (subparts[subparts.length - 2]) {
+                return subparts[subparts.length - 2];
+            }
+            return parts[2];
+        }
+        return url;
     }
 
     function nearestHour(utc) {
