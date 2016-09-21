@@ -161,8 +161,10 @@ function handleTimeLineAsync(action,load) {
             wastingTime = 0;
         } else if (load < timeLine.length) {
             sendRequest("change",[load,timeLine[load][1]]);
-            timeLine[load][1] = 0;
-            changeTimeLeft(timeLine[load][0]);
+            if (timeLine[load][1]) {
+                timeLine[load][1] = 0;
+                changeTimeLeft(timeLine[load][0]);   
+            }
         } else {
             console.log("change to timeline out of bounds" + load + "/" + timeLine.length);
         }
