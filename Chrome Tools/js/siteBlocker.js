@@ -31,41 +31,75 @@ var urls = [[
 //set-up first time when opened
 startTimeLine();
 
-chrome.storage.sync.get("redirects", function(items) {
-    //var redirects = items.redirects;
-    chrome.webRequest.onBeforeRequest.addListener(function(info) {
-        if (info.tabId != VIPtab) {
-            var now = new Date();
-            var position = now.getHours()*100+now.getMinutes()/0.6;
-            for (var i = 0 ; i < today.length ; i++) {
-                //today comes from scheduleInfo.js
-                if (today[i][0][1] > position) {
-                    break;
-                } else if (today[i][0][2] > position) {
-                    return redirect(info);
-                }
-            }
-            var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
-            if (timeLeft <= currentTimeOffset) {
+chrome.webRequest.onBeforeRequest.addListener(function(info) {
+    if (info.tabId != VIPtab) {
+        var now = new Date();
+        var position = now.getHours()*100+now.getMinutes()/0.6;
+        for (var i = 0 ; i < today.length ; i++) {
+            //today comes from scheduleInfo.js
+            if (today[i][0][1] > position) {
+                break;
+            } else if (today[i][0][2] > position) {
                 return redirect(info);
             }
         }
-    },
-    {
-        urls: urls[0],
-        types: ["main_frame"]
-    },
-        ["blocking"]
-    );
+        var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
+        if (timeLeft <= currentTimeOffset) {
+            return redirect(info);
+        }
+    }
     function redirect(info) {
-        /*if (!redirects) {
+        //so it runs in parallel/doesn't wait
+        setTimeout(function(){
+            storeRedirect(info.url);
+        },0);
+        return {redirectUrl: chrome.extension.getURL("/html/schedule.html")};
+    }
+},
+{
+    urls: urls[0],
+    types: ["main_frame"]
+},
+    ["blocking"]
+);
+
+function storeRedirect(url) {
+    chrome.storage.sync.get("redirects", function(items) {
+        var redirects = items.redirects;
+        if (!redirects) {
             redirects = [];
         }
-        redirects.push([+new Date(),info.url,1]);
-        chrome.storage.sync.set({"redirects": redirects});*/
-        return {redirectUrl: chrome.extension.getURL("/html/Schedule.html")};
-    }
-});
+        var newEntry = [+new Date(),url];
+        //approximately the max size per item, slightly smaller
+        var limit = 8000;
+        //if the new entry is larger than it can possibly be stored, shouldn't ever happen
+        //to make sure we don't get into an infinite loop
+        if (JSON.stringify(newEntry).length > limit) {
+            console.log("can't store the following, too large:");
+            console.log(newEntry);
+        } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > 7300) {
+            moveRedirect(redirects,url);
+        } else {
+            redirects.push(newEntry);
+            chrome.storage.sync.set({"redirects": redirects});
+        }
+    });
+}
+
+function moveRedirect(redirects,url) {
+    chrome.storage.sync.get("redirectIndexes", function(items) {
+        var redirectIndexes = items.redirectIndexes;
+        if (!redirectIndexes) {
+            redirectIndexes = [];
+        }
+        var redirectName = "redirect_" + redirectIndexes.length;
+        redirectIndexes.push(redirectName);
+        var setObj = {redirectIndexes:redirectIndexes,redirects:[]};
+        setObj[redirectName] = redirects;
+        chrome.storage.sync.set(setObj);
+        storeRedirect(url);
+    });
+}
 
 function startTimeLine() {
     chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab) {
