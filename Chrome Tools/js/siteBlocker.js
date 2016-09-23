@@ -77,7 +77,7 @@ function storeRedirect(url) {
         if (JSON.stringify(newEntry).length > limit) {
             console.log("can't store the following, too large:");
             console.log(newEntry);
-        } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > 7300) {
+        } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
             moveRedirect(redirects,url);
         } else {
             redirects.push(newEntry);
