@@ -5,6 +5,7 @@ var title = "";
 var tabId = -1;
 var timeLineLength = 1800000; // 30 mins
 var startingTimeLeft = 300000; // 5 mins
+var VIPlength = 20000; // 20s
 if (0) { // if in testing mode
     timeLineLength = 120000; // 2 mins
     startingTimeLeft = 60000; // 1 mins
@@ -17,6 +18,7 @@ var returnTimer = -1;
 var displayTimer = -1;
 var displayTimeStarter = -1;
 var VIPtab = -1;
+var tempVIPtimer = -1;
 //sites that will block after time spent
 var urls = [[
     "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
@@ -331,6 +333,17 @@ function resetTime() {
 function makeCurrentTabVIP() {
     VIPtab = tabId;
     clearAlarm();
+}
+
+function tempVIP() {
+    makeCurrentTabVIP();
+    clearTimeout(tempVIPtimer);
+    tempVIPtimer = setTimeout(function(){
+        VIPtab = -1;
+        if (wastingTime) {
+            setReminder(timeLeft);
+        }
+    },VIPlength);
 }
 
 function change(timeLineIndex) {

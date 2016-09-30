@@ -12,6 +12,8 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
             case "change":
                 change(a.input);
                 break;
+            case "temp":
+                tempVIP();
 
             //from alarm.js
             case "stopAllAlarms":

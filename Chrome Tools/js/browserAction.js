@@ -275,7 +275,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
     //order matters in terms of what gets checked first
     //keep letters capitalized
-    var phrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],["VIP",VIP],["CHANGE",change]];
+    var phrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],["VIP",VIP],["CHANGE",change],["TEMP",tempVIP]];
     var currentPhrase = -1;
     var phraseIndex = 0;
     var deletes = false;
@@ -382,6 +382,11 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     function change() {
         sendRequest("change",currentTimePiece);
     }
+
+    function tempVIP() {
+        sendRequest("temp");
+    }
+
     //send requests to background
     function sendRequest(action,input) {
         chrome.runtime.sendMessage({
