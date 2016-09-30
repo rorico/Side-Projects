@@ -221,7 +221,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         time = new Date();
     }
 
-    function startShowHotkey(phrase) {
+    function startShowHotkey(phrase,start) {
         $("#phrase").remove();
         var front = "<div id='phraseFront'>";
         var back = "<div id='phraseBack'>";
@@ -245,7 +245,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         $("#phraseFront").css("top",topOffset);
         $("#phraseBack").css("left",leftOffset);
         $("#phraseBack").css("top",topOffset);
-        $("#phrase0").addClass("filled");
+        if (start) {
+            $("#phrase0").addClass("filled");
+        }
         disappearHotkey();
     }
 
@@ -257,45 +259,52 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var disappearInterval;
     function disappearHotkey() {
         var opacity = 0.8;
+        $("#phrase").css("opacity",opacity);
         clearInterval(disappearInterval);
-        disappearInterval = setInterval(function() {
-            opacity -= 0.01;
-            $("#phrase").css("opacity",opacity);
-            if (opacity <= 0) {
-                clearHotkey();
-            }
-        },10);
+        if (!allowMistakes) {
+            disappearInterval = setInterval(function() {
+                opacity -= 0.01;
+                $("#phrase").css("opacity",opacity);
+                if (opacity <= 0) {
+                    clearHotkey();
+                }
+            },15);
+        }
     }
 
     function clearHotkey() {
-        currentPhrase = -1;
+        currentPhrase = 0;
         phraseIndex = 0;
+        allowMistakes = false;
         clearInterval(disappearInterval);
         $("#phrase").remove();
     }
     //order matters in terms of what gets checked first
     //keep letters capitalized
     var phrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],["VIP",VIP],["CHANGE",change],["TEMP",tempVIP]];
-    var currentPhrase = -1;
+    var currentPhrase = 0;
     var phraseIndex = 0;
+    var allowMistakes = false;
     var deletes = false;
     $(window).keydown(function(e) {
-        if (currentPhrase !== -1) {
+        if (currentPhrase) {
             //get lowercase ascii value of next part
-            if (e.keyCode === phrases[currentPhrase][0].charCodeAt(phraseIndex)) {
+            if (e.keyCode === currentPhrase[0].charCodeAt(phraseIndex)) {
                 showHotkey(phraseIndex);
-                if (++phraseIndex === phrases[currentPhrase][0].length) {
-                    phrases[currentPhrase][1]();
+                if (++phraseIndex === currentPhrase[0].length) {
+                    var fnc = currentPhrase[1];
+                    clearHotkey();
+                    fnc();
                 }
-            } else {
+            } else if (!allowMistakes) {
                 clearHotkey();
             }
         } else  {
             var found = false;
             for (var i = 0 ; i < phrases.length ; i++) {
                 if (e.keyCode === phrases[i][0].charCodeAt(0)) {
-                    startShowHotkey(phrases[i][0]);
-                    currentPhrase = i;
+                    startShowHotkey(phrases[i][0],true);
+                    currentPhrase = phrases[i];
                     phraseIndex = 1;
                     found = true;
                 }
@@ -376,7 +385,15 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function VIP() {
-        sendRequest("VIP");
+        //add another test to actually call vip in background
+        var random = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for (var i = 0 ; i < 18 ; i++) {
+            random += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        currentPhrase = [random,function(){sendRequest("VIP");}];
+        allowMistakes = true;
+        startShowHotkey(random,false);
     }
 
     function change() {
