@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
         switch(a.action) {
             //from siteBlocker.js
             case "VIP":
-                makeCurrentTabVIP();
+                VIP();
                 break;
             case "resetTime":
                 resetTime();
