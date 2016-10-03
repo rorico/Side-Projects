@@ -1412,20 +1412,19 @@ var templateInfoPart2 = ';\n'+
 '    var nowTimeOffset = 50;     //for showing now bar\n'+
 '    var weekMode = false;\n'+
 '    var offset = 0;\n'+
-'    var nowTimer = -1;\n'+
 '\n'+
-'    $("#datepicker").datepicker({\n'+
+'    $( "#datepicker" ).datepicker({\n'+
 '        onSelect: function(dateText) {\n'+
 '            if (weekMode) {\n'+
-'                showWeek($("#datepicker").datepicker("getDate"));\n'+
+'                showWeek($( "#datepicker" ).datepicker("getDate"));\n'+
 '            } else {\n'+
-'                changeDate($("#datepicker").datepicker("getDate"));\n'+
+'                changeDate($( "#datepicker" ).datepicker("getDate"));\n'+
 '            }\n'+
 '        },\n'+
 '        dateFormat: "DD MM d, yy"\n'+
 '    });\n'+
-'    $("#datepicker").datepicker("setDate", now);\n'+
-'    showSchedule("#currentDay", now);\n'+
+'    $( "#datepicker" ).datepicker("setDate", now);\n'+
+'    showSchedule(\'#currentDay\', now);\n'+
 '\n'+
 '    function showSchedule(container,date) {\n'+
 '        var today = todaySchedule(date);    //function in scheduleInfo.js\n'+
@@ -1433,12 +1432,10 @@ var templateInfoPart2 = ';\n'+
 '        if (sameDay(date,now)) {\n'+
 '            nowTimeOffset = 50 * !weekMode;\n'+
 '            $(container).prepend("<div id=\'nowHolder\'><div id=\'now\'></div></div>");\n'+
-'            clearTimeout(nowTimer);\n'+
 '            showNow();\n'+
 '        }\n'+
-'\n'+
-'        if (!today.length) {\n'+
-'            addTimeSlot(container,"class",endTime - startTime,1,["No Classes Today"]);\n'+
+'        if (today.length === 0) {\n'+
+'            $(container).append("<div class=\'class\' style=\'height:599px\'><p style=\'top:285px\'>No Classes Today</p></div>");\n'+
 '        } else {\n'+
 '            addTimeSlot(container,"placeholder placeborder",0,1);\n'+
 '            var length = today[0][0][1] - startTime - 1;\n'+
@@ -1450,9 +1447,9 @@ var templateInfoPart2 = ';\n'+
 '            for (var i = 0 ; i < today.length ; i++) {\n'+
 '                var start = today[i][0][1];\n'+
 '                var finish = today[i][0][2];\n'+
-'                var classType = today[i][3];\n'+
-'                var classCode = today[i][2][0];\n'+
-'                var className = today[i][2][1];\n'+
+'                var classType = today[i][4];\n'+
+'                var classCode = today[i][3][0];\n'+
+'                var className = today[i][3][1];\n'+
 '                var location = today[i][1];\n'+
 '\n'+
 '                var height = finish - start + 1;\n'+
@@ -1460,7 +1457,10 @@ var templateInfoPart2 = ';\n'+
 '                addTimeSlot(container,"class " + classType,height,2,classInfo);\n'+
 '\n'+
 '                var beginning = finish;\n'+
-'                var end = (i === today.length - 1 ? endTime : end = today[i+1][0][1] - 1);\n'+
+'                var end = endTime;\n'+
+'                if (i != today.length - 1) {\n'+
+'                    end = today[i+1][0][1] - 1;\n'+
+'                }\n'+
 '                var next;\n'+
 '                while ((next = Math.floor((beginning+100)/100)*100)<=end) {\n'+
 '                    length = next - beginning;\n'+
@@ -1483,7 +1483,7 @@ var templateInfoPart2 = ';\n'+
 '        if (content && content.length) {\n'+
 '            thisContent = "<p style=\'top:" + (thisHeight - 15.2 * content.length)/2 + "px\'>" + content.join("<br />") + "</p>";\n'+
 '        }\n'+
-'        $(container).append("<div class=\'" + classType + "\' style=\'height:" + thisHeight + "px\'>" + thisContent + "</div>");\n'+
+'        $(container).append("<div class=\'" + classType + "\' style=\'max-height:" + thisHeight + "px;height:" + thisHeight + "px\'>" + thisContent + "</div>");\n'+
 '    }\n'+
 '\n'+
 '    function sameDay(day1,day2) {\n'+
@@ -1493,27 +1493,27 @@ var templateInfoPart2 = ';\n'+
 '    }\n'+
 '\n'+
 '    function showNow() {\n'+
-'        if ($("#now").size()) {\n'+
+'        if ($(\'#now\').size()>0) {\n'+
 '            now = new Date();\n'+
-'            if (now.getHours() < startTime/100 || now.getHours() >= endTime/100) {\n'+
-'                $("#now").css("display","none");\n'+
+'            var delay = 60-now.getSeconds();\n'+
+'            var position = (now.getHours()-7)*50+now.getMinutes()/1.2;\n'+
+'            if (now.getHours()>=19||now.getHours()<=6) {\n'+
+'                $(\'#now\').css(\'display\',\'none\');\n'+
 '            } else {\n'+
-'                var text = (now.getHours())+":"+("0"+now.getMinutes()).slice(-2)+"AM";\n'+
+'                var text = (now.getHours())+":"+(\'0\'+now.getMinutes()).slice(-2)+"AM";\n'+
 '                if (now.getHours()>=13) {\n'+
-'                    text = (now.getHours()-12)+":"+("0"+now.getMinutes()).slice(-2)+"PM";\n'+
+'                    text = (now.getHours()-12)+":"+(\'0\'+now.getMinutes()).slice(-2)+"PM";\n'+
 '                } else if (now.getHours()==12) {\n'+
-'                    text = (now.getHours())+":"+("0"+now.getMinutes()).slice(-2)+"PM";\n'+
+'                    text = (now.getHours())+":"+(\'0\'+now.getMinutes()).slice(-2)+"PM";\n'+
 '                }\n'+
-'            	var position = Math.floor((now.getHours() - (startTime)/100) * 50 + now.getMinutes()/1.2);\n'+
-'                $("#now").css("display","block");\n'+
-'                $("#now").text(text);\n'+
-'                $("#nowHolder").css("top",position);\n'+
-'                $("#nowHolder").css("left",-nowTimeOffset);\n'+
-'            	var delay = 60000 - now.getSeconds()*1000 - now.getMilliseconds();\n'+
-'	            nowTimer = setTimeout(function() {\n'+
-'	                showNow();\n'+
-'	            },delay);\n'+
+'                $(\'#now\').css(\'display\',\'block\');\n'+
+'                $(\'#now\').text(text);\n'+
+'                $(\'#nowHolder\').css(\'top\',position);\n'+
+'                $(\'#nowHolder\').css(\'left\',-nowTimeOffset);\n'+
 '            }\n'+
+'            setTimeout(function() {\n'+
+'                showNow();\n'+
+'            },delay*1000);\n'+
 '        }\n'+
 '    }\n'+
 '\n'+
@@ -1534,24 +1534,24 @@ var templateInfoPart2 = ';\n'+
 '        }\n'+
 '    });\n'+
 '\n'+
-'    $("#showWeek").click(weekView);\n'+
-'    $("#next").click(next);\n'+
-'    $("#prev").click(prev);\n'+
+'    $(\'#showWeek\').click(weekView);\n'+
+'    $(\'#next\').click(next);\n'+
+'    $(\'#prev\').click(prev);\n'+
 '\n'+
 '    function weekView() {\n'+
-'        var date = $("#datepicker").datepicker("getDate");\n'+
+'        var date = $( "#datepicker" ).datepicker("getDate");\n'+
 '        weekMode = !weekMode;\n'+
 '        if (weekMode) {\n'+
-'            $("#showWeek").val("Show Day");\n'+
+'            $(\'#showWeek\').val("Show Day");\n'+
 '            showWeek(date);\n'+
 '        } else {\n'+
-'            $("#showWeek").val("Show Week");\n'+
+'            $(\'#showWeek\').val("Show Week");\n'+
 '            changeDate(date);\n'+
 '        }\n'+
 '    }\n'+
 '\n'+
 '    function next() {\n'+
-'        var date = $("#datepicker").datepicker("getDate");\n'+
+'        var date = $( "#datepicker" ).datepicker("getDate");\n'+
 '        if (weekMode) {\n'+
 '            date.setDate(date.getDate() + 7);\n'+
 '            showWeek(date);\n'+
@@ -1559,11 +1559,11 @@ var templateInfoPart2 = ';\n'+
 '            date.setDate(date.getDate() + 1);\n'+
 '            changeDate(date);\n'+
 '        }\n'+
-'        $("#datepicker").datepicker("setDate",date);\n'+
+'        $( "#datepicker" ).datepicker("setDate",date);\n'+
 '    }\n'+
 '\n'+
 '    function prev() {\n'+
-'        var date = $("#datepicker").datepicker("getDate");\n'+
+'        var date = $( "#datepicker" ).datepicker("getDate");\n'+
 '        if (weekMode) {\n'+
 '            date.setDate(date.getDate() - 7);\n'+
 '            showWeek(date);\n'+
@@ -1571,12 +1571,12 @@ var templateInfoPart2 = ';\n'+
 '            date.setDate(date.getDate() - 1);\n'+
 '            changeDate(date);\n'+
 '        }\n'+
-'        $("#datepicker").datepicker("setDate",date);\n'+
+'        $( "#datepicker" ).datepicker("setDate",date);\n'+
 '    }\n'+
 '\n'+
 '    function setToday() {\n'+
 '        now = new Date();\n'+
-'        $("#datepicker").datepicker("setDate",now);\n'+
+'        $( "#datepicker" ).datepicker("setDate",now);\n'+
 '        if (weekMode) {\n'+
 '            showWeek(now);\n'+
 '        } else {\n'+
@@ -1585,24 +1585,24 @@ var templateInfoPart2 = ';\n'+
 '    }\n'+
 '\n'+
 '    function changeDate(date) { //single day\n'+
-'        $("#container").empty();\n'+
-'        $("#container").append("<div id=\'currentDay\' class=\'day\'></div>");\n'+
+'        $(\'#container\').empty();\n'+
+'        $(\'#container\').append("<div id=\'currentDay\' class=\'day\'></div>");\n'+
 '        showSchedule("#currentDay",date);\n'+
 '    }\n'+
 '\n'+
 '    function showWeek(date) {\n'+
-'        $("#container").empty();\n'+
+'        $(\'#container\').empty();\n'+
 '        var start = date.getDay()-1;\n'+
 '        date.setDate(date.getDate()-start);    //set to monday\n'+
 '        for (var i = 0 ; i<5 ; i++) {\n'+
-'            $("#container").append("<div id=\'D"+i+"\' class=\'day\'></div>");\n'+
-'            showSchedule("#D"+i, date);\n'+
+'            $(\'#container\').append("<div id=\'D"+i+"\' class=\'day\'></div>");\n'+
+'            showSchedule(\'#D\'+i, date);\n'+
 '            date.setDate(date.getDate()+1);\n'+
 '        }\n'+
-'        var length = $("#calendar").width();\n'+
-'        $(".class").width((length-100)/5-2);\n'+
-'        $(".placeholder").width((length-100)/5);\n'+
-'        $("#now").width((length-100)/5);\n'+
+'        var length = $(\'#calendar\').width();\n'+
+'        $(\'.class\').width((length-100)/5-2);\n'+
+'        $(\'.placeholder\').width((length-100)/5);\n'+
+'        $(\'#now\').width((length-100)/5);\n'+
 '        showNow();\n'+
 '    }\n'+
 '\n'+
@@ -1613,7 +1613,7 @@ var templateInfoPart2 = ';\n'+
 '                for (var k = 0 ; k < scheduleInfo[i][1][j][1].length ; k++) {\n'+
 '                    var thisInfo = scheduleInfo[i][1][j][1][k];\n'+
 '                    if (sameDOW(date,thisInfo[0][0])&&isInRange(date,thisInfo[2])) {\n'+
-'                        today.push([thisInfo[0],thisInfo[1],scheduleInfo[i][0],scheduleInfo[i][1][j][0]]);\n'+
+'                        today.push([thisInfo[0],thisInfo[1],thisInfo[2],scheduleInfo[i][0],scheduleInfo[i][1][j][0]]);\n'+
 '                    }\n'+
 '                }\n'+
 '            }\n'+
@@ -1632,19 +1632,19 @@ var templateInfoPart2 = ';\n'+
 '        var day = -1;\n'+
 '        switch(dayOfWeek) {\n'+
 '            case 1:\n'+
-'                day = "M";\n'+
+'                day = \'M\';\n'+
 '                break;\n'+
 '            case 2:\n'+
-'                day = "T";\n'+
+'                day = \'T\';\n'+
 '                break;\n'+
 '            case 3:\n'+
-'                day = "W";\n'+
+'                day = \'W\';\n'+
 '                break;\n'+
 '            case 4:\n'+
-'                day = "Th";\n'+
+'                day = \'Th\';\n'+
 '                break;\n'+
 '            case 5:\n'+
-'                day = "F";\n'+
+'                day = \'F\';\n'+
 '                break;\n'+
 '        }\n'+
 '        if (DOW.indexOf(day) > -1) {\n'+
