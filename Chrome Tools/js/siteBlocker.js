@@ -19,6 +19,7 @@ var displayTimer = -1;
 var displayTimeStarter = -1;
 var VIPtab = -1;
 var tempVIPtimer = -1;
+var tempVIPstartTime = 0;
 //sites that will block after time spent
 var urls = [[
     "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
@@ -35,18 +36,7 @@ startTimeLine();
 
 chrome.webRequest.onBeforeRequest.addListener(function(info) {
     if (info.tabId != VIPtab) {
-        var now = new Date();
-        var position = now.getHours()*100+now.getMinutes()/0.6;
-        for (var i = 0 ; i < today.length ; i++) {
-            //today comes from scheduleInfo.js
-            if (today[i][0][1] > position) {
-                break;
-            } else if (today[i][0][2] > position) {
-                return redirect(info);
-            }
-        }
-        var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
-        if (timeLeft <= currentTimeOffset) {
+        if (siteBlocked()) {
             return redirect(info);
         }
     }
@@ -64,6 +54,25 @@ chrome.webRequest.onBeforeRequest.addListener(function(info) {
 },
     ["blocking"]
 );
+
+function siteBlocked() {
+    var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
+    if (timeLeft <= currentTimeOffset) {
+        return true;
+    }
+    var now = new Date();
+    var position = now.getHours()*100+now.getMinutes()/0.6;
+    for (var i = 0 ; i < today.length ; i++) {
+        //today comes from scheduleInfo.js
+        if (today[i][0][1] > position) {
+            break;
+        } else if (today[i][0][2] > position) {
+            return true;
+        }
+    }
+    return false;
+
+}
 
 function storeRedirect(url) {
     chrome.storage.sync.get("redirects", function(items) {
@@ -195,35 +204,62 @@ function handleNewPage(newWasting,newUrl,newTitle) {
             setReminder(timeLeft);
         }
     }
-    countDownTimer();
+    badgeDisplay();
 }
 
 function changeTimeLeft(change) {
     timeLeft += change;
-    //remember to call countDownTimer(); at end of processing 
+    //remember to call badgeDisplay(); at end of processing 
 }
 
-function countDownTimer() {
-    clearTimeout(displayTimeStarter);
-    clearInterval(displayTimer);
+function badgeDisplay() {
     //have the option to update browserAction every time, but accuracy isn't completely needed
     sendRequest("timer",timeLeft);
+    if (VIPtab === tabId) {
+        //if it is not set, VIP isn't temp
+        if (tempVIPstartTime) {
+            //don't even bother if more time left than limit
+            if (siteBlocked || timeLeft - (wastingTime ? new Date() - startTime : 0) < VIPlength) {
+                //even if not wasting time, temp will count down anyways
+                countDownTimer(VIPlength - new Date() + tempVIPstartTime,true);
+                //when this turns to 0, will not show actual time left, may want to fix this later
+            } else {
+                //if more time left than the vip length, might as well show the entire thing
+                displayTimeLeft();
+            }
+        } else {
+            //apparently google chrome resets the tab specific display when changing pages
+            //infinity symbol
+            chrome.browserAction.setBadgeText({text:"\u221e",tabId:tabId});
+        }
+    } else {
+        displayTimeLeft();
+    }
+}
+
+function displayTimeLeft() {
     var currentTimeOffset = (wastingTime ? new Date() - startTime : 0);
     var curTimeLeft = timeLeft - currentTimeOffset; //don't want to touch timeLeft variable
-    if (curTimeLeft < 0) {
-        curTimeLeft = 0;
+    countDownTimer(curTimeLeft,wastingTime);
+}
+
+function countDownTimer(time,wastingTime) {
+    clearTimeout(displayTimeStarter);
+    clearInterval(displayTimer);
+    if (time < 0) {
+        time = 0;
     }
-    chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
-    if (wastingTime && curTimeLeft > 0) {
-        var delay = (curTimeLeft-1)%1000+1;
+    setBadgeText(time,tabId);
+    if (wastingTime && time > 0) {
+        var delay = (time-1)%1000+1;
         displayTimeStarter = setTimeout(function() {
-            curTimeLeft -= delay;
-            if (wastingTime && curTimeLeft >= 0) {
-                chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
+            time -= delay;
+            if (wastingTime && time >= 0) {
+                setBadgeText(time);
                 displayTimer = setInterval(function() {
-                    curTimeLeft -= 1000;
-                    if (wastingTime && curTimeLeft >= 0) {
-                        chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(curTimeLeft)});
+                    time -= 1000;
+                    if (wastingTime && time >= 0) {
+                        setBadgeText(time);
                     } else {
                         clearInterval(displayTimer);
                     }
@@ -231,6 +267,10 @@ function countDownTimer() {
             }
         },delay);
     }
+}
+
+function setBadgeText(time,tabId) {
+    chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
 }
 
 function MinutesSecondsFormat(milli) {
@@ -284,7 +324,7 @@ function returnTime(delay) {
         if (!completed) {
             timeTotal += currentTimeInterval;
         }
-        countDownTimer();
+        badgeDisplay();
         returnTime(timeTotal - timeLeft + currentTimeOffset);
     },delay);
 }
@@ -331,19 +371,29 @@ function resetTime() {
 }
 
 function makeCurrentTabVIP() {
+    clearTimeout(tempVIPtimer);
     VIPtab = tabId;
     clearAlarm();
 }
 
+function VIP() {
+    makeCurrentTabVIP();
+    tempVIPstartTime = 0;
+    //infinity symbol
+    chrome.browserAction.setBadgeText({text:"\u221e",tabId:tabId});
+}
+
 function tempVIP() {
     makeCurrentTabVIP();
-    clearTimeout(tempVIPtimer);
+    tempVIPstartTime = +new Date();
     tempVIPtimer = setTimeout(function(){
         VIPtab = -1;
+        tempVIPstartTime = 0;
         if (wastingTime) {
             setReminder(timeLeft);
         }
     },VIPlength);
+    badgeDisplay();
 }
 
 function change(timeLineIndex) {
@@ -354,7 +404,7 @@ function change(timeLineIndex) {
     }
     clearTimeout(returnTimer);
     returnTime();
-    countDownTimer();
+    badgeDisplay();
 }
 
 //for displaying in an open browser action
