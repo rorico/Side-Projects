@@ -230,7 +230,7 @@ function badgeDisplay() {
         } else {
             //apparently google chrome resets the tab specific display when changing pages
             //infinity symbol
-            chrome.browserAction.setBadgeText({text:"\u221e",tabId:tabId});
+            chrome.browserAction.setBadgeText({text:"\u221e"});
         }
     } else {
         displayTimeLeft();
@@ -249,7 +249,7 @@ function countDownTimer(time,wastingTime) {
     if (time < 0) {
         time = 0;
     }
-    setBadgeText(time,tabId);
+    setBadgeText(time);
     if (wastingTime && time > 0) {
         var delay = (time-1)%1000+1;
         displayTimeStarter = setTimeout(function() {
