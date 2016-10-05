@@ -222,7 +222,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function startShowHotkey(phrase,start) {
-        $("#phrase").remove();
+        $("#phraseHolder").remove();
         var front = "<div id='phraseFront'>";
         var back = "<div id='phraseBack'>";
         for (var i = 0 ; i < phrase.length ; i++) {
@@ -231,34 +231,41 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
         front += "</div>";
         back += "</div>";
-        var html = "<div id='phrase'>" + front + back + "</div>";
-        $("body").append(html);
+        var html = "<div id='phraseHolder'><div id='phrase'>" + front + back + "</div></div>";
+        $("body").prepend(html);
         var fontSize = 100;
-        if ($("body").width() < $("#phraseFront").width()) {
-            fontSize = Math.floor(fontSize / ($("#phraseFront").width() / $("body").width()));
+        var widthMargin = 40;    //don't want text to hug the sides
+        var maxWidth = $("body").width() - widthMargin;
+        if (maxWidth < $("#phraseFront").width()) {
+            //shouldn't get stuck in an infinite loop
+            fontSize = Math.floor(fontSize / ($("#phraseFront").width() / maxWidth));
             $(".phrasePart").css("font-size",fontSize);
         }
         //center display
-        var leftOffset = ($("body").width() - $("#phraseFront").width())/2;
-        var topOffset = ($("body").height() - $("#phraseFront").height())/2;
-        $("#phraseFront").css("left",leftOffset);
-        $("#phraseFront").css("top",topOffset);
-        $("#phraseBack").css("left",leftOffset);
-        $("#phraseBack").css("top",topOffset);
+        var leftOffset = ($("body").innerWidth() - $("#phraseFront").outerWidth())/2;
+        var topOffset = ($("body").innerHeight() - $("#phraseFront").outerHeight())/2;
+        $("#phraseHolder").css("left",leftOffset);
+        $("#phraseHolder").css("top",topOffset);
         if (start) {
             $("#phrase0").addClass("filled");
         }
-        disappearHotkey();
+        disappearHotkey(1200);
     }
 
-    function showHotkey(index) {
-        $("#phrase" + index).addClass("filled");
-        disappearHotkey();
+    function showHotkey(index,correct) {
+        if (correct) {
+            $("#phrase" + index).addClass("filled").removeClass("failed");
+            disappearHotkey(1200);
+        } else {
+            $("#phrase" + index).addClass("failed");
+            disappearHotkey(500);
+        }
     }
 
     var disappearInterval;
-    function disappearHotkey() {
+    function disappearHotkey(time) {
         var opacity = 0.8;
+        var delay = (time ? time / opacity / 100 : 15);
         $("#phrase").css("opacity",opacity);
         clearInterval(disappearInterval);
         if (!allowMistakes) {
@@ -268,7 +275,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 if (opacity <= 0) {
                     clearHotkey();
                 }
-            },15);
+            },delay);
         }
     }
 
@@ -276,8 +283,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         currentPhrase = 0;
         phraseIndex = 0;
         allowMistakes = false;
-        clearInterval(disappearInterval);
-        $("#phrase").remove();
     }
     //order matters in terms of what gets checked first
     //keep letters capitalized
@@ -290,14 +295,19 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         if (currentPhrase) {
             //get lowercase ascii value of next part
             if (e.keyCode === currentPhrase[0].charCodeAt(phraseIndex)) {
-                showHotkey(phraseIndex);
+                showHotkey(phraseIndex,true);
                 if (++phraseIndex === currentPhrase[0].length) {
+                    $("#phrase").addClass("done");
                     var fnc = currentPhrase[1];
                     clearHotkey();
                     fnc();
+                    disappearHotkey();
                 }
-            } else if (!allowMistakes) {
-                clearHotkey();
+            } else {
+                showHotkey(phraseIndex,false);
+                if (!allowMistakes) {
+                    clearHotkey();
+                }
             }
         } else  {
             var found = false;
