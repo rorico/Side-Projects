@@ -269,7 +269,7 @@ function countDownTimer(time,wastingTime) {
     }
 }
 
-function setBadgeText(time,tabId) {
+function setBadgeText(time) {
     chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
 }
 
@@ -379,8 +379,7 @@ function makeCurrentTabVIP() {
 function VIP() {
     makeCurrentTabVIP();
     tempVIPstartTime = 0;
-    //infinity symbol
-    chrome.browserAction.setBadgeText({text:"\u221e",tabId:tabId});
+    badgeDisplay();
 }
 
 function tempVIP() {
