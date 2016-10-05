@@ -229,6 +229,8 @@ function badgeDisplay() {
             }
         } else {
             //apparently google chrome resets the tab specific display when changing pages
+            clearTimeout(displayTimeStarter);
+            clearInterval(displayTimer);
             //infinity symbol
             chrome.browserAction.setBadgeText({text:"\u221e"});
         }
