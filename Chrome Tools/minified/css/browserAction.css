@@ -99,6 +99,11 @@ div p{
     width:60px;
     border-right:0;
 }
+#phraseHolder{
+    height: 0;
+    width: 0;
+    position:relative;
+}
 #phrase{
     position:absolute;
     z-index: 1;
@@ -107,6 +112,9 @@ div p{
 }
 .filled{
     color:black;
+}
+.failed{
+    color:red;
 }
 .phrasePart{
     display:inline;
@@ -124,4 +132,10 @@ div p{
     border:1px solid black;
     border-radius: 5px;
     background-color: white;
+}
+#phrase.done .filled{
+    color:white;
+}
+#phrase.done #phraseBack{
+    background-color: black;
 }
