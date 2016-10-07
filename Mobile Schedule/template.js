@@ -42,7 +42,7 @@ var templateInfoPart1 = '<!DOCTYPE html>\n'+
 '    display:inline;;\n'+
 '}\n'+
 '#header{\n'+
-'    height:30px;\n'+
+'    margin-bottom:9px;\n'+
 '}\n'+
 '#datepicker{\n'+
 '    text-align:center;\n'+

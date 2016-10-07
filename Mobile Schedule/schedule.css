@@ -14,7 +14,7 @@ div p{
     display:inline;;
 }
 #header{
-    height:30px;
+    margin-bottom:9px;
 }
 #datepicker{
     text-align:center;
