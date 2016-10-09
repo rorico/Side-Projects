@@ -40,7 +40,7 @@ $(window).keydown(function(e) {
         $('#speed').val(speed);
     }
 });
-for(var i = 0 ; i<human.length ; i++) {
+for (var i = 0 ; i<human.length ; i++) {
     if (human[i]) {
         $('input[name='+(i+1)+'][value=human]').attr('checked','checked');
     } else {
@@ -119,7 +119,7 @@ $(document).ready(function(){
 
 function start(i,j) {
     pauseable = true;
-    if( i < maxCards && greenLines<2 && blueLines<2 && keepgoing && !gameEnd ){
+    if ( i < maxCards && greenLines<2 && blueLines<2 && keepgoing && !gameEnd ){
         gameN=j;
         turnN=i;
         var player = i%4;
@@ -163,12 +163,12 @@ function start(i,j) {
         turnN=i;
         unpauseable = true;
         $('#pause').css('display','block');
-    } else if(gameEnd){         //this allows for game ends shown at 0 speed
+    } else if (gameEnd){         //this allows for game ends shown at 0 speed
         gameEnd=false;
         newGame();
         delayedStart(0,j+1);
     } else {                //end game
-        if(greenLines>=2){
+        if (greenLines>=2){
             greenwin++;
         } else if (blueLines>=2){
             bluewin++;
@@ -209,7 +209,7 @@ function delayedStart(i,j) {
 function noDelay() {
     animate = false;
     for (var j = 0 ; j < maxGame ; j++) {
-        for( var i = 0 ; i < 104 && greenLines<2 && blueLines<2 && keepgoing && gameEnd ; i++){
+        for ( var i = 0 ; i < 104 && greenLines<2 && blueLines<2 && keepgoing && gameEnd ; i++){
             switch (i%4) {
                 case 0:
                     playBlue(0);
@@ -225,7 +225,7 @@ function noDelay() {
                     break;
             }
         }
-        if(greenLines>=2){
+        if (greenLines>=2){
             greenwin++;
         } else if (blueLines>=2){
             bluewin++;
@@ -248,7 +248,7 @@ function noDelay() {
 //Output [card][side][row x, col y]
 function getOptions(cards) {
     var options = [];
-    for( var k = 0 ; k<cards.length ; k++ )
+    for ( var k = 0 ; k<cards.length ; k++ )
     {
         var sides = [];
         var card = cards[k];
@@ -265,9 +265,9 @@ function getOptions(cards) {
 
 function cardOptions(card) {
     var possible = [];
-    if(card === 1) {
+    if (card === 1) {
         possible = [[0,0],[0,9],[9,0],[9,9]];
-    } else if(card < 10) {
+    } else if (card < 10) {
         possible = [[0,card-1],[9,10-card]];
     } else {
         var x = Math.floor(card/10);
@@ -275,7 +275,7 @@ function cardOptions(card) {
         possible = [[x,y],[9-x,9-y]];
     }
     var sides = [];
-    for( var i = 0 ; i<possible.length ; i++ )
+    for ( var i = 0 ; i<possible.length ; i++ )
     {
         if (points[possible[i][0]][possible[i][1]]===0) {
             sides.push([possible[i][0],possible[i][1]]);
@@ -310,9 +310,9 @@ function drawCard(player,index,value,change) {
 //random add jack
 function addJR() {
     var options = [];
-    for( var i = 0 ; i<board.length ; i++ )
+    for ( var i = 0 ; i<board.length ; i++ )
     {
-        for( var j = 0 ; j<board[i].length ; j++ )
+        for ( var j = 0 ; j<board[i].length ; j++ )
         {
             if (points[i][j]===0) {
                 options.push([i,j]);
@@ -326,9 +326,9 @@ function addJR() {
 function removeJR(colour) {
     colour=4-colour;
     var options = [];
-    for( var i = 0 ; i<board.length ; i++ )
+    for ( var i = 0 ; i<board.length ; i++ )
     {
-        for( var j = 0 ; j<board[i].length ; j++ )
+        for ( var j = 0 ; j<board[i].length ; j++ )
         {
             if (points[i][j]===colour) {
                 options.push([i,j]);
@@ -357,7 +357,7 @@ function addJ(colour,offensive) {
         for (var row = 0 ; row<10 ; row++){
             checkOpen = 0;
             cnt21=0;
-            for(var i = 0 ; i < 5 ; i++) {
+            for (var i = 0 ; i < 5 ; i++) {
                 if (points[row][i]===value) {
                     cnt21++;
                 } else if (points[row][i]!==0) {
@@ -390,7 +390,7 @@ function addJ(colour,offensive) {
         for (var col = 0 ; col<10 ; col++){
             checkOpen = 0;
             cnt12=0;
-            for(var i = 0 ; i < 5 ; i++) {
+            for (var i = 0 ; i < 5 ; i++) {
                 if (points[i][col]===value) {
                     cnt12++;
                 } else if (points[i][col]!==0) {
@@ -423,7 +423,7 @@ function addJ(colour,offensive) {
         for (var row = 0 ; row<6 ; row++){
             checkOpen = 0;
             cnt11=0;
-            for(var i = 0 ; i < 5 ; i++) {
+            for (var i = 0 ; i < 5 ; i++) {
                 if (points[row+i][i]===value) {
                     cnt11++;
                 } else if (points[row+i][i]!==0) {
@@ -456,7 +456,7 @@ function addJ(colour,offensive) {
         for (var col = 1 ; col<6 ; col++){
             checkOpen = 0;
             cnt11=0;
-            for(var i = 0 ; i < 5 ; i++) {
+            for (var i = 0 ; i < 5 ; i++) {
                 if (points[i][col+i]===value) {
                     cnt11++;
                 } else if (points[i][col+i]!==0) {
@@ -489,7 +489,7 @@ function addJ(colour,offensive) {
         for (var row = 4 ; row<10 ; row++){
             checkOpen = 0;
             cnt11=0;
-            for(var i = 0 ; i < 5 ; i++) {
+            for (var i = 0 ; i < 5 ; i++) {
                 if (points[row-i][i]===value) {
                     cnt11++;
                 } else if (points[row-i][i]!==0) {
@@ -522,7 +522,7 @@ function addJ(colour,offensive) {
         for (var col = 1 ; col<6 ; col++){
             checkOpen = 0;
             cnt11=0;
-            for(var i = 0 ; i < 5 ; i++) {
+            for (var i = 0 ; i < 5 ; i++) {
                 if (points[9-i][col+i]===value) {
                     cnt11++;
                 } else if (points[9-i][col+i]!==0) {
@@ -600,9 +600,9 @@ function addJ_2(colour) {
 function removeJ(colour) {
     colour = 4-colour;       
     var worth = [];
-    for( var i = 0 ; i<board.length ; i++ ){
+    for ( var i = 0 ; i<board.length ; i++ ){
         var worthrow = [];
-        for( var j = 0 ; j<board[i].length ; j++ ){
+        for ( var j = 0 ; j<board[i].length ; j++ ){
             worthrow.push(0);
             
         }
@@ -620,7 +620,7 @@ function removeJ(colour) {
         check = true;
         tnp=[];
         cnt21=0;
-        for(var i = 0 ; i < 5 ; i++) {
+        for (var i = 0 ; i < 5 ; i++) {
             if (points[row][i]===value) {
                 cnt21++;
                 tnp.push([row,i])
@@ -629,7 +629,7 @@ function removeJ(colour) {
             }
         }
         if (cnt21===4&&check) {
-            for(var i = 0 ; i<tnp.length ; i++){
+            for (var i = 0 ; i<tnp.length ; i++){
                 worth[tnp[i][0]][tnp[i][1]]++;
             }
         }
@@ -647,7 +647,7 @@ function removeJ(colour) {
                 check=false;
             }
             if (cnt21===4&&check) {
-                for(var i = 0 ; i<tnp.length ; i++){
+                for (var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
@@ -657,7 +657,7 @@ function removeJ(colour) {
         check = true;
         tnp=[];
         cnt12=0;
-        for(var i = 0 ; i < 5 ; i++) {
+        for (var i = 0 ; i < 5 ; i++) {
             if (points[i][col]===value) {
                 cnt12++;
                 tnp.push([i,col]);
@@ -666,7 +666,7 @@ function removeJ(colour) {
             }
         }
         if (cnt12===4&&check) {
-            for(var i = 0 ; i<tnp.length ; i++){
+            for (var i = 0 ; i<tnp.length ; i++){
                 worth[tnp[i][0]][tnp[i][1]]++;
             }
         }
@@ -684,7 +684,7 @@ function removeJ(colour) {
                 check=false;
             }
             if (cnt12===4&&check) {
-                for(var i = 0 ; i<tnp.length ; i++){
+                for (var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
@@ -693,7 +693,7 @@ function removeJ(colour) {
     for (var row = 0 ; row<6 ; row++){
         check = true;
         cnt11=0;
-        for(var i = 0 ; i < 5 ; i++) {
+        for (var i = 0 ; i < 5 ; i++) {
             if (points[row+i][i]===value) {
                 cnt11++;
                 tnp.push([row+i,i]);
@@ -702,7 +702,7 @@ function removeJ(colour) {
             }
         }
         if (cnt11===4&&check) {
-            for(var i = 0 ; i<tnp.length ; i++){
+            for (var i = 0 ; i<tnp.length ; i++){
                 worth[tnp[i][0]][tnp[i][1]]++;
             }
         }
@@ -720,7 +720,7 @@ function removeJ(colour) {
                 check=false;
             }
             if (cnt11===4&&check) {
-                for(var i = 0 ; i<tnp.length ; i++){
+                for (var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
@@ -730,7 +730,7 @@ function removeJ(colour) {
         check = true;
         tnp=[];
         cnt11=0;
-        for(var i = 0 ; i < 5 ; i++) {
+        for (var i = 0 ; i < 5 ; i++) {
             if (points[i][col+i]===value) {
                 cnt11++;
                 tnp.push([i,col+i]);
@@ -739,7 +739,7 @@ function removeJ(colour) {
             }
         }
         if (cnt11===4&&check) {
-            for(var i = 0 ; i<tnp.length ; i++){
+            for (var i = 0 ; i<tnp.length ; i++){
                 worth[tnp[i][0]][tnp[i][1]]++;
             }
         }
@@ -757,7 +757,7 @@ function removeJ(colour) {
                 check=false;
             }
             if (cnt11===4&&check) {
-                for(var i = 0 ; i<tnp.length ; i++){
+                for (var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
@@ -767,7 +767,7 @@ function removeJ(colour) {
         check = true;
         tnp=[];
         cnt11=0;
-        for(var i = 0 ; i < 5 ; i++) {
+        for (var i = 0 ; i < 5 ; i++) {
             if (points[row-i][i]===value) {
                 cnt11++;
                 tnp.push([row-i,i]);
@@ -776,7 +776,7 @@ function removeJ(colour) {
             }
         }
         if (cnt11===4&&check) {
-            for(var i = 0 ; i<tnp.length ; i++){
+            for (var i = 0 ; i<tnp.length ; i++){
                 worth[tnp[i][0]][tnp[i][1]]++;
             }
         }
@@ -794,7 +794,7 @@ function removeJ(colour) {
                 check=false;
             }
             if (cnt11===4&&check) {
-                for(var i = 0 ; i<tnp.length ; i++){
+                for (var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
@@ -804,7 +804,7 @@ function removeJ(colour) {
         check = true;
         tnp=[];
         cnt11=0;
-        for(var i = 0 ; i < 5 ; i++) {
+        for (var i = 0 ; i < 5 ; i++) {
             if (points[9-i][col+i]===value) {
                 cnt11++;
                 tnp.push([9-i,col+i]);
@@ -813,7 +813,7 @@ function removeJ(colour) {
             }
         }
         if (cnt11===4&&check) {
-            for(var i = 0 ; i<tnp.length ; i++){
+            for (var i = 0 ; i<tnp.length ; i++){
                 worth[tnp[i][0]][tnp[i][1]]++;
             }
         }
@@ -831,7 +831,7 @@ function removeJ(colour) {
                 check=false;
             }
             if (cnt11===4&&check) {
-                for(var i = 0 ; i<tnp.length ; i++){
+                for (var i = 0 ; i<tnp.length ; i++){
                     worth[tnp[i][0]][tnp[i][1]]++;
                 }
             }
@@ -839,16 +839,16 @@ function removeJ(colour) {
     }
     var returnValues = [];
     var max = 0;
-    for( var i = 0 ; i<board.length ; i++ ){
-        for( var j = 0 ; j<board[i].length ; j++ ){
+    for ( var i = 0 ; i<board.length ; i++ ){
+        for ( var j = 0 ; j<board[i].length ; j++ ){
             if (max<worth[i][j]) {
                 max = worth[i][j];
             }
         }
     }
     if (max!=0) {
-        for( var i = 0 ; i<board.length ; i++ ){
-            for( var j = 0 ; j<board[i].length ; j++ ){
+        for ( var i = 0 ; i<board.length ; i++ ){
+            for ( var j = 0 ; j<board[i].length ; j++ ){
                 if (max===worth[i][j]) {
                     returnValues.push([i,j]);
                 }
@@ -858,173 +858,75 @@ function removeJ(colour) {
     return returnValues;
     
 }
+
 //checks if lines is won and turns them over
+//if can finish multiple, finishes all
 function checker(x,y) {
     var value = points[x][y];
-    var tnp = [];
-    
-    var check11 = true;
-    var check12 = true;
-    var check13 = true;
-    var check21 = true;
-    var check23 = true;
-    var check31 = true;
-    var check32 = true;
-    var check33 = true;
-    
-    var cnt11 = 0;
-    var cnt12 = 0;
-    var cnt13 = 0;
-    var cnt21 = 0;
-    
-    for(var i = 1 ; i < 5 ; i++) { //check later for edges
-        if (x-i!==-1 && x-i!==-1 && check11 && points[x-i][y-i]===value) {
-            cnt11++;
-            tnp.push([x-i,y-i])
-        } else {
-            check11 = false;
-        }
-        if (x+i!==10 && x+i!==10 && check33 && points[x+i][y+i]===value) {
-            cnt11++;
-            tnp.push([x+i,y+i])
-        } else {
-            check33 = false;
-        }
-    }
-    if (cnt11>=4) {
-        if (value === 1) {
-            blueLines++;
-        } else if (value === 3){
-            greenLines++;
-        }
-        finishLine(x,y,value);
-        for(var i = 0 ; i<4 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
-        }
-    } else if (cnt11===8) {
-        if (value === 1) {
-            blueLines+=2;
-        } else if (value === 3){
-            greenLines+=2;
-        }
-        finishLine(x,y,value);
-        for(var i = 0 ; i<8 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
-        }
-    }
-    tnp = [];
-    for(var i = 1 ; i < 5 ; i++) { //check later for edges
-        if (y-i!==-1 && check12 && points[x][y-i]===value) {
-            cnt12++;
-            tnp.push([x,y-i])
-        } else {
-            check12 = false;
-        }
-        if (y+i!==10 && check32 && points[x][y+i]===value) {
-            cnt12++;
-            tnp.push([x,y+i])
-        } else {
-            check32 = false;
-        }
-    }
-    if (cnt12>=4) {
-        if (value === 1) {
-            blueLines++;
-        } else if (value === 3){
-            greenLines++;
-        }
-        finishLine(x,y,value);
-        for(var i = 0 ; i<4 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
-        }
-    } else if (cnt12===8) {
-        if (value === 1) {
-            blueLines+=2;
-        } else if (value === 3){
-            greenLines+=2;
-        }
-        finishLine(x,y,value);
-        for(var i = 0 ; i<8 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
-        }
-    }
-    tnp = [];
-    for(var i = 1 ; i < 5 ; i++) { //check later for edges
-        if (x+i!==10 && y-i!==-1 && check13 && points[x+i][y-i]===value) {
-            cnt13++;
-            tnp.push([x+i,y-i])
-        } else {
-            check13 = false;
-        }
-        if (x-i!==-1 && y+i!==10 && check31 && points[x-i][y+i]===value) {
-            cnt13++;
-            tnp.push([x-i,y+i])
-        } else {
-            check31 = false;
-        }
-    }
-    if (cnt13>=4) {
-        if (value === 1) {
-            blueLines++;
-        } else if (value === 3){
-            greenLines++;
-        }
-        finishLine(x,y,value);
-        for(var i = 0 ; i<4 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
-        }
-    } else if (cnt13===8) {
-        if (value === 1) {
-            blueLines+=2;
-        } else if (value === 3){
-            greenLines+=2;
-        }
-        finishLine(x,y,value);
-        for(var i = 0 ; i<8 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
-        }
-    }
-    tnp = [];
-    for(var i = 1 ; i < 5 ; i++) { //check later for edges
-        if (x-i!==-1 && check21 && points[x-i][y]===value) {
-            cnt21++;
-            tnp.push([x-i,y])
-        } else {
-            check21 = false;
-        }
-        if (x+i!==10 && check23 && points[x+i][y]===value) {
-            cnt21++;
-            tnp.push([x+i,y])
-        } else {
-            check23 = false;
-        }
-    }
-    if (cnt21>=4) {
-        if (value === 1) {
-            blueLines++;
-        } else if (value === 3){
-            greenLines++;
-        }
-        finishLine(x,y,value);
-        for(var i = 0 ; i<4 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
-        }
-    } else if (cnt21===8) {
-        if (value === 1) {
-            blueLines+=2;
-        } else if (value === 3){
-            greenLines+=2;
-        }
-        finishLine(x,y,value);
-        for(var i = 0 ; i<8 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
-        }
-    }
-    tnp = [];
+    checkDirection(x,y,1,1,value);
+    checkDirection(x,y,1,0,value);
+    checkDirection(x,y,0,1,value);
+    checkDirection(x,y,1,-1,value);
 }
 
+function checkDirection(x,y,dirX,dirY,value) {
+    var tnp = [];
 
+    var checkUp = true;
+    var checkDown = true;
+    
+    var cnt = 0;
+    
+    var xUp = x;
+    var xDown = x;
+    var yUp = y;
+    var yDown = y;
+    
+    for (var i = 1 ; i < 5 ; i++) {
+        xUp += dirX;
+        yUp += dirY;
+        if (!outOfBounds(xUp,yUp) && checkUp && points[xUp][yUp]===value) {
+            cnt++;
+            tnp.push([xUp,yUp])
+        } else {
+            checkUp = false;
+        }
 
+        xDown -= dirX;
+        yDown -= dirY;
+        if (!outOfBounds(xDown,yDown) && checkDown && points[xDown][yDown]===value) {
+            cnt++;
+            tnp.push([xDown,yDown])
+        } else {
+            checkDown = false;
+        }
+    }
+    if (cnt === 8) {
+        if (value === 1) {
+            blueLines += 2;
+        } else if (value === 3){
+            greenLines += 2;
+        }
+        finishLine(x,y,value);
+        for (var i = 0 ; i < 8 ; i++){
+            finishLine(tnp[i][0],tnp[i][1],value);
+        }
+    } else if (cnt >= 4) {
+        if (value === 1) {
+            blueLines++;
+        } else if (value === 3){
+            greenLines++;
+        }
+        finishLine(x,y,value);
+        for (var i = 0 ; i < 4 ; i++){
+            finishLine(tnp[i][0],tnp[i][1],value);
+        }
+    }
+}
+
+function outOfBounds(x,y) {
+    return x > 9 || x < 0 || y > 9 || y < 0;
+}
 
 //-----------auxilary functions-------------------//
 
@@ -1099,7 +1001,7 @@ function createBoard()
         var rowinfo = [];
         var pointsrow = [];
         var pointworthrow = [];
-        for( var col = 1 ; col<=10 ; col++)
+        for ( var col = 1 ; col<=10 ; col++)
         {
             if (row==0) {
                 if (col==1||col==10) {
@@ -1134,10 +1036,10 @@ function createBoard()
 
     //create board display
     var cnt = 1;
-    for(var i = 0 ; i<board.length ; i++)
+    for (var i = 0 ; i<board.length ; i++)
     {
         $('#board').append('<tr id =board'+i+'></tr>');
-        for(var j = 0 ; j<board[i].length ; j++)
+        for (var j = 0 ; j<board[i].length ; j++)
         {
             $('#board'+i).append('<td class="v'+points[i][j]+'" id="'+cnt+'">'+changeToCards(board[i][j])+'</td>');
             cnt++;
@@ -1162,7 +1064,7 @@ function createBoard()
 //restart game
 function newGame() {
     for (var row = 0 ; row < 10 ; row++) {
-        for( var col = 0 ; col< 10 ; col++)
+        for ( var col = 0 ; col< 10 ; col++)
         {
             points[row][col]=0;
         }
@@ -1192,7 +1094,7 @@ function newGame() {
     players = [player1.slice(),player2.slice(),player3.slice(),player4.slice()];
     showHands();
     
-    for(var i = 1 ; i<=100 && animate; i++)
+    for (var i = 1 ; i<=100 && animate; i++)
     {
         $('#'+i).removeClass();
         $('#'+i).addClass('v0');
@@ -1317,9 +1219,9 @@ function animateHand(index,player,remove,change) {
     pastChange = change;
 }
 function showWorth() {
-    for(var x = 0 ; x<10; x++)
+    for (var x = 0 ; x<10; x++)
     {
-        for(var y = 0 ; y<10; y++)
+        for (var y = 0 ; y<10; y++)
         {
             i=x*10+y+1;
             $('#'+i).removeClass();
@@ -1335,7 +1237,7 @@ function isEqual(array1,array2) {
             if (!isEqual(array1[i],array2[i])) 
                 return false;
         } else {
-            if(array1[i] !== array2[i]){
+            if (array1[i] !== array2[i]){
                 return false;
             }
         }
@@ -1345,7 +1247,7 @@ function isEqual(array1,array2) {
 function showArray(data,container) {
     if (Array.isArray(data)) {
         $(container).append('[');
-        for(var i = 0 ; i<data.length ; i++) {
+        for (var i = 0 ; i<data.length ; i++) {
             showArray(data[i],container);
             if (i!=data.length-1) {
                 $(container).append(',');
@@ -1483,7 +1385,7 @@ function changeToCards(number) {
 function showPlaces(player) {
     $('.possible').removeClass('possible');
     var options = getOptions(players[player]);
-    for(var card = 0 ; card<options.length ; card++) {
+    for (var card = 0 ; card<options.length ; card++) {
         for (var side = 0 ; side<options[card].length; side++) {
             var position = options[card][side][0]*10+options[card][side][1]+1;
             $('#'+position).addClass('possible');
