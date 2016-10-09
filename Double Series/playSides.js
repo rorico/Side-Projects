@@ -1,7 +1,7 @@
 function playSides(player,value,offensive) {
     var options = getOptions(players[player]);
     var useless = hasUselessCard(options);
-    if (useless!==false) {
+    if (useless !== -1) {
         return [0,useless,[-1,-1]];
     }
     var best = mostLines(options,value,offensive);

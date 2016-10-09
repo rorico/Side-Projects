@@ -4,7 +4,7 @@ function playAIphil(player,value,offensive) {
 
     //determines useless cards
     var useless = hasUselessCard(options);
-    if (useless!==false) {
+    if (useless !== -1) {
         return [0,useless,[-1,-1]];
     }
 
