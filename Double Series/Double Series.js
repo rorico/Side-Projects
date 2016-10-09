@@ -4,7 +4,7 @@ var speed = 00;
 var human = [false,false,false,false];
 var showMoves = false;
 //game play
-function playBlue (player){
+function playBlue(player) {
     //return playRandom(player,1);
     //return playHybrid(player,1);
     //return playAI(player,1,true);
@@ -13,7 +13,7 @@ function playBlue (player){
     //return playSides(player,1,true);
     //return playWorth(player,1,true);      //currently doesn't work
 }
-function playGreen (player){
+function playGreen(player) {
     //return playRandom(player,3);
     //return playHybrid(player,3);
     //return playAI(player,3,true);
@@ -117,7 +117,7 @@ $(document).ready(function(){
     delayedStart(0,0);
 });
 
-function start(i,j){
+function start(i,j) {
     pauseable = true;
     if( i < maxCards && greenLines<2 && blueLines<2 && keepgoing && !gameEnd ){
         gameN=j;
@@ -246,7 +246,7 @@ function noDelay() {
 }
 //array of options that player can play
 //Output [card][side][row x, col y]
-function getOptions(cards){
+function getOptions(cards) {
     var options = [];
     for( var k = 0 ; k<cards.length ; k++ )
     {
@@ -263,7 +263,7 @@ function getOptions(cards){
     return options;
 }
 
-function cardOptions(card){
+function cardOptions(card) {
     var possible = [];
     if(card === 1) {
         possible = [[0,0],[0,9],[9,0],[9,9]];
@@ -308,7 +308,7 @@ function drawCard(player,index,value,change) {
 }
 
 //random add jack
-function addJR (){
+function addJR() {
     var options = [];
     for( var i = 0 ; i<board.length ; i++ )
     {
@@ -323,7 +323,7 @@ function addJR (){
 }
 
 //random remove jack 
-function removeJR(colour){
+function removeJR(colour) {
     colour=4-colour;
     var options = [];
     for( var i = 0 ; i<board.length ; i++ )
@@ -339,7 +339,7 @@ function removeJR(colour){
 }
 
 //add jack
-function addJ (colour,offensive){
+function addJ(colour,offensive) {
     var value = 4-colour;
     var tnp = [];
     var returnValues = [];
@@ -591,13 +591,13 @@ function addJ (colour,offensive){
 }
 
 //add jack v2
-function addJ_2 (colour){
+function addJ_2(colour) {
     var options = check4_2(colour);
     return options;
 }
 
 //remove jack 
-function removeJ(colour){
+function removeJ(colour) {
     colour = 4-colour;       
     var worth = [];
     for( var i = 0 ; i<board.length ; i++ ){
@@ -859,7 +859,7 @@ function removeJ(colour){
     
 }
 //checks if lines is won and turns them over
-function checker(x,y){
+function checker(x,y) {
     var value = points[x][y];
     var tnp = [];
     
@@ -1043,7 +1043,7 @@ function sort_by_number(a,b) {
 }
 
 //has an Add J
-function hasAdd(player){
+function hasAdd(player) {
     for (var i = 0 ; i < player.length ; i++){
         if (player[i] === 0) {
             return i;
@@ -1160,7 +1160,7 @@ function createBoard()
 }
 
 //restart game
-function newGame(){
+function newGame() {
     for (var row = 0 ; row < 10 ; row++) {
         for( var col = 0 ; col< 10 ; col++)
         {
@@ -1252,7 +1252,7 @@ function addPoint(x,y,value) {
 }
 
 //creates a line
-function finishLine(x,y,value){
+function finishLine(x,y,value) {
     points[x][y] = value+1;
     pointworth[x][y]++;
         var position = 10*x+y+1;
@@ -1263,7 +1263,7 @@ function finishLine(x,y,value){
 }
 
 //shows Hand on board
-function showHands(){
+function showHands() {
     $("#p0").empty();
     $("#p1").empty();
     $("#p2").empty();
@@ -1280,7 +1280,7 @@ var pastPlayer = -1;
 var pastCardIndex = -1;
 var pastCard = -2;
 var pastChange = false;
-function animateHand(index,player,remove,change){
+function animateHand(index,player,remove,change) {
     if (pastPlayer!==-1){
         if (!pastRemove) {
             if (!pastChange) {
@@ -1342,7 +1342,7 @@ function isEqual(array1,array2) {
     }
     return true;
 }
-function showArray(data,container){
+function showArray(data,container) {
     if (Array.isArray(data)) {
         $(container).append('[');
         for(var i = 0 ; i<data.length ; i++) {

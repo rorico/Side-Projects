@@ -1,6 +1,6 @@
 //used in a lot of different AIs
 //returns indexes for options with greatest value
-function mostLines(options,value,offensive){
+function mostLines(options,value,offensive) {
     var type = value;
     var typeFor = value;
     var typeAgainst = 4 - value;
@@ -9,7 +9,7 @@ function mostLines(options,value,offensive){
     var best = 0;
 
     //initialize worth to be 0
-    for(var i = 0 ; i<options.length ; i++){
+    for (var i = 0 ; i<options.length ; i++){
         var worthrow = [];
 
         //if Jacks, push -1
@@ -26,14 +26,14 @@ function mostLines(options,value,offensive){
     //if finds a line of 4,breakopenbreaks out of for loop
     var breakopen = true;
     while(number!==-1&&breakopen){
-        for(var card = 0; card<options.length&&breakopen ; card++){
+        for (var card = 0; card<options.length&&breakopen ; card++){
             //continue out if a Jack
             if (options[card]===-1||options[card]===0) {
                 continue;
             }
 
             //switches from offensive to defensive
-            for(var blah = 0 ; blah<=1&&breakopen; blah++){
+            for (var blah = 0 ; blah<=1&&breakopen; blah++){
                 if (blah===0) {
                     type = typeFor;
                 } else if (offensive||number<3) {
@@ -43,7 +43,7 @@ function mostLines(options,value,offensive){
                 }
 
             
-            for(var side = 0; side<options[card].length ; side++){
+            for (var side = 0; side<options[card].length ; side++){
 
                 //row x, col y
                 var x = options[card][side][0];
@@ -57,11 +57,11 @@ function mostLines(options,value,offensive){
                 var cnt = 0;
                 
                 //diagonal
-                for(var i = 1 ; i < 5 ; i++) { //11
+                for (var i = 1 ; i < 5 ; i++) { //11
                     if (x-i!==-1 && y-i!==-1){
-                        if(points[x-i][y-i]===type) {
+                        if (points[x-i][y-i]===type) {
                             cnt++;
-                        } else if(points[x-i][y-i]!==0){
+                        } else if (points[x-i][y-i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -69,11 +69,11 @@ function mostLines(options,value,offensive){
                         break;
                     }
                 }
-                for(var i = 1 ; i<=removed ; i++){
+                for (var i = 1 ; i<=removed ; i++){
                     if (x+i!==10 && y+i!==10){
-                        if(points[x+i][y+i]===type) {
+                        if (points[x+i][y+i]===type) {
                             cnt++;
-                        } else if(points[x+i][y+i]!==0){
+                        } else if (points[x+i][y+i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -85,7 +85,7 @@ function mostLines(options,value,offensive){
                     check = true;
                     worth[card][side]+=number*number;
                 }
-                for(var i = removed + 1 ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
+                for (var i = removed + 1 ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
                     if (points[x+i-5][y+i-5]===type) {
                         cnt--;
                     } else if (points[x+i-5][y+i-5]!==0){
@@ -106,11 +106,11 @@ function mostLines(options,value,offensive){
                 checkremove = true;
                 removed = 0;
                 cnt = 0;
-                for(var i = 1 ; i < 5 ; i++) { //12
+                for (var i = 1 ; i < 5 ; i++) { //12
                     if (x-i!==-1){
-                        if(points[x-i][y]===type) {
+                        if (points[x-i][y]===type) {
                             cnt++;
-                        } else if(points[x-i][y]!==0){
+                        } else if (points[x-i][y]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -118,11 +118,11 @@ function mostLines(options,value,offensive){
                         break;
                     }
                 }
-                for(var i = 1 ; i<=removed ; i++){
+                for (var i = 1 ; i<=removed ; i++){
                     if (x+i!==10){
-                        if(points[x+i][y]===type) {
+                        if (points[x+i][y]===type) {
                             cnt++;
-                        } else if(points[x+i][y]!==0){
+                        } else if (points[x+i][y]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -134,7 +134,7 @@ function mostLines(options,value,offensive){
                     check = true;
                     worth[card][side]+=number*number;
                 }
-                for(var i = removed + 1 ; i<5 && x+i!==10 && checkremove ; i++){
+                for (var i = removed + 1 ; i<5 && x+i!==10 && checkremove ; i++){
                     if (points[x+i-5][y]===type) {
                         cnt--;
                     } else if (points[x+i-5][y]!==0){
@@ -155,11 +155,11 @@ function mostLines(options,value,offensive){
                 checkremove = true;
                 removed = 0;
                 cnt = 0;
-                for(var i = 1 ; i < 5 ; i++) { //13
+                for (var i = 1 ; i < 5 ; i++) { //13
                     if (x-i!==-1 && y+i!==10){
-                        if(points[x-i][y+i]===type) {
+                        if (points[x-i][y+i]===type) {
                             cnt++;
-                        } else if(points[x-i][y+i]!==0){
+                        } else if (points[x-i][y+i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -167,11 +167,11 @@ function mostLines(options,value,offensive){
                         break;
                     }
                 }
-                for(var i = 1 ; i<=removed ; i++){
+                for (var i = 1 ; i<=removed ; i++){
                     if (x+i!==10 && y-i!==-1){
-                        if(points[x+i][y-i]===type) {
+                        if (points[x+i][y-i]===type) {
                             cnt++;
-                        } else if(points[x+i][y-i]!==0){
+                        } else if (points[x+i][y-i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -183,7 +183,7 @@ function mostLines(options,value,offensive){
                     check = true;
                     worth[card][side]+=number*number;
                 }
-                for(var i = removed + 1 ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
+                for (var i = removed + 1 ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
                     if (points[x+i-5][y-i+5]===type) {
                         cnt--;
                     } else if (points[x+i-5][y-i+5]!==0){
@@ -203,11 +203,11 @@ function mostLines(options,value,offensive){
                 checkremove = true;
                 removed = 0;
                 cnt = 0;
-                for(var i = 1 ; i < 5 ; i++) { //11
+                for (var i = 1 ; i < 5 ; i++) { //11
                     if (y-i!==-1){
-                        if(points[x][y-i]===type) {
+                        if (points[x][y-i]===type) {
                             cnt++;
-                        } else if(points[x][y-i]!==0){
+                        } else if (points[x][y-i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -215,11 +215,11 @@ function mostLines(options,value,offensive){
                         break;
                     }
                 }
-                for(var i = 1 ; i<=removed ; i++){
+                for (var i = 1 ; i<=removed ; i++){
                     if (y+i!==10){
-                        if(points[x][y+i]===type) {
+                        if (points[x][y+i]===type) {
                             cnt++;
-                        } else if(points[x][y+i]!==0){
+                        } else if (points[x][y+i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -231,7 +231,7 @@ function mostLines(options,value,offensive){
                     check = true;
                     worth[card][side]+=number*number;
                 }
-                for(var i = removed + 1 ; i<5 && y+i!==10 && checkremove ; i++){
+                for (var i = removed + 1 ; i<5 && y+i!==10 && checkremove ; i++){
                     if (points[x][y+i-5]===type) {
                         cnt--;
                     } else if (points[x][y+i-5]!==0){
@@ -262,16 +262,16 @@ function mostLines(options,value,offensive){
     
     var returnValues = [best];
     var max = 0;
-    for( var i = 0 ; i<worth.length ; i++ ){
-        for( var j = 0 ; j<worth[i].length ; j++ ){
+    for ( var i = 0 ; i<worth.length ; i++ ){
+        for ( var j = 0 ; j<worth[i].length ; j++ ){
             if (max<worth[i][j]) {
                 max = worth[i][j];
             }
         }
     }
     var returnValuesValues = [];
-    for( var i = 0 ; i<worth.length ; i++ ){
-        for( var j = 0 ; j<worth[i].length ; j++ ){
+    for ( var i = 0 ; i<worth.length ; i++ ){
+        for ( var j = 0 ; j<worth[i].length ; j++ ){
             if (max===worth[i][j]) {
                 returnValuesValues.push([i,j]);
             }

@@ -1,4 +1,4 @@
-function playHybrid (player,value){
+function playHybrid(player,value) {
     if (value===3) {
         if (greenLines===1) {
             return playAI(player,value,true);

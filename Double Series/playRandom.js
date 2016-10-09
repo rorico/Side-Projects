@@ -1,4 +1,4 @@
-function playRandom(player,value){
+function playRandom(player,value) {
     var options = getOptions(players[player]);
     var useless = hasUselessCard(options);
     if (useless !== -1) {
@@ -9,7 +9,7 @@ function playRandom(player,value){
     var spots = options[card];
     if (spots === 0){
         spots = addJR();
-    } else if(options[card] === -1) {
+    } else if (options[card] === -1) {
         spots = removeJR(value);
         if (!spots.length) {
             //have to choose another card, just change cards

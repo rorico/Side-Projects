@@ -43,7 +43,7 @@ function playSides(player,value,offensive) {
         var bestCard = -1;
         var bestAmount = 0;
         var side = -1;
-        for( var i = 0 ; i<options.length ; i++ ){
+        for ( var i = 0 ; i<options.length ; i++ ){
             var sideInfo = bestSide(options[i],value,offensive);
             if (bestAmount<sideInfo[0]) {
                 bestCard = i;
@@ -67,7 +67,7 @@ function playSides(player,value,offensive) {
     return [1,card,[x,y]];
 }
 
-function bestSide(card,value,offensive){
+function bestSide(card,value,offensive) {
     var type = value;
     var number = 4;
     var worth = [];
@@ -79,7 +79,7 @@ function bestSide(card,value,offensive){
     }
     var breakopen = true;
     while(number!==-1&&breakopen){    
-        for(var side = 0; side<card.length ; side++){
+        for (var side = 0; side<card.length ; side++){
             var x = card[side][0];
             var y = card[side][1];
             
@@ -90,7 +90,7 @@ function bestSide(card,value,offensive){
             var removed = 0;
             var cnt = 0;
             
-            for( var blah = 0 ; blah<=1&&breakopen; blah++){
+            for ( var blah = 0 ; blah<=1&&breakopen; blah++){
                 if (blah===0) {
                     type = value;
                 } else if (offensive||number<3) {
@@ -98,11 +98,11 @@ function bestSide(card,value,offensive){
                 } else if (!offensive) {
                     type=4-value;
                 }
-                for(var i = 1 ; i < 5 ; i++) { //11
+                for (var i = 1 ; i < 5 ; i++) { //11
                     if (x-i!==-1 && y-i!==-1){
-                        if(points[x-i][y-i]===type) {
+                        if (points[x-i][y-i]===type) {
                             cnt++;
-                        } else if(points[x-i][y-i]!==0){
+                        } else if (points[x-i][y-i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -110,11 +110,11 @@ function bestSide(card,value,offensive){
                         break;
                     }
                 }
-                for(var i = 1 ; i<=removed ; i++){
+                for (var i = 1 ; i<=removed ; i++){
                     if (x+i!==10 && y+i!==10){
-                        if(points[x+i][y+i]===type) {
+                        if (points[x+i][y+i]===type) {
                             cnt++;
-                        } else if(points[x+i][y+i]!==0){
+                        } else if (points[x+i][y+i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -126,7 +126,7 @@ function bestSide(card,value,offensive){
                     check = true;
                     worth[side]+=number*number;
                 }
-                for(var i = removed ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
+                for (var i = removed ; i<5 && x+i!==10 && y+i!==10 && checkremove ; i++){
                     if (points[x+i-4][y+i-4]===type) {
                         cnt--;
                     } else if (points[x+i-4][y+i-4]!==0){
@@ -146,11 +146,11 @@ function bestSide(card,value,offensive){
                 checkOpen = 0;
                 removed = 0;
                 cnt = 0;
-                for(var i = 1 ; i < 5 ; i++) { //12
+                for (var i = 1 ; i < 5 ; i++) { //12
                     if (x-i!==-1){
-                        if(points[x-i][y]===type) {
+                        if (points[x-i][y]===type) {
                             cnt++;
-                        } else if(points[x-i][y]!==0){
+                        } else if (points[x-i][y]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -158,11 +158,11 @@ function bestSide(card,value,offensive){
                         break;
                     }
                 }
-                for(var i = 1 ; i<=removed ; i++){
+                for (var i = 1 ; i<=removed ; i++){
                     if (x+i!==10){
-                        if(points[x+i][y]===type) {
+                        if (points[x+i][y]===type) {
                             cnt++;
-                        } else if(points[x+i][y]!==0){
+                        } else if (points[x+i][y]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -174,7 +174,7 @@ function bestSide(card,value,offensive){
                     check = true;
                     worth[side]+=number*number;
                 }
-                for(var i = removed ; i<5 && x+i!==10 && checkremove ; i++){
+                for (var i = removed ; i<5 && x+i!==10 && checkremove ; i++){
                     if (points[x+i-4][y]===type) {
                         cnt--;
                     } else if (points[x+i-4][y]!==0){
@@ -194,11 +194,11 @@ function bestSide(card,value,offensive){
                 checkOpen = 0;
                 removed = 0;
                 cnt = 0;
-                for(var i = 1 ; i < 5 ; i++) { //11
+                for (var i = 1 ; i < 5 ; i++) { //11
                     if (x-i!==-1 && y+i!==10){
-                        if(points[x-i][y+i]===type) {
+                        if (points[x-i][y+i]===type) {
                             cnt++;
-                        } else if(points[x-i][y+i]!==0){
+                        } else if (points[x-i][y+i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -206,11 +206,11 @@ function bestSide(card,value,offensive){
                         break;
                     }
                 }
-                for(var i = 1 ; i<=removed ; i++){
+                for (var i = 1 ; i<=removed ; i++){
                     if (x+i!==10 && y-i!==-1){
-                        if(points[x+i][y-i]===type) {
+                        if (points[x+i][y-i]===type) {
                             cnt++;
-                        } else if(points[x+i][y-i]!==0){
+                        } else if (points[x+i][y-i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -222,7 +222,7 @@ function bestSide(card,value,offensive){
                     check = true;
                     worth[side]+=number*number;
                 }
-                for(var i = removed ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
+                for (var i = removed ; i<5 && x+i!==10 && y-i!==-1 && checkremove ; i++){
                     if (points[x+i-4][y-i+4]===type) {
                         cnt--;
                     } else if (points[x+i-4][y-i+4]!==0){
@@ -241,11 +241,11 @@ function bestSide(card,value,offensive){
                 checkOpen = 0;
                 removed = 0;
                 cnt = 0;
-                for(var i = 1 ; i < 5 ; i++) { //11
+                for (var i = 1 ; i < 5 ; i++) { //11
                     if (y-i!==-1){
-                        if(points[x][y-i]===type) {
+                        if (points[x][y-i]===type) {
                             cnt++;
-                        } else if(points[x][y-i]!==0){
+                        } else if (points[x][y-i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -253,11 +253,11 @@ function bestSide(card,value,offensive){
                         break;
                     }
                 }
-                for(var i = 1 ; i<=removed ; i++){
+                for (var i = 1 ; i<=removed ; i++){
                     if (y+i!==10){
-                        if(points[x][y+i]===type) {
+                        if (points[x][y+i]===type) {
                             cnt++;
-                        } else if(points[x][y+i]!==0){
+                        } else if (points[x][y+i]!==0){
                             checkOpen++;
                         }
                     } else {
@@ -269,7 +269,7 @@ function bestSide(card,value,offensive){
                     check = true;
                     worth[side]+=number*number;
                 }
-                for(var i = removed ; i<5 && y+i!==10 && checkremove ; i++){
+                for (var i = removed ; i<5 && y+i!==10 && checkremove ; i++){
                     if (points[x][y+i-4]===type) {
                         cnt--;
                     } else if (points[x][y+i-4]!==0){
@@ -297,7 +297,7 @@ function bestSide(card,value,offensive){
     var returnValues = [];
     var max = 0;
     var maxPos = -1;
-    for( var i = 0 ; i<worth.length ; i++ ){
+    for ( var i = 0 ; i<worth.length ; i++ ){
         if (max<worth[i]) {
             max = worth[i];
             maxPos = i;
@@ -305,7 +305,7 @@ function bestSide(card,value,offensive){
     }
     var secondMax = 0;
     var secondMaxPos = -1;
-    for( var i = 0 ; i<worth.length ; i++ ){
+    for ( var i = 0 ; i<worth.length ; i++ ){
         if (i===maxPos) {
             continue;
         }

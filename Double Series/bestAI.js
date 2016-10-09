@@ -62,7 +62,7 @@ function playBest(player,value,offensive) {
     return [1,card,[x,y]];
 }
 //returns indexes for options with greatest value
-function bestMove(options,value,offensive){
+function bestMove(options,value,offensive) {
     var type = value;
     var typeFor = value;
     var typeAgainst = 4 - value;
@@ -74,7 +74,7 @@ function bestMove(options,value,offensive){
     var possibleBoard = copyArray(points);
     
     //initialize worth to be 0
-    for(var i = 0 ; i<options.length ; i++){
+    for (var i = 0 ; i<options.length ; i++){
         var worthrow = [];
 
         //if Jacks, push -1
@@ -96,13 +96,13 @@ function bestMove(options,value,offensive){
         worth.push(worthrow);
     }
     //if finds a line of 4,breakopenbreaks out of for loop
-    for(var card = 0; card<options.length ; card++){
+    for (var card = 0; card<options.length ; card++){
         //continue out if a Jack
         if (options[card]===-1||options[card]===0) {
             continue;
         }
 
-        for(var side = 0; side<options[card].length ; side++){
+        for (var side = 0; side<options[card].length ; side++){
             var x = options[card][side][0];
             var y = options[card][side][1];
             if (possibleBoard[x][y]===10) {
@@ -115,9 +115,9 @@ function bestMove(options,value,offensive){
         }
 
         
-        for(var side = 0; side<options[card].length ; side++){
+        for (var side = 0; side<options[card].length ; side++){
             //switches from offensive to defensive
-            for(var blah = 0 ; blah<=1; blah++){
+            for (var blah = 0 ; blah<=1; blah++){
                 if (blah===0) {
                     type = typeFor;
                     multiplier = 1;
@@ -150,7 +150,7 @@ function bestMove(options,value,offensive){
             }
         }
         
-        for(var side = 0; side<options[card].length ; side++){
+        for (var side = 0; side<options[card].length ; side++){
             var x = options[card][side][0];
             var y = options[card][side][1];
             if (possibleBoard[x][y]===10) {
@@ -164,16 +164,16 @@ function bestMove(options,value,offensive){
     //return max
     var returnValues = [best];
     var max = 0;
-    for( var i = 0 ; i<worth.length ; i++ ){
-        for( var j = 0 ; j<worth[i].length ; j++ ){
+    for ( var i = 0 ; i<worth.length ; i++ ){
+        for ( var j = 0 ; j<worth[i].length ; j++ ){
             if (max<worth[i][j]) {
                 max = worth[i][j];
             }
         }
     }
     var returnValuesValues = [];
-    for( var i = 0 ; i<worth.length ; i++ ){
-        for( var j = 0 ; j<worth[i].length ; j++ ){
+    for ( var i = 0 ; i<worth.length ; i++ ){
+        for ( var j = 0 ; j<worth[i].length ; j++ ){
             if (max===worth[i][j]) {
                 returnValuesValues.push([i,j]);
             }
@@ -184,7 +184,7 @@ function bestMove(options,value,offensive){
     
 }
 
-function checkCard(x,y,dirX,dirY,type,points){
+function checkCard(x,y,dirX,dirY,type,points) {
     var check = false;
     
     var checkOpen = true;
@@ -200,16 +200,16 @@ function checkCard(x,y,dirX,dirY,type,points){
     
     var inhand = 0;
     
-    for(var i = 1 ; i < 5 ; i++) { 
+    for (var i = 1 ; i < 5 ; i++) { 
         tnpX = x - dirX * i;
         tnpY = y - dirY * i;
         if (tnpX!==-1 && tnpY!==-1 && tnpX!==10 && tnpY!==10){
-            if(points[tnpX][tnpY]===type) {
+            if (points[tnpX][tnpY]===type) {
                 cnt++;
-            } else if(points[tnpX][tnpY]===10||points[tnpX][tnpY]===11){
+            } else if (points[tnpX][tnpY]===10||points[tnpX][tnpY]===11){
                 cnt++;
                 inhand++;
-            } else if(points[tnpX][tnpY]!==0){
+            } else if (points[tnpX][tnpY]!==0){
                 checkClosed++;
             }
         } else {
@@ -217,16 +217,16 @@ function checkCard(x,y,dirX,dirY,type,points){
             break;
         }
     }
-    for(var i = 1 ; i<=removed ; i++){
+    for (var i = 1 ; i<=removed ; i++){
         tnpX = x + dirX * i;
         tnpY = y + dirY * i;
         if (tnpX!==-1 && tnpY!==-1 && tnpX!==10 && tnpY!==10){
-            if(points[tnpX][tnpY]===type) {
+            if (points[tnpX][tnpY]===type) {
                 cnt++;
-            } else if(points[tnpX][tnpY]===10||points[tnpX][tnpY]===11){
+            } else if (points[tnpX][tnpY]===10||points[tnpX][tnpY]===11){
                 cnt+=0.5;
                 inhand++;
-            } else if(points[tnpX][tnpY]!==0){
+            } else if (points[tnpX][tnpY]!==0){
                 checkClosed++;
             }
         } else {
@@ -244,7 +244,7 @@ function checkCard(x,y,dirX,dirY,type,points){
             check = true;
             worth+=Math.pow(3,cnt);
         }
-        for(var i = removed + 1 ; i<5 ; i++){
+        for (var i = removed + 1 ; i<5 ; i++){
             tnpX = x + dirX * i;
             tnpY = y + dirY * i;
             if (tnpX===-1 || tnpY===-1 || tnpX===10 || tnpY===10) {
@@ -252,7 +252,7 @@ function checkCard(x,y,dirX,dirY,type,points){
             }
             if (points[tnpX-dirX *5][tnpY-dirY *5]===type) {
                 cnt--;
-            } else if(points[tnpX-dirX *5][tnpY-dirY *5]===10||points[tnpX-dirX *5][tnpY-dirY *5]===11){
+            } else if (points[tnpX-dirX *5][tnpY-dirY *5]===10||points[tnpX-dirX *5][tnpY-dirY *5]===11){
                 cnt-=0.5;
                 inhand--;
             } else if (points[tnpX-dirX *5][tnpY-dirY *5]!==0){
@@ -260,7 +260,7 @@ function checkCard(x,y,dirX,dirY,type,points){
             }
             if (points[tnpX][tnpY]===type) {
                 cnt++;
-            } else if(points[tnpX][tnpY]===10||points[tnpX][tnpY]===11){
+            } else if (points[tnpX][tnpY]===10||points[tnpX][tnpY]===11){
                 cnt+=0.5;
                 inhand++;
             } else if (points[tnpX][tnpY]!==0){

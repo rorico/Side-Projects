@@ -54,14 +54,14 @@ function playAIphil(player,value,offensive) {
 }    
 
 //search: PhilAI
-function mostLinesPhil(options,value,offensive){
+function mostLinesPhil(options,value,offensive) {
     var typeFor = value;
     var typeAgainst = 4 - typeFor;
     var number = 0; //helps a line of four
     var worth = [];
 
     //initialize worth to be 0
-    for(var i = 0 ; i<options.length ; i++){
+    for (var i = 0 ; i<options.length ; i++){
         var worthrow = [];
 
         //if Jacks, push -1
@@ -75,12 +75,12 @@ function mostLinesPhil(options,value,offensive){
         worth.push(worthrow);
     }
 
-    for(var card = 0; card<options.length; card++){
+    for (var card = 0; card<options.length; card++){
         if (options[card]===-1||options[card]===0) {
             continue;
         }
 
-        for(var side = 0; side<options[card].length ; side++){
+        for (var side = 0; side<options[card].length ; side++){
             var row = options[card][side][0];
             var col = options[card][side][1];
             var actualSide = side;
@@ -90,7 +90,7 @@ function mostLinesPhil(options,value,offensive){
             for (var i = -4; i <= 0; i++){
 
                 var start = row + i;
-                if(start < 0 || start > 5){
+                if (start < 0 || start > 5){
                     continue;
                 }
 
@@ -101,13 +101,13 @@ function mostLinesPhil(options,value,offensive){
                 var cntOpPlayedNotInHand = 0;
                 var cntOpPlayedInHand = 0;
 
-                for(var j = 0; j <=4; j++){
+                for (var j = 0; j <=4; j++){
                     var indexRow = row + i + j;
                     var indexCol = col;
                     var breakout = true;
 
-                    for(var card2 = 0; card2<options.length && breakout; card2++){
-                        for(var side2 = 0; side2<options[card2].length && breakout; side2++){
+                    for (var card2 = 0; card2<options.length && breakout; card2++){
+                        for (var side2 = 0; side2<options[card2].length && breakout; side2++){
 
                             var row2 = options[card2][side2][0];
                             var col2 = options[card2][side2][1];
@@ -116,22 +116,22 @@ function mostLinesPhil(options,value,offensive){
                                 continue;
                             }
 
-                            if(points[indexRow][indexCol]===typeFor) {
+                            if (points[indexRow][indexCol]===typeFor) {
                                 cntFor++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===typeAgainst){
+                            } else if (points[indexRow][indexCol]===typeAgainst){
                                 cntAgainst++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
                                 cntWon++;
                                 breakout = false;
-                            } else if(points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
+                            } else if (points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
                                 //console.log("OP1: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedInHand = cntOpPlayedInHand + 0.75;
-                            } else if(points[9-indexRow][9-indexCol] > 0){
+                            } else if (points[9-indexRow][9-indexCol] > 0){
                                 //console.log("OP2: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedNotInHand++;
-                            } else if(indexRow == row2 && indexCol == col2){
+                            } else if (indexRow == row2 && indexCol == col2){
                                 //console.log("OP3: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpNotPlayedInHand = cntOpNotPlayedInHand + 0.4;
                             }
@@ -139,7 +139,7 @@ function mostLinesPhil(options,value,offensive){
                     }
                 }
 
-                if(cntFor === 4 || cntAgainst === 4){
+                if (cntFor === 4 || cntAgainst === 4){
                     if (number === 0){
                         number = 4;
                     }
@@ -147,12 +147,12 @@ function mostLinesPhil(options,value,offensive){
 
                 //console.log("cntFor: " + cntFor + " cntONPIH: " + cntOpNotPlayedInHand + " cntOPIH: " + cntOpPlayedInHand)
                 cntFor = round(cntFor + cntOpNotPlayedInHand + cntOpPlayedInHand,0);
-                if(cntWon > 0){
+                if (cntWon > 0){
 
-                } else if(cntFor > 0 && cntAgainst > 0){
+                } else if (cntFor > 0 && cntAgainst > 0){
 
                 } else if (cntFor > 0){
-                    worth[card][actualSide] += valueFor(cntFor);
+                    worth[card][actualSide] += valuefor (cntFor);
                 } else if (cntAgainst > 0){
                     worth[card][actualSide] += valueAgainst(cntAgainst);
                 }
@@ -164,7 +164,7 @@ function mostLinesPhil(options,value,offensive){
             for (var i = -4; i <= 0; i++){
 
                 var start = col + i;
-                if(start < 0 || start > 5){
+                if (start < 0 || start > 5){
                     continue;
                 }
 
@@ -175,13 +175,13 @@ function mostLinesPhil(options,value,offensive){
                 var cntOpPlayedNotInHand = 0;
                 var cntOpPlayedInHand = 0;
 
-                for(var j = 0; j <=4; j++){
+                for (var j = 0; j <=4; j++){
                     var indexRow = row;
                     var indexCol = col + i + j;
                     var breakout = true;
 
-                    for(var card2 = 0; card2<options.length && breakout; card2++){
-                        for(var side2 = 0; side2<options[card2].length && breakout; side2++){
+                    for (var card2 = 0; card2<options.length && breakout; card2++){
+                        for (var side2 = 0; side2<options[card2].length && breakout; side2++){
 
                             var row2 = options[card2][side2][0];
                             var col2 = options[card2][side2][1];
@@ -190,22 +190,22 @@ function mostLinesPhil(options,value,offensive){
                                 continue;
                             }
 
-                            if(points[indexRow][indexCol]===typeFor) {
+                            if (points[indexRow][indexCol]===typeFor) {
                                 cntFor++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===typeAgainst){
+                            } else if (points[indexRow][indexCol]===typeAgainst){
                                 cntAgainst++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
                                 cntWon++;
                                 breakout = false;
-                            } else if(points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
+                            } else if (points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
                                 //console.log("OP1: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedInHand = cntOpPlayedInHand + 0.75;
-                            } else if(points[9-indexRow][9-indexCol] > 0){
+                            } else if (points[9-indexRow][9-indexCol] > 0){
                                 //console.log("OP2: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedNotInHand++;
-                            } else if(indexRow == row2 && indexCol == col2){
+                            } else if (indexRow == row2 && indexCol == col2){
                                 //console.log("OP3: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpNotPlayedInHand = cntOpNotPlayedInHand + 0.4;
                             }
@@ -213,7 +213,7 @@ function mostLinesPhil(options,value,offensive){
                     }
                 }
 
-                if(cntFor === 4 || cntAgainst === 4){
+                if (cntFor === 4 || cntAgainst === 4){
                     if (number === 0){
                         number = 4;
                     }
@@ -221,12 +221,12 @@ function mostLinesPhil(options,value,offensive){
 
                 //console.log("cntFor: " + cntFor + " cntONPIH: " + cntOpNotPlayedInHand + " cntOPIH: " + cntOpPlayedInHand)
                 cntFor = round(cntFor + cntOpNotPlayedInHand + cntOpPlayedInHand,0);
-                if(cntWon > 0){
+                if (cntWon > 0){
 
-                } else if(cntFor > 0 && cntAgainst > 0){
+                } else if (cntFor > 0 && cntAgainst > 0){
 
                 } else if (cntFor > 0){
-                    worth[card][actualSide] += valueFor(cntFor);
+                    worth[card][actualSide] += valuefor (cntFor);
                 } else if (cntAgainst > 0){
                     worth[card][actualSide] += valueAgainst(cntAgainst);
                 }
@@ -238,7 +238,7 @@ function mostLinesPhil(options,value,offensive){
             // for (var i = -4; i <= 0; i++){
 
             //     var start = col + i;
-            //     if(start < 0 || start > 5){
+            //     if (start < 0 || start > 5){
             //         continue;
             //     }
 
@@ -248,23 +248,23 @@ function mostLinesPhil(options,value,offensive){
             //     var cntOpPlayed = 0;
             //     var cntForInHand = 0;
 
-            //     for(var j = 0; j <=4; j++){
+            //     for (var j = 0; j <=4; j++){
 
             //         var indexRow = row;
             //         var indexCol = col + i + j;
                     
-            //         if(points[indexRow][indexCol]===typeFor) {
+            //         if (points[indexRow][indexCol]===typeFor) {
             //             cntFor++;
-            //         } else if(points[indexRow][indexCol]===typeAgainst){
+            //         } else if (points[indexRow][indexCol]===typeAgainst){
             //             cntAgainst++;
-            //         } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+            //         } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
             //             cntWon++;
-            //         } else if(points[9-indexRow][9-indexCol] > 0){
+            //         } else if (points[9-indexRow][9-indexCol] > 0){
             //             cntOpPlayed++;
             //         }
 
-            //         // for(var card2 = 0; card2<options.length; card2++){
-            //         //     for(var side2 = 0; side2<options[card2].length ; side2++){
+            //         // for (var card2 = 0; card2<options.length; card2++){
+            //         //     for (var side2 = 0; side2<options[card2].length ; side2++){
             //         //         var row2 = options[card2][side2][0];
             //         //         var col2 = options[card2][side2][1];
             //         //         if (indexRow == row2 && indexCol == col2){
@@ -275,19 +275,19 @@ function mostLinesPhil(options,value,offensive){
 
             //     }
 
-            //     if(cntFor === 4 || cntAgainst === 4){
+            //     if (cntFor === 4 || cntAgainst === 4){
             //         if (number === 0){
             //             number = 4;
             //         }
             //     }
 
             //     //cntFor = cntFor + cntForInHand;
-            //     if(cntWon > 0){
+            //     if (cntWon > 0){
 
-            //     } else if(cntFor > 0 && cntAgainst > 0){
+            //     } else if (cntFor > 0 && cntAgainst > 0){
 
             //     } else if (cntFor > 0){
-            //         worth[card][actualSide] += valueFor(cntFor);
+            //         worth[card][actualSide] += valuefor (cntFor);
             //         //console.log("HF: card: " + card + " side: " + side  + " actualSide: " + actualSide + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " options " + options[card][side] + " worth " + worth[card][actualSide]);
             //     } else if (cntAgainst > 0){
             //         worth[card][actualSide] += valueAgainst(cntAgainst);
@@ -304,7 +304,7 @@ function mostLinesPhil(options,value,offensive){
 
                 var startRow = row + i;
                 var startCol = col + i;
-                if(startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
+                if (startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
                     continue;
                 }
 
@@ -315,13 +315,13 @@ function mostLinesPhil(options,value,offensive){
                 var cntOpPlayedNotInHand = 0;
                 var cntOpPlayedInHand = 0;
 
-                for(var j = 0; j <=4; j++){
+                for (var j = 0; j <=4; j++){
                     var indexRow = row + i + j;
                     var indexCol = col + i + j;
                     var breakout = true;
 
-                    for(var card2 = 0; card2<options.length && breakout; card2++){
-                        for(var side2 = 0; side2<options[card2].length && breakout; side2++){
+                    for (var card2 = 0; card2<options.length && breakout; card2++){
+                        for (var side2 = 0; side2<options[card2].length && breakout; side2++){
 
                             var row2 = options[card2][side2][0];
                             var col2 = options[card2][side2][1];
@@ -330,22 +330,22 @@ function mostLinesPhil(options,value,offensive){
                                 continue;
                             }
 
-                            if(points[indexRow][indexCol]===typeFor) {
+                            if (points[indexRow][indexCol]===typeFor) {
                                 cntFor++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===typeAgainst){
+                            } else if (points[indexRow][indexCol]===typeAgainst){
                                 cntAgainst++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
                                 cntWon++;
                                 breakout = false;
-                            } else if(points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
+                            } else if (points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
                                 //console.log("OP1: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedInHand = cntOpPlayedInHand + 0.75;
-                            } else if(points[9-indexRow][9-indexCol] > 0){
+                            } else if (points[9-indexRow][9-indexCol] > 0){
                                 //console.log("OP2: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedNotInHand++;
-                            } else if(indexRow == row2 && indexCol == col2){
+                            } else if (indexRow == row2 && indexCol == col2){
                                 //console.log("OP3: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpNotPlayedInHand = cntOpNotPlayedInHand + 0.4;
                             }
@@ -353,7 +353,7 @@ function mostLinesPhil(options,value,offensive){
                     }
                 }
 
-                if(cntFor === 4 || cntAgainst === 4){
+                if (cntFor === 4 || cntAgainst === 4){
                     if (number === 0){
                         number = 4;
                     }
@@ -361,12 +361,12 @@ function mostLinesPhil(options,value,offensive){
 
                 //console.log("cntFor: " + cntFor + " cntONPIH: " + cntOpNotPlayedInHand + " cntOPIH: " + cntOpPlayedInHand)
                 cntFor = round(cntFor + cntOpNotPlayedInHand + cntOpPlayedInHand,0);
-                if(cntWon > 0){
+                if (cntWon > 0){
 
-                } else if(cntFor > 0 && cntAgainst > 0){
+                } else if (cntFor > 0 && cntAgainst > 0){
 
                 } else if (cntFor > 0){
-                    worth[card][actualSide] += valueFor(cntFor);
+                    worth[card][actualSide] += valuefor (cntFor);
                 } else if (cntAgainst > 0){
                     worth[card][actualSide] += valueAgainst(cntAgainst);
                 }
@@ -379,7 +379,7 @@ function mostLinesPhil(options,value,offensive){
 
             //     var startRow = row + i;
             //     var startCol = col + i;
-            //     if(startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
+            //     if (startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
             //         continue;
             //     }
 
@@ -389,23 +389,23 @@ function mostLinesPhil(options,value,offensive){
             //     var cntOpPlayed = 0;
             //     var cntForInHand = 0;
 
-            //     for(var j = 0; j <=4; j++){
+            //     for (var j = 0; j <=4; j++){
 
             //         var indexRow = row + i + j;
             //         var indexCol = col + i + j;
                     
-            //         if(points[indexRow][indexCol]===typeFor) {
+            //         if (points[indexRow][indexCol]===typeFor) {
             //             cntFor++;
-            //         } else if(points[indexRow][indexCol]===typeAgainst){
+            //         } else if (points[indexRow][indexCol]===typeAgainst){
             //             cntAgainst++;
-            //         } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+            //         } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
             //             cntWon++;
-            //         } else if(points[9-indexRow][9-indexCol] > 0){
+            //         } else if (points[9-indexRow][9-indexCol] > 0){
             //             cntOpPlayed++;
             //         }
 
-            //         // for(var card2 = 0; card2<options.length; card2++){
-            //         //     for(var side2 = 0; side2<options[card2].length ; side2++){
+            //         // for (var card2 = 0; card2<options.length; card2++){
+            //         //     for (var side2 = 0; side2<options[card2].length ; side2++){
             //         //         var row2 = options[card2][side2][0];
             //         //         var col2 = options[card2][side2][1];
             //         //         if (indexRow == row2 && indexCol == col2){
@@ -414,19 +414,19 @@ function mostLinesPhil(options,value,offensive){
             //         //     }
             //         // }
             //     }
-            //     if(cntFor === 4 || cntAgainst === 4){
+            //     if (cntFor === 4 || cntAgainst === 4){
             //         if (number === 0){
             //             number = 4;
             //         }
             //     }
 
             //     //cntFor = cntFor + cntForInHand;
-            //     if(cntWon > 0){
+            //     if (cntWon > 0){
 
-            //     } else if(cntFor > 0 && cntAgainst > 0){
+            //     } else if (cntFor > 0 && cntAgainst > 0){
 
             //     } else if (cntFor > 0){
-            //         worth[card][actualSide] += valueFor(cntFor);
+            //         worth[card][actualSide] += valuefor (cntFor);
             //         //console.log("DF: card: " + card + " side: " + side  + " actualSide: " + actualSide + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " options " + options[card][side] + " worth " + worth[card][actualSide]);
             //     } else if (cntAgainst > 0){
             //         worth[card][actualSide] += valueAgainst(cntAgainst);
@@ -442,7 +442,7 @@ function mostLinesPhil(options,value,offensive){
 
                 var startRow = row - i;
                 var startCol = col + i;
-                if(startRow < 4 || startRow > 9 || startCol < 0 || startCol > 5){
+                if (startRow < 4 || startRow > 9 || startCol < 0 || startCol > 5){
                     continue;
                 }
 
@@ -453,13 +453,13 @@ function mostLinesPhil(options,value,offensive){
                 var cntOpPlayedNotInHand = 0;
                 var cntOpPlayedInHand = 0;
 
-                for(var j = 0; j <=4; j++){
+                for (var j = 0; j <=4; j++){
                     var indexRow = row - i - j;
                     var indexCol = col + i + j;
                     var breakout = true;
 
-                    for(var card2 = 0; card2<options.length && breakout; card2++){
-                        for(var side2 = 0; side2<options[card2].length && breakout; side2++){
+                    for (var card2 = 0; card2<options.length && breakout; card2++){
+                        for (var side2 = 0; side2<options[card2].length && breakout; side2++){
 
                             var row2 = options[card2][side2][0];
                             var col2 = options[card2][side2][1];
@@ -468,20 +468,20 @@ function mostLinesPhil(options,value,offensive){
                                 continue;
                             }
 
-                            if(points[indexRow][indexCol]===typeFor) {
+                            if (points[indexRow][indexCol]===typeFor) {
                                 cntFor++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===typeAgainst){
+                            } else if (points[indexRow][indexCol]===typeAgainst){
                                 cntAgainst++;
-                            } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
                                 cntWon++;
-                            } else if(points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
+                            } else if (points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
                                 //console.log("OP1: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedInHand = cntOpPlayedInHand + 0.75;
-                            } else if(points[9-indexRow][9-indexCol] > 0){
+                            } else if (points[9-indexRow][9-indexCol] > 0){
                                 //console.log("OP2: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedNotInHand++;
-                            } else if(indexRow == row2 && indexCol == col2){
+                            } else if (indexRow == row2 && indexCol == col2){
                                 //console.log("OP3: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpNotPlayedInHand = cntOpNotPlayedInHand + 0.4;
                             }
@@ -489,7 +489,7 @@ function mostLinesPhil(options,value,offensive){
                     }
                 }
 
-                if(cntFor === 4 || cntAgainst === 4){
+                if (cntFor === 4 || cntAgainst === 4){
                     if (number === 0){
                         number = 4;
                     }
@@ -497,12 +497,12 @@ function mostLinesPhil(options,value,offensive){
 
                 //console.log("cntFor: " + cntFor + " cntONPIH: " + cntOpNotPlayedInHand + " cntOPIH: " + cntOpPlayedInHand)
                 cntFor = round(cntFor + cntOpNotPlayedInHand + cntOpPlayedInHand,0);
-                if(cntWon > 0){
+                if (cntWon > 0){
 
-                } else if(cntFor > 0 && cntAgainst > 0){
+                } else if (cntFor > 0 && cntAgainst > 0){
 
                 } else if (cntFor > 0){
-                    worth[card][actualSide] += valueFor(cntFor);
+                    worth[card][actualSide] += valuefor (cntFor);
                 } else if (cntAgainst > 0){
                     worth[card][actualSide] += valueAgainst(cntAgainst);
                 }
@@ -515,10 +515,10 @@ function mostLinesPhil(options,value,offensive){
     //return max
     var returnValues = [number+1];
     var max = 0;
-    for( var i = 0 ; i<worth.length ; i++ ){
-        for( var j = 0 ; j<worth[i].length ; j++ ){
+    for ( var i = 0 ; i<worth.length ; i++ ){
+        for ( var j = 0 ; j<worth[i].length ; j++ ){
             //console.log("D: card: " + i + " side: " + j + " worth" + worth[i][j]);
-            if(worth[i].length == 1){
+            if (worth[i].length == 1){
                 worth[i][j] = worth[i][j]/2;
             }    
             if (max<worth[i][j]) {
@@ -527,8 +527,8 @@ function mostLinesPhil(options,value,offensive){
         }
     }
     var returnValuesValues = [];
-    for( var i = 0 ; i<worth.length ; i++ ){
-        for( var j = 0 ; j<worth[i].length ; j++ ){
+    for ( var i = 0 ; i<worth.length ; i++ ){
+        for ( var j = 0 ; j<worth[i].length ; j++ ){
             if (max===worth[i][j]) {
                 returnValuesValues.push([i,j]);
             }
@@ -546,12 +546,12 @@ function mostLinesPhil(options,value,offensive){
     // var max = 0;
 
 
-    // for( var i = 0 ; i<worth.length ; i++ ){
+    // for ( var i = 0 ; i<worth.length ; i++ ){
     //     maxDifference[i] = 0;
     // }
 
-    // for( var i = 0 ; i<worth.length ; i++ ){
-    //     if(worth[i].length == 1){
+    // for ( var i = 0 ; i<worth.length ; i++ ){
+    //     if (worth[i].length == 1){
     //         maxDifference[i] = worth[i][0]/2;
     //         bestestSide[i] = 0;
     //     } else if (worth[i][0] <= worth[i][1])  {
@@ -570,7 +570,7 @@ function mostLinesPhil(options,value,offensive){
     //     }
     // }
     // var returnValuesValues = [];
-    // for( var i = 0 ; i<worth.length ; i++ ){
+    // for ( var i = 0 ; i<worth.length ; i++ ){
     //     if (max===maxDifference[i]) {
     //         returnValuesValues.push([i,bestestSide[i]]);
     //     }
@@ -582,14 +582,14 @@ function mostLinesPhil(options,value,offensive){
 
     
 
-function cardWorth(options,value,offensive){
+function cardWorth(options,value,offensive) {
     var typeFor = value;
     var typeAgainst = 4 - typeFor;
     var number = 0; //helps a line of four
     var worth = [];
 
     //initialize worth to be 0
-    for(var i = 0 ; i<options.length ; i++){
+    for (var i = 0 ; i<options.length ; i++){
         var worthrow = [];
 
         //if Jacks, push -1
@@ -603,21 +603,21 @@ function cardWorth(options,value,offensive){
         worth.push(worthrow);
     }
 
-    for(var card = 0; card<options.length; card++){
+    for (var card = 0; card<options.length; card++){
         if (options[card]===-1||options[card]===0) {
             continue;
         }
 
-        for(var side = 0; side<options[card].length ; side++){
+        for (var side = 0; side<options[card].length ; side++){
             var row = options[card][side][0];
             var col = options[card][side][1];
             var actualSide = 0;
             
-            if(row >= 5){
+            if (row >= 5){
                 actualSide = 1; 
             }
 
-            if(row == 9 && col == 0){
+            if (row == 9 && col == 0){
                 actualSide = 2; 
             } else if (row == 9 && col == 9){
                 actualSide = 3; 
@@ -632,7 +632,7 @@ function cardWorth(options,value,offensive){
             for (var i = -4; i <= 0; i++){
 
                 var start = row + i;
-                if(start < 0 || start > 5){
+                if (start < 0 || start > 5){
                     continue;
                 }
 
@@ -643,13 +643,13 @@ function cardWorth(options,value,offensive){
                 var cntOpPlayedNotInHand = 0;
                 var cntOpPlayedInHand = 0;
 
-                for(var j = 0; j <=4; j++){
+                for (var j = 0; j <=4; j++){
                     var indexRow = row + i + j;
                     var indexCol = col;
                     var breakout = true;
 
-                    for(var card2 = 0; card2<options.length && breakout; card2++){
-                        for(var side2 = 0; side2<options[card2].length && breakout; side2++){
+                    for (var card2 = 0; card2<options.length && breakout; card2++){
+                        for (var side2 = 0; side2<options[card2].length && breakout; side2++){
 
                             var row2 = options[card2][side2][0];
                             var col2 = options[card2][side2][1];
@@ -658,22 +658,22 @@ function cardWorth(options,value,offensive){
                                 continue;
                             }
 
-                            if(points[indexRow][indexCol]===typeFor) {
+                            if (points[indexRow][indexCol]===typeFor) {
                                 cntFor++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===typeAgainst){
+                            } else if (points[indexRow][indexCol]===typeAgainst){
                                 cntAgainst++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
                                 cntWon++;
                                 breakout = false;
-                            } else if(points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
+                            } else if (points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
                                 //console.log("OP1: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedInHand = cntOpPlayedInHand + 0.75;
-                            } else if(points[9-indexRow][9-indexCol] > 0){
+                            } else if (points[9-indexRow][9-indexCol] > 0){
                                 //console.log("OP2: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedNotInHand++;
-                            } else if(indexRow == row2 && indexCol == col2){
+                            } else if (indexRow == row2 && indexCol == col2){
                                 //console.log("OP3: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpNotPlayedInHand = cntOpNotPlayedInHand + 0.4;
                             }
@@ -681,7 +681,7 @@ function cardWorth(options,value,offensive){
                     }
                 }
 
-                if(cntFor === 4 || cntAgainst === 4){
+                if (cntFor === 4 || cntAgainst === 4){
                     if (number === 0){
                         number = 4;
                     }
@@ -689,12 +689,12 @@ function cardWorth(options,value,offensive){
 
                 //console.log("cntFor: " + cntFor + " cntONPIH: " + cntOpNotPlayedInHand + " cntOPIH: " + cntOpPlayedInHand)
                 cntFor = round(cntFor + cntOpNotPlayedInHand + cntOpPlayedInHand,0);
-                if(cntWon > 0){
+                if (cntWon > 0){
 
-                } else if(cntFor > 0 && cntAgainst > 0){
+                } else if (cntFor > 0 && cntAgainst > 0){
 
                 } else if (cntFor > 0){
-                    worth[card][actualSide] += valueFor(cntFor);
+                    worth[card][actualSide] += valuefor (cntFor);
                 } else if (cntAgainst > 0){
                     worth[card][actualSide] += valueAgainst(cntAgainst);
                 }
@@ -706,7 +706,7 @@ function cardWorth(options,value,offensive){
             for (var i = -4; i <= 0; i++){
 
                 var start = col + i;
-                if(start < 0 || start > 5){
+                if (start < 0 || start > 5){
                     continue;
                 }
 
@@ -717,13 +717,13 @@ function cardWorth(options,value,offensive){
                 var cntOpPlayedNotInHand = 0;
                 var cntOpPlayedInHand = 0;
 
-                for(var j = 0; j <=4; j++){
+                for (var j = 0; j <=4; j++){
                     var indexRow = row;
                     var indexCol = col + i + j;
                     var breakout = true;
 
-                    for(var card2 = 0; card2<options.length && breakout; card2++){
-                        for(var side2 = 0; side2<options[card2].length && breakout; side2++){
+                    for (var card2 = 0; card2<options.length && breakout; card2++){
+                        for (var side2 = 0; side2<options[card2].length && breakout; side2++){
 
                             var row2 = options[card2][side2][0];
                             var col2 = options[card2][side2][1];
@@ -732,22 +732,22 @@ function cardWorth(options,value,offensive){
                                 continue;
                             }
 
-                            if(points[indexRow][indexCol]===typeFor) {
+                            if (points[indexRow][indexCol]===typeFor) {
                                 cntFor++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===typeAgainst){
+                            } else if (points[indexRow][indexCol]===typeAgainst){
                                 cntAgainst++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
                                 cntWon++;
                                 breakout = false;
-                            } else if(points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
+                            } else if (points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
                                 //console.log("OP1: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedInHand = cntOpPlayedInHand + 0.75;
-                            } else if(points[9-indexRow][9-indexCol] > 0){
+                            } else if (points[9-indexRow][9-indexCol] > 0){
                                 //console.log("OP2: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedNotInHand++;
-                            } else if(indexRow == row2 && indexCol == col2){
+                            } else if (indexRow == row2 && indexCol == col2){
                                 //console.log("OP3: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpNotPlayedInHand = cntOpNotPlayedInHand + 0.4;
                             }
@@ -755,7 +755,7 @@ function cardWorth(options,value,offensive){
                     }
                 }
 
-                if(cntFor === 4 || cntAgainst === 4){
+                if (cntFor === 4 || cntAgainst === 4){
                     if (number === 0){
                         number = 4;
                     }
@@ -763,12 +763,12 @@ function cardWorth(options,value,offensive){
 
                 //console.log("cntFor: " + cntFor + " cntONPIH: " + cntOpNotPlayedInHand + " cntOPIH: " + cntOpPlayedInHand)
                 cntFor = round(cntFor + cntOpNotPlayedInHand + cntOpPlayedInHand,0);
-                if(cntWon > 0){
+                if (cntWon > 0){
 
-                } else if(cntFor > 0 && cntAgainst > 0){
+                } else if (cntFor > 0 && cntAgainst > 0){
 
                 } else if (cntFor > 0){
-                    worth[card][actualSide] += valueFor(cntFor);
+                    worth[card][actualSide] += valuefor (cntFor);
                 } else if (cntAgainst > 0){
                     worth[card][actualSide] += valueAgainst(cntAgainst);
                 }
@@ -780,7 +780,7 @@ function cardWorth(options,value,offensive){
             // for (var i = -4; i <= 0; i++){
 
             //     var start = col + i;
-            //     if(start < 0 || start > 5){
+            //     if (start < 0 || start > 5){
             //         continue;
             //     }
 
@@ -790,23 +790,23 @@ function cardWorth(options,value,offensive){
             //     var cntOpPlayed = 0;
             //     var cntForInHand = 0;
 
-            //     for(var j = 0; j <=4; j++){
+            //     for (var j = 0; j <=4; j++){
 
             //         var indexRow = row;
             //         var indexCol = col + i + j;
                     
-            //         if(points[indexRow][indexCol]===typeFor) {
+            //         if (points[indexRow][indexCol]===typeFor) {
             //             cntFor++;
-            //         } else if(points[indexRow][indexCol]===typeAgainst){
+            //         } else if (points[indexRow][indexCol]===typeAgainst){
             //             cntAgainst++;
-            //         } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+            //         } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
             //             cntWon++;
-            //         } else if(points[9-indexRow][9-indexCol] > 0){
+            //         } else if (points[9-indexRow][9-indexCol] > 0){
             //             cntOpPlayed++;
             //         }
 
-            //         // for(var card2 = 0; card2<options.length; card2++){
-            //         //     for(var side2 = 0; side2<options[card2].length ; side2++){
+            //         // for (var card2 = 0; card2<options.length; card2++){
+            //         //     for (var side2 = 0; side2<options[card2].length ; side2++){
             //         //         var row2 = options[card2][side2][0];
             //         //         var col2 = options[card2][side2][1];
             //         //         if (indexRow == row2 && indexCol == col2){
@@ -817,19 +817,19 @@ function cardWorth(options,value,offensive){
 
             //     }
 
-            //     if(cntFor === 4 || cntAgainst === 4){
+            //     if (cntFor === 4 || cntAgainst === 4){
             //         if (number === 0){
             //             number = 4;
             //         }
             //     }
 
             //     //cntFor = cntFor + cntForInHand;
-            //     if(cntWon > 0){
+            //     if (cntWon > 0){
 
-            //     } else if(cntFor > 0 && cntAgainst > 0){
+            //     } else if (cntFor > 0 && cntAgainst > 0){
 
             //     } else if (cntFor > 0){
-            //         worth[card][actualSide] += valueFor(cntFor);
+            //         worth[card][actualSide] += valuefor (cntFor);
             //         //console.log("HF: card: " + card + " side: " + side  + " actualSide: " + actualSide + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " options " + options[card][side] + " worth " + worth[card][actualSide]);
             //     } else if (cntAgainst > 0){
             //         worth[card][actualSide] += valueAgainst(cntAgainst);
@@ -846,7 +846,7 @@ function cardWorth(options,value,offensive){
 
                 var startRow = row + i;
                 var startCol = col + i;
-                if(startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
+                if (startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
                     continue;
                 }
 
@@ -857,13 +857,13 @@ function cardWorth(options,value,offensive){
                 var cntOpPlayedNotInHand = 0;
                 var cntOpPlayedInHand = 0;
 
-                for(var j = 0; j <=4; j++){
+                for (var j = 0; j <=4; j++){
                     var indexRow = row + i + j;
                     var indexCol = col + i + j;
                     var breakout = true;
 
-                    for(var card2 = 0; card2<options.length && breakout; card2++){
-                        for(var side2 = 0; side2<options[card2].length && breakout; side2++){
+                    for (var card2 = 0; card2<options.length && breakout; card2++){
+                        for (var side2 = 0; side2<options[card2].length && breakout; side2++){
 
                             var row2 = options[card2][side2][0];
                             var col2 = options[card2][side2][1];
@@ -872,22 +872,22 @@ function cardWorth(options,value,offensive){
                                 continue;
                             }
 
-                            if(points[indexRow][indexCol]===typeFor) {
+                            if (points[indexRow][indexCol]===typeFor) {
                                 cntFor++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===typeAgainst){
+                            } else if (points[indexRow][indexCol]===typeAgainst){
                                 cntAgainst++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
                                 cntWon++;
                                 breakout = false;
-                            } else if(points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
+                            } else if (points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
                                 //console.log("OP1: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedInHand = cntOpPlayedInHand + 0.75;
-                            } else if(points[9-indexRow][9-indexCol] > 0){
+                            } else if (points[9-indexRow][9-indexCol] > 0){
                                 //console.log("OP2: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedNotInHand++;
-                            } else if(indexRow == row2 && indexCol == col2){
+                            } else if (indexRow == row2 && indexCol == col2){
                                 //console.log("OP3: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpNotPlayedInHand = cntOpNotPlayedInHand + 0.4;
                             }
@@ -895,7 +895,7 @@ function cardWorth(options,value,offensive){
                     }
                 }
 
-                if(cntFor === 4 || cntAgainst === 4){
+                if (cntFor === 4 || cntAgainst === 4){
                     if (number === 0){
                         number = 4;
                     }
@@ -903,12 +903,12 @@ function cardWorth(options,value,offensive){
 
                 //console.log("cntFor: " + cntFor + " cntONPIH: " + cntOpNotPlayedInHand + " cntOPIH: " + cntOpPlayedInHand)
                 cntFor = round(cntFor + cntOpNotPlayedInHand + cntOpPlayedInHand,0);
-                if(cntWon > 0){
+                if (cntWon > 0){
 
-                } else if(cntFor > 0 && cntAgainst > 0){
+                } else if (cntFor > 0 && cntAgainst > 0){
 
                 } else if (cntFor > 0){
-                    worth[card][actualSide] += valueFor(cntFor);
+                    worth[card][actualSide] += valuefor (cntFor);
                 } else if (cntAgainst > 0){
                     worth[card][actualSide] += valueAgainst(cntAgainst);
                 }
@@ -921,7 +921,7 @@ function cardWorth(options,value,offensive){
 
             //     var startRow = row + i;
             //     var startCol = col + i;
-            //     if(startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
+            //     if (startRow < 0 || startRow > 5 || startCol < 0 || startCol > 5){
             //         continue;
             //     }
 
@@ -931,23 +931,23 @@ function cardWorth(options,value,offensive){
             //     var cntOpPlayed = 0;
             //     var cntForInHand = 0;
 
-            //     for(var j = 0; j <=4; j++){
+            //     for (var j = 0; j <=4; j++){
 
             //         var indexRow = row + i + j;
             //         var indexCol = col + i + j;
                     
-            //         if(points[indexRow][indexCol]===typeFor) {
+            //         if (points[indexRow][indexCol]===typeFor) {
             //             cntFor++;
-            //         } else if(points[indexRow][indexCol]===typeAgainst){
+            //         } else if (points[indexRow][indexCol]===typeAgainst){
             //             cntAgainst++;
-            //         } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+            //         } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
             //             cntWon++;
-            //         } else if(points[9-indexRow][9-indexCol] > 0){
+            //         } else if (points[9-indexRow][9-indexCol] > 0){
             //             cntOpPlayed++;
             //         }
 
-            //         // for(var card2 = 0; card2<options.length; card2++){
-            //         //     for(var side2 = 0; side2<options[card2].length ; side2++){
+            //         // for (var card2 = 0; card2<options.length; card2++){
+            //         //     for (var side2 = 0; side2<options[card2].length ; side2++){
             //         //         var row2 = options[card2][side2][0];
             //         //         var col2 = options[card2][side2][1];
             //         //         if (indexRow == row2 && indexCol == col2){
@@ -956,19 +956,19 @@ function cardWorth(options,value,offensive){
             //         //     }
             //         // }
             //     }
-            //     if(cntFor === 4 || cntAgainst === 4){
+            //     if (cntFor === 4 || cntAgainst === 4){
             //         if (number === 0){
             //             number = 4;
             //         }
             //     }
 
             //     //cntFor = cntFor + cntForInHand;
-            //     if(cntWon > 0){
+            //     if (cntWon > 0){
 
-            //     } else if(cntFor > 0 && cntAgainst > 0){
+            //     } else if (cntFor > 0 && cntAgainst > 0){
 
             //     } else if (cntFor > 0){
-            //         worth[card][actualSide] += valueFor(cntFor);
+            //         worth[card][actualSide] += valuefor (cntFor);
             //         //console.log("DF: card: " + card + " side: " + side  + " actualSide: " + actualSide + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " options " + options[card][side] + " worth " + worth[card][actualSide]);
             //     } else if (cntAgainst > 0){
             //         worth[card][actualSide] += valueAgainst(cntAgainst);
@@ -984,7 +984,7 @@ function cardWorth(options,value,offensive){
 
                 var startRow = row - i;
                 var startCol = col + i;
-                if(startRow < 4 || startRow > 9 || startCol < 0 || startCol > 5){
+                if (startRow < 4 || startRow > 9 || startCol < 0 || startCol > 5){
                     continue;
                 }
 
@@ -995,13 +995,13 @@ function cardWorth(options,value,offensive){
                 var cntOpPlayedNotInHand = 0;
                 var cntOpPlayedInHand = 0;
 
-                for(var j = 0; j <=4; j++){
+                for (var j = 0; j <=4; j++){
                     var indexRow = row - i - j;
                     var indexCol = col + i + j;
                     var breakout = true;
 
-                    for(var card2 = 0; card2<options.length && breakout; card2++){
-                        for(var side2 = 0; side2<options[card2].length && breakout; side2++){
+                    for (var card2 = 0; card2<options.length && breakout; card2++){
+                        for (var side2 = 0; side2<options[card2].length && breakout; side2++){
 
                             var row2 = options[card2][side2][0];
                             var col2 = options[card2][side2][1];
@@ -1010,22 +1010,22 @@ function cardWorth(options,value,offensive){
                                 continue;
                             }
 
-                            if(points[indexRow][indexCol]===typeFor) {
+                            if (points[indexRow][indexCol]===typeFor) {
                                 cntFor++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===typeAgainst){
+                            } else if (points[indexRow][indexCol]===typeAgainst){
                                 cntAgainst++;
                                 breakout = false;
-                            } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+                            } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
                                 cntWon++;
                                 breakout = false;
-                            } else if(points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
+                            } else if (points[9-indexRow][9-indexCol] > 0 && indexRow == row2 && indexCol == col2){
                                 //console.log("OP1: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedInHand = cntOpPlayedInHand + 0.75;
-                            } else if(points[9-indexRow][9-indexCol] > 0){
+                            } else if (points[9-indexRow][9-indexCol] > 0){
                                 //console.log("OP2: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpPlayedNotInHand++;
-                            } else if(indexRow == row2 && indexCol == col2){
+                            } else if (indexRow == row2 && indexCol == col2){
                                 //console.log("OP3: " + card + card2 + indexRow + row2 + indexCol + col2)
                                 cntOpNotPlayedInHand = cntOpNotPlayedInHand + 0.4;
                             }
@@ -1033,7 +1033,7 @@ function cardWorth(options,value,offensive){
                     }
                 }
 
-                if(cntFor === 4 || cntAgainst === 4){
+                if (cntFor === 4 || cntAgainst === 4){
                     if (number === 0){
                         number = 4;
                     }
@@ -1041,12 +1041,12 @@ function cardWorth(options,value,offensive){
 
                 //console.log("cntFor: " + cntFor + " cntONPIH: " + cntOpNotPlayedInHand + " cntOPIH: " + cntOpPlayedInHand)
                 cntFor = round(cntFor + cntOpNotPlayedInHand + cntOpPlayedInHand,0);
-                if(cntWon > 0){
+                if (cntWon > 0){
 
-                } else if(cntFor > 0 && cntAgainst > 0){
+                } else if (cntFor > 0 && cntAgainst > 0){
 
                 } else if (cntFor > 0){
-                    worth[card][actualSide] += valueFor(cntFor);
+                    worth[card][actualSide] += valuefor (cntFor);
                 } else if (cntAgainst > 0){
                     worth[card][actualSide] += valueAgainst(cntAgainst);
                 }
@@ -1058,7 +1058,7 @@ function cardWorth(options,value,offensive){
 
             //     var startRow = row - i;
             //     var startCol = col + i;
-            //     if(startRow < 4 || startRow > 9 || startCol < 0 || startCol > 5){
+            //     if (startRow < 4 || startRow > 9 || startCol < 0 || startCol > 5){
             //         continue;
             //     }
 
@@ -1068,23 +1068,23 @@ function cardWorth(options,value,offensive){
             //     var cntOpPlayed = 0;
             //     var cntForInHand = 0;
 
-            //     for(var j = 0; j <=4; j++){
+            //     for (var j = 0; j <=4; j++){
 
             //         var indexRow = row - i - j;
             //         var indexCol = col + i + j;
                     
-            //         if(points[indexRow][indexCol]===typeFor) {
+            //         if (points[indexRow][indexCol]===typeFor) {
             //             cntFor++;
-            //         } else if(points[indexRow][indexCol]===typeAgainst){
+            //         } else if (points[indexRow][indexCol]===typeAgainst){
             //             cntAgainst++;
-            //         } else if(points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
+            //         } else if (points[indexRow][indexCol]===2 ||points[indexRow][indexCol]===4){
             //             cntWon++;
-            //         } else if(points[9-indexRow][9-indexCol] > 0){
+            //         } else if (points[9-indexRow][9-indexCol] > 0){
             //             cntOpPlayed++;
             //         }
 
-            //         // for(var card2 = 0; card2<options.length; card2++){
-            //         //     for(var side2 = 0; side2<options[card2].length ; side2++){
+            //         // for (var card2 = 0; card2<options.length; card2++){
+            //         //     for (var side2 = 0; side2<options[card2].length ; side2++){
             //         //         var row2 = options[card2][side2][0];
             //         //         var col2 = options[card2][side2][1];
             //         //         if (indexRow == row2 && indexCol == col2){
@@ -1093,19 +1093,19 @@ function cardWorth(options,value,offensive){
             //         //     }
             //         // }
             //     }
-            //     if(cntFor === 4 || cntAgainst === 4){
+            //     if (cntFor === 4 || cntAgainst === 4){
             //         if (number === 0){
             //             number = 4;
             //         }
             //     }
 
             //     //cntFor = cntFor + cntForInHand;
-            //     if(cntWon > 0){
+            //     if (cntWon > 0){
 
-            //     } else if(cntFor > 0 && cntAgainst > 0){
+            //     } else if (cntFor > 0 && cntAgainst > 0){
 
             //     } else if (cntFor > 0){
-            //         worth[card][actualSide] += valueFor(cntFor);
+            //         worth[card][actualSide] += valuefor (cntFor);
             //         //console.log("DF: card: " + card + " side: " + side  + " actualSide: " + actualSide + " start " + start + " indexRow " + indexRow + " indexCol " + indexCol + " cntFor " + cntFor + " cntAgainst " + cntAgainst + " options " + options[card][side] + " worth " + worth[card][actualSide]);
             //     } else if (cntAgainst > 0){
             //         worth[card][actualSide] += valueAgainst(cntAgainst);
@@ -1130,12 +1130,12 @@ function cardWorth(options,value,offensive){
     // var max = 0;
 
 
-    // for( var i = 0 ; i<worth.length ; i++ ){
+    // for ( var i = 0 ; i<worth.length ; i++ ){
     //     maxDifference[i] = 0;
     // }
 
-    // for( var i = 0 ; i<worth.length ; i++ ){
-    //     if(worth[i].length == 1){
+    // for ( var i = 0 ; i<worth.length ; i++ ){
+    //     if (worth[i].length == 1){
     //         maxDifference[i] = worth[i][0]/2;
     //         bestestSide[i] = 0;
     //     } else if (worth[i][0] <= worth[i][1])  {
@@ -1154,7 +1154,7 @@ function cardWorth(options,value,offensive){
     //     }
     // }
     // var returnValuesValues = [];
-    // for( var i = 0 ; i<worth.length ; i++ ){
+    // for ( var i = 0 ; i<worth.length ; i++ ){
     //     if (max===maxDifference[i]) {
     //         returnValuesValues.push([i,bestestSide[i]]);
     //     }
@@ -1164,7 +1164,7 @@ function cardWorth(options,value,offensive){
     
 }
 
-function valueFor(cntFor){
+function valuefor (cntFor) {
     switch (cntFor) {
         case 1:
             return 0.03;
@@ -1179,7 +1179,7 @@ function valueFor(cntFor){
     }
 }
 
-function valueAgainst(cntFor){
+function valueAgainst(cntFor) {
     switch (cntFor) {
         case 1:
             //return 0;
@@ -1208,9 +1208,9 @@ function showCardWorth(array) {
         }
     }
     //console.log(array.length);
-    for(var i = 0 ; i<array.length ; i++) {
+    for (var i = 0 ; i<array.length ; i++) {
         
-        for(var j = 0 ; j<array[i].length ; j++) {
+        for (var j = 0 ; j<array[i].length ; j++) {
         //console.log(i + " " + j + " " + array[i][j]);
 
             $('#worth'+i+j).html(round(array[i][j],2));
