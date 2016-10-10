@@ -15,22 +15,22 @@ $(window).keydown(function(e) {
         $('#speed').val(speed);
     }
 });
-for (var i = 0 ; i<human.length ; i++) {
+for (var i = 0 ; i < human.length ; i++) {
     if (human[i]) {
         $('input[name='+(i+1)+'][value=human]').attr('checked','checked');
     } else {
         $('input[name='+(i+1)+'][value=computer]').attr('checked','checked');
     }
 }
-$('input[type=radio]').on('change',function(){
+$('input[type=radio]').on('change',function() {
     event.stopPropagation();
     if (this.value=="human") {
-        human[this.name-1]=true;
+        human[this.name-1] = true;
     } else if (this.value=="computer") {
-        human[this.name-1]=false;
+        human[this.name-1] = false;
     }
 });
-$('input[type=radio]').click(function(){
+$('input[type=radio]').click(function() {
     event.stopPropagation();
 });
 
@@ -40,11 +40,11 @@ var turnN = 0;
 var pauseable = true;
 var unpauseable = false;
 $(window).keypress(function(e) {
-    if (e.keyCode == 0 || e.keyCode == 32) { //spacebar
+    if (e.keyCode === 0 || e.keyCode === 32) { //spacebar
         pause();
     }
 });
-$(document).click(function(){
+$(document).click(function() {
     pause();
 });
 
@@ -84,21 +84,20 @@ var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 var gameEnd = false;
 var animate = true;
-var checkValid = false;
 var info = {board:board};
-$(document).ready(function(){
+$(document).ready(function() {
     createBoard();
     newGame();
     delayedStart(0,0);
 });
 
-function start(i,j) {
+function start(turn,game) {
     pauseable = true;
-    if ( i < maxCards && greenLines<2 && blueLines<2 && keepgoing && !gameEnd ){
-        gameN=j;
-        turnN=i;
-        var player = i%4;
-        var team = ((player%2)*2)+1;    //1 for players 1 and 3, 3 for 2 and 4
+    if (turn < maxCards && greenLines<2 && blueLines<2 && keepgoing && !gameEnd) {
+        gameN = game;
+        turnN = turn;
+        var player = turn % 4;
+        var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
     
         if (human[player]) {
             keepgoing = true;
@@ -108,7 +107,7 @@ function start(i,j) {
             playHuman(player,team);
             return;
         } else {
-            if (players[player].length!==0) {
+            if (players[player].length) {
                 var result = [-2,-1,[-1,-1]]; //[action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ
                 if (team === 1) {
                     result = playBlue(player);
@@ -121,9 +120,16 @@ function start(i,j) {
                 var place = result[2];
                 var x = place[0];
                 var y = place[1];
+                if (checkValid) {
+                    if (!checkValidPlay(action,players[player][card],x,y,team)) {
+                        pause();
+                        console.log("player:",player,"cards:",players[player],"team:",team,"play:",result);
+                        return;
+                    }
+                }
                 if (action === 0) {    //throw away card
-                    i--;                   //repeat turn
-                } else if (action === -1 ){
+                    turn--;                   //repeat turn
+                } else if (action === -1 ) {
                     removePoint(x,y);
                 } else if (action === 1) {
                     addPoint(x,y,team);
@@ -132,37 +138,38 @@ function start(i,j) {
                 drawCard(player,card,team);
             }
         }
-        delayedStart(i+1,j);
+        delayedStart(turn+1,game);
     } else if (!keepgoing) {       //pauses
-        gameN=j;
-        turnN=i;
+        gameN = game;
+        turnN = turn;
         unpauseable = true;
         $('#pause').css('display','block');
-    } else if (gameEnd){         //this allows for game ends shown at 0 speed
-        gameEnd=false;
+    } else if (gameEnd) {         //this allows for game ends shown at 0 speed
+        gameEnd = false;
         newGame();
-        delayedStart(0,j+1);
+        delayedStart(0,game+1);
     } else {                //end game
-        if (greenLines>=2){
+        if (greenLines >= 2){
             greenwin++;
-        } else if (blueLines>=2){
+        } else if (blueLines >= 2){
             bluewin++;
         } else {
             ties++;
         }
-        gameN=j;
-        turnN=i;
+        gameN = game;
+        turnN = turn;
+        var totalGames = game + 1;
         $('#bluewin').text(bluewin);
         $('#greenwin').text(greenwin);
         $('#ties').text(ties);
-        $('#blueP').text(((bluewin/(j+1))*100).toFixed(2)+"%");
-        $('#greenP').text(((greenwin/(j+1))*100).toFixed(2)+"%");
-        $('#tieP').text(((ties/(j+1))*100).toFixed(2)+"%");
+        $('#blueP').text(((bluewin/totalGames)*100).toFixed(2)+"%");
+        $('#greenP').text(((greenwin/totalGames)*100).toFixed(2)+"%");
+        $('#tieP').text(((ties/totalGames)*100).toFixed(2)+"%");
         
-        if (j<maxGame - 1) {        //starts at game 0
+        if (totalGames < maxGame) {        //starts at game 0
             setTimeout(function(){
-                gameEnd=true;
-                start(i,j);
+                gameEnd = true;
+                start(turn,game);
             },speed*3);
         } else {
             pauseable = false;
@@ -171,16 +178,49 @@ function start(i,j) {
     }
 }
 
-function delayedStart(i,j) {
-    if (speed==0) {
-        start(i,j);
+function delayedStart(turn,game) {
+    if (speed <= 0) {
+        start(turn,game);
     } else {
         setTimeout(function(){
-            start(i,j);
+            start(turn,game);
         },speed);
     }
 }
 
+function checkValidPlay(action,card,x,y,team) {
+    switch (action) {
+    case 0: //throw away card
+        if (card === 0 || card === -1) {
+            return false;
+        }
+        if (cardOptions(card).length) {
+            return false;
+        }
+        break;
+    case -1: //remove J
+        if (card !== -1) {
+            return false;
+        }
+        if (points[x][y] !== 4 - team) {
+            return false;
+        }
+        break;
+    case 1: //add
+        if (card !== 0) {
+            if (points[x][y] !== 0) {
+                return false;
+            }
+        }
+        break;
+    default: //shouldn't get here
+        return false;
+        break;
+    }
+    return true;
+}
+
+//remove or refactor
 function noDelay() {
     animate = false;
     for (var j = 0 ; j < maxGame ; j++) {
@@ -219,12 +259,12 @@ function noDelay() {
     }
     showWorth();
 }
+
 //array of options that player can play
 //Output [card][side][row x, col y]
 function getOptions(cards) {
     var options = [];
-    for ( var k = 0 ; k<cards.length ; k++ )
-    {
+    for ( var k = 0 ; k < cards.length ; k++) {
         var sides = [];
         var card = cards[k];
         //if jacks, just push jacks
@@ -238,6 +278,7 @@ function getOptions(cards) {
     return options;
 }
 
+//returns x,y coordinates for the card, does not work with Js
 function cardOptions(card) {
     var possible = [];
     if (card === 1) {
@@ -250,7 +291,7 @@ function cardOptions(card) {
         possible = [[x,y],[9-x,9-y]];
     }
     var sides = [];
-    for ( var i = 0 ; i<possible.length ; i++ )
+    for ( var i = 0 ; i < possible.length ; i++ )
     {
         if (points[possible[i][0]][possible[i][1]]===0) {
             sides.push([possible[i][0],possible[i][1]]);
@@ -268,7 +309,7 @@ function drawCard(player,index,value,change) {
         showPlaces(player);
     }
     cardsPlayed.push(players[player][index]);
-    if (cardsleft!==-1) {
+    if (cardsleft !== -1) {
         players[player][index] = deck[cardsleft];
         cardsleft--;
         if (animate) {
@@ -310,7 +351,7 @@ function checkDirection(x,y,dirX,dirY,value) {
         yUp += dirY;
         if (!outOfBounds(xUp,yUp) && checkUp && points[xUp][yUp]===value) {
             cnt++;
-            tnp.push([xUp,yUp])
+            tnp.push([xUp,yUp]);
         } else {
             checkUp = false;
         }
@@ -319,7 +360,7 @@ function checkDirection(x,y,dirX,dirY,value) {
         yDown -= dirY;
         if (!outOfBounds(xDown,yDown) && checkDown && points[xDown][yDown]===value) {
             cnt++;
-            tnp.push([xDown,yDown])
+            tnp.push([xDown,yDown]);
         } else {
             checkDown = false;
         }
@@ -367,7 +408,7 @@ function sort_by_number(a,b) {
     return 0;
 }
 
-//has an Add J
+//position of Add J, -1 if none
 function hasAdd(player) {
     for (var i = 0 ; i < player.length ; i++){
         if (player[i] === 0) {
@@ -377,26 +418,28 @@ function hasAdd(player) {
     return -1;
 }
 
-//has a Remove J
+//position of Remove J, -1 if none
 function hasRemove(player) {
     for (var i = 0 ; i < player.length ; i++){
-        if (player[i]===-1) {
+        if (player[i] === -1) {
             return i;
         }
     }
     return -1;
 }
+
 function hasOnlyJ(player) {
     for (var i = 0 ; i < player.length ; i++){
-        if (player[i]!==-1&&player[i]!==0) {
+        if (player[i]!==-1 && player[i]!==0) {
             return false;
         }
     }
     return true;
 }
+
 function hasOnlyRemoveJ(player) {
     for (var i = 0 ; i < player.length ; i++){
-        if (player[i]!==-1) {
+        if (player[i] !== -1) {
             return false;
         }
     }
@@ -406,7 +449,8 @@ function hasOnlyRemoveJ(player) {
 //has a useless card
 function hasUselessCard(options) {
     for (var i = 0 ; i < options.length ; i++){
-        if (options[i].length===0) {
+        //if J, length will be undefined
+        if (options[i].length === 0) {
             return i;
         }
     }
@@ -417,18 +461,15 @@ function hasUselessCard(options) {
 
 //-----------------game functions--------------//
 //creates board and deck
-function createBoard()
-{
+function createBoard() {
     //creates indexes for rows 1 - 5
     for (var row = 0 ; row < 5 ; row++) {
         var rowinfo = [];
         var pointsrow = [];
         var pointworthrow = [];
-        for ( var col = 1 ; col<=10 ; col++)
-        {
-            if (row==0) {
-                if (col==1||col==10) {
-                    
+        for (var col = 1 ; col <= 10 ; col++) {
+            if (row === 0) {
+                if (col === 1 || col === 10) {
                     rowinfo.push(1);
                     pointsrow.push(0);
                     pointworthrow.push(0);
@@ -437,9 +478,8 @@ function createBoard()
                     pointsrow.push(0);
                     pointworthrow.push(0);
                 }
-                continue;
             } else {
-                rowinfo.push(col+10*row-1);
+                rowinfo.push(10*row + col - 1);
                 pointsrow.push(0);
                 pointworthrow.push(0);
             }
@@ -450,8 +490,7 @@ function createBoard()
     }
 
     //copies a reverse of rows 1 - 5
-    for (var i = 0 ; i < 5 ; i++)
-    {
+    for (var i = 0 ; i < 5 ; i++) {
         board.push(board[4-i].slice().reverse());
         points.push(points[4-i].slice());
         pointworth.push(pointworth[4-i].slice());
@@ -459,24 +498,20 @@ function createBoard()
 
     //create board display
     var cnt = 1;
-    for (var i = 0 ; i<board.length ; i++)
-    {
+    for (var i = 0 ; i < board.length ; i++) {
         $('#board').append('<tr id =board'+i+'></tr>');
-        for (var j = 0 ; j<board[i].length ; j++)
-        {
+        for (var j = 0 ; j < board[i].length ; j++) {
             $('#board'+i).append('<td class="v'+points[i][j]+'" id="'+cnt+'">'+changeToCards(board[i][j])+'</td>');
             cnt++;
         }
     }
 
     //creates deck with 4 add Js, 4 remove Js, 4 corner pieces, and 2 of each other card
-    for (var i = 2 ; i < 50 ; i++)
-    {
+    for (var i = 2 ; i < 50 ; i++) {
         deck.push(i);
         deck.push(i);
     }
-    for (var i = 0 ; i < 4 ; i++)
-    {
+    for (var i = 0 ; i < 4 ; i++) {
         deck.push(1);
         deck.push(0);
         deck.push(-1);
@@ -487,8 +522,7 @@ function createBoard()
 //restart game
 function newGame() {
     for (var row = 0 ; row < 10 ; row++) {
-        for ( var col = 0 ; col< 10 ; col++)
-        {
+        for ( var col = 0 ; col < 10 ; col++) {
             points[row][col]=0;
         }
     }
@@ -498,27 +532,22 @@ function newGame() {
     var player2 = [];
     var player3 = [];
     var player4 = [];
-    for (var i = maxCards - handLength ; i < maxCards ; i++)
-    {
+    for (var i = maxCards - handLength ; i < maxCards ; i++) {
         player1.push(deck[i]);
     }
-    for (var i = maxCards - 2 * handLength ; i < maxCards - handLength ; i++)
-    {
+    for (var i = maxCards - 2 * handLength ; i < maxCards - handLength ; i++) {
         player2.push(deck[i]);
     }
-    for (var i = maxCards - 3 * handLength ; i < maxCards - 2 * handLength ; i++)
-    {
+    for (var i = maxCards - 3 * handLength ; i < maxCards - 2 * handLength ; i++) {
         player3.push(deck[i]);
     }
-    for (var i = maxCards - 4 * handLength ; i < maxCards - 3 * handLength ; i++)
-    {
+    for (var i = maxCards - 4 * handLength ; i < maxCards - 3 * handLength ; i++) {
         player4.push(deck[i]);
     }
-    players = [player1.slice(),player2.slice(),player3.slice(),player4.slice()];
+    players = [player1,player2,player3,player4];
     showHands();
     
-    for (var i = 1 ; i<=100 && animate; i++)
-    {
+    for (var i = 1 ; i <= 100 && animate; i++) {
         $('#'+i).removeClass();
         $('#'+i).addClass('v0');
     }
@@ -541,8 +570,7 @@ function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex ;
   
     // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-  
+    while (currentIndex) {
       // Pick a remaining element...
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex -= 1;
@@ -559,7 +587,7 @@ function shuffle(array) {
 //changes a value to 0 because of remove J
 function removePoint(x,y) {
     points[x][y] = 0;
-        var position = 10*x+y+1;
+        var position = 10*x + y + 1;
         if (animate) {
         $('#'+position).removeClass();
         $('#'+position).addClass('v0');
@@ -569,7 +597,7 @@ function removePoint(x,y) {
 //changes value to given value of card played
 function addPoint(x,y,value) {
     points[x][y] = value;
-        var position = 10*x+y+1;
+        var position = 10*x + y + 1;
         if (animate) {
         $('#'+position).removeClass('v0');
         $('#'+position).addClass('v'+value);
@@ -578,9 +606,9 @@ function addPoint(x,y,value) {
 
 //creates a line
 function finishLine(x,y,value) {
-    points[x][y] = value+1;
+    points[x][y] = value + 1;
     pointworth[x][y]++;
-        var position = 10*x+y+1;
+        var position = 10*x + y + 1;
         if (animate) {
         $('#'+position).removeClass('v'+value);
         $('#'+position).addClass('v'+(value+1));
@@ -593,8 +621,8 @@ function showHands() {
     $("#p1").empty();
     $("#p2").empty();
     $("#p3").empty();
-    for (var i = 0 ; i<players.length ; i++) {
-        for (var j = 0 ; j<players[i].length ; j++) {
+    for (var i = 0 ; i < players.length ; i++) {
+        for (var j = 0 ; j < players[i].length ; j++) {
             $("#p"+i).append("<div id='p"+i+"_"+j+"'>"+changeToCards(players[i][j])+"</div>");
         }
     }
@@ -606,7 +634,7 @@ var pastCardIndex = -1;
 var pastCard = -2;
 var pastChange = false;
 function animateHand(index,player,remove,change) {
-    if (pastPlayer!==-1){
+    if (pastPlayer !== -1) {
         if (!pastRemove) {
             if (!pastChange) {
                 $('#p'+pastPlayer+'_'+pastCardIndex).removeClass('raise');
@@ -616,7 +644,7 @@ function animateHand(index,player,remove,change) {
             $('#p'+pastPlayer+'_'+pastCardIndex).removeClass('raise');
             size = players[pastPlayer].length;
             $('#p'+pastPlayer+'_'+size).remove();
-            for ( var i = pastCardIndex ; i < size ; i++) {
+            for (var i = pastCardIndex ; i < size ; i++) {
                 $('#p'+pastPlayer+'_'+i).html(changeToCards(players[pastPlayer][i]));
             }
         }
@@ -641,12 +669,11 @@ function animateHand(index,player,remove,change) {
     pastPlayer = player;
     pastChange = change;
 }
+
 function showWorth() {
-    for (var x = 0 ; x<10; x++)
-    {
-        for (var y = 0 ; y<10; y++)
-        {
-            i=x*10+y+1;
+    for (var x = 0 ; x < 10; x++) {
+        for (var y = 0 ; y < 10; y++) {
+            var i = x*10 + y + 1;
             $('#'+i).removeClass();
             $('#'+i).addClass('v0');
             $('#'+i).text(pointworth[x][y]);
@@ -654,8 +681,9 @@ function showWorth() {
     }
     showArray(pointworth,"#values");
 }
+
 function isEqual(array1,array2) {
-    for (var i = 0 ; i<array1.length ; i++) {
+    for (var i = 0 ; i < array1.length ; i++) {
         if (Array.isArray(array1[i])) {
             if (!isEqual(array1[i],array2[i])) 
                 return false;
@@ -667,12 +695,13 @@ function isEqual(array1,array2) {
     }
     return true;
 }
+
 function showArray(data,container) {
     if (Array.isArray(data)) {
         $(container).append('[');
-        for (var i = 0 ; i<data.length ; i++) {
+        for (var i = 0 ; i < data.length ; i++) {
             showArray(data[i],container);
-            if (i!=data.length-1) {
+            if (i !== data.length-1) {
                 $(container).append(',');
             }
         }
@@ -685,9 +714,9 @@ function showArray(data,container) {
         $(container).append(data);
     }
 }
+
 function hideHands(player) {
-    for (var i = 0 ; i<players.length ; i++)
-    {
+    for (var i = 0 ; i < players.length ; i++) {
         if (i === player) {
             continue;
         }
@@ -696,6 +725,7 @@ function hideHands(player) {
         }
     }
 }
+
 //change card numbers to corresponding card in game
 function changeToCards(number) {
     switch (number) {
@@ -805,12 +835,13 @@ function changeToCards(number) {
             return "-2";
     }
 }
+
 function showPlaces(player) {
     $('.possible').removeClass('possible');
     var options = getOptions(players[player]);
-    for (var card = 0 ; card<options.length ; card++) {
-        for (var side = 0 ; side<options[card].length; side++) {
-            var position = options[card][side][0]*10+options[card][side][1]+1;
+    for (var card = 0 ; card < options.length ; card++) {
+        for (var side = 0 ; side < options[card].length ; side++) {
+            var position = options[card][side][0]*10 + options[card][side][1] + 1;
             $('#'+position).addClass('possible');
         }
     }

@@ -3,6 +3,7 @@ var maxGame = 1000;
 var speed = 00;
 var human = [false,false,false,false];
 var showMoves = false;
+var checkValid = true;
 //game play
 function playBlue(player) {
     //return playRandom(player,1);
