@@ -108,7 +108,7 @@ function start(turn,game) {
             return;
         } else {
             if (players[player].length) {
-                var result = [-2,-1,[-1,-1]]; //[action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ
+                var result = [-2,-1,[-1,-1]]; //[action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
                 if (team === 1) {
                     result = playBlue(player);
                 } else if (team === 3) {
@@ -121,19 +121,30 @@ function start(turn,game) {
                 var x = place[0];
                 var y = place[1];
                 if (checkValid) {
-                    if (!checkValidPlay(action,players[player][card],x,y,team)) {
+                    if (!checkValidPlay(action,players[player][card],x,y,team,result[3])) {
                         pause();
                         console.log("player:",player,"cards:",players[player],"team:",team,"play:",result);
                         return;
                     }
                 }
-                if (action === 0) {    //throw away card
-                    turn--;                   //repeat turn
-                } else if (action === -1 ) {
+                switch (action) {
+                case 0:
+                    turn--;
+                    break;
+                case -1:
                     removePoint(x,y);
-                } else if (action === 1) {
+                    break;
+                case 1:
                     addPoint(x,y,team);
                     checker(x,y);
+                    break;
+                case 2:
+                    addPoint(x,y,team);
+                    for (var i = 0 ; i < finishedLine.length ; i++) {
+                        finishLine(finishedLine[i][0],finishedLine[i][1]);
+                    }
+                    finishLine(x,y,team);
+                    break;
                 }
                 drawCard(player,card,team);
             }
@@ -188,7 +199,7 @@ function delayedStart(turn,game) {
     }
 }
 
-function checkValidPlay(action,card,x,y,team) {
+function checkValidPlay(action,card,x,y,team,finishedLine) {
     switch (action) {
     case 0: //throw away card
         if (card === 0 || card === -1) {
@@ -206,6 +217,13 @@ function checkValidPlay(action,card,x,y,team) {
             return false;
         }
         break;
+    case 2: //add and finish line
+        for (var i = 0 ; i < finishedLine.length ; i++) {
+            if (points[finishedLine[i][0]][finishedLine[i][1]] !== team) {
+                return false;
+            }
+        }
+        //fall through and also check add
     case 1: //add
         if (card !== 0) {
             if (points[x][y] !== 0) {
@@ -213,6 +231,7 @@ function checkValidPlay(action,card,x,y,team) {
             }
         }
         break;
+
     default: //shouldn't get here
         return false;
         break;
