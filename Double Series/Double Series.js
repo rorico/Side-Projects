@@ -320,9 +320,9 @@ function cardOptions(card) {
 }
 
 //pick up new card
-function drawCard(player,index,value,change) {
+function drawCard(player,index,team,change) {
     if (animate) {
-        $("#card_played").prepend("<div class='c"+value+"'>"+changeToCards(players[player][index])+"</div>");
+        $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(players[player][index])+"</div>");
     }
     if (showMoves) {
         showPlaces(player);
@@ -344,14 +344,14 @@ function drawCard(player,index,value,change) {
 //checks if lines is won and turns them over
 //if can finish multiple, finishes all
 function checker(x,y) {
-    var value = points[x][y];
-    checkDirection(x,y,1,1,value);
-    checkDirection(x,y,1,0,value);
-    checkDirection(x,y,0,1,value);
-    checkDirection(x,y,1,-1,value);
+    var team = points[x][y];
+    checkDirection(x,y,1,1,team);
+    checkDirection(x,y,1,0,team);
+    checkDirection(x,y,0,1,team);
+    checkDirection(x,y,1,-1,team);
 }
 
-function checkDirection(x,y,dirX,dirY,value) {
+function checkDirection(x,y,dirX,dirY,team) {
     var tnp = [];
 
     var checkUp = true;
@@ -367,7 +367,7 @@ function checkDirection(x,y,dirX,dirY,value) {
     for (var i = 1 ; i < 5 ; i++) {
         xUp += dirX;
         yUp += dirY;
-        if (!outOfBounds(xUp,yUp) && checkUp && points[xUp][yUp]===value) {
+        if (!outOfBounds(xUp,yUp) && checkUp && points[xUp][yUp]===team) {
             cnt++;
             tnp.push([xUp,yUp]);
         } else {
@@ -376,7 +376,7 @@ function checkDirection(x,y,dirX,dirY,value) {
 
         xDown -= dirX;
         yDown -= dirY;
-        if (!outOfBounds(xDown,yDown) && checkDown && points[xDown][yDown]===value) {
+        if (!outOfBounds(xDown,yDown) && checkDown && points[xDown][yDown]===team) {
             cnt++;
             tnp.push([xDown,yDown]);
         } else {
@@ -384,24 +384,24 @@ function checkDirection(x,y,dirX,dirY,value) {
         }
     }
     if (cnt === 8) {
-        if (value === 1) {
+        if (team === 1) {
             blueLines += 2;
-        } else if (value === 3){
+        } else if (team === 3){
             greenLines += 2;
         }
-        finishLine(x,y,value);
+        finishLine(x,y,team);
         for (var i = 0 ; i < 8 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
+            finishLine(tnp[i][0],tnp[i][1],team);
         }
     } else if (cnt >= 4) {
-        if (value === 1) {
+        if (team === 1) {
             blueLines++;
-        } else if (value === 3){
+        } else if (team === 3){
             greenLines++;
         }
-        finishLine(x,y,value);
+        finishLine(x,y,team);
         for (var i = 0 ; i < 4 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],value);
+            finishLine(tnp[i][0],tnp[i][1],team);
         }
     }
 }
@@ -602,7 +602,7 @@ function shuffle(array) {
     return array;
 }
 
-//changes a value to 0 because of remove J
+//changes a team to 0 because of remove J
 function removePoint(x,y) {
     points[x][y] = 0;
         var position = 10*x + y + 1;
@@ -612,24 +612,24 @@ function removePoint(x,y) {
         }
 }
 
-//changes value to given value of card played
-function addPoint(x,y,value) {
-    points[x][y] = value;
+//changes team to given team of card played
+function addPoint(x,y,team) {
+    points[x][y] = team;
         var position = 10*x + y + 1;
         if (animate) {
         $('#'+position).removeClass('v0');
-        $('#'+position).addClass('v'+value);
+        $('#'+position).addClass('v'+team);
         }
 }
 
 //creates a line
-function finishLine(x,y,value) {
-    points[x][y] = value + 1;
+function finishLine(x,y,team) {
+    points[x][y] = team + 1;
     pointworth[x][y]++;
         var position = 10*x + y + 1;
         if (animate) {
-        $('#'+position).removeClass('v'+value);
-        $('#'+position).addClass('v'+(value+1));
+        $('#'+position).removeClass('v'+team);
+        $('#'+position).addClass('v'+(team+1));
         }
 }
 
