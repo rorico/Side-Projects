@@ -651,14 +651,11 @@ var pastRemove = true;
 var pastPlayer = -1;
 var pastCardIndex = -1;
 var pastCard = -2;
-var pastChange = false;
-function animateHand(index,player,remove,change) {
+function animateHand(index,player,remove) {
     if (pastPlayer !== -1) {
         if (!pastRemove) {
-            if (!pastChange) {
-                $('#p'+pastPlayer+'_'+pastCardIndex).removeClass('raise');
-                $('#p'+pastPlayer+'_'+pastCardIndex).html(changeToCards(pastCard));
-            }
+            $('#p'+pastPlayer+'_'+pastCardIndex).removeClass('raise');
+            $('#p'+pastPlayer+'_'+pastCardIndex).html(changeToCards(pastCard));
         } else {
             $('#p'+pastPlayer+'_'+pastCardIndex).removeClass('raise');
             size = players[pastPlayer].length;
@@ -666,27 +663,15 @@ function animateHand(index,player,remove,change) {
             for (var i = pastCardIndex ; i < size ; i++) {
                 $('#p'+pastPlayer+'_'+i).html(changeToCards(players[pastPlayer][i]));
             }
-        }
-        
+        }    
     }
-    if (!change) {
-        $('#p'+player+'_'+index).addClass('raise');
-        pastRemove = remove;
-    } else {
-        $('#p'+player+'_'+index).html(changeToCards(players[player][index]));
-        if (remove) {
-            size = players[player].length;
-            $('#p'+player+'_'+size).remove();
-            for ( var i = index ; i < size ; i++) {
-                $('#p'+player+'_'+i).html(changeToCards(players[player][i]));
-            }
-        }
-        pastRemove = false;
-    }
+
+    $('#p'+player+'_'+index).addClass('raise');
+
+    pastRemove = remove;
     pastCard = players[player][index];
     pastCardIndex = index;
     pastPlayer = player;
-    pastChange = change;
 }
 
 function showWorth() {

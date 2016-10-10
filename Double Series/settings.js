@@ -1,6 +1,6 @@
 //settings
 var maxGame = 1000;
-var speed = 00;
+var speed = 500;
 var human = [false,false,false,false];
 var showMoves = false;
 var checkValid = true;
