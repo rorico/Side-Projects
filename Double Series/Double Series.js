@@ -328,17 +328,16 @@ function drawCard(player,index,value,change) {
         showPlaces(player);
     }
     cardsPlayed.push(players[player][index]);
+    var remove = false;
     if (cardsleft !== -1) {
         players[player][index] = deck[cardsleft];
         cardsleft--;
-        if (animate) {
-            animateHand(index,player,false,change);
-        }
     } else {
         players[player].splice(index,1);
-        if (animate) {
-            animateHand(index,player,true,change);
-        }
+        remove = true;
+    }
+    if (animate) {
+        animateHand(index,player,remove);
     }
 }
 
