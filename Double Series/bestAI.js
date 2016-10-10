@@ -1,5 +1,5 @@
-function playBest(player,value,offensive) {
-    var options = getOptions(players[player]);
+function playBest(hand,value,offensive) {
+    var options = getOptions(hand);
     var useless = hasUselessCard(options);
     if (useless !== -1) {
         return [0,useless,[-1,-1]]
@@ -10,7 +10,7 @@ function playBest(player,value,offensive) {
     if (best[0]!==4) {
 
         //determines if has remove Jack
-        var removePos = hasRemove(players[player]);
+        var removePos = hasRemove(hand);
         if (removePos!==-1) {
             var options2 = removeJ(value);
             if (options2.length!==0) {
@@ -18,7 +18,7 @@ function playBest(player,value,offensive) {
                 var x = options2[side][0];
                 var y = options2[side][1];
                 return [-1,removePos,[x,y]];
-            }  else if (hasOnlyRemoveJ(players[player])){
+            }  else if (hasOnlyRemoveJ(hand)){
                 options = removeJR(value);
                 var side = Math.floor(Math.random()*options.length);
                 var x = options[side][0];
@@ -28,7 +28,7 @@ function playBest(player,value,offensive) {
         }
 
         //determines if has add Jack
-        var addPos = hasAdd(players[player]);
+        var addPos = hasAdd(hand);
         if (addPos!==-1) {
             var options2 = addJ(value,offensive);
             if (options2.length!=0) {
@@ -36,7 +36,7 @@ function playBest(player,value,offensive) {
                 var x = options2[side][0];
                 var y = options2[side][1];
                 return [1,addPos,[x,y]];
-            } else if (hasOnlyJ(players[player])){
+            } else if (hasOnlyJ(hand)){
                 options = addJR();
                 var side = Math.floor(Math.random()*options.length);
                 var x = options[side][0];

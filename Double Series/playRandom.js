@@ -1,5 +1,5 @@
-function playRandom(player,value) {
-    var options = getOptions(players[player]);
+function playRandom(hand,value) {
+    var options = getOptions(hand);
     var useless = hasUselessCard(options);
     if (useless !== -1) {
         return [0,useless,[-1,-1]];
@@ -13,7 +13,7 @@ function playRandom(player,value) {
         spots = removeJR(value);
         if (!spots.length) {
             //have to choose another card, just change cards
-            return playRandom(player,value);
+            return playRandom(hand,value);
         }
         var action = -1;
     }

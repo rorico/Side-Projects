@@ -1,6 +1,6 @@
-function playAIphil(player,value,offensive) {
+function playAIphil(hand,value,offensive) {
     //get all options
-    var options = getOptions(players[player]);
+    var options = getOptions(hand);
 
     //determines useless cards
     var useless = hasUselessCard(options);
@@ -12,7 +12,7 @@ function playAIphil(player,value,offensive) {
     var best = mostLinesPhil(options,value,offensive);
 
     if (best[0]!=4) {
-        var removePos = hasRemove(players[player]);
+        var removePos = hasRemove(hand);
         if (removePos!=-1) {
             var options2 = removeJ(value);
             if (options2.length!=0) {
@@ -20,7 +20,7 @@ function playAIphil(player,value,offensive) {
                 var x = options2[side][0];
                 var y = options2[side][1];
                 return [-1,removePos,[x,y]];
-            }  else if (hasOnlyRemoveJ(players[player])){
+            }  else if (hasOnlyRemoveJ(hand)){
                 options = removeJR(value);
                 var side = Math.floor(Math.random()*options.length);
                 var x = options[side][0];
@@ -28,7 +28,7 @@ function playAIphil(player,value,offensive) {
                 return [-1,removePos,[x,y]];
             }
         }
-        var addPos = hasAdd(players[player]);
+        var addPos = hasAdd(hand);
         if (addPos!=-1) {
             var options2 = addJ(value,offensive);
             if (options2.length!=0) {
@@ -36,7 +36,7 @@ function playAIphil(player,value,offensive) {
                 var x = options2[side][0];
                 var y = options2[side][1];
                 return [1,addPos,[x,y]];
-            } else if (hasOnlyJ(players[player])){
+            } else if (hasOnlyJ(hand)){
                 options = addJR();
                 var side = Math.floor(Math.random()*options.length);
                 var x = options[side][0];

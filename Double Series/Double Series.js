@@ -98,21 +98,22 @@ function start(turn,game) {
         turnN = turn;
         var player = turn % 4;
         var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
-    
+        var hand = players[player];
+
         if (human[player]) {
             keepgoing = true;
             pauseable = false;
             hideHands(player);
-            showCardWorth(cardWorth(getOptions(players[player]),team,true));
+            showCardWorth(cardWorth(getOptions(hand),team,true));
             playHuman(player,team);
             return;
         } else {
-            if (players[player].length) {
+            if (hand.length) {
                 var result = [-2,-1,[-1,-1]]; //[action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
                 if (team === 1) {
-                    result = playBlue(player);
+                    result = playBlue(hand);
                 } else if (team === 3) {
-                    result = playGreen(player);
+                    result = playGreen(hand);
                 }
                 
                 var action = result[0];
@@ -121,9 +122,9 @@ function start(turn,game) {
                 var x = place[0];
                 var y = place[1];
                 if (checkValid) {
-                    if (!checkValidPlay(action,players[player][card],x,y,team,result[3])) {
+                    if (!checkValidPlay(action,hand[card],x,y,team,result[3])) {
                         pause();
-                        console.log("player:",player,"cards:",players[player],"team:",team,"play:",result);
+                        console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
                         return;
                     }
                 }
@@ -287,7 +288,7 @@ function getOptions(cards) {
         var sides = [];
         var card = cards[k];
         //if jacks, just push jacks
-        if (card === 0||card === -1) {
+        if (card === 0 || card === -1) {
             sides = card;
         } else {
             sides = cardOptions(card);
