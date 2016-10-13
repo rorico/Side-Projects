@@ -141,6 +141,7 @@ function start(turn,game) {
                     break;
                 case 2:
                     addPoint(x,y,team);
+                    var finishedLine = result[3];
                     for (var i = 0 ; i < finishedLine.length ; i++) {
                         finishLine(finishedLine[i][0],finishedLine[i][1]);
                     }
