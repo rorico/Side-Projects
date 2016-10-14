@@ -194,9 +194,11 @@ function playCard(player,team,result) {
             return;
         }
     }
+    var replace = false;
     switch (action) {
     case PLAY_REPLACE:
         //do nothing here
+        replace = true;
         break;
     case PLAY_REMOVE:
         removePoint(x,y);
@@ -215,7 +217,7 @@ function playCard(player,team,result) {
         break;
     }
     cardsPlayed.push([players[player][card],[x,y]]);
-    drawCard(player,card,team);
+    drawCard(player,card,team,replace);
 }
 
 function checkValidPlay(action,card,x,y,team,finishedLine) {
@@ -339,7 +341,7 @@ function cardOptions(card) {
 }
 
 //pick up new card
-function drawCard(player,card,team,change) {
+function drawCard(player,card,team,replace) {
     if (animate) {
         $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(players[player][card])+"</div>");
     }
@@ -356,7 +358,7 @@ function drawCard(player,card,team,change) {
         pause();
     }
     if (animate) {
-        animateHand(player,card,remove);
+        animateHand(player,card,remove,replace);
     }
 }
 
@@ -666,7 +668,7 @@ function showHands() {
 }
 
 var nextTurn;
-function animateHand(player,card,remove) {
+function animateHand(player,card,remove,replace) {
     if (nextTurn) {
         nextTurn();
         nextTurn = undefined;
@@ -687,6 +689,11 @@ function animateHand(player,card,remove) {
             $('#p'+player+'_'+card).html(changeToCards(players[player][card]));
         }
     };
+    //want to update quicker as will have to use hand again
+    if (replace) {
+        nextTurn();
+        nextTurn = undefined;
+    }
 }
 
 function showWorth() {
