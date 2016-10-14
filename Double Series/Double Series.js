@@ -339,23 +339,24 @@ function cardOptions(card) {
 }
 
 //pick up new card
-function drawCard(player,index,team,change) {
+function drawCard(player,card,team,change) {
     if (animate) {
-        $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(players[player][index])+"</div>");
+        $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(players[player][card])+"</div>");
     }
     if (showMoves) {
         showPlaces(player);
     }
     var remove = false;
     if (cardsleft !== -1) {
-        players[player][index] = deck[cardsleft];
+        players[player][card] = deck[cardsleft];
         cardsleft--;
     } else {
-        players[player].splice(index,1);
+        players[player].splice(card,1);
         remove = true;
+        pause();
     }
     if (animate) {
-        animateHand(index,player,remove);
+        animateHand(player,card,remove);
     }
 }
 
@@ -664,31 +665,28 @@ function showHands() {
     }
 }
 
-var pastRemove = true;
-var pastPlayer = -1;
-var pastCardIndex = -1;
-var pastCard = -2;
-function animateHand(index,player,remove) {
-    if (pastPlayer !== -1) {
-        if (!pastRemove) {
-            $('#p'+pastPlayer+'_'+pastCardIndex).removeClass('raise');
-            $('#p'+pastPlayer+'_'+pastCardIndex).html(changeToCards(pastCard));
-        } else {
-            $('#p'+pastPlayer+'_'+pastCardIndex).removeClass('raise');
-            size = players[pastPlayer].length;
-            $('#p'+pastPlayer+'_'+size).remove();
-            for (var i = pastCardIndex ; i < size ; i++) {
-                $('#p'+pastPlayer+'_'+i).html(changeToCards(players[pastPlayer][i]));
-            }
-        }    
+var nextTurn;
+function animateHand(player,card,remove) {
+    if (nextTurn) {
+        nextTurn();
+        nextTurn = undefined;
     }
 
-    $('#p'+player+'_'+index).addClass('raise');
+    $('#p'+player+'_'+card).addClass('raise');
 
-    pastRemove = remove;
-    pastCard = players[player][index];
-    pastCardIndex = index;
-    pastPlayer = player;
+    nextTurn = function() {
+        if (remove) {
+            $('#p'+player+'_'+card).removeClass('raise');
+            var size = players[player].length;
+            $('#p'+player+'_'+size).remove();
+            for (var i = card ; i < size ; i++) {
+                $('#p'+player+'_'+i).html(changeToCards(players[player][i]));
+            }
+        } else {
+            $('#p'+player+'_'+card).removeClass('raise');
+            $('#p'+player+'_'+card).html(changeToCards(players[player][card]));
+        }
+    };
 }
 
 function showWorth() {
