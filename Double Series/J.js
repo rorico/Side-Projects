@@ -551,3 +551,18 @@ function removeJ(colour) {
     return returnValues;
     
 }
+
+
+function sort_arrays(a,b) {
+    if (a[0] < b[0]) return -1;
+    if (a[0] > b[0]) return 1;
+    if (a[1] < b[1]) return -1;
+    if (a[1] > b[1]) return 1;
+    return 0;
+}
+
+function sort_by_number(a,b) {
+    if (a[2] < b[2]) return -1;
+    if (a[2] > b[2]) return 1;
+    return 0;
+}

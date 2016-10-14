@@ -432,21 +432,6 @@ function outOfBounds(x,y) {
 }
 
 //-----------auxilary functions-------------------//
-
-
-function sort_arrays(a,b) {
-    if (a[0] < b[0]) return -1;
-    if (a[0] > b[0]) return 1;
-    if (a[1] < b[1]) return -1;
-    if (a[1] > b[1]) return 1;
-    return 0;
-}
-function sort_by_number(a,b) {
-    if (a[2] < b[2]) return -1;
-    if (a[2] > b[2]) return 1;
-    return 0;
-}
-
 //position of Add J, -1 if none
 function hasAdd(player) {
     for (var i = 0 ; i < player.length ; i++){
@@ -705,40 +690,7 @@ function showWorth() {
             $('#'+i).text(pointworth[x][y]);
         }
     }
-    showArray(pointworth,"#values");
-}
-
-function isEqual(array1,array2) {
-    for (var i = 0 ; i < array1.length ; i++) {
-        if (Array.isArray(array1[i])) {
-            if (!isEqual(array1[i],array2[i])) 
-                return false;
-        } else {
-            if (array1[i] !== array2[i]){
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-function showArray(data,container) {
-    if (Array.isArray(data)) {
-        $(container).append('[');
-        for (var i = 0 ; i < data.length ; i++) {
-            showArray(data[i],container);
-            if (i !== data.length-1) {
-                $(container).append(',');
-            }
-        }
-        $(container).append(']');
-    } else if (typeof data.getMonth === 'function') {
-        $(container).append('new Date("'+data+'")');
-    } else if (typeof data === 'string') {
-        $(container).append('"'+data+'"');
-    } else {
-        $(container).append(data);
-    }
+    $("#values").append(JSON.stringify(pointworth));
 }
 
 function hideHands(player) {
