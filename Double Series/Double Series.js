@@ -85,6 +85,12 @@ var cardsPlayed = [];
 var gameEnd = false;
 var animate = true;
 var info = {board:board};
+
+var PLAY_REPLACE = 0;
+var PLAY_REMOVE = -1;
+var PLAY_ADD = 1;
+var PLAY_FINISH = 2;
+
 $(document).ready(function() {
     createBoard();
     newGame();
@@ -109,46 +115,19 @@ function start(turn,game) {
             return;
         } else {
             if (hand.length) {
-                var result = [-2,-1,[-1,-1]]; //[action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
+                var AI;
                 if (team === 1) {
-                    result = playBlue(hand);
+                    AI = playBlue;
                 } else if (team === 3) {
-                    result = playGreen(hand);
+                    AI = playGreen;
                 }
-                
-                var action = result[0];
-                var card = result[1];
-                var place = result[2];
-                var x = place[0];
-                var y = place[1];
-                if (checkValid) {
-                    if (!checkValidPlay(action,hand[card],x,y,team,result[3])) {
-                        pause();
-                        console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
-                        return;
-                    }
-                }
-                switch (action) {
-                case 0:
+                var result = AI(hand); //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
+                //results checked here
+                playCard(player,team,result);
+                //would like another way to do this
+                if (result[0] === PLAY_REPLACE) {
                     turn--;
-                    break;
-                case -1:
-                    removePoint(x,y);
-                    break;
-                case 1:
-                    addPoint(x,y,team);
-                    checker(x,y);
-                    break;
-                case 2:
-                    addPoint(x,y,team);
-                    var finishedLine = result[3];
-                    for (var i = 0 ; i < finishedLine.length ; i++) {
-                        finishLine(finishedLine[i][0],finishedLine[i][1]);
-                    }
-                    finishLine(x,y,team);
-                    break;
                 }
-                drawCard(player,card,team);
             }
         }
         delayedStart(turn+1,game);
@@ -201,9 +180,47 @@ function delayedStart(turn,game) {
     }
 }
 
+function playCard(player,team,result) {
+    var hand = players[player];
+    var action = result[0];
+    var card = result[1];
+    var place = result[2];
+    var x = place[0];
+    var y = place[1];
+    if (checkValid) {
+        if (!checkValidPlay(action,hand[card],x,y,team,result[3])) {
+            pause();
+            console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
+            return;
+        }
+    }
+    switch (action) {
+    case PLAY_REPLACE:
+        //do nothing here
+        break;
+    case PLAY_REMOVE:
+        removePoint(x,y);
+        break;
+    case PLAY_ADD:
+        addPoint(x,y,team);
+        checker(x,y);
+        break;
+    case PLAY_FINISH:
+        addPoint(x,y,team);
+        var finishedLine = result[3];
+        for (var i = 0 ; i < finishedLine.length ; i++) {
+            finishLine(finishedLine[i][0],finishedLine[i][1]);
+        }
+        finishLine(x,y,team);
+        break;
+    }
+    cardsPlayed.push([players[player][card],[x,y]]);
+    drawCard(player,card,team);
+}
+
 function checkValidPlay(action,card,x,y,team,finishedLine) {
     switch (action) {
-    case 0: //throw away card
+    case PLAY_REPLACE: //throw away card
         if (card === 0 || card === -1) {
             return false;
         }
@@ -211,7 +228,7 @@ function checkValidPlay(action,card,x,y,team,finishedLine) {
             return false;
         }
         break;
-    case -1: //remove J
+    case PLAY_REMOVE: //remove J
         if (card !== -1) {
             return false;
         }
@@ -219,14 +236,14 @@ function checkValidPlay(action,card,x,y,team,finishedLine) {
             return false;
         }
         break;
-    case 2: //add and finish line
+    case PLAY_FINISH: //add and finish line
         for (var i = 0 ; i < finishedLine.length ; i++) {
             if (points[finishedLine[i][0]][finishedLine[i][1]] !== team) {
                 return false;
             }
         }
         //fall through and also check add
-    case 1: //add
+    case PLAY_ADD: //add
         if (card !== 0) {
             if (points[x][y] !== 0) {
                 return false;
@@ -329,7 +346,6 @@ function drawCard(player,index,team,change) {
     if (showMoves) {
         showPlaces(player);
     }
-    cardsPlayed.push(players[player][index]);
     var remove = false;
     if (cardsleft !== -1) {
         players[player][index] = deck[cardsleft];
