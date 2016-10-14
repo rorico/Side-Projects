@@ -150,15 +150,15 @@ function start(turn,game) {
         }
         gameN = game;
         turnN = turn;
-        var totalGames = game + 1;
+        var totalGames = game + 1;  //0-index
         $('#bluewin').text(bluewin);
         $('#greenwin').text(greenwin);
         $('#ties').text(ties);
-        $('#blueP').text(((bluewin/totalGames)*100).toFixed(2)+"%");
-        $('#greenP').text(((greenwin/totalGames)*100).toFixed(2)+"%");
-        $('#tieP').text(((ties/totalGames)*100).toFixed(2)+"%");
+        $('#blueP').text(getPercentage(bluewin,totalGames));
+        $('#greenP').text(getPercentage(greenwin,totalGames));
+        $('#tieP').text(getPercentage(ties,totalGames));
         
-        if (totalGames < maxGame) {        //starts at game 0
+        if (totalGames < maxGame) {
             setTimeout(function(){
                 gameEnd = true;
                 start(turn,game);
@@ -168,6 +168,10 @@ function start(turn,game) {
             showWorth();
         }
     }
+}
+
+function getPercentage(num,den) {
+    return ((num/den)*100).toFixed(2) + "%";
 }
 
 function delayedStart(turn,game) {
