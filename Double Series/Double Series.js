@@ -190,6 +190,7 @@ function playCard(player,team,result) {
     var y = place[1];
     if (checkValid) {
         if (!checkValidPlay(action,hand[card],x,y,team,result[3])) {
+            pause();
             console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
             return;
         }
