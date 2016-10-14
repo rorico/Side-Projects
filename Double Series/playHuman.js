@@ -1,109 +1,96 @@
-function playHuman(player,value) {
-    var options = getOptions(players[player]);
-    for (var i = 0 ; i<players[player].length ; i++) {
-        $('#p'+player+'_'+i).addClass('choose');
-        if (options[i].length===0||options[i]===-1||options[i]===0) {       //no possible moves, jacks
-            $('#p'+player+'_'+i).addClass('special');
+function playHuman(player,team) {
+    var hand = players[player];
+    for (var card = 0 ; card < hand.length ; card++) {
+        var cardEle = $('#p'+player+'_'+card);
+        cardEle.addClass('choose');
+        var options = [];
+        //jacks, don't need to calculate possible for them at this stage
+        if (hand[card] === 0 || hand[card] === -1) {
+            cardEle.addClass('special');
+        } else {
+            options = cardOptions(hand[card]);
+            //no possible moves for the card
+            if (!options.length) {
+                cardEle.addClass('special');
+            } else {
+                //show possible moves
+                for (var side = 0 ; side < options.length ; side++) {
+                    var x = options[side][0];
+                    var y = options[side][1];
+                    showChoose(player,team,card,PLAY_ADD,x,y);
+                }
+            }
         }
-        $('#p'+player+'_'+i).unbind('click');
-        $('#p'+player+'_'+i).bind('click',{player:player,i:i,value:value,sides:options[i]}, function(event) {
-            event.stopPropagation();
-            $('.special').removeClass('special');
-            $('.choose').unbind('click');
-            $('.choose').removeClass('choose');
-            chooseCard(event.data.player,event.data.i,event.data.value,event.data.sides);
+        cardEle.bind('click',{player:player,team:team,card:card,options:options}, function(event) {
+            clearHuman();
+            var e = event.data;
+            chooseCard(e.player,e.team,e.card,e.options);
         });
     }
-    for (var card = 0 ; card<options.length ; card++) {
-        for (var side = 0 ; options[card]!=-1&&options[card]!=0&&side<options[card].length ; side++) {
-            var x = options[card][side][0];
-            var y = options[card][side][1];
-            showChoose(player,x,y,value,card);
-        }
-    }
 }
-function chooseCard(player,card,value,sides) {
-    
-    $('#o'+player).append("<div class='choose option' id='back'>BACK</div>");
-    $('#back').bind('click',{player:player,value:value}, function(event) {
-        $('.option').remove();
-        $('.special').removeClass('special');
-        $('.choose').unbind('click');
-        $('.choose').removeClass('choose');
-        playHuman(event.data.player,event.data.value);
+
+function chooseCard(player,team,card,options) {
+    var backButton = $("<div class='choose option' id='back'>BACK</div>");
+    backButton.bind('click',{player:player,team:team}, function(event) {
+        clearHuman();
+        var e = event.data;
+        playHuman(e.player,e.team);
     });
-    if (sides===0) {
-        sides = addJR();
-    }
-    
-    if (sides===-1) {
-        sides = removeJR(value);
-        for (var side = 0 ; side<sides.length ; side++) {
-            var x = sides[side][0];
-            var y = sides[side][1];
-            showChooseRemove(player,x,y,value,card);
-        }
-        return;
-    }
-    
-    if (sides.length===0) {     //useless card
-        $('#o'+player).append("<div class='choose option' id='remove'>REMOVE</div>");
-        $('#remove').bind('click',{player:player,value:value,card:card}, function(event) {
-            $('.option').remove();
-            $('.special').removeClass('special');
-            $('.choose').unbind('click');
-            $('.choose').removeClass('choose');
-            drawCard(event.data.player,event.data.card,event.data.value,true);
-            playHuman(event.data.player,event.data.value);
+    $('#o'+player).append(backButton);
+
+    var action = PLAY_ADD;
+    if (players[player][card] === 0) {
+        options = addJR();
+    } else if (players[player][card] === -1) {
+        action = PLAY_REMOVE;
+        options = removeJR(team);
+    } else if (!options.length) {     //useless card
+        action = PLAY_REPLACE;
+        var removeButton = $("<div class='choose option' id='remove'>REMOVE</div>");
+        removeButton.bind('click',{player:player,team:team,card:card,action:action}, function(event) {
+            clearHuman();
+            var e = event.data;
+            //x,y doesn't matter
+            choosePlay(e.player,e.team,e.card,e.action,-1,-1);
         });
+        $('#o'+player).append(removeButton);
     }
     
-    for (var side = 0 ; side<sides.length ; side++) {
-        var x = sides[side][0];
-        var y = sides[side][1];
-        showChoose(player,x,y,value,card);
+    for (var side = 0 ; side < options.length ; side++) {
+        var x = options[side][0];
+        var y = options[side][1];
+        showChoose(player,team,card,action,x,y);
     }
 }
-function showChoose(player,x,y,value,card) {
-    var position = 10*x+y+1;
-    if (animate) {
-        $('#'+position).addClass('choose');
-    }
-    $('#'+position).unbind();
-    $('#'+position).bind('click',{player:player,x:x,y:y,value:value,card:card}, function(event) {
-        event.stopPropagation();
-        $('.choose').unbind('click');
-        $('.special').removeClass('special');
-        $('.choose').removeClass('choose');
-        $('.option').remove();
-        chooseSide(event.data.player,event.data.x,event.data.y,event.data.value,event.data.card);
+
+function showChoose(player,team,card,action,x,y) {
+    var position = 10*x + y + 1;
+    var positionEle = $('#'+position);
+    positionEle.addClass('choose');
+    positionEle.unbind();
+    positionEle.bind('click',{player:player,team:team,card:card,action:action,x:x,y:y}, function(event) {
+        clearHuman();
+        var e = event.data;
+        choosePlay(e.player,e.team,e.card,e.action,e.x,e.y);
     });
 }
-function chooseSide(player,x,y,value,card) {
-    addPoint(x,y,value);
-    checker(x,y);
-    drawCard(player,card,value);
-    $('.hide').removeClass('hide');
-    delayedStart(turnN+1,gameN);
+
+//clears clicks and classes that playHuman made
+function clearHuman() {
+    $('.choose').unbind('click');
+    $('.special').removeClass('special');
+    $('.choose').removeClass('choose');
+    $('.option').remove();
 }
-function showChooseRemove(player,x,y,value,card) {
-    var position = 10*x+y+1;
-    if (animate) {
-        $('#'+position).addClass('choose');
+
+function choosePlay(player,team,card,action,x,y) {
+    var result = [action,card,[x,y]];
+    playCard(player,team,result);
+    //if replacing card, stay on this turn
+    if (action === PLAY_REPLACE) {
+        playHuman(player,team);
+    } else {
+        $('.hide').removeClass('hide');
+        delayedStart(turnN+1,gameN);
     }
-    $('#'+position).unbind();
-    $('#'+position).bind('click',{player:player,x:x,y:y,value:value,card:card}, function(event) {
-        event.stopPropagation();
-        $('.choose').unbind('click');
-        $('.special').removeClass('special');
-        $('.choose').removeClass('choose');
-        $('.option').remove();
-        chooseSideRemove(event.data.player,event.data.x,event.data.y,event.data.value,event.data.card);
-    });
-}
-function chooseSideRemove(player,x,y,value,card) {
-    removePoint(x,y);
-    drawCard(player,card,value);
-    $('.hide').removeClass('hide');
-    delayedStart(turnN+1,gameN);
 }
