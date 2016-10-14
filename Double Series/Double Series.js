@@ -44,9 +44,6 @@ $(window).keypress(function(e) {
         pause();
     }
 });
-$(document).click(function() {
-    pause();
-});
 
 function pause() {
     if (pauseable) {
