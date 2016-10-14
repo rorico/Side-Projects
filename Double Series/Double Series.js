@@ -356,7 +356,6 @@ function drawCard(player,card,team,replace) {
     } else {
         players[player].splice(card,1);
         remove = true;
-        pause();
     }
     if (animate) {
         animateHand(player,card,remove,replace);
