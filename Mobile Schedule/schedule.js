@@ -153,7 +153,6 @@ $(window).keydown(function(e) {
     }
 });
 
-$("#showWeek").click(weekView);
 $("#next").click(next);
 $("#prev").click(prev);
 
