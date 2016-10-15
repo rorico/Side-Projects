@@ -141,6 +141,7 @@ var templateInfoPart1 = '<!DOCTYPE html>\n'+
 '    border-color:brown;\n'+
 '}\n'+
 '</style>'+
+'    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">\n'+
 '</head>\n'+
 '\n'+
 '<body>\n'+
@@ -149,7 +150,6 @@ var templateInfoPart1 = '<!DOCTYPE html>\n'+
 '<input type="button" value="Prev" id="prev">\n'+
 '<input type="text" id="datepicker">\n'+
 '<input type="button" value="Next" id="next">\n'+
-'<input type="button" value="Show Week" id="showWeek">\n'+
 '</div>\n'+
 '<div id="holder"><div>\n'+
 '<div class="timeline">\n'+
@@ -244,8 +244,10 @@ var templateInfoPart2 = ';</script>\n'+
 '    },\n'+
 '    dateFormat: "DD MM d, yy"\n'+
 '});\n'+
-'$("#datepicker").datepicker("setDate", now);\n'+
-'showSchedule("#currentDay", now);\n'+
+'\n'+
+'//main\n'+
+'var weekMode = window.innerWidth > window.innerHeight;\n'+
+'setToday();\n'+
 '\n'+
 'function showSchedule(container,date) {\n'+
 '    var today = todaySchedule(date);    //function in scheduleInfo.js\n'+
@@ -381,7 +383,6 @@ var templateInfoPart2 = ';</script>\n'+
 '    }\n'+
 '});\n'+
 '\n'+
-'$("#showWeek").click(weekView);\n'+
 '$("#next").click(next);\n'+
 '$("#prev").click(prev);\n'+
 '\n'+
@@ -446,10 +447,10 @@ var templateInfoPart2 = ';</script>\n'+
 '        showSchedule("#D"+i, date);\n'+
 '        date.setDate(date.getDate()+1);\n'+
 '    }\n'+
-'    var length = $("#calendar").width();\n'+
-'    $(".class").width((length-100)/5-2);\n'+
-'    $(".placeholder").width((length-100)/5);\n'+
-'    $("#now").width((length-100)/5);\n'+
+'    var width = ($("#calendar").width()-100) / 5;\n'+
+'    $(".class").width(width-2);\n'+
+'    $(".placeholder").width(width);\n'+
+'    $("#now").width(width);\n'+
 '    showNow();\n'+
 '}\n'+
 '\n'+

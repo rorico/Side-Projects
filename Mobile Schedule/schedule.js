@@ -16,8 +16,10 @@ $("#datepicker").datepicker({
     },
     dateFormat: "DD MM d, yy"
 });
-$("#datepicker").datepicker("setDate", now);
-showSchedule("#currentDay", now);
+
+//main
+var weekMode = window.innerWidth > window.innerHeight;
+setToday();
 
 function showSchedule(container,date) {
     var today = todaySchedule(date);    //function in scheduleInfo.js
@@ -217,10 +219,10 @@ function showWeek(date) {
         showSchedule("#D"+i, date);
         date.setDate(date.getDate()+1);
     }
-    var length = $("#calendar").width();
-    $(".class").width((length-100)/5-2);
-    $(".placeholder").width((length-100)/5);
-    $("#now").width((length-100)/5);
+    var width = ($("#calendar").width()-100) / 5;
+    $(".class").width(width-2);
+    $(".placeholder").width(width);
+    $("#now").width(width);
     showNow();
 }
 
