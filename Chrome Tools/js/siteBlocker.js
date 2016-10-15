@@ -390,7 +390,7 @@ function tempVIP() {
     tempVIPtimer = setTimeout(function(){
         VIPtab = -1;
         tempVIPstartTime = 0;
-        if (wastingTime) {
+        if (wastingTime === 1) {
             setReminder(timeLeft);
         }
     },VIPlength);
