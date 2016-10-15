@@ -23,7 +23,7 @@ var tempVIPstartTime = 0;
 //sites that will block after time spent
 var urls = [[
     "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
-    "http://threesjs.com/",
+    "http://threesjs.com/"
 ],
 //sites that will spend time but not actively block
 [
