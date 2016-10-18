@@ -1,25 +1,3 @@
-//set alarm for every half hour after 10pm
-//sets alarm when it rings so can't stop before
-var sleepAlarmStart = 22;   //10pm
-var sleepAlarmEnd = 6;      //6am
-setSleepAlarm();
-chrome.alarms.onAlarm.addListener(function(alarm) {
-    if (alarm.name=="sleep") {
-        setAlarm(0,1);
-        setSleepAlarm();
-    }
-});
-function setSleepAlarm() {
-    var date = new Date();
-    date.setSeconds(0);
-    date.setMinutes(Math.floor(date.getMinutes()/30)*30 + 30);
-    if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
-        date.setHours(sleepAlarmStart);
-        date.setMinutes(0);
-    }
-    chrome.alarms.create("sleep", {when:+date});
-}
-
 //[state, alarm time, alarm object, type]
 var alarms = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]; 
 //types : 0 - regular
@@ -38,6 +16,26 @@ var playAlarmCheck = [false];   //array so that it is pass by reference
 chrome.browserAction.setBadgeBackgroundColor({color:defaultColor});
 chrome.browserAction.setBadgeText({text:""});                           //reset text
 
+//set alarm for every half hour after 10pm
+//sets alarm when it rings so can't stop before
+var sleepAlarmStart = 22;   //10pm
+var sleepAlarmEnd = 6;      //6am
+setSleepAlarm();
+
+function setSleepAlarm() {
+    var date = new Date();
+    date.setSeconds(0);
+    date.setMinutes(Math.floor(date.getMinutes()/30)*30 + 30);
+    if (date.getHours()<sleepAlarmStart && date.getHours()>sleepAlarmEnd) {
+        date.setHours(sleepAlarmStart);
+        date.setMinutes(0);
+    }
+    setTimer(function(){
+        setAlarm(0,1);
+        setSleepAlarm();
+    },date - new Date());
+}
+
 //returns [alarmNumber, alarm timestamp]
 function setAlarm(delay,type) {
     for (var i = 0 ; i<alarms.length ;i++) {
@@ -46,7 +44,7 @@ function setAlarm(delay,type) {
             alarmTime.setMinutes(alarmTime.getMinutes()+delay);
             ++alarmCnt;
             //chrome.browserAction.setBadgeText({text:(++alarmCnt).toString()});
-            var alarm = setTimeout(function() {
+            var alarm = setTimer(function() {
                 ringAlarm(i,type);
             },delay*60000);
 
@@ -106,7 +104,7 @@ function removeAlarm(alarmNumber,type) {
                 }
             }
         }
-        clearTimeout(alarms[alarmNumber][2]);
+        clearTimer(alarms[alarmNumber][2]);
         alarms[alarmNumber][0] = 0;
         sendRequest("removeAlarm",[alarmNumber,alarms[alarmNumber][3]]);
         return true;

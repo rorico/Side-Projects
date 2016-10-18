@@ -11,10 +11,10 @@ if (0) { // if in testing mode
     startingTimeLeft = 60000; // 1 mins
 }
 var timeLeft = startingTimeLeft;
-var alarm;
 var timeLine = [];
 var timeLineAsync = true;
-var returnTimer = -1;
+var alarm = -1;
+var returnTimer;
 var displayTimer = -1;
 var displayTimeStarter = -1;
 var VIPtab = -1;
@@ -281,7 +281,7 @@ function MinutesSecondsFormat(milli) {
 }
 
 function returnTime(delay) {
-    returnTimer = setTimeout(function() {
+    returnTimer = setTimer(function() {
         var date = new Date() - timeLineLength;
         var endingIndex = 0;
         var cnt = 0;
@@ -364,7 +364,7 @@ function clearAlarm() {
 }
 
 function resetTime() {
-    clearTimeout(returnTimer);
+    clearTimer(returnTimer);
     startTime = new Date();
     timeLeft = startingTimeLeft;
     timeLine = [];
@@ -403,7 +403,7 @@ function change(timeLineIndex) {
         //clear incase
         clearAlarm();
     }
-    clearTimeout(returnTimer);
+    clearTimer(returnTimer);
     returnTime();
     badgeDisplay();
 }
