@@ -346,7 +346,7 @@ function matchesURL(url) {
 function setReminder(time) {
     clearTimeout(alarm);
     var timeLeftP = timeLeft;
-    if (timeLeft <= 0) {
+    if (timeLeft < 2000) {
         time = 2000;
     }
     alarm = setTimeout(function() { 
