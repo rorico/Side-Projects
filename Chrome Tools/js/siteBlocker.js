@@ -22,13 +22,13 @@ var tempVIPtimer = -1;
 var tempVIPstartTime = 0;
 //sites that will block after time spent
 var urls = [[
-    "http://reddit.com/*", "https://reddit.com/*", "http://*.reddit.com/*", "https://*.reddit.com/*",
+    "*://reddit.com/*","*://*.reddit.com/*",
     "http://threesjs.com/"
 ],
 //sites that will spend time but not actively block
 [
-    "http://*.youtube.com/*", "https://*.youtube.com/*",
-    "http://imgur.com/*", "https://imgur.com/*", "http://*.imgur.com/*", "https://*.imgur.com/*"
+    "*://*.youtube.com/*",
+    "*://imgur.com/*","*://*.imgur.com/*"
 ]];
 
 //set-up first time when opened
