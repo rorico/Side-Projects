@@ -44,6 +44,14 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
     updateTimeLine();
 
+    //automatically close window after a period of time
+    //due to alt tabbing out of game to close alarm multiple times and expecting it not to be open
+    //if browserAction becomes more than alarm, remove this
+    //consider also making a certain time after last action
+    setTimeout(function(){
+        window.close();
+    },60000);//1 minute
+
     //may want to combine with start later
     function restartTimeLine() {
         clearInterval(updateTimeLineInterval);
