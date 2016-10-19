@@ -7,10 +7,6 @@ var timerQueue = [];
 var curTimerId = 0;
 var timerHandlers = [];
 
-setTimer(function(){
-    setAlarm(1,0);
-},timerThreshold);
-
 function setTimer(funct,delay) {
     if (!delay || delay < timerThreshold) {
         timerHandlers[++curTimerId] = [0,setTimeout(funct,delay)];
