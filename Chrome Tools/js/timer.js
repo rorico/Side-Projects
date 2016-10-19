@@ -12,7 +12,7 @@ setTimer(function(){
 },timerThreshold);
 
 function setTimer(funct,delay) {
-    if (delay < timerThreshold) {
+    if (!delay || delay < timerThreshold) {
         timerHandlers[++curTimerId] = [0,setTimeout(funct,delay)];
         return curTimerId;
     } else {
