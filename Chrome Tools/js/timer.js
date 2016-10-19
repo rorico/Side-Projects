@@ -2,53 +2,53 @@
 //setTimeout doesn't seem to work when computer sleeps, or if the computer is slow,
 //chrome.alarms doesn't seem to have these problems
 
-var timeoutThreshold = 300000; // 5 minutes
-var timeoutQueue = [];
-var curTimeoutId = 0;
-var timeoutHandlers = [];
+var timerThreshold = 300000; // 5 minutes
+var timerQueue = [];
+var curTimerId = 0;
+var timerHandlers = [];
 
 setTimer(function(){
     setAlarm(1,0);
-},timeoutThreshold);
+},timerThreshold);
 
 function setTimer(funct,delay) {
-    if (delay < timeoutThreshold) {
-        timeoutHandlers[++curTimeoutId] = [0,setTimeout(funct,delay)];
-        return curTimeoutId;
+    if (delay < timerThreshold) {
+        timerHandlers[++curTimerId] = [0,setTimeout(funct,delay)];
+        return curTimerId;
     } else {
         var index = 0;
         var runTime = +new Date() + delay;
-        for (var i = 0 ; i < timeoutQueue.length ; i++) {
-            if (runTime < timeoutQueue[i][1]) {
+        for (var i = 0 ; i < timerQueue.length ; i++) {
+            if (runTime < timerQueue[i][1]) {
                 break;
             } else {
                 index++;
             }
         }
-        timeoutQueue.splice(index,0,[++curTimeoutId,runTime,funct]);
+        timerQueue.splice(index,0,[++curTimerId,runTime,funct]);
         if (!index) {
             //if using alarms for anything else, change clearAll
             chrome.alarms.clearAll();
-            chrome.alarms.create("timeout",{when:runTime});
+            chrome.alarms.create("timer",{when:runTime});
         }
-        timeoutHandlers[curTimeoutId] = [1];
-        return curTimeoutId;//[1,curTimeoutId];
+        timerHandlers[curTimerId] = [1];
+        return curTimerId;
     }
 }
 
-function clearTimer(handler) {
-    var thisHandle = timeoutHandlers[handler];
+function clearTimer(handlerId) {
+    var thisHandle = timerHandlers[handlerId];
     if (thisHandle) {
         if (thisHandle[0]) {
             //want a better way to do this
             //can use another array, but will likely have more overhead due to low use of this
             var first = false;
-            for (var i = 0 ; i < timeoutQueue.length ; i++) {
-                if (handler === timeoutQueue[i][0]) {
-                    timeoutQueue.splice(i,1);
+            for (var i = 0 ; i < timerQueue.length ; i++) {
+                if (handlerId === timerQueue[i][0]) {
+                    timerQueue.splice(i,1);
                     if (i === 0) {
                         chrome.alarms.clearAll();
-                        chrome.alarms.create("timeout",{when:timeoutQueue[0][1]});
+                        chrome.alarms.create("timer",{when:timerQueue[0][1]});
                     }
                     break;
                 }
@@ -60,22 +60,22 @@ function clearTimer(handler) {
 }
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
-    if (alarm.name==="timeout") {
-        console.log(timeoutQueue);
-        var threshold = +new Date() + timeoutThreshold;
+    if (alarm.name==="timer") {
+        console.log(timerQueue);
+        var threshold = +new Date() + timerThreshold;
         var cnt = 0;
-        for (var i = 0 ; i < timeoutQueue.length ; i++) {
-            if (timeoutQueue[i][1] < threshold) {
-                timeoutHandlers[timeoutQueue[i][0]] = setTimeout(timeoutQueue[i][2],timeoutQueue[i][1] - new Date());
+        for (var i = 0 ; i < timerQueue.length ; i++) {
+            if (timerQueue[i][1] < threshold) {
+                timerHandlers[timerQueue[i][0]] = setTimeout(timerQueue[i][2],timerQueue[i][1] - new Date());
                 cnt++;
             } else {
                 break;
             }
         }
-        timeoutQueue.splice(0,cnt);
-        if (timeoutQueue.length) {
-            chrome.alarms.create("timeout",{when:timeoutQueue[0][1]});
+        timerQueue.splice(0,cnt);
+        if (timerQueue.length) {
+            chrome.alarms.create("timer",{when:timerQueue[0][1]});
         }
-        console.log(timeoutQueue);
+        console.log(timerQueue);
     }
 });
