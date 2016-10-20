@@ -7,6 +7,9 @@ function setScheduleInfo() {
         if (items.scheduleInfo) {
             scheduleInfo = items.scheduleInfo;
             today = todaySchedule(date);
+            
+            //for siteBlocker.js
+            setupClass();
         } else {
             scheduleInfo = [];
             today = [];
