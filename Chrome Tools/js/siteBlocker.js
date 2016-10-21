@@ -90,9 +90,10 @@ function classReminder(delay) {
 function militaryToUTC(time){
     var ret = new Date();
     var hour = Math.floor(time/100);
-    var minutes = time % 100;
+    var minutes = (time % 100) * 0.6;
     ret.setHours(hour);
     ret.setMinutes(minutes);
+    ret.setSeconds(0);
     ret.setMilliseconds(0);
     return ret;
 }
