@@ -227,20 +227,12 @@ function handleNewPage(newWasting,newUrl,newTitle) {
     handleTimeLineAsync("add",[timeSpent,wastingTime,url,title,startTime]);
     if (wastingTime) {
         changeTimeLeft(-timeSpent);
-        if (wastingTime === 1) {
-            clearTimeout(alarm);
-        }
     }
     //handle new page
     startTime = new Date();
     wastingTime = newWasting;
     url = newUrl;
     title = newTitle;
-    if (newWasting) {
-        if (newWasting === 1 && tabId !== VIPtab) {
-            setReminder(timeLeft,tabId);
-        }
-    }
     badgeDisplay();
 }
 
@@ -275,6 +267,8 @@ function badgeDisplay() {
         //when this turns to 0, will not show actual time left, may want to fix this later
     }
     countDownTimer(time,countDown);
+    if (countDown && wastingTime === 1) {
+    }
 }
 
 function countDownTimer(time,countDown) {
@@ -382,7 +376,6 @@ function matchesURL(url) {
 function setReminder(time,tabId) {
     clearTimeout(alarm);
     var timeLeftP = timeLeft;
-    if (timeLeft < tolerance || inClass()) {
         time = tolerance;
     }
     alarm = setTimeout(function() {
@@ -444,9 +437,6 @@ function tempVIP() {
     makeCurrentTabVIP();
     tempVIPstartTime = +new Date();
     tempVIPtimer = setTimeout(function(){
-        if (wastingTime === 1) {
-            setReminder(timeLeft,VIPtab);
-        }
         VIPtab = -1;
         tempVIPstartTime = 0;
     },VIPlength);
