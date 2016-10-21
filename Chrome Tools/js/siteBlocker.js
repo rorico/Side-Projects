@@ -77,7 +77,7 @@ function classReminder(delay) {
                 } else {
                     time = militaryToUTC(classes[0][1]) - now;
                 }
-                badgeDisplay();
+                timeLeftOutput();
                 if (keepGoing) {
                     classReminder(time);
                 }
@@ -233,16 +233,17 @@ function handleNewPage(newWasting,newUrl,newTitle) {
     wastingTime = newWasting;
     url = newUrl;
     title = newTitle;
-    badgeDisplay();
+    timeLeftOutput();
 }
 
 function changeTimeLeft(change) {
     timeLeft += change;
-    //remember to call badgeDisplay(); at end of processing 
+    //could run badgeDisplay() here, but if this function gets called multiple times, a lot of calculations are wasted
+    //instead, remember to call timeLeftOutput(); at end of processing
 }
 
 //shows effective timeLeft from this moment on
-function badgeDisplay() {
+function timeLeftOutput() {
     //have the option to update browserAction every time, but accuracy isn't completely needed
     sendRequest("timer",timeLeft);
     var time = timeLeft - (wastingTime ? new Date() - startTime : 0);
@@ -357,7 +358,7 @@ function returnTime(delay) {
         if (!completed) {
             timeTotal += currentTimeInterval;
         }
-        badgeDisplay();
+        timeLeftOutput();
         returnTime(timeTotal - timeLeft + currentTimeOffset);
     },delay);
 }
@@ -374,6 +375,8 @@ function matchesURL(url) {
     return 0;
 }
 
+//sets a reminder when timeLeft reaches 0, and blocks site
+//should only be run if wastingTime === 1
 function setReminder(time,tabId) {
     clearTimeout(alarm);
     if (time < tolerance) {
@@ -427,7 +430,7 @@ function makeCurrentTabVIP() {
 function VIP() {
     makeCurrentTabVIP();
     tempVIPstartTime = 0;
-    badgeDisplay();
+    timeLeftOutput();
 }
 
 function tempVIP() {
@@ -437,7 +440,7 @@ function tempVIP() {
         VIPtab = -1;
         tempVIPstartTime = 0;
     },VIPlength);
-    badgeDisplay();
+    timeLeftOutput();
 }
 
 function change(timeLineIndex) {
@@ -448,7 +451,7 @@ function change(timeLineIndex) {
     }
     clearTimer(returnTimer);
     returnTime();
-    badgeDisplay();
+    timeLeftOutput();
 }
 
 //for displaying in an open browser action
