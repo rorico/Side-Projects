@@ -8,13 +8,12 @@ var typeColors = ["#0000FF","#33FFFF","#FF0000"];   //["blue","teal","red"];
 var defaultColor = "#000000";   //black
 var alarmCnt = 0;
 var ringingCnt = 0;
-var ringingTypeCnt = [0,0,0];
-var ringingTypeMax = -1;
+var alarmTypeCnt = [0,0,0];
+var alarmTypeMax = -1;
 var audio = new Audio("/alarm.mp3");
 var playAlarmCheck = [false];   //array so that it is pass by reference
 
 chrome.browserAction.setBadgeBackgroundColor({color:defaultColor});
-chrome.browserAction.setBadgeText({text:""});                           //reset text
 
 //set alarm for every half hour after 10pm
 //sets alarm when it rings so can't stop before
@@ -42,12 +41,18 @@ function setAlarm(delay,type) {
         if (!alarms[i][0]) {
             var alarmTime = new Date();
             alarmTime.setMinutes(alarmTime.getMinutes()+delay);
-            ++alarmCnt;
-            //chrome.browserAction.setBadgeText({text:(++alarmCnt).toString()});
+            alarmCnt++;
             var alarm = setTimer(function() {
                 ringAlarm(i,type);
             },delay*60000);
 
+
+            alarmTypeCnt[type]++;
+            //display highest type color
+            if (type > alarmTypeMax) {
+                chrome.browserAction.setBadgeBackgroundColor({color:typeColors[type]});
+                alarmTypeMax = type;
+            }
             alarms[i] = [1,alarmTime,alarm,type];
             sendRequest("setAlarm",[i,+alarmTime,type]);
             return [i,+alarmTime];
@@ -57,11 +62,6 @@ function setAlarm(delay,type) {
 }
 
 function ringAlarm(alarmNumber,type) {
-    if (type > ringingTypeMax) {
-        chrome.browserAction.setBadgeBackgroundColor({color:typeColors[type]});
-        ringingTypeMax = type;
-    }
-    ringingTypeCnt[type]++;
     ringingCnt++;
     alarms[alarmNumber][0] = 2;
     playAlarmCheck[0] = true;
@@ -80,30 +80,31 @@ function removeAlarm(alarmNumber,type) {
     //unspecified type is a catchall,
     //type 2 needs specific call
     if (alarms[alarmNumber][0] && ((typeof type === "undefined" && alarms[alarmNumber][3] !== 2) || alarms[alarmNumber][3] == type)) {
-        if (--alarmCnt) {
-          //chrome.browserAction.setBadgeText({text:(alarmCnt).toString()});
-        } else {
-          //chrome.browserAction.setBadgeText({text:""});
-        }
-        //check if ringing
-        if (playAlarmCheck[0] && alarms[alarmNumber][0]===2) {
-            ringingTypeCnt[type]--;
-            if (--ringingCnt === 0) {
-                ringingTypeMax = -1;
-                playAlarmCheck[0] = false;
-                audio.pause();
-                audio.currentTime = 0;
-                chrome.browserAction.setBadgeBackgroundColor({color:defaultColor});
-            } else {
-                for (var i = ringingTypeMax ; i >= 0 ; i--) {
-                    if (ringingTypeCnt[i]) {
-                        ringingTypeMax = i;
-                        chrome.browserAction.setBadgeBackgroundColor({color:typeColors[i]});
-                        break;
-                    }
+        alarmTypeCnt[type]--;
+        //if no alarms left
+        if (!--alarmCnt) {
+            alarmTypeMax = -1;
+            chrome.browserAction.setBadgeBackgroundColor({color:defaultColor});
+        } else {        
+            //update highest alarm color
+            for (var i = alarmTypeMax ; i >= 0 ; i--) {
+                if (alarmTypeCnt[i]) {
+                    alarmTypeMax = i;
+                    chrome.browserAction.setBadgeBackgroundColor({color:typeColors[i]});
+                    break;
                 }
             }
         }
+        //check if ringing
+        if (playAlarmCheck[0] && alarms[alarmNumber][0]===2) {
+            //if no alarms ringing, turn off sound
+            if (!--ringingCnt) {
+                playAlarmCheck[0] = false;
+                audio.pause();
+                audio.currentTime = 0;
+            }
+        }
+
         clearTimer(alarms[alarmNumber][2]);
         alarms[alarmNumber][0] = 0;
         sendRequest("removeAlarm",[alarmNumber,alarms[alarmNumber][3]]);
