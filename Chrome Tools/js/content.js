@@ -16,7 +16,6 @@ blockScreen.html(text);
 $("body").append(blockScreen);
 
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
-    console.log(a,b,c);
     if (a.action === "unblock") {
         chrome.runtime.onMessage.removeListener(listener);
         blockScreen.remove();

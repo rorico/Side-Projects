@@ -118,8 +118,8 @@ function storeRedirect(url) {
         //if the new entry is larger than it can possibly be stored, shouldn't ever happen
         //to make sure we don't get into an infinite loop
         if (JSON.stringify(newEntry).length > limit) {
-            console.log("can't store the following, too large:");
-            console.log(newEntry);
+            throw("can't store the following, too large:");
+            log(newEntry);
         } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
             moveRedirect(redirects,url);
         } else {
@@ -190,7 +190,7 @@ function handleFocus(newFocused) {
 //used to make sure there is no async problems, likely not needed
 function handleTimeLineAsync(action,load) {
     while(!timeLineAsync) {
-        console.log("didn't think this situation would ever happen, good thing I coded this");
+        throw("didn't think this situation would ever happen, good thing I coded this");
     }
     timeLineAsync = false;
     if (action === "add") {
@@ -208,10 +208,10 @@ function handleTimeLineAsync(action,load) {
                 changeTimeLeft(timeLine[load][0]);   
             }
         } else {
-            console.log("change to timeline out of bounds" + load + "/" + timeLine.length);
+            throw("change to timeline out of bounds" + load + "/" + timeLine.length);
         }
     } else {
-        console.log("this shouldn't happen");
+        throw("timeLine action incorrect");
     }
     timeLineAsync = true;
 }
@@ -249,6 +249,7 @@ function changeTimeLeft(change) {
     //remember to call badgeDisplay(); at end of processing 
 }
 
+//shows effective timeLeft from this moment on
 function badgeDisplay() {
     //have the option to update browserAction every time, but accuracy isn't completely needed
     sendRequest("timer",timeLeft);
