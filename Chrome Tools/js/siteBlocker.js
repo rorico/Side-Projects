@@ -268,6 +268,7 @@ function badgeDisplay() {
     }
     countDownTimer(time,countDown);
     if (countDown && wastingTime === 1) {
+        setReminder(time,tabId);
     }
 }
 
@@ -375,15 +376,11 @@ function matchesURL(url) {
 
 function setReminder(time,tabId) {
     clearTimeout(alarm);
-    var timeLeftP = timeLeft;
+    if (time < tolerance) {
         time = tolerance;
     }
     alarm = setTimeout(function() {
-        if (timeLeft === timeLeftP) {
-            blockSite(tabId);
-        } else {
-            setReminder(timeLeftP - timeLeft,tabId);
-        }
+        blockSite(tabId);
     },time);
 }
 
