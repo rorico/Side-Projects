@@ -114,7 +114,8 @@ function storeRedirect(url) {
         }
         var newEntry = [+new Date(),url];
         //approximately the max size per item, slightly smaller
-        var limit = 8000;
+        //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
+        var limit = 7000;
         //if the new entry is larger than it can possibly be stored, shouldn't ever happen
         //to make sure we don't get into an infinite loop
         if (JSON.stringify(newEntry).length > limit) {
