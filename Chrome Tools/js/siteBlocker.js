@@ -115,6 +115,7 @@ function storeRedirect(url) {
         var newEntry = [+new Date(),url];
         //approximately the max size per item, slightly smaller
         //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
+        //can check getBytesInUse, but seems unnecessary
         var limit = 7000;
         //if the new entry is larger than it can possibly be stored, shouldn't ever happen
         //to make sure we don't get into an infinite loop
@@ -239,7 +240,7 @@ function handleNewPage(newWasting,newUrl,newTitle) {
 
 function changeTimeLeft(change) {
     timeLeft += change;
-    //could run badgeDisplay() here, but if this function gets called multiple times, a lot of calculations are wasted
+    //could run timeLeftOutput() here, but if this function gets called multiple times, a lot of calculations are wasted
     //instead, remember to call timeLeftOutput(); at end of processing
 }
 
@@ -254,8 +255,6 @@ function timeLeftOutput() {
         //if tempVIPstartTime is not set, VIP isn't temp
         time = Infinity;
         countDown = false;
-        //infinity symbol
-        //chrome.browserAction.setBadgeText({text:"\u221e"});
     } else if (time > classStart - new Date()) {
         time = classStart - new Date();
         countDown = true;
@@ -306,6 +305,7 @@ function setBadgeText(time) {
 
 function MinutesSecondsFormat(milli) {
     if (milli === Infinity) {
+        //infinity symbol
         return "\u221e";
     } else {
         var secs = Math.ceil(milli/1000);
@@ -389,20 +389,23 @@ function setReminder(time,tabId) {
 }
 
 function blockSite(tabId) {
-    //setAlarm(0,2);
-    //use a wrapper in case tabId gets changed in the meantime, may not be needed
+    //all changes in tabs should be caught, but in case, check
     if (this.tabId === tabId) {
-        chrome.tabs.executeScript({file:"/lib/jquery.min.js"},function(){
-            chrome.tabs.executeScript({file:"/js/content.js"},function(){
+        //use a wrapper in case tabId gets changed in the meantime, may not be needed
+        var thisUrl = url;
+        chrome.tabs.executeScript(tabId,{file:"/lib/jquery.min.js"},function(){
+            chrome.tabs.executeScript(tabId,{file:"/js/content.js"},function(){
                 blockedTab = tabId;
+                storeRedirect(thisUrl);
             });
         });
+    } else {
+        throw("uncaught change in tabId");
     }
 }
 
 function unblockSite() {
     if (blockedTab !== -2) {
-        //stopAllAlarms(2);
         chrome.tabs.sendMessage(blockedTab,{action:"unblock"});
         blockedTab = -2;
     }
