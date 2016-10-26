@@ -1,15 +1,15 @@
-body{
+body {
     font-family: 'Times New Roman';
     font-size: 100%;
 }
-div{
+div {
     text-align: center;
 }
-div p{
+div p {
     position: relative;
     margin: 0;
 }
-.part{
+.part {
     border: 1px solid black;
     border-radius: 10px;
     margin: 20px;
