@@ -97,7 +97,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
         var classAddon = "";
         if (time >= 3) {
-            time -= 2;
             classAddon = " timeLineBlock";
         }
         var timeLineEntry = $("<div style='width:" + time + "px;' class='timeLine wasting" + info[1] + classAddon + "' id='timeLine" + num + "'></div>");
@@ -157,22 +156,18 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             var newEle = $("#timeLine div:last-child");
             var oldestEle = $("#timeLine div:first-child");
             if (!newEle.hasClass("timeLineBlock") && newEle.width() + 1 >= 2) {
-                newEle.width(newEle.width() - 1);
                 newEle.addClass("timeLineBlock");
-            } else {
-                newEle.width(newEle.width() + 1);
             }
+            newEle.width(newEle.width() + 1);
             //oldest has 0 width, remove
             while(!oldestEle.hasClass("timeLineBlock") && oldestEle.width() <= 0) {
                 oldestEle.remove();
                 oldestEle = $("#timeLine div:first-child");
             }
             if (oldestEle.hasClass("timeLineBlock") && oldestEle.width() - 1 <= 0) {
-                oldestEle.width(oldestEle.width() + 1);
                 oldestEle.removeClass("timeLineBlock");
-            } else {
-                oldestEle.width(oldestEle.width() - 1);
             }
+            oldestEle.width(oldestEle.width() - 1);
         },delay);
         timeCurrentInterval = setInterval(function() {
             timeCurrent += 1000;
