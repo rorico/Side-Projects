@@ -1,137 +1,137 @@
-body{
+body {
     font-family: 'Times New Roman';
     font-size: 100%;
-    width:400px;
-    text-align:center;
+    width: 400px;
+    text-align: center;
 }
-div{
+div {
     text-align: center;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
     -webkit-box-sizing: border-box;
 }
-div p{
-    position:relative;
-    margin:0;
+div p {
+    position: relative;
+    margin: 0;
 }
-#alarmText{
-    margin:10px;
+#alarmText {
+    margin: 10px;
 }
-.alarm{
-    border-radius:5px;
-    border:1px black solid;
-    margin:10px;
+.alarm {
+    border-radius: 5px;
+    border: 1px black solid;
+    margin: 10px;
 }
-#setTimer{
-    width:70px;
+#setTimer {
+    width: 70px;
 }
-.alarmTitle{
-    float:left;
-    height:51px;
-    width:51px;
+.alarmTitle {
+    float: left;
+    height: 51px;
+    width: 51px;
     text-align: center;
     vertical-align: middle;
     line-height: 50px;
-    border-right:1px solid black;
-    display:inline-block;
-    border-color:inherit;
+    border-right: 1px solid black;
+    display: inline-block;
+    border-color: inherit;
 }
-.alarmData{
-    height:50px;
+.alarmData {
+    height: 50px;
     text-align: center;
     vertical-align: middle;
     line-height: 50px;
-    display:inline-block;
+    display: inline-block;
 }
-.notSet{
-    opacity:0.3;
+.notSet {
+    opacity: 0.3;
 }
-#timeLine{
-    height:50px;
-    float:left;
+#timeLine {
+    height: 50px;
+    float: left;
 }
-#timeLineHolder{
-    border:1px solid black;
+#timeLineHolder {
+    border: 1px solid black;
     border-radius: 2px;
     display: inline-block;
 }
-.timeLine{
-    height:50px;
-    border-top:1px solid white;
-    border-bottom:1px solid white;
-    display:inline-block;
+.timeLine {
+    height: 50px;
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+    display: inline-block;
 }
-.timeLineBlock{
-    border:1px solid white;
+.timeLineBlock {
+    border: 1px solid white;
 }
-.wasting0{
+.wasting0 {
     background-color: black;
 }
-.wasting1{
+.wasting1 {
     background-color: red;
 }
-.wasting2{
+.wasting2 {
     background-color: #8C0000;
 }
-#info{      
+#info {      
     word-wrap: break-word;
 }
-.axisPart{
-    display:inline-block;
-    float:left;
-    padding:0;
-    height:3px;
-    width:60px;
-    border-right:1px solid black;
+.axisPart {
+    display: inline-block;
+    float: left;
+    padding: 0;
+    height: 3px;
+    width: 60px;
+    border-right: 1px solid black;
 }
-.axisPart.top{
-    border-bottom:1px solid black;
+.axisPart.top {
+    border-bottom: 1px solid black;
 }
-.axisPart.bot{
+.axisPart.bot {
     border-top: 1px solid black;
 }
-.axisPart.end{
-    width:60px;
-    border-right:0;
+.axisPart.end {
+    width: 60px;
+    border-right: 0;
 }
-#phraseHolder{
+#phraseHolder {
     height: 0;
     width: 0;
-    position:relative;
+    position: relative;
 }
-#phrase{
-    position:absolute;
+#phrase {
+    position: absolute;
     z-index: 1;
-    left:0;
-    top:0;
+    left: 0;
+    top: 0;
 }
-.filled{
-    color:black;
+.filled {
+    color: black;
 }
-.failed{
-    color:red;
+.failed {
+    color: red;
 }
-.phrasePart{
-    display:inline;
-    font-size:100px;
+.phrasePart {
+    display: inline;
+    font-size: 100px;
 }
-#phraseFront{
-    position:absolute;
-    border:1px solid black;
+#phraseFront {
+    position: absolute;
+    border: 1px solid black;
     border-radius: 5px;
-    z-index:2;
-    color:white;
+    z-index: 2;
+    color: white;
 }
-#phraseBack{
-    position:absolute;
-    border:1px solid black;
+#phraseBack {
+    position: absolute;
+    border: 1px solid black;
     border-radius: 5px;
     background-color: white;
 }
-#phrase.done .filled{
-    color:white;
+#phrase.done .filled {
+    color: white;
 }
-#phrase.done #phraseBack{
+#phrase.done #phraseBack {
     background-color: black;
 }

@@ -32,15 +32,15 @@ function showSchedule(container,date) {
     }
 
     if (!today.length) {
-        addTimeSlot(container,"class",endTime - startTime,1,["No Classes Today"]);
+        addTimeSlot(container,"class",endTime - startTime,["No Classes Today"]);
     } else {
-        addTimeSlot(container,"placeholder placeborder",0,1);
+        addTimeSlot(container,"placeholder placeborder",0);
         var length = today[0][0][1] - startTime - 1;
         while (length > 100) {
-            addTimeSlot(container,"placeholder placeborder",100,1);
+            addTimeSlot(container,"placeholder placeborder",100);
             length -= 100;
         }
-        addTimeSlot(container,"placeholder",length,0);
+        addTimeSlot(container,"placeholder",length);
         for (var i = 0 ; i < today.length ; i++) {
             var start = today[i][0][1];
             var finish = today[i][0][2];
@@ -51,25 +51,26 @@ function showSchedule(container,date) {
 
             var height = finish - start + 1;
             var classInfo = [classCode + (weekMode ? "" : " " + className) + " - " + classType, location];
-            addTimeSlot(container,"class " + classType,height,2,classInfo);
+            addTimeSlot(container,"class " + classType,height,classInfo);
 
             var beginning = finish;
             var end = (i === today.length - 1 ? endTime : end = today[i+1][0][1] - 1);
             var next;
             while ((next = Math.floor((beginning+100)/100)*100)<=end) {
                 length = next - beginning;
-                addTimeSlot(container,"placeholder placeborder",length,1);
+                addTimeSlot(container,"placeholder placeborder",length);
                 beginning += length;
             }
-            addTimeSlot(container,"placeholder",end-beginning,0);
+            addTimeSlot(container,"placeholder",end-beginning);
         }
     }
     $(container).parent().append("<div id='side'></div>");
 }
 
-function addTimeSlot(container,classType,time,borderAmount,content) {
+function addTimeSlot(container,classType,time,content) {
+    //do no need to account for border as using box-sizing:border-box
     var height = time/2;
-    var thisHeight = height + offset - borderAmount;
+    var thisHeight = height + offset;
     offset = thisHeight % 1;
     thisHeight = Math.floor(thisHeight);
 
