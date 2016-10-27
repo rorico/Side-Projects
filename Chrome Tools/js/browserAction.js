@@ -140,7 +140,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     //not exactly accurate, not too important
     function countDownFunction(time) {
-        $("#test").html(MinutesSecondsFormat(time));
+        $("#timeLeft").html(MinutesSecondsFormat(time));
         if (wastingTime && time>0) {
             var delay = (time-1)%1000+1;
             countDownTimer = setTimeout(function() {
