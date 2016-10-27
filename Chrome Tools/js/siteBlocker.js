@@ -87,7 +87,7 @@ function classReminder(delay) {
 }
 
 //probably not actually military time, but similar
-function militaryToUTC(time){
+function militaryToUTC(time) {
     var ret = new Date();
     var hour = Math.floor(time/100);
     var minutes = (time % 100) * 0.6;
@@ -98,7 +98,7 @@ function militaryToUTC(time){
     return ret;
 }
 
-function UTCtoMilitary(time){
+function UTCtoMilitary(time) {
     return time.getHours()*100 + time.getMinutes()/0.6;;
 }
 
