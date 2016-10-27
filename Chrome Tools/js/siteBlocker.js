@@ -268,9 +268,7 @@ function timeLeftOutput() {
         //when this turns to 0, will not show actual time left, may want to fix this later
     }
     countDownTimer(time,countDown);
-    if (countDown && wastingTime === 1) {
-        setReminder(time,tabId);
-    }
+    setReminder(time,countDown);
 }
 
 function countDownTimer(time,countDown) {
@@ -377,15 +375,17 @@ function matchesURL(url) {
 }
 
 //sets a reminder when timeLeft reaches 0, and blocks site
-//should only be run if wastingTime === 1
-function setReminder(time,tabId) {
+function setReminder(time,countDown) {
     clearTimeout(alarm);
-    if (time < tolerance) {
-        time = tolerance;
+    unblockSite();
+    if (countDown && wastingTime === 1) {
+        if (time < tolerance) {
+            time = tolerance;
+        }
+        alarm = setTimeout(function() {
+            blockSite(tabId);
+        },time);
     }
-    alarm = setTimeout(function() {
-        blockSite(tabId);
-    },time);
 }
 
 function blockSite(tabId) {
@@ -411,11 +411,6 @@ function unblockSite() {
     }
 }
 
-function clearAlarm() {
-    clearTimeout(alarm);
-    unblockSite();
-}
-
 function resetTime() {
     clearTimer(returnTimer);
     startTime = new Date();
@@ -428,7 +423,6 @@ function resetTime() {
 function makeCurrentTabVIP() {
     clearTimeout(tempVIPtimer);
     VIPtab = tabId;
-    clearAlarm();
 }
 
 function VIP() {
@@ -449,10 +443,6 @@ function tempVIP() {
 
 function change(timeLineIndex) {
     handleTimeLineAsync("change",timeLineIndex);
-    if (timeLeft >= 0) {
-        //clear incase
-        clearAlarm();
-    }
     clearTimer(returnTimer);
     returnTime();
     timeLeftOutput();
