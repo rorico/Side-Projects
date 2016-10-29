@@ -3,6 +3,7 @@ var wastingTime = false;
 var url = "";
 var title = "";
 var tabId = -2;
+var windowId = -3;
 var timeLineLength = 1800000; // 30 mins
 var startingTimeLeft = 300000; // 5 mins
 var VIPlength = 20000; // 20s
@@ -129,38 +130,25 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     }
 });
 
-//checks all levels and returns the level of url if matched, 0 if none
-function matchesURL(url) {
-    for (var lvl = 0 ; lvl < urls.length ; lvl++) {
-        for (var i = 0 ; i < urls[lvl].length ; i++) {
-            if (new RegExp("^" + urls[lvl][i].replace(/\./g,"\\.").replace(/\*/g, ".*") + "$").test(url)) {
-                return lvl + 1;
-            }
-        }
-    }
-    return 0;
-}
-
-/* does not measure when switching to outside chrome
-var focused = true;
-var out = [0,0,0];
 chrome.windows.onFocusChanged.addListener(function(windowId) {
-    chrome.tabs.query({windowId:chrome.windows.WINDOW_ID_CURRENT}, function(tabs) {
-        handleFocus(!!tabs.length);
-    });
-});
-
-function handleFocus(newFocused) {
-    if (newFocused != focused) {
-        if (newFocused) {
-            handleNewPage(out[0],out[1],out[2]);
-        } else {
-            out = [wastingTime,url,title];
-            handleNewPage(false,"","Not Chrome");
+    //due to browserAction triggering this, gonna have to workaround it
+    if (windowId === chrome.windows.WINDOW_ID_NONE) {
+        //handleNewPage("","Outside Chrome");
+    } else {
+        if (windowId !== this.windowId) {
+            chrome.tabs.query({windowId:windowId,active:true}, function(tabs) {
+                if (tabs.length) {
+                    var activeTab = tabs[0];
+                    handleNewPage(activeTab.url,activeTab.title);
+                    tabId = activeTab.tabId;
+                } else {
+                    throw("window empty tab")
+                }
+            });
         }
+        this.windowId = windowId;
     }
-    focused = newFocused;
-}*/
+});
 
 function handleNewPage(newUrl,newTitle) {
     //handle previous page
@@ -181,6 +169,18 @@ function handleNewPage(newUrl,newTitle) {
     url = newUrl;
     title = newTitle;
     timeLeftOutput();
+}
+
+//checks all levels and returns the level of url if matched, 0 if none
+function matchesURL(url) {
+    for (var lvl = 0 ; lvl < urls.length ; lvl++) {
+        for (var i = 0 ; i < urls[lvl].length ; i++) {
+            if (new RegExp("^" + urls[lvl][i].replace(/\./g,"\\.").replace(/\*/g, ".*") + "$").test(url)) {
+                return lvl + 1;
+            }
+        }
+    }
+    return 0;
 }
 
 //used to make sure there is no async problems, likely not needed
