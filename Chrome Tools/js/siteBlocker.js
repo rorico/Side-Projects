@@ -38,6 +38,7 @@ var urls = [[
 //set-up first time when opened
 startTimeLine();
 
+//gets run when schedule gets loaded in ScheduleInfo.js
 function setupClass() {
     var now = new Date();
     var position = UTCtoMilitary(now);
@@ -106,46 +107,6 @@ function inClass() {
     return new Date() > classStart;
 }
 
-function storeRedirect(url) {
-    chrome.storage.sync.get("redirects", function(items) {
-        var redirects = items.redirects;
-        if (!redirects) {
-            redirects = [];
-        }
-        var newEntry = [+new Date(),url];
-        //approximately the max size per item, slightly smaller
-        //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
-        //can check getBytesInUse, but seems unnecessary
-        var limit = 7000;
-        //if the new entry is larger than it can possibly be stored, shouldn't ever happen
-        //to make sure we don't get into an infinite loop
-        if (JSON.stringify(newEntry).length > limit) {
-            throw("can't store the following, too large:");
-            log(newEntry);
-        } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
-            moveRedirect(redirects,url);
-        } else {
-            redirects.push(newEntry);
-            chrome.storage.sync.set({"redirects": redirects});
-        }
-    });
-}
-
-function moveRedirect(redirects,url) {
-    chrome.storage.sync.get("redirectIndexes", function(items) {
-        var redirectIndexes = items.redirectIndexes;
-        if (!redirectIndexes) {
-            redirectIndexes = [];
-        }
-        var redirectName = "redirect_" + redirectIndexes.length;
-        redirectIndexes.push(redirectName);
-        var setObj = {redirectIndexes:redirectIndexes,redirects:[]};
-        setObj[redirectName] = redirects;
-        chrome.storage.sync.set(setObj);
-        storeRedirect(url);
-    });
-}
-
 function startTimeLine() {
     chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab) {
         handleNewPage(matchesURL(tab.url),tab.url,tab.title);
@@ -168,6 +129,18 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     }
 });
 
+//checks all levels and returns the level of url if matched, 0 if none
+function matchesURL(url) {
+    for (var lvl = 0 ; lvl < urls.length ; lvl++) {
+        for (var i = 0 ; i < urls[lvl].length ; i++) {
+            if (new RegExp("^" + urls[lvl][i].replace(/\./g,"\\.").replace(/\*/g, ".*") + "$").test(url)) {
+                return lvl + 1;
+            }
+        }
+    }
+    return 0;
+}
+
 /* does not measure when switching to outside chrome
 var focused = true;
 var out = [0,0,0];
@@ -188,6 +161,26 @@ function handleFocus(newFocused) {
     }
     focused = newFocused;
 }*/
+
+function handleNewPage(newWasting,newUrl,newTitle) {
+    //handle previous page
+    unblockSite();
+    var timeSpent = new Date() - startTime;
+    //if small time spent on wasting, don't count
+    if (timeSpent < tolerance) {
+        wastingTime = 0;
+    }
+    handleTimeLineAsync("add",[timeSpent,wastingTime,url,title,startTime]);
+    if (wastingTime) {
+        changeTimeLeft(-timeSpent);
+    }
+    //handle new page
+    startTime = new Date();
+    wastingTime = newWasting;
+    url = newUrl;
+    title = newTitle;
+    timeLeftOutput();
+}
 
 //used to make sure there is no async problems, likely not needed
 function handleTimeLineAsync(action,load) {
@@ -216,26 +209,6 @@ function handleTimeLineAsync(action,load) {
         throw("timeLine action incorrect");
     }
     timeLineAsync = true;
-}
-
-function handleNewPage(newWasting,newUrl,newTitle) {
-    //handle previous page
-    unblockSite();
-    var timeSpent = new Date() - startTime;
-    //if small time spent on wasting, don't count
-    if (timeSpent < tolerance) {
-        wastingTime = 0;
-    }
-    handleTimeLineAsync("add",[timeSpent,wastingTime,url,title,startTime]);
-    if (wastingTime) {
-        changeTimeLeft(-timeSpent);
-    }
-    //handle new page
-    startTime = new Date();
-    wastingTime = newWasting;
-    url = newUrl;
-    title = newTitle;
-    timeLeftOutput();
 }
 
 function changeTimeLeft(change) {
@@ -311,6 +284,83 @@ function MinutesSecondsFormat(milli) {
     }
 }
 
+//sets a reminder when timeLeft reaches 0, and blocks site
+function setReminder(time,countDown) {
+    clearTimeout(alarm);
+    unblockSite();
+    if (countDown && wastingTime === 1) {
+        if (time < tolerance) {
+            time = tolerance;
+        }
+        alarm = setTimeout(function() {
+            blockSite(tabId);
+        },time);
+    }
+}
+
+function blockSite(tabId) {
+    //all changes in tabs should be caught, but in case, check
+    if (this.tabId === tabId) {
+        //use a wrapper in case tabId gets changed in the meantime, may not be needed
+        var thisUrl = url;
+        chrome.tabs.executeScript(tabId,{file:"/lib/jquery.min.js"},function(){
+            chrome.tabs.executeScript(tabId,{file:"/js/content.js"},function(){
+                blockedTab = tabId;
+                storeRedirect(thisUrl);
+            });
+        });
+    } else {
+        throw("uncaught change in tabId");
+    }
+}
+
+function storeRedirect(url) {
+    chrome.storage.sync.get("redirects", function(items) {
+        var redirects = items.redirects;
+        if (!redirects) {
+            redirects = [];
+        }
+        var newEntry = [+new Date(),url];
+        //approximately the max size per item, slightly smaller
+        //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
+        //can check getBytesInUse, but seems unnecessary
+        var limit = 7000;
+        //if the new entry is larger than it can possibly be stored, shouldn't ever happen
+        //to make sure we don't get into an infinite loop
+        if (JSON.stringify(newEntry).length > limit) {
+            throw("can't store the following, too large:");
+            log(newEntry);
+        } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
+            moveRedirect(redirects,url);
+        } else {
+            redirects.push(newEntry);
+            chrome.storage.sync.set({"redirects": redirects});
+        }
+    });
+}
+
+function moveRedirect(redirects,url) {
+    chrome.storage.sync.get("redirectIndexes", function(items) {
+        var redirectIndexes = items.redirectIndexes;
+        if (!redirectIndexes) {
+            redirectIndexes = [];
+        }
+        var redirectName = "redirect_" + redirectIndexes.length;
+        redirectIndexes.push(redirectName);
+        var setObj = {redirectIndexes:redirectIndexes,redirects:[]};
+        setObj[redirectName] = redirects;
+        chrome.storage.sync.set(setObj);
+        storeRedirect(url);
+    });
+}
+
+function unblockSite() {
+    if (blockedTab !== -2) {
+        chrome.tabs.sendMessage(blockedTab,{action:"unblock"});
+        blockedTab = -2;
+    }
+}
+
 function returnTime(delay) {
     returnTimer = setTimer(function() {
         var date = new Date() - timeLineLength;
@@ -362,55 +412,7 @@ function returnTime(delay) {
     },delay);
 }
 
-//checks all levels and returns the level of url if matched, 0 if none
-function matchesURL(url) {
-    for (var lvl = 0 ; lvl < urls.length ; lvl++) {
-        for (var i = 0 ; i < urls[lvl].length ; i++) {
-            if (new RegExp("^" + urls[lvl][i].replace(/\./g,"\\.").replace(/\*/g, ".*") + "$").test(url)) {
-                return lvl + 1;
-            }
-        }
-    }
-    return 0;
-}
-
-//sets a reminder when timeLeft reaches 0, and blocks site
-function setReminder(time,countDown) {
-    clearTimeout(alarm);
-    unblockSite();
-    if (countDown && wastingTime === 1) {
-        if (time < tolerance) {
-            time = tolerance;
-        }
-        alarm = setTimeout(function() {
-            blockSite(tabId);
-        },time);
-    }
-}
-
-function blockSite(tabId) {
-    //all changes in tabs should be caught, but in case, check
-    if (this.tabId === tabId) {
-        //use a wrapper in case tabId gets changed in the meantime, may not be needed
-        var thisUrl = url;
-        chrome.tabs.executeScript(tabId,{file:"/lib/jquery.min.js"},function(){
-            chrome.tabs.executeScript(tabId,{file:"/js/content.js"},function(){
-                blockedTab = tabId;
-                storeRedirect(thisUrl);
-            });
-        });
-    } else {
-        throw("uncaught change in tabId");
-    }
-}
-
-function unblockSite() {
-    if (blockedTab !== -2) {
-        chrome.tabs.sendMessage(blockedTab,{action:"unblock"});
-        blockedTab = -2;
-    }
-}
-
+///////////// Requests from outside ///////////
 function resetTime() {
     clearTimer(returnTimer);
     startTime = new Date();
@@ -447,6 +449,7 @@ function change(timeLineIndex) {
     returnTime();
     timeLeftOutput();
 }
+///////////////////////////////////////////////
 
 //for displaying in an open browser action
 function sendRequest(action,input) {
