@@ -44,6 +44,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
     updateTimeLine();
 
+    var logs = background.allLogs;
+    var numUnread = background.numUnread;
+    alertLogs();
+
     //automatically close window after a period of time
     //due to alt tabbing out of game to close alarm multiple times and expecting it not to be open
     //if browserAction becomes more than alarm, remove this
@@ -197,6 +201,47 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     function MinutesSecondsFormat(milli) {
         var secs = Math.ceil(milli/1000);
         return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
+    }
+
+    function alertLogs() {
+        if (numUnread) {
+            var logHolder = $("<div id='logHolder' class='block'>!</div>");
+            $("body").prepend(logHolder);
+            logHolder.width(logHolder.height());
+            logHolder.one("click",displayLogs);
+        }
+    }
+
+    function displayLogs() {
+        var allLogEle = $("<div id='logs'></div>");
+        for (var i = 0 ; i < logs.length ; i++) {
+            if (!logs[i][1]) {
+                var logEle = $("<div class='log block'>" + logs[i][0] + "</div>");
+                clickLogRemove(logEle,i);
+                allLogEle.append(logEle);
+            }
+        }
+        var logHolder = $("#logHolder")
+        logHolder.html(allLogEle);
+        //20 is 2 * margin
+        logHolder.outerWidth($("body").width() - 20);
+        logHolder.one("click",function(){
+            //maybe want to just change instead of remove
+            this.remove();
+            alertLogs();
+        });
+    }
+
+    function clickLogRemove(ele,i) {
+        ele.click(function(e){
+            e.stopPropagation();
+            this.remove();
+            sendRequest("removeLog",i);
+            numUnread--;
+            if (!numUnread) {
+                $("#logHolder").remove();
+            }
+        });
     }
 
     ////////////////////////events//////////////////////////////

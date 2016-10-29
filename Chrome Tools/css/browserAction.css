@@ -18,10 +18,18 @@ div p {
 #alarmText {
     margin: 10px;
 }
+.block,
 .alarm {
     border-radius: 5px;
     border: 1px black solid;
     margin: 10px;
+}
+#logHolder {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    border-color: red;
+    background-color: white;
 }
 #setTimer {
     width: 70px;

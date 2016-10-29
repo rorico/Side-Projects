@@ -29,6 +29,11 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
             case "removeAlarm":
                 removeAlarm(a.input);
                 break;
+
+            //from log.js
+            case "removeLog":
+                removeLog(a.input);
+                break;
         }
     } else if (a.from === "options") {
         switch(a.action) {
