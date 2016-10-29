@@ -109,7 +109,7 @@ function inClass() {
 
 function startTimeLine() {
     chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab) {
-        handleNewPage(matchesURL(tab.url),tab.url,tab.title);
+        handleNewPage(tab.url,tab.title);
     });
     returnTime(timeLineLength - timeLeft);
 }
@@ -117,13 +117,13 @@ function startTimeLine() {
 chrome.tabs.onActivated.addListener(function(activeInfo) {
     this.tabId = activeInfo.tabId;
     chrome.tabs.get(activeInfo.tabId, function(tab) {
-        handleNewPage(matchesURL(tab.url),tab.url,tab.title);
+        handleNewPage(tab.url,tab.title);
     });
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo && changeInfo.status === "loading" && tabId == this.tabId) {
-        handleNewPage(matchesURL(tab.url),tab.url,tab.title);
+        handleNewPage(tab.url,tab.title);
     } else if (changeInfo && changeInfo.title && tabId == this.tabId) {
         title = changeInfo.title;
     }
@@ -162,9 +162,10 @@ function handleFocus(newFocused) {
     focused = newFocused;
 }*/
 
-function handleNewPage(newWasting,newUrl,newTitle) {
+function handleNewPage(newUrl,newTitle) {
     //handle previous page
     unblockSite();
+    var newWasting = matchesURL(newUrl);
     var timeSpent = new Date() - startTime;
     //if small time spent on wasting, don't count
     if (timeSpent < tolerance) {
