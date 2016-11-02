@@ -32,15 +32,15 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var currentTimePiece = -1;
     var updateTimeLineInterval = -1;
     var timeCurrentInterval = -1;
-    if (addTimeLine([timeCurrent,wastingTime,url],false,-1)) {
+
+    if (addTimeLine(-1,false,timeCurrent,wastingTime)) {
         for (var i = 0; i < timeLine.length ; i++) {
-            if (!addTimeLine(timeLine[i],true,i)) {
+            if (!addTimeLine(i,false,timeLine[i][0],timeLine[i][1])) {
                 break;
             }
         }
-        if (timeLineLeft > 0) {
-            $("#timeLine").prepend("<div style='width:" + timeLineLeft + "px' class='timeLine'></div>");
-        }
+        //fill in rest
+        addTimeLine(-2,false);
     }
     updateTimeLine();
 
@@ -78,58 +78,87 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         offset = 0;
 
         $("#timeLine").empty();
-        addTimeLine([timeCurrent,wastingTime,url],false,-1);
-        $("#timeLine").prepend("<div style='width:" + timeLineLeft + "px' class='timeLine'></div>");
+        addTimeLine(-1,false,timeCurrent,wastingTime);
+        addTimeLine(-2,false);
+        displayInfo(-1);
         updateTimeLine();
     }
 
-    function addTimeLine(info,hover,num) {        //returns true if not done
-        var time = info[0]/timeLineLength * parentWidth + offset;
-        offset = time%1;
-        time = Math.floor(time);
-        if (time < 1 && hover) {
-            offset += time;
+    //returns true if not done
+    function addTimeLine(index,first,time,wastingTime) {
+        var width = 0;
+        if (index === -2) {
+            width = timeLineLeft;
+        } else {
+            width = time/timeLineLength * parentWidth + offset;
+        }
+        offset = width % 1;
+        width = Math.floor(width);
+        //if smaller than 1px, don't bother adding, unless at very start or end (these will change size)
+        if (width < 1 && index !== -1) {
+            offset += width;
             return true;
         }
         var ret = true;
-        if (time >= timeLineLeft) {
-            time = timeLineLeft;
+        if (width >= timeLineLeft) {
+            width = timeLineLeft;
             timeLineLeft = 0;
             ret = false;
         } else {
-            timeLineLeft -= time;
+            timeLineLeft -= width;
         }
-        var classAddon = "";
-        if (time >= 3) {
-            classAddon = " timeLineBlock";
+
+        var classes = "timeLine";
+        if (index !== -2) {
+            classes += " wasting" + wastingTime;
+            if (width >= 3) {
+                classes += " timeLineBlock";
+            }
         }
-        var timeLineEntry = $("<div style='width:" + time + "px;' class='timeLine wasting" + info[1] + classAddon + "' id='timeLine" + num + "'></div>");
-        $("#timeLine").prepend(timeLineEntry);
-        setClick(timeLineEntry,info,num);
-        if (hover) {
-            setHover(timeLineEntry,info);
+
+        var timeLineEntry = $("<div style='width:" + width + "px;' class='" + classes + "' id='" + getTimeLineId(index) + "'></div>");
+        if (first) {
+            $("#timeLine").append(timeLineEntry);
+        } else {
+            $("#timeLine").prepend(timeLineEntry);
+        }
+
+        if (index !== -2) {
+            setClick(timeLineEntry,index);
         }
         return ret;
     }
 
-    function setHover(ele,info) {
+    function getTimeLineId(index) {
+        return (index === -2 ? "timeLineP" : "timeLine" + (index - timeLineOffset));
+    }
+
+    function setClick(ele,i) {
+        ele.click(function() {
+            currentTimePiece = i + timeLineOffset;
+            displayInfo(currentTimePiece);
+        });
         ele.hover(function() {
-            hover = true;
-            $("#info").html(formatInfo(info[2],info[0],info[3]));
+            displayInfo(i + timeLineOffset);
         },function() {
-            if (!click) {
-                hover = false;
-                $("#info").html(formatInfo(url,timeCurrent,title));
-            }
+            displayInfo(currentTimePiece);
         });
     }
-    
-    function setClick(ele,info,i) {
-        ele.click(function() {
-            click = true;
-            currentTimePiece = i;
-            $('#info').html(formatInfo(info[2],info[0],info[3]));
-        });
+
+    function displayInfo(i) {
+        clearTimeout(timeCurrentInterval);
+        var info = "";
+        if (i === -1) {
+            timeCurrent = new Date() - startTime;
+            var delay = 1 - (timeCurrent%1);
+            timeCurrentInterval = setTimeout(function() {
+                displayInfo(i);
+            },delay);
+            info = formatInfo(url,timeCurrent,title);
+        } else {
+            info = formatInfo(timeLine[i][2],timeLine[i][0],timeLine[i][3]);
+        }
+        $("#info").html(info);
     }
 
     function countDown(timeLeft) {
