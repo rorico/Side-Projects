@@ -210,141 +210,146 @@ function changeTimeLeft(change) {
 }
 
 //shows effective timeLeft from this moment on
-function timeLeftOutput() {
-    //have the option to update browserAction every time, but accuracy isn't completely needed
-    sendRequest("timer",timeLeft);
-    var time = timeLeft - (wastingTime ? new Date() - startTime : 0);
-    var countDown = wastingTime;
+var timeLeftOutput = (function(){
+    function timeLeftOutput() {
+        //have the option to update browserAction every time, but accuracy isn't completely needed
+        sendRequest("timer",timeLeft);
+        var time = timeLeft - (wastingTime ? new Date() - startTime : 0);
+        var countDown = wastingTime;
 
-    if (VIPtab === tabId && !tempVIPstartTime) {
-        //if tempVIPstartTime is not set, VIP isn't temp
-        time = Infinity;
-        countDown = false;
-    } else if (time > classStart - new Date()) {
-        time = classStart - new Date();
-        countDown = true;
+        if (VIPtab === tabId && !tempVIPstartTime) {
+            //if tempVIPstartTime is not set, VIP isn't temp
+            time = Infinity;
+            countDown = false;
+        } else if (time > classStart - new Date()) {
+            time = classStart - new Date();
+            countDown = true;
+        }
+
+        //don't even bother if more time left than limit
+        var VIPtimeLeft = VIPlength - new Date() + tempVIPstartTime;
+        if (VIPtab === tabId && time < VIPtimeLeft) {
+            time = VIPtimeLeft;
+            countDown = true;
+            //when this turns to 0, will not show actual time left, may want to fix this later
+        }
+        countDownTimer(time,countDown);
+        setReminder(time,countDown);
     }
 
-    //don't even bother if more time left than limit
-    var VIPtimeLeft = VIPlength - new Date() + tempVIPstartTime;
-    if (VIPtab === tabId && time < VIPtimeLeft) {
-        time = VIPtimeLeft;
-        countDown = true;
-        //when this turns to 0, will not show actual time left, may want to fix this later
+    function countDownTimer(time,countDown) {
+        clearTimeout(displayTimeStarter);
+        clearInterval(displayTimer);
+        if (time < 0) {
+            time = 0;
+        }
+        setBadgeText(time);
+        if (countDown && time > 0) {
+            var delay = (time-1)%1000 + 1;
+            displayTimeStarter = setTimeout(function() {
+                time -= delay;
+                if (countDown && time >= 0) {
+                    setBadgeText(time);
+                    displayTimer = setInterval(function() {
+                        time -= 1000;
+                        if (countDown && time >= 0) {
+                            setBadgeText(time);
+                        } else {
+                            clearInterval(displayTimer);
+                        }
+                    },1000);
+                }
+            },delay);
+        }
     }
-    countDownTimer(time,countDown);
-    setReminder(time,countDown);
-}
 
-function countDownTimer(time,countDown) {
-    clearTimeout(displayTimeStarter);
-    clearInterval(displayTimer);
-    if (time < 0) {
-        time = 0;
-    }
-    setBadgeText(time);
-    if (countDown && time > 0) {
-        var delay = (time-1)%1000 + 1;
-        displayTimeStarter = setTimeout(function() {
-            time -= delay;
-            if (countDown && time >= 0) {
-                setBadgeText(time);
-                displayTimer = setInterval(function() {
-                    time -= 1000;
-                    if (countDown && time >= 0) {
-                        setBadgeText(time);
-                    } else {
-                        clearInterval(displayTimer);
-                    }
-                },1000);
+    function setBadgeText(time) {
+        chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
+        function MinutesSecondsFormat(milli) {
+            if (milli === Infinity) {
+                //infinity symbol
+                return "\u221e";
+            } else {
+                var secs = Math.ceil(milli/1000);
+                return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
             }
-        },delay);
-    }
-}
-
-function setBadgeText(time) {
-    chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
-}
-
-function MinutesSecondsFormat(milli) {
-    if (milli === Infinity) {
-        //infinity symbol
-        return "\u221e";
-    } else {
-        var secs = Math.ceil(milli/1000);
-        return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
-    }
-}
-
-//sets a reminder when timeLeft reaches 0, and blocks site
-function setReminder(time,countDown) {
-    clearTimeout(alarm);
-    unblockSite();
-    if (countDown && wastingTime === 1) {
-        if (time < tolerance) {
-            time = tolerance;
         }
-        alarm = setTimeout(function() {
-            blockSite(tabId);
-        },time);
     }
-}
 
-function blockSite(tabId) {
-    //all changes in tabs should be caught, but in case, check
-    if (this.tabId === tabId) {
-        //use a wrapper in case tabId gets changed in the meantime, may not be needed
-        var thisUrl = url;
-        chrome.tabs.executeScript(tabId,{file:"/lib/jquery.min.js"},function(){
-            chrome.tabs.executeScript(tabId,{file:"/js/content.js"},function(){
-                blockedTab = tabId;
-                storeRedirect(thisUrl);
+    //sets a reminder when timeLeft reaches 0, and blocks site
+    function setReminder(time,countDown) {
+        clearTimeout(alarm);
+        unblockSite();
+        if (countDown && wastingTime === 1) {
+            if (time < tolerance) {
+                time = tolerance;
+            }
+            alarm = setTimeout(function() {
+                blockSite(tabId);
+            },time);
+        }
+    }
+    return timeLeftOutput;
+})();
+
+var blockSite = (function() {
+    function blockSite(tabId) {
+        //all changes in tabs should be caught, but in case, check
+        if (this.tabId === tabId) {
+            //use a wrapper in case tabId gets changed in the meantime, may not be needed
+            var thisUrl = url;
+            chrome.tabs.executeScript(tabId,{file:"/lib/jquery.min.js"},function(){
+                chrome.tabs.executeScript(tabId,{file:"/js/content.js"},function(){
+                    blockedTab = tabId;
+                    storeRedirect(thisUrl);
+                });
             });
-        });
-    } else {
-        throw("uncaught change in tabId");
-    }
-}
-
-function storeRedirect(url) {
-    chrome.storage.sync.get("redirects", function(items) {
-        var redirects = items.redirects;
-        if (!redirects) {
-            redirects = [];
-        }
-        var newEntry = [+new Date(),url];
-        //approximately the max size per item, slightly smaller
-        //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
-        //can check getBytesInUse, but seems unnecessary
-        var limit = 7000;
-        //if the new entry is larger than it can possibly be stored, shouldn't ever happen
-        //to make sure we don't get into an infinite loop
-        if (JSON.stringify(newEntry).length > limit) {
-            throw("can't store the following, too large:");
-            log(newEntry);
-        } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
-            moveRedirect(redirects,url);
         } else {
-            redirects.push(newEntry);
-            chrome.storage.sync.set({"redirects": redirects});
+            throw("uncaught change in tabId");
         }
-    });
-}
+    }
 
-function moveRedirect(redirects,url) {
-    chrome.storage.sync.get("redirectIndexes", function(items) {
-        var redirectIndexes = items.redirectIndexes;
-        if (!redirectIndexes) {
-            redirectIndexes = [];
-        }
-        var redirectName = "redirect_" + redirectIndexes.length;
-        redirectIndexes.push(redirectName);
-        var setObj = {redirectIndexes:redirectIndexes,redirects:[]};
-        setObj[redirectName] = redirects;
-        chrome.storage.sync.set(setObj);
-        storeRedirect(url);
-    });
-}
+    function storeRedirect(url) {
+        chrome.storage.sync.get("redirects", function(items) {
+            var redirects = items.redirects;
+            if (!redirects) {
+                redirects = [];
+            }
+            var newEntry = [+new Date(),url];
+            //approximately the max size per item, slightly smaller
+            //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
+            //can check getBytesInUse, but seems unnecessary
+            var limit = 7000;
+            //if the new entry is larger than it can possibly be stored, shouldn't ever happen
+            //to make sure we don't get into an infinite loop
+            if (JSON.stringify(newEntry).length > limit) {
+                throw("can't store the following, too large:");
+                log(newEntry);
+            } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
+                moveRedirect(redirects,url);
+            } else {
+                redirects.push(newEntry);
+                chrome.storage.sync.set({"redirects": redirects});
+            }
+        });
+    }
+
+    function moveRedirect(redirects,url) {
+        chrome.storage.sync.get("redirectIndexes", function(items) {
+            var redirectIndexes = items.redirectIndexes;
+            if (!redirectIndexes) {
+                redirectIndexes = [];
+            }
+            var redirectName = "redirect_" + redirectIndexes.length;
+            redirectIndexes.push(redirectName);
+            var setObj = {redirectIndexes:redirectIndexes,redirects:[]};
+            setObj[redirectName] = redirects;
+            chrome.storage.sync.set(setObj);
+            storeRedirect(url);
+        });
+    }
+    return blockSite;
+});
 
 function unblockSite() {
     if (blockedTab !== -2) {
