@@ -533,6 +533,13 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 case "reset":
                     restartTimeLine();
                     break;
+                case "newPage":
+                    $("#" + getTimeLineId(-1)).removeClass("wasting" + wastingTime).addClass("wasting0");
+                    startTime = background.startTime;
+                    wastingTime = background.wastingTime;
+                    timeLineOffset++;
+                    addTimeLine(-1,true,new Date() - startTime,wastingTime);
+                    break;
             }
         }
     });
