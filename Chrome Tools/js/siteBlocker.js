@@ -349,7 +349,7 @@ var blockSite = (function() {
         });
     }
     return blockSite;
-});
+})();
 
 function unblockSite() {
     if (blockedTab !== -2) {
