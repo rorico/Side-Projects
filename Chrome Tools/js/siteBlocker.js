@@ -56,7 +56,7 @@ function setupClass() {
 //for before class, show how much time left
 function classReminder(delay) {
     if (classes.length) {
-        setTimer(function(){
+        setTimer(function() {
             var time = classStart - new Date() - timeLeft;
             //if timing is off
             if (time > 0) {
@@ -210,7 +210,7 @@ function changeTimeLeft(change) {
 }
 
 //shows effective timeLeft from this moment on
-var timeLeftOutput = (function(){
+var timeLeftOutput = (function() {
     function timeLeftOutput() {
         //have the option to update browserAction every time, but accuracy isn't completely needed
         sendRequest("timer",timeLeft);
@@ -298,8 +298,8 @@ var blockSite = (function() {
         if (this.tabId === tabId) {
             //use a wrapper in case tabId gets changed in the meantime, may not be needed
             var thisUrl = url;
-            chrome.tabs.executeScript(tabId,{file:"/lib/jquery.min.js"},function(){
-                chrome.tabs.executeScript(tabId,{file:"/js/content.js"},function(){
+            chrome.tabs.executeScript(tabId,{file:"/lib/jquery.min.js"},function() {
+                chrome.tabs.executeScript(tabId,{file:"/js/content.js"},function() {
                     blockedTab = tabId;
                     storeRedirect(thisUrl);
                 });
@@ -433,7 +433,7 @@ function VIP() {
 function tempVIP() {
     makeCurrentTabVIP();
     tempVIPstartTime = +new Date();
-    tempVIPtimer = setTimeout(function(){
+    tempVIPtimer = setTimeout(function() {
         VIPtab = -1;
         tempVIPstartTime = 0;
     },VIPlength);

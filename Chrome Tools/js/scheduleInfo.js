@@ -17,7 +17,7 @@ function setScheduleInfo() {
     });
 }
 
-var todaySchedule = (function(){
+var todaySchedule = (function() {
     function todaySchedule(date) {
         var today = [];
         for (var i = 0 ; i < scheduleInfo.length ; i++) {

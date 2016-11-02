@@ -52,7 +52,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     //due to alt tabbing out of game to close alarm multiple times and expecting it not to be open
     //if browserAction becomes more than alarm, remove this
     //consider also making a certain time after last action
-    setTimeout(function(){
+    setTimeout(function() {
         window.close();
     },60000);//1 minute
 
@@ -245,7 +245,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         logHolder.html(allLogEle);
         //20 is 2 * margin
         logHolder.outerWidth($("body").width() - 20);
-        logHolder.one("click",function(){
+        logHolder.one("click",function() {
             //maybe want to just change instead of remove
             this.remove();
             alertLogs();
@@ -469,7 +469,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         for (var i = 0 ; i < 18 ; i++) {
             random += possible.charAt(Math.floor(Math.random() * possible.length));
         }
-        currentPhrase = [random,function(){sendRequest("VIP");}];
+        currentPhrase = [random,function() {sendRequest("VIP");}];
         allowMistakes = true;
         startShowHotkey(random,false);
     }

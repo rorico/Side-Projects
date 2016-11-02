@@ -29,7 +29,7 @@ function setSleepAlarm() {
         date.setHours(sleepAlarmStart);
         date.setMinutes(0);
     }
-    setTimer(function(){
+    setTimer(function() {
         setAlarm(0,1);
         setSleepAlarm();
     },date - new Date());
