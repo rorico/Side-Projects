@@ -114,7 +114,7 @@ function startTimeLine() {
             handleNewPage(activeTab.url,activeTab.title);
             tabId = activeTab.tabId;
         } else {
-            throw("window empty tab");
+            throw Error("window empty tab");
         }
     });
     returnTime(timeLineLength - timeLeft);
@@ -147,7 +147,7 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
                     handleNewPage(activeTab.url,activeTab.title);
                     tabId = activeTab.tabId;
                 } else {
-                    throw("window empty tab");
+                    throw Error("window empty tab");
                 }
             });
         }
@@ -202,10 +202,10 @@ function modifyTimeLine(action,load) {
                 changeTimeLeft(timeLine[load][0]);
             }
         } else {
-            throw("change to timeline out of bounds" + load + "/" + timeLine.length);
+            throw Error("change to timeline out of bounds" + load + "/" + timeLine.length);
         }
     } else {
-        throw("timeLine action incorrect");
+        throw Error("timeLine action incorrect");
     }
 }
 
@@ -311,7 +311,7 @@ var blockSite = (function() {
                 });
             });
         } else {
-            throw("uncaught change in tabId");
+            throw Error("uncaught change in tabId");
         }
     }
 
@@ -329,7 +329,7 @@ var blockSite = (function() {
             //if the new entry is larger than it can possibly be stored, shouldn't ever happen
             //to make sure we don't get into an infinite loop
             if (JSON.stringify(newEntry).length > limit) {
-                throw("can't store the following, too large:");
+                throw Error("can't store the following, too large:");
                 log(newEntry);
             } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
                 moveRedirect(redirects,url);
