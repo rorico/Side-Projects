@@ -59,8 +59,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     function restartTimeLine() {
         clearInterval(updateTimeLineInterval);
         clearInterval(timeCurrentInterval);
-        hover = false;
-        click = false;
 
         //these values will probably be update from background when called
         timeLeft = background.timeLeft;
@@ -182,31 +180,24 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function updateTimeLine() {
-        var parentWidth = $("#timeLine").width();
         var delay = timeLineLength/parentWidth;
         updateTimeLineInterval = setInterval(function() {
             var newEle = $("#timeLine div:last-child");
-            var oldestEle = $("#timeLine div:first-child");
-            if (!newEle.hasClass("timeLineBlock") && newEle.width() + 1 >= 2) {
+            newEle.width(newEle.width() + 1);
+            if (!newEle.hasClass("timeLineBlock") && newEle.width() >= 3) {
                 newEle.addClass("timeLineBlock");
             }
-            newEle.width(newEle.width() + 1);
+            var oldestEle = $("#timeLine div:first-child");
             //oldest has 0 width, remove
-            while(!oldestEle.hasClass("timeLineBlock") && oldestEle.width() <= 0) {
+            while(oldestEle.width() <= 0) {
                 oldestEle.remove();
                 oldestEle = $("#timeLine div:first-child");
             }
-            if (oldestEle.hasClass("timeLineBlock") && oldestEle.width() - 1 <= 0) {
+            oldestEle.width(oldestEle.width() - 1);
+            if (oldestEle.hasClass("timeLineBlock") && oldestEle.width() < 3) {
                 oldestEle.removeClass("timeLineBlock");
             }
-            oldestEle.width(oldestEle.width() - 1);
         },delay);
-        timeCurrentInterval = setInterval(function() {
-            timeCurrent += 1000;
-            if (!hover) {
-                $("#info").html(formatInfo(url,timeCurrent,title));
-            }
-        },1000);
     }
 
     function formatInfo(url,time,title) {
