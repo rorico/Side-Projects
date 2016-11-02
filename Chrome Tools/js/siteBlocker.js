@@ -189,10 +189,7 @@ function modifyTimeLine(action,load) {
     } else if (action === "remove") {
         timeLine.splice(load[0],load[1]);
     } else if (action === "change") {
-        if (load === -1) {
-            sendRequest("change",[load,wastingTime]);
-            wastingTime = 0;
-        } else if (load < timeLine.length) {
+        if (load < timeLine.length || load < 0) {
             sendRequest("change",[load,timeLine[load][1]]);
             if (timeLine[load][1]) {
                 timeLine[load][1] = 0;
@@ -439,7 +436,15 @@ function tempVIP() {
 }
 
 function change(timeLineIndex) {
+    if (timeLineIndex === -1) {
+        //change the current one and restart counter
+        wastingTime = 0;
+        handleNewPage(url,title);
+        //to browserAction, assume only way to get newPage while its open
+        sendRequest("newPage");
+    } else {
         modifyTimeLine("change",timeLineIndex);
+    }
     clearTimer(returnTimer);
     returnTime();
     timeLeftOutput();

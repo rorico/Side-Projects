@@ -528,11 +528,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     break;
                 case "change":
                     var input = a.input;
-                    $("#timeLine" + input[0]).removeClass("wasting" + input[1]).addClass("wasting0");
-                    //if change isn't just to 0, will need to change this
-                    if (input[0] === -1) {
-                        wastingTime = 0;
-                    }
+                    $("#" + getTimeLineId(input[0])).removeClass("wasting" + input[1]).addClass("wasting0");
                     break;
                 case "reset":
                     restartTimeLine();
