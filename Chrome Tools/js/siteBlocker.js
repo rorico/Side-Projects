@@ -14,7 +14,6 @@ if (0) { // if in testing mode
 }
 var timeLeft = startingTimeLeft;
 var timeLine = [];
-var timeLineAsync = true;
 var alarm = -1;
 var returnTimer;
 var displayTimer = -1;
@@ -159,7 +158,7 @@ function handleNewPage(newUrl,newTitle) {
     if (timeSpent < tolerance) {
         wastingTime = 0;
     }
-    handleTimeLineAsync("add",[timeSpent,wastingTime,url,title,startTime]);
+    modifyTimeLine("add",[timeSpent,wastingTime,url,title,startTime]);
     if (wastingTime) {
         changeTimeLeft(-timeSpent);
     }
@@ -183,12 +182,8 @@ function matchesURL(url) {
     return 0;
 }
 
-//used to make sure there is no async problems, likely not needed
-function handleTimeLineAsync(action,load) {
-    while(!timeLineAsync) {
-        throw("didn't think this situation would ever happen, good thing I coded this");
-    }
-    timeLineAsync = false;
+//timeLine acts as an object
+function modifyTimeLine(action,load) {
     if (action === "add") {
         timeLine.unshift(load);
     } else if (action === "remove") {
@@ -201,7 +196,7 @@ function handleTimeLineAsync(action,load) {
             sendRequest("change",[load,timeLine[load][1]]);
             if (timeLine[load][1]) {
                 timeLine[load][1] = 0;
-                changeTimeLeft(timeLine[load][0]);   
+                changeTimeLeft(timeLine[load][0]);
             }
         } else {
             throw("change to timeline out of bounds" + load + "/" + timeLine.length);
@@ -209,7 +204,6 @@ function handleTimeLineAsync(action,load) {
     } else {
         throw("timeLine action incorrect");
     }
-    timeLineAsync = true;
 }
 
 function changeTimeLeft(change) {
@@ -386,7 +380,7 @@ function returnTime(delay) {
             }
         }
         if (cnt) {
-            handleTimeLineAsync("remove",[endingIndex,cnt]);
+            modifyTimeLine("remove",[endingIndex,cnt]);
         }
         //return time and calculate when to call function again
         //ideally check again when can return time again
@@ -396,7 +390,7 @@ function returnTime(delay) {
             if (timeLine[i][1]) {
                 if (timeLeft - currentTimeOffset > timeTotal) {
                     changed.push([i,timeLine[i][1],timeLine[i][0]]);
-                    handleTimeLineAsync("change",i);
+                    modifyTimeLine("change",i);
                 } else {
                     completed = true;
                     break;
@@ -445,7 +439,7 @@ function tempVIP() {
 }
 
 function change(timeLineIndex) {
-    handleTimeLineAsync("change",timeLineIndex);
+        modifyTimeLine("change",timeLineIndex);
     clearTimer(returnTimer);
     returnTime();
     timeLeftOutput();
