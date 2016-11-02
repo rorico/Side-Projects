@@ -41,6 +41,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         //fill in rest
         addTimeLine(-2,false);
     }
+    displayInfo(-1);
     updateTimeLine();
 
     var logs = background.allLogs;
