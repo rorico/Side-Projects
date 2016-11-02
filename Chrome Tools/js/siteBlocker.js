@@ -108,8 +108,14 @@ function inClass() {
 }
 
 function startTimeLine() {
-    chrome.tabs.getSelected(chrome.windows.WINDOW_ID_CURRENT, function(tab) {
-        handleNewPage(tab.url,tab.title);
+    chrome.tabs.query({windowId:chrome.windows.WINDOW_ID_CURRENT,active:true}, function(tabs) {
+        if (tabs.length) {
+            var activeTab = tabs[0];
+            handleNewPage(activeTab.url,activeTab.title);
+            tabId = activeTab.tabId;
+        } else {
+            throw("window empty tab");
+        }
     });
     returnTime(timeLineLength - timeLeft);
 }
@@ -141,7 +147,7 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
                     handleNewPage(activeTab.url,activeTab.title);
                     tabId = activeTab.tabId;
                 } else {
-                    throw("window empty tab")
+                    throw("window empty tab");
                 }
             });
         }
