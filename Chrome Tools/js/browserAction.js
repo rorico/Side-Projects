@@ -27,8 +27,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var parentWidth = 360;      //keep unchanged
     var timeLineLeft = parentWidth;
     var offset = 0;
-    var hover = false;
-    var click = false;
+    var timeLineOffset = 0;
     var currentTimePiece = -1;
     var updateTimeLineInterval = -1;
     var timeCurrentInterval = -1;
