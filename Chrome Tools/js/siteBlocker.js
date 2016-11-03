@@ -97,7 +97,7 @@ function militaryToUTC(time) {
 }
 
 function UTCtoMilitary(time) {
-    return time.getHours()*100 + time.getMinutes()/0.6;;
+    return time.getHours()*100 + time.getMinutes()/0.6;
 }
 
 function inClass() {
@@ -111,7 +111,7 @@ function startTimeLine() {
             handleNewPage(activeTab.url,activeTab.title);
             tabId = activeTab.tabId;
         } else {
-            throw Error("window empty tab");
+            log("window empty tab");
         }
     });
     returnTime(timeLineLength - timeLeft);
@@ -144,7 +144,7 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
                     handleNewPage(activeTab.url,activeTab.title);
                     tabId = activeTab.tabId;
                 } else {
-                    throw Error("window empty tab");
+                    log("window empty tab");
                 }
             });
         }
@@ -199,10 +199,10 @@ function modifyTimeLine(action,load) {
                 changeTimeLeft(timeLine[load][0]);
             }
         } else {
-            throw Error("change to timeline out of bounds" + load + "/" + timeLine.length);
+            log("change to timeline out of bounds" + load + "/" + timeLine.length);
         }
     } else {
-        throw Error("timeLine action incorrect");
+        log("timeLine action incorrect");
     }
 }
 
@@ -273,7 +273,7 @@ var timeLeftOutput = (function() {
     function setBadgeText(time) {
         chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
     }
-    
+
     function MinutesSecondsFormat(milli) {
         if (milli === Infinity) {
             //infinity symbol
@@ -313,7 +313,7 @@ var blockSite = (function() {
                 });
             });
         } else {
-            throw Error("uncaught change in tabId");
+            log("uncaught change in tabId");
         }
     }
 
@@ -331,7 +331,7 @@ var blockSite = (function() {
             //if the new entry is larger than it can possibly be stored, shouldn't ever happen
             //to make sure we don't get into an infinite loop
             if (JSON.stringify(newEntry).length > limit) {
-                throw Error("can't store the following, too large:");
+                log("can't store the following, too large:");
                 log(newEntry);
             } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
                 moveRedirect(redirects,url);

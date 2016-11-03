@@ -21,6 +21,7 @@ function removeLog(index) {
     }
 }
 
+//this doesn't actually seem to work, but doesn't harm
 window.onerror = function(message, source, lineno, colno, error){
     addLog(message);
 };
