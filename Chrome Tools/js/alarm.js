@@ -66,6 +66,7 @@ function ringAlarm(alarmNumber,type) {
     alarms[alarmNumber][0] = 2;
     playAlarmCheck = true;
     sendRequest("ringing",alarmNumber);
+    audio.play();
     var interval = setInterval(function() {
         if (playAlarmCheck) {
             audio.play();
