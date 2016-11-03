@@ -18,6 +18,7 @@ function setScheduleInfo() {
 }
 
 var todaySchedule = (function() {
+    return todaySchedule;
     function todaySchedule(date) {
         var today = [];
         for (var i = 0 ; i < scheduleInfo.length ; i++) {
@@ -72,8 +73,6 @@ var todaySchedule = (function() {
         if (a[0][1] > b[0][1]) return 1;
         return 0;
     }
-
-    return todaySchedule;
 })();
 
 /* used to add a timeslot somewhere, not used yet

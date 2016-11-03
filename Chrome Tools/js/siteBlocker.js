@@ -14,10 +14,7 @@ if (0) { // if in testing mode
 }
 var timeLeft = startingTimeLeft;
 var timeLine = [];
-var alarm = -1;
 var returnTimer;
-var displayTimer = -1;
-var displayTimeStarter = -1;
 var VIPtab = -1;
 var tempVIPtimer = -1;
 var tempVIPstartTime = 0;
@@ -217,6 +214,10 @@ function changeTimeLeft(change) {
 
 //shows effective timeLeft from this moment on
 var timeLeftOutput = (function() {
+    var alarm = -1;
+    var displayTimer = -1;
+    var displayTimeStarter = -1;
+    return timeLeftOutput;
     function timeLeftOutput() {
         //have the option to update browserAction every time, but accuracy isn't completely needed
         sendRequest("timer",timeLeft);
@@ -295,10 +296,10 @@ var timeLeftOutput = (function() {
             },time);
         }
     }
-    return timeLeftOutput;
 })();
 
 var blockSite = (function() {
+    return blockSite;
     function blockSite(tabId) {
         //all changes in tabs should be caught, but in case, check
         if (this.tabId === tabId) {
@@ -354,7 +355,6 @@ var blockSite = (function() {
             storeRedirect(url);
         });
     }
-    return blockSite;
 })();
 
 function unblockSite() {
@@ -416,6 +416,15 @@ function returnTime(delay) {
 }
 
 ///////////// Requests from outside ///////////
+function resetTime() {
+    clearTimer(returnTimer);
+    startTime = new Date();
+    timeLeft = startingTimeLeft;
+    timeLine = [];
+    startTimeLine();
+    sendRequest("reset");
+}
+
 function resetTime() {
     clearTimer(returnTimer);
     startTime = new Date();
