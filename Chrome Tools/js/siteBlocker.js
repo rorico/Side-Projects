@@ -272,14 +272,15 @@ var timeLeftOutput = (function() {
 
     function setBadgeText(time) {
         chrome.browserAction.setBadgeText({text:MinutesSecondsFormat(time)});
-        function MinutesSecondsFormat(milli) {
-            if (milli === Infinity) {
-                //infinity symbol
-                return "\u221e";
-            } else {
-                var secs = Math.ceil(milli/1000);
-                return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
-            }
+    }
+    
+    function MinutesSecondsFormat(milli) {
+        if (milli === Infinity) {
+            //infinity symbol
+            return "\u221e";
+        } else {
+            var secs = Math.ceil(milli/1000);
+            return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
         }
     }
 
