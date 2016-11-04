@@ -54,6 +54,27 @@ fs.readFile(htmlFolder + "/background.html", function (err, data) {
             });
         }
     });
+    fs.readdir(htmlFolder, function(err, files) {
+        for (var j = 0 ; j < files.length ; j++) {
+            //remove leading js/ if jsFolder changes, change
+            if (files[j] === "background.html") {
+                files.splice(j,1);
+                break;
+            }
+        }
+        for (var i = 0 ; i < files.length ; i++) {
+        	fs.readFile(htmlFolder + "/" + files[i], function (err, data) {
+			    if (err) {
+			      return console.error(err);
+			    }
+	            fs.writeFile(minifedFolder + "/" + htmlFolder + "/" + files[i], data.toString, function() {
+	                if (err) {
+	                  return console.error(err);
+	                }
+	            });
+        	});
+        }
+    });
 });
 
 fs.readdir(cssFolder, function(err, files) {
