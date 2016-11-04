@@ -4,6 +4,7 @@ const fs = require('fs');
 
 var minifedFolder = "minified";
 var jsFolder = "js";
+var cssFolder = "css";
 var htmlFolder = "html";
 
 fs.readFile(htmlFolder + "/background.html", function (err, data) {
@@ -55,4 +56,13 @@ fs.readFile(htmlFolder + "/background.html", function (err, data) {
     });
 });
 
-
+fs.readdir(cssFolder, function(err, files) {
+    for (var i = 0 ; i < files.length ; i++) {
+        var mini = Uglifycss.processFiles([cssFolder + "/" + files[i]]);
+        fs.writeFile(minifedFolder + "/" + cssFolder + "/" + files[i], mini, function() {
+            if (err) {
+              return console.error(err);
+            }
+        });
+    }
+});
