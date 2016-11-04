@@ -1,5 +1,4 @@
 //Creates a copy of Chrome Tools while minifying the js and css
-
 const UglifyJS = require("uglify-js");
 const Uglifycss = require("uglifycss");
 const fs = require('fs');
@@ -52,13 +51,14 @@ fs.readFile(htmlFolder + "/background.html", function (err, data) {
         filenames.push(result[1].substring(1)); //remove leading slash
         startIndex = result.index;
     }
-    var result = UglifyJS.minify(filenames,{mangle:{toplevel:true},output:{ascii_only:true}});
+    //like to set mangle:{toplevel:true}, but can't due to browserAction and schedule requesting specific variables
+    var result = UglifyJS.minify(filenames,{output:{ascii_only:true}});
     fs.writeFile(minifedFolder + "/" + jsFolder + "/" + backgroundFileName, result.code, function() {
         if (err) {
           return console.error(err);
         }
     });
-    contents = contents.substring(0,startIndex) + "<script src=\"/" + jsFolder + "/" + backgroundFileName + "\"></script>" + contents.substring(startIndex);
+    contents = contents.substring(0,startIndex) + "<script src=\"/" + jsFolder + "/" + backgroundFileName + "\"></script>\n" + contents.substring(startIndex);
     fs.writeFile(minifedFolder + "/" + htmlFolder + "/background.html", contents, function() {
         if (err) {
           return console.error(err);
@@ -76,7 +76,7 @@ fs.readFile(htmlFolder + "/background.html", function (err, data) {
             }
         }
         for (var i = 0 ; i < files.length ; i++) {
-            var mini = UglifyJS.minify(filenames,{mangle:{toplevel:true},output:{ascii_only:true}});
+            var mini = UglifyJS.minify(jsFolder + "/" + files[i],{output:{ascii_only:true}});
             fs.writeFile(minifedFolder + "/" + jsFolder + "/" + files[i], mini.code, function() {
                 if (err) {
                   return console.error(err);
