@@ -334,7 +334,7 @@ var setupClass;
             } else {
                 log("uncaught change in tabId");
             }
-        }
+        };
 
 
         unblockSite = function() {
@@ -342,7 +342,7 @@ var setupClass;
                 chrome.tabs.sendMessage(blockedTab,{action:"unblock"});
                 blockedTab = -2;
             }
-        }
+        };
 
         function storeRedirect(url) {
             chrome.storage.sync.get("redirects", function(items) {
@@ -444,7 +444,7 @@ var setupClass;
         timeLine = [];
         startTimeLine();
         sendRequest("reset");
-    }
+    };
 
     function makeCurrentTabVIP() {
         clearTimeout(tempVIPtimer);
@@ -455,7 +455,7 @@ var setupClass;
         makeCurrentTabVIP();
         tempVIPstartTime = 0;
         timeLeftOutput();
-    }
+    };
 
     tempVIP = function() {
         makeCurrentTabVIP();
@@ -465,7 +465,7 @@ var setupClass;
             tempVIPstartTime = 0;
         },VIPlength);
         timeLeftOutput();
-    }
+    };
 
     change = function(timeLineIndex) {
         if (timeLineIndex === -1) {
@@ -480,7 +480,7 @@ var setupClass;
         clearTimer(returnTimer);
         returnTime();
         timeLeftOutput();
-    }
+    };
     ///////////////////////////////////////////////
 
     //for displaying in an open browser action
