@@ -69,6 +69,18 @@ function ringAlarm(alarmNumber,type) {
     playAlarmCheck = true;
     sendRequest("ringing",alarmNumber);
     audio.play();
+    //sleep auto snoozes
+    if (type === 1) {
+        //hold local copy
+        var timestamp = alarms[alarmNumber][1];
+        setInterval(function(){
+            //check if alarm is still ringing
+            if (timestamp === alarms[alarmNumber][1] && alarms[alarmNumber][0] === 2) {
+                removeAlarm(alarmNumber,type);
+                setAlarm(5,1);
+            }
+        },5000);//5 seconds
+    }
 }
 
 //returns true if alarm is removed
