@@ -69,14 +69,6 @@ function ringAlarm(alarmNumber,type) {
     playAlarmCheck = true;
     sendRequest("ringing",alarmNumber);
     audio.play();
-    /*var interval = setInterval(function() {
-        if (playAlarmCheck) {
-            audio.play();
-        } else {
-            clearInterval(interval);
-        }
-    },audioLength + 300);*/
-    //cl
 }
 
 //returns true if alarm is removed
