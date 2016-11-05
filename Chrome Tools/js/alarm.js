@@ -12,7 +12,6 @@ var alarmTypeCnt = [0,0,0];
 var alarmTypeMax = -1;
 var audio = new Audio("/alarm.mp3");
 audio.loop = true;
-var audioLength = audio.duration;
 var playAlarmCheck = false;   //true if any alarm is currently ringing
 
 chrome.browserAction.setBadgeBackgroundColor({color:defaultColor});

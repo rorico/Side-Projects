@@ -38,7 +38,6 @@ function clearTimer(handlerId) {
         if (thisHandle[0]) {
             //want a better way to do this
             //can use another array, but will likely have more overhead due to low use of this
-            var first = false;
             for (var i = 0 ; i < timerQueue.length ; i++) {
                 if (handlerId === timerQueue[i][0]) {
                     timerQueue.splice(i,1);
