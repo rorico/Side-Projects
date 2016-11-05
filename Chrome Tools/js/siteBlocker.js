@@ -64,7 +64,7 @@ var setupClass;
             classStart = militaryToUTC(classes[0][0]);
             classReminder(classStart - now - startingTimeLeft);
         }
-    }
+    };
 
     //for before class, show how much time left
     function classReminder(delay) {
