@@ -11,6 +11,8 @@ var ringingCnt = 0;
 var alarmTypeCnt = [0,0,0];
 var alarmTypeMax = -1;
 var audio = new Audio("/alarm.mp3");
+audio.loop = true;
+var audioLength = audio.duration;
 var playAlarmCheck = false;   //true if any alarm is currently ringing
 
 chrome.browserAction.setBadgeBackgroundColor({color:defaultColor});
@@ -67,13 +69,14 @@ function ringAlarm(alarmNumber,type) {
     playAlarmCheck = true;
     sendRequest("ringing",alarmNumber);
     audio.play();
-    var interval = setInterval(function() {
+    /*var interval = setInterval(function() {
         if (playAlarmCheck) {
             audio.play();
         } else {
             clearInterval(interval);
         }
-    },3000);
+    },audioLength + 300);*/
+    //cl
 }
 
 //returns true if alarm is removed
