@@ -21,7 +21,6 @@ var setupClass;
     var VIPtab = -1;
     var tempVIPtimer = -1;
     var tempVIPstartTime = 0;
-    var blockedTab = -2;
     var classes = [];
     var classStart = Infinity;
     //sites that will block after time spent
@@ -39,12 +38,16 @@ var setupClass;
     var startingTimeLeft = 300000; // 5 mins
     var VIPlength = 20000; // 20s
     var tolerance = 2000; // 2s
-    if (0) { // if in testing mode
+    if (1) { // if in testing mode
         timeLineLength = 120000; // 2 mins
         startingTimeLeft = 60000; // 1 mins
     }
     timeLeft = startingTimeLeft;
     
+    //functions in their own closure
+    var blockSite;
+    var unblockSite;
+
     //set-up first time when opened
     startTimeLine();
 
@@ -315,9 +318,9 @@ var setupClass;
         }
     })();
 
-    var blockSite = (function() {
-        return blockSite;
-        function blockSite(tab) {
+    (function() {
+        var blockedTab = -2;
+        blockSite = function(tab) {
             //all changes in tabs should be caught, but in case, check
             if (tab === tabId) {
                 //use a wrapper in case tabId gets changed in the meantime, may not be needed
@@ -330,6 +333,14 @@ var setupClass;
                 });
             } else {
                 log("uncaught change in tabId");
+            }
+        }
+
+
+        unblockSite = function() {
+            if (blockedTab !== -2) {
+                chrome.tabs.sendMessage(blockedTab,{action:"unblock"});
+                blockedTab = -2;
             }
         }
 
@@ -373,13 +384,6 @@ var setupClass;
             });
         }
     })();
-
-    function unblockSite() {
-        if (blockedTab !== -2) {
-            chrome.tabs.sendMessage(blockedTab,{action:"unblock"});
-            blockedTab = -2;
-        }
-    }
 
     function returnTime(delay) {
         returnTimer = setTimer(function() {
