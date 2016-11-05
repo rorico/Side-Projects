@@ -100,10 +100,6 @@ function UTCtoMilitary(time) {
     return time.getHours()*100 + time.getMinutes()/0.6;
 }
 
-function inClass() {
-    return new Date() > classStart;
-}
-
 function startTimeLine() {
     chrome.tabs.query({windowId:chrome.windows.WINDOW_ID_CURRENT,active:true}, function(tabs) {
         if (tabs.length) {
@@ -417,15 +413,6 @@ function returnTime(delay) {
 }
 
 ///////////// Requests from outside ///////////
-function resetTime() {
-    clearTimer(returnTimer);
-    startTime = new Date();
-    timeLeft = startingTimeLeft;
-    timeLine = [];
-    startTimeLine();
-    sendRequest("reset");
-}
-
 function resetTime() {
     clearTimer(returnTimer);
     startTime = new Date();
