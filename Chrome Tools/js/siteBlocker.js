@@ -227,10 +227,12 @@ var setupClass;
         var displayTimer = -1;
         var displayTimeStarter = -1;
         return timeLeftOutput;
+        //ideally, shows lowest timeLeft at all points
         function timeLeftOutput() {
             //have the option to update browserAction every time, but accuracy isn't completely needed
             sendRequest("timer",timeLeft);
             var time = timeLeft - (wastingTime ? new Date() - startTime : 0);
+            var endTime = 0;
             var countDown = wastingTime;
 
             if (VIPtab === tabId && !tempVIPstartTime) {
@@ -245,30 +247,35 @@ var setupClass;
             //don't even bother if more time left than limit
             var VIPtimeLeft = VIPlength - new Date() + tempVIPstartTime;
             if (VIPtab === tabId && time < VIPtimeLeft) {
+                //if not wasting time, vip will countDown, but stop when reach timeLeft
+                if (!countDown && !wastingTime) {
+                    endTime = time;
+                }
                 time = VIPtimeLeft;
                 countDown = true;
                 //when this turns to 0, will not show actual time left, may want to fix this later
             }
-            countDownTimer(time,countDown);
+            countDownTimer(time,endTime,countDown);
             setReminder(time,countDown);
         }
 
-        function countDownTimer(time,countDown) {
+        function countDownTimer(time,endTime,countDown) {
             clearTimeout(displayTimeStarter);
             clearInterval(displayTimer);
+            //don't have negative time
             if (time < 0) {
                 time = 0;
             }
             setBadgeText(time);
-            if (countDown && time > 0) {
+            if (countDown && time > endTime) {
                 var delay = (time-1)%1000 + 1;
                 displayTimeStarter = setTimeout(function() {
                     time -= delay;
-                    if (countDown && time >= 0) {
+                    if (countDown && time >= endTime) {
                         setBadgeText(time);
                         displayTimer = setInterval(function() {
                             time -= 1000;
-                            if (countDown && time >= 0) {
+                            if (countDown && time >= endTime) {
                                 setBadgeText(time);
                             } else {
                                 clearInterval(displayTimer);
@@ -307,7 +314,6 @@ var setupClass;
             }
         }
     })();
-
 
     var blockSite = (function() {
         return blockSite;
