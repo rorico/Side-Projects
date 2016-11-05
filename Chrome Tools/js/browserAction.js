@@ -12,7 +12,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             showRinging(i);
         }
     }
-    var timeLineLength = background.timeLineLength;
     var timeLeft = background.timeLeft;
     var startTime = background.startTime;
     var wastingTime = background.wastingTime;
@@ -24,6 +23,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     $("#info").html(formatInfo(url,timeCurrent,title));
     var timeLine = background.timeLine;
+    var timeLineLength = background.timeLineLength;
     var parentWidth = 360;      //keep unchanged
     var timeLineLeft = parentWidth;
     var offset = 0;
