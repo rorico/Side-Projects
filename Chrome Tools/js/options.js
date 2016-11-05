@@ -1,5 +1,5 @@
 chrome.storage.sync.get("redirectIndexes", function(item) {
-    var nameLevel = 2;
+    var maxNameLevel = 2;
     var timezoneOffset = (new Date()).getTimezoneOffset() * 60000;
     var hourAmount = 3600000; //num of millisec
     
@@ -8,93 +8,113 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
         redirectIndexes = [];
     }
     redirectIndexes.push("redirects");
+
+    var redirectData = [];
     chrome.storage.sync.get(redirectIndexes, function(items) {
         var redirects = items.redirects;
-        var allRedirects = [];
         Object.keys(items).sort().forEach(function(i) {
-            allRedirects = allRedirects.concat(items[i]);
+            redirectData = redirectData.concat(items[i]);
         });
-        //assume sorted
-        if (allRedirects && allRedirects.length) {
-            var series = [];
-            var indexes = {};
-            var index = 0;
+        chartRedirects(maxNameLevel);
+    });
 
-            //set all
-            var allStart = nearestHour(allRedirects[0][0]) - hourAmount;
-            var all = [[allStart,0]];
-            for (var j = 0 ; j < allRedirects.length ; j++) {
-                var name = getWebsiteName(allRedirects[j][1]);
-                var hour = nearestHour(allRedirects[j][0]);
-                var curIndex = indexes[name];
-                if (curIndex === undefined) {
-                    curIndex = index++;
-                    indexes[name] = curIndex;
-                    //add a 0 before start of data
-                    var newData = [[hour - hourAmount,0]];
-                    series.push({name:name,data:newData});
+    var levelOptions = "";
+    for (var i = 0 ; i <= maxNameLevel ; i++) {
+        var selected = maxNameLevel === i ? " selected" : "";
+        levelOptions += "<option value='" + i + "'" + selected + ">" + i + "</option>";
+    }
+    $("#nameLevel").html(levelOptions).change(function(){
+        chartRedirects(parseInt(this.value));
+    });
+
+    var chartRedirects = (function(){
+        return chartRedirects;
+        function chartRedirects(level) {
+            //assume sorted
+            if (redirectData && redirectData.length) {
+                var series = [];
+                var indexes = {};
+                var index = 0;
+
+                //set all
+                var allStart = nearestHour(redirectData[0][0]) - hourAmount;
+                var all = [[allStart,0]];
+                for (var j = 0 ; j < redirectData.length ; j++) {
+                    var name = getWebsiteName(redirectData[j][1],level);
+                    var hour = nearestHour(redirectData[j][0]);
+                    var curIndex = indexes[name];
+                    if (curIndex === undefined) {
+                        curIndex = index++;
+                        indexes[name] = curIndex;
+                        //add a 0 before start of data
+                        var newData = [[hour - hourAmount,0]];
+                        series.push({name:name,data:newData});
+                    }
+                    var data = series[curIndex].data;
+                    addEntry(data,hour);
+                    addEntry(all,hour);
                 }
-                var data = series[curIndex].data;
-                addEntry(data,hour);
-                addEntry(all,hour);
-            }
-            series.push({name:"all",data:all,visible:false});
-            //add a 0 aftet end of data
-            for (var i = 0 ; i < series.length ; i++) {
-                var data = series[i].data;
-                data.push([data[data.length-1][0] + hourAmount, 0]);
-            }
-            $("#redirects").highcharts({
-                chart: {
-                    zoomType: "x",
-                    type: "spline"
-                },
-                title: {
-                    text: "Redirects"
-                },
-                xAxis:{
-                    type: "datetime"
-                },
-                yAxis: {
+                series.push({name:"all",data:all,visible:false});
+                //add a 0 aftet end of data
+                for (var i = 0 ; i < series.length ; i++) {
+                    var data = series[i].data;
+                    data.push([data[data.length-1][0] + hourAmount, 0]);
+                }
+                var test = $("#redirects").highcharts({
+                    chart: {
+                        zoomType: "x",
+                        type: "spline"
+                    },
                     title: {
-                        text: "Number of Redirects"
-                    }
-                },
-                series: series,
-                plotOptions: {
-                    area: {
-                        fillColor: {
-                            linearGradient: {
-                                x1: 0,
-                                y1: 0,
-                                x2: 0,
-                                y2: 1
+                        text: "Redirects"
+                    },
+                    xAxis:{
+                        type: "datetime"
+                    },
+                    yAxis: {
+                        title: {
+                            text: "Number of Redirects"
+                        }
+                    },
+                    series: series,
+                    plotOptions: {
+                        area: {
+                            fillColor: {
+                                linearGradient: {
+                                    x1: 0,
+                                    y1: 0,
+                                    x2: 0,
+                                    y2: 1
+                                },
+                                stops: [
+                                    [0, Highcharts.getOptions().colors[0]],
+                                    [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get("rgba")]
+                                ]
                             },
-                            stops: [
-                                [0, Highcharts.getOptions().colors[0]],
-                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get("rgba")]
-                            ]
-                        },
-                        marker: {
-                            radius: 2
-                        },
-                        lineWidth: 1,
-                        states: {
-                            hover: {
-                                lineWidth: 1
-                            }
-                        },
-                        threshold: null
+                            marker: {
+                                radius: 2
+                            },
+                            lineWidth: 1,
+                            states: {
+                                hover: {
+                                    lineWidth: 1
+                                }
+                            },
+                            threshold: null
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
-        function getWebsiteName(name) {
+        function getWebsiteName(name,nameLevel) {
             name = (name ? name : "unnamed");
             var ret = name;
             switch(nameLevel) {
                 case 2:
+                    ret = getBaseUrl(name);
+                    break;
+                case 1:
                     var base = getBaseUrl(name);
                     var lookFor = "reddit.com/r/";
                     var index = name.indexOf(lookFor);
@@ -106,9 +126,6 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
                     } else {
                         ret = base;
                     }
-                    break;
-                case 1:
-                    ret = getBaseUrl(name);
                     break;
                 case 0:
                     ret = name;
@@ -147,5 +164,5 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
                 data.push([hour,1]);
             }
         }
-    });
+    })();
 });
