@@ -38,7 +38,7 @@ var setupClass;
     var startingTimeLeft = 300000; // 5 mins
     var VIPlength = 20000; // 20s
     var tolerance = 2000; // 2s
-    if (1) { // if in testing mode
+    if (0) { // if in testing mode
         timeLineLength = 120000; // 2 mins
         startingTimeLeft = 60000; // 1 mins
     }

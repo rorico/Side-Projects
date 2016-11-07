@@ -1,8 +1,8 @@
 //Creates a copy of Chrome Tools while minifying the js and css
 const UglifyJS = require("uglify-js");
 const Uglifycss = require("uglifycss");
-const fs = require('fs');
-const ncp = require('ncp');
+const fs = require("fs");
+const ncp = require("ncp");
 
 var minifedFolder = "minified";
 var jsFolder = "js";
@@ -10,7 +10,7 @@ var cssFolder = "css";
 var htmlFolder = "html";
 
 //very important minifiedFolder is here, or will get infinite recursive folder
-var special = [htmlFolder,cssFolder,jsFolder,minifedFolder,"Chrome Tools.zip","compress.js"];
+var special = [htmlFolder,cssFolder,jsFolder,minifedFolder,"Chrome Tools.zip","compress.js","build.bat"];
 
 //copy all files that don't need special attention
 fs.readdir(".", function(err, files) {
