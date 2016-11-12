@@ -1,0 +1,140 @@
+::-webkit-scrollbar { 
+    display: none; 
+}
+#board {
+    padding-bottom: 10px;
+    color: white;
+    text-align: center;
+}
+#board td {
+    width: 40px;
+    height: 40px;
+    border: 1px black solid;
+    padding: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+#scores td {
+    width: 75px;
+}
+#board .v0 {
+    color: black;
+}
+#board .v1 {
+    background-color: #191970;
+}
+#board .v2 {
+    background-color: #191970;
+    border: 3px #add8e6 solid;
+}
+#board .v3 {
+    background-color: #6e8b3d;
+}
+#board .v4 {
+    background-color: #6e8b3d;
+    border: 3px black solid;
+}
+#options {
+    float: right;
+}
+.c1 {
+    background-color: #191970;
+    color: white;
+}
+.c3 {
+    background-color: #6e8b3d;
+    color: white;
+}
+#card_played {
+    margin-top: 40px;
+    margin-left: 30px;
+    width: 61px;
+    max-height: 378px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    text-align: center;
+}
+#card_played div {
+    height: 40px;
+    width: 40px;
+    border: 1px solid black;
+    display: block;
+    vertical-align: middle;
+    line-height: 40px;
+}
+div {
+    float: left;
+    display: inline-block;
+}
+#pause {
+    opacity: 0.5;
+    background-color: white;
+    font-size: 100px;
+    top: 40%;
+    left: 80%;
+    position: fixed;
+    display: none;
+    border: 1px black solid;
+    padding: 10px;
+}
+.players {
+    float: initial;
+    overflow: hidden;
+    height: 50px;
+    display: block;
+    text-align: center;
+}
+.players div {
+    margin-top: 8px;
+    height: 40px;
+    width: 40px;
+    border: 1px solid black;
+    display: block;
+    vertical-align: middle;
+    line-height: 40px;
+}
+.players div.hide {
+    color: white;
+}
+.players .raise {
+    margin-top: 0px;
+}
+.playerTitle {
+    float: initial;
+    overflow: hidden;
+    height: 30px;
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+}
+.options {
+    margin-top: 50px;
+    min-width: 10px;
+    float: initial;
+    overflow: hidden;
+    height: 50px;
+    display: block;
+    text-align: center;
+}
+.options div {
+    margin-left: 10px;
+    margin-top: 8px;
+    height: 40px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 1px solid black;
+    display: block;
+    vertical-align: middle;
+    line-height: 40px;
+}
+.choose {
+    background-color: orange !important;
+}
+.choose.special {
+    background-color: red !important;
+}
+.possible {
+    background-color: yellow;
+}
