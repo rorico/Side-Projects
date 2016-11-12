@@ -97,10 +97,10 @@ http.createServer(function(request, response) {
     if (filename === "/game") {
         filename = "Double Series.html";
     } else if (filename === "/data") {
-        if (request.method == 'POST') {
-            var body = '';
+        if (request.method == "POST") {
+            var body = "";
 
-            request.on('data', function (data) {
+            request.on("data", function (data) {
                 body += data;
 
                 // Too much POST data, kill the connection!
@@ -108,7 +108,7 @@ http.createServer(function(request, response) {
                     request.connection.destroy();
             });
 
-            request.on('end', function () {
+            request.on("end", function () {
                 //var query = qs.parse(body);
                 var query = JSON.parse(body);
                 console.log(body);
@@ -117,26 +117,27 @@ http.createServer(function(request, response) {
                 var type = query ? query.type : "";
                 var ret = "";
                 switch(type) {
-                    case "start":
+                case "start":
                     var player = getOpenPlayerSlot();
                     var myTurn = player === waitingFor ? true : false;
                     ret = JSON.stringify({player:player,hand:game.players[player],cardsPlayed:game.cardsPlayed,myTurn:myTurn});
                     break;
-                    case "play":
+                case "play":
                     console.log(query.result);
                     playCard(query.player,query.result);
                     ret = "OK";
                     break;
-                    case "get":
+                case "get":
                     dataRequests.push([response,query.player]);
+                    //remember to send a response within a time limit
                     break;
-                    default:
+                default:
                     ret = "NOK";
                     break;
                 }
 
                 if (ret) {
-                    response.writeHead(200, {'Content-Type': 'text/plain'});
+                    response.writeHead(200, {"Content-Type": "text/plain"});
                     response.end(ret);
                 }
             });
@@ -151,10 +152,10 @@ http.createServer(function(request, response) {
     fs.access(filename, function(err) {
         if (err) {
             console.log(err);
-            response.writeHead(404, {'Content-Type': 'text/plain'});
-            response.end('Hello World\n');
+            response.writeHead(404, {"Content-Type": "text/plain"});
+            response.end("Hello World\n");
         } else {
-            response.writeHead(200, {'Content-Type': mimeTypes[path.extname(filename)]});
+            response.writeHead(200, {"Content-Type": mimeTypes[path.extname(filename)]});
             var fileStream = fs.createReadStream(filename);
             fileStream.pipe(response);
         }
@@ -163,4 +164,4 @@ http.createServer(function(request, response) {
 }).listen(port);
 
 // Console will print the message
-console.log('Server running at http://localhost:' + port);
+console.log("Server running at http://localhost:" + port);
