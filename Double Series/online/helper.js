@@ -1,3 +1,116 @@
+
+var board;
+var points;
+//may want to change this later
+exports.setUp = function(info) {
+    if (!board) {
+        board = info.board;
+        points = info.points;
+    }
+}
+
+
+exports.getOptions = getOptions;
+exports.cardOptions = cardOptions;
+exports.hasAdd = hasAdd;
+exports.hasRemove = hasRemove;
+exports.hasOnlyJ = hasOnlyJ;
+exports.hasOnlyRemoveJ = hasOnlyRemoveJ;
+exports.addJoptions = addJoptions;
+exports.removeJoptions = removeJoptions;
+exports.hasUselessCard = hasUselessCard;
+
+//array of options that player can play
+//Output [card][side][row x, col y]
+function getOptions(cards) {// {,info) {
+    var options = [];
+    for ( var k = 0 ; k < cards.length ; k++) {
+        var sides = [];
+        var card = cards[k];
+        //if jacks, just push jacks
+        if (card === 0 || card === -1) {
+            sides = card;
+        } else {
+            sides = cardOptions(card);//,info);
+        }
+        options.push(sides);
+    }
+    return options;
+}
+
+//returns x,y coordinates for the card, does not work with Js
+function cardOptions(card) {//,info) {
+    var possible = [];
+    //var points = info.points;
+    if (card === 1) {
+        possible = [[0,0],[0,9],[9,0],[9,9]];
+    } else if (card < 10) {
+        possible = [[0,card-1],[9,10-card]];
+    } else {
+        var x = Math.floor(card/10);
+        var y = card % 10;
+        possible = [[x,y],[9-x,9-y]];
+    }
+    var sides = [];
+    for ( var i = 0 ; i < possible.length ; i++ )
+    {
+        if (points[possible[i][0]][possible[i][1]]===0) {
+            sides.push([possible[i][0],possible[i][1]]);
+        }
+    }
+    return sides;
+}
+
+
+function hasAdd(hand) {
+    for (var i = 0 ; i < hand.length ; i++){
+        if (hand[i] === 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+//position of Remove J, -1 if none
+function hasRemove(hand) {
+    for (var i = 0 ; i < hand.length ; i++){
+        if (hand[i] === -1) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function hasOnlyJ(hand) {
+    for (var i = 0 ; i < hand.length ; i++){
+        if (hand[i]!==-1 && hand[i]!==0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function hasOnlyRemoveJ(hand) {
+    for (var i = 0 ; i < hand.length ; i++){
+        if (hand[i] !== -1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+//has a useless card
+function hasUselessCard(options) {
+    for (var i = 0 ; i < options.length ; i++){
+        //if J, length will be undefined
+        if (options[i].length === 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
 //random add jack
 function addJoptions() {
     var options = [];

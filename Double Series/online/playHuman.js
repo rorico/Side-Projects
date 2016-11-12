@@ -85,12 +85,6 @@ function clearHuman() {
 
 function choosePlay(player,team,card,action,x,y) {
     var result = [action,card,[x,y]];
-    playCard(player,team,result);
-    //if replacing card, stay on this turn
-    if (action === PLAY_REPLACE) {
-        playHuman(player,team);
-    } else {
-        $('.hide').removeClass('hide');
-        delayedStart(turnN+1,gameN);
-    }
+    playedCard = card;
+    playData(player,result);
 }

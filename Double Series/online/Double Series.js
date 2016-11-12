@@ -71,8 +71,6 @@ var maxCards = 108;
 var handLength = 7;
 
 var pointworth = [];
-//var pointworth = [[58,64,77,91,128,129,82,77,72,55],[76,84,96,137,162,133,106,92,95,56],[87,98,126,155,193,184,147,147,113,84],[93,128,149,158,196,215,187,152,135,95],[130,151,169,190,234,248,222,172,150,127],[118,145,178,220,255,248,211,175,147,130],[87,124,154,209,238,226,181,161,123,100],[68,94,124,166,178,191,178,151,98,88],[62,90,94,112,133,157,129,104,82,64],[50,61,60,78,102,113,86,85,57,50]];
-//var pointworth = [[1050,878,938,928,1209,1089,656,536,479,437],[1159,1255,1202,1480,1468,1462,1092,719,622,449],[1421,1524,1806,1733,1714,1620,1379,1187,705,537],[1639,2062,2229,2122,1875,1848,1596,1315,1075,644],[2055,2235,2431,2331,1975,1992,1603,1435,1268,1039],[1906,2357,2635,2791,2776,2352,1857,1587,1438,1327],[1220,1914,2271,2663,2624,2358,1912,1604,1313,1014],[984,1304,2068,2280,2431,2298,1887,1651,1089,918],[835,1217,1289,1853,2134,2015,1684,1279,1126,844],[800,947,1057,1206,1783,1630,1169,1009,841,940]];
 var points = [];
 var players = [];
 var blueLines = 0;
@@ -88,11 +86,177 @@ var PLAY_REMOVE = -1;
 var PLAY_ADD = 1;
 var PLAY_FINISH = 2;
 
+var me;
+var playedCard = -1;
+
+
 $(document).ready(function() {
     createBoard();
     newGame();
-    delayedStart(0,0);
+    //delayedStart(0,0);
 });
+
+$.ajax({
+    type: "POST",
+    url: "/data",
+    data: JSON.stringify({type:"start"}),
+    dataType: "json",
+    success: function(data){
+        console.log(data);
+        if (data.player === undefined) {
+            alert("something went very wrong");
+        } else {
+            me = data.player;
+            if (data.hand) {
+                players[me] = data.hand;
+            }
+            showHands();
+        }
+        if (data.cardsPlayed) {
+            for (var i = 0 ; i < data.cardsPlayed.length ; i++) {
+                var card = data.cardsPlayed[i];
+                $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card[2])+"</div>");
+                var x = card[3][0];
+                var y = card[3][1];
+                var team = (card[0] % 2) * 2 + 1;
+                switch (card[1]) {
+                case PLAY_REPLACE:
+                    //do nothing here
+                    break;
+                case PLAY_REMOVE:
+                    removePoint(x,y);
+                    break;
+                case PLAY_ADD:
+                    addPoint(x,y,team);
+                    checker(x,y);
+                    break;
+                case PLAY_FINISH:
+                    addPoint(x,y,team);
+                    var finishedLine = result[3];
+                    for (var i = 0 ; i < finishedLine.length ; i++) {
+                        finishLine(finishedLine[i][0],finishedLine[i][1]);
+                    }
+                    finishLine(x,y,team);
+                    break;
+                }
+            }
+            //if ((!data.cardsPlayed.length && !me) || data.cardsPlayed[data.cardsPlayed.length -1])
+        }
+        if (data.myTurn) {
+            playHuman(me,(me % 2) * 2 + 1);
+        }
+        getData();
+    }
+});
+
+function getData() {
+    var data = {type:"get",player:me};
+    $.ajax({
+        type: "POST",
+        url: "/data",
+        data: JSON.stringify(data),
+        success: function(data){
+            console.log(data);
+            //doStuff
+            if (data.player === undefined) {
+                alert("something went very wrong");
+            } else {
+                if (data.player === me) {
+                    if (data.newCard === undefined) {
+                        alert("something went very wrong");
+                    } else {
+                        players[me][playedCard] = data.newCard;
+                        $('#p'+me+'_'+playedCard).html(changeToCards(data.newCard));
+                    }
+                }
+                if (data.play) {
+                    var play = data.play;
+                    var x = play[2][0];
+                    var y = play[2][1];
+                    var team = (data.player % 2) * 2 + 1;
+                    switch (play[0]) {
+                    case PLAY_REPLACE:
+                        //do nothing here
+                        break;
+                    case PLAY_REMOVE:
+                        removePoint(x,y);
+                        break;
+                    case PLAY_ADD:
+                        addPoint(x,y,team);
+                        checker(x,y);
+                        break;
+                    case PLAY_FINISH:
+                        addPoint(x,y,team);
+                        var finishedLine = result[3];
+                        for (var i = 0 ; i < finishedLine.length ; i++) {
+                            finishLine(finishedLine[i][0],finishedLine[i][1]);
+                        }
+                        finishLine(x,y,team);
+                        break;
+                    }
+                }
+                if (data.myTurn) {
+                    playHuman(me,(me % 2) * 2 + 1);
+                }
+            }
+            getData();
+        },
+        dataType: "json"
+    });
+}
+
+function playData(player,result) {
+    var data = {type:"play",player:player,result:result};
+    $.ajax({
+        type: "POST",
+        url: "/data",
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(data){
+            if(data !== "OK") {
+                alert("play error");
+            }
+            console.log(data);
+        }
+    });
+}
+
+function playCard(player,team,result) {
+    var hand = players[player];
+    var action = result[0];
+    var card = result[1];
+    var place = result[2];
+    var x = place[0];
+    var y = place[1];
+    var replace = false;
+    switch (action) {
+    case PLAY_REPLACE:
+        //do nothing here
+        replace = true;
+        break;
+    case PLAY_REMOVE:
+        removePoint(x,y);
+        break;
+    case PLAY_ADD:
+        addPoint(x,y,team);
+        checker(x,y);
+        break;
+    case PLAY_FINISH:
+        addPoint(x,y,team);
+        var finishedLine = result[3];
+        for (var i = 0 ; i < finishedLine.length ; i++) {
+            finishLine(finishedLine[i][0],finishedLine[i][1]);
+        }
+        finishLine(x,y,team);
+        break;
+    }
+    if (!replace) {
+        turnN++;
+    }
+    cardsPlayed.push([player,action,players[player][card],[x,y]]);
+    drawCard(player,card,team,replace);
+    return [true,players[player][card]];
+}
 
 function start(turn,game) {
     pauseable = true;
@@ -529,18 +693,6 @@ function createBoard() {
             cnt++;
         }
     }
-
-    //creates deck with 4 add Js, 4 remove Js, 4 corner pieces, and 2 of each other card
-    for (var i = 2 ; i < 50 ; i++) {
-        deck.push(i);
-        deck.push(i);
-    }
-    for (var i = 0 ; i < 4 ; i++) {
-        deck.push(1);
-        deck.push(0);
-        deck.push(-1);
-    }
-    
 }
 
 //restart game
