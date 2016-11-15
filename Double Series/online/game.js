@@ -1,44 +1,16 @@
 const fs = require("fs");
 //settings
 var maxGame = 1000;
-var speed = 00;
+var speed = 500;
 var human = [false,false,false,false];
-var showMoves = false;
 var checkValid = true;
 
-
-var playBlue;
-var playGreen;
 var playerAIs = [,,,];
 
 setAI([0,1,2,3],"playRandom");
-/*
-//game play
-function playBlue(player) {
-    //return playRandom(player,1);
-    //return playHybrid(player,1);
-    //return playAI(player,1,true);
-    return playBest(player,1,true);
-    //return playAIphil(player,1,true);
-    //return playSides(player,1,true);
-    //return playWorth(player,1,true);      //currently doesn't work
-}
-function playGreen(player) {
-    return playRandom(player,3);
-    //return playHybrid(player,3);
-    //return playAI(player,3,true);
-    //return playBest(player,3,true);
-    //return playAIphil(player,3,true);
-    //return playSides(player,3,true);
-    //return playWorth(player,3,true);      //currently doesn't work
-}*/
 
-
-var keepgoing = true;       //allows for pauses anywhere in code
 var gameN = 0;
 var turnN = 0;
-var pauseable = true;
-var unpauseable = false;
 //game parts
 var board = [];
 var deck = [];
@@ -58,7 +30,6 @@ var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 var gameEnd = false;
 var winner = -1;
-var animate = false;
 var info = {
     board:board,
     points:points,
@@ -209,85 +180,6 @@ function checkGameDone() {
     }
 }
 
-function start(turn,game) {
-    pauseable = true;
-    if (turn < maxCards && greenLines<2 && blueLines<2 && keepgoing && !gameEnd) {
-        gameN = game;
-        turnN = turn;
-        var player = turn % 4;
-        var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
-        var hand = players[player];
-
-        if (human[player]) {
-            keepgoing = true;
-            pauseable = false;
-            playHuman(player,team);
-            return;
-        } else {
-            if (hand.length) {
-                var AI;
-                if (team === 1) {
-                    AI = playBlue;
-                } else if (team === 3) {
-                    AI = playGreen;
-                }
-                var result = AI(hand); //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
-                //results checked here
-                playCard(player,team,result);
-                //would like another way to do this
-                if (result[0] === PLAY_REPLACE) {
-                    turn--;
-                }
-            }
-        }
-        delayedStart(turn+1,game);
-    } else if (!keepgoing) {       //pauses
-        gameN = game;
-        turnN = turn;
-        unpauseable = true;
-        $('#pause').css('display','block');
-    } else if (gameEnd) {         //this allows for game ends shown at 0 speed
-        gameEnd = false;
-        newGame();
-        delayedStart(0,game+1);
-    } else {                //end game
-        if (greenLines >= 2){
-            greenwin++;
-        } else if (blueLines >= 2){
-            bluewin++;
-        } else {
-            ties++;
-        }
-        gameN = game;
-        turnN = turn;
-        var totalGames = game + 1;  //0-index
-        
-        if (totalGames < maxGame) {
-            setTimeout(function(){
-                gameEnd = true;
-                start(turn,game);
-            },speed*3);
-        } else {
-            pauseable = false;
-            showWorth();
-        }
-    }
-}
-
-function getPercentage(num,den) {
-    return ((num/den)*100).toFixed(2) + "%";
-}
-
-function delayedStart(turn,game) {
-    if (speed <= 0) {
-        start(turn,game);
-    } else {
-        setTimeout(function(){
-            start(turn,game);
-        },speed);
-    }
-}
-
 function checkValidPlay(player,action,cardIndex,x,y,team,finishedLine) {
     if (gameEnd) {
         return false;
@@ -335,46 +227,6 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLine) {
     return true;
 }
 
-//remove or refactor
-function noDelay() {
-    animate = false;
-    for (var j = 0 ; j < maxGame ; j++) {
-        for ( var i = 0 ; i < 104 && greenLines<2 && blueLines<2 && keepgoing && gameEnd ; i++){
-            switch (i%4) {
-                case 0:
-                    playBlue(0);
-                    break;
-                case 1:
-                    playGreen(1);
-                    break;
-                case 2:
-                    playBlue(2);
-                    break;
-                case 3:
-                    playGreen(3);
-                    break;
-            }
-        }
-        if (greenLines>=2){
-            greenwin++;
-        } else if (blueLines>=2){
-            bluewin++;
-        } else {
-            ties++;
-        }
-        gameN=j;
-        turnN=i;
-        $('#bluewin').text(bluewin);
-        $('#greenwin').text(greenwin);
-        $('#ties').text(ties);
-        $('#blueP').text(((bluewin/(j+1))*100).toFixed(2)+"%");
-        $('#greenP').text(((greenwin/(j+1))*100).toFixed(2)+"%");
-        $('#tieP').text(((ties/(j+1))*100).toFixed(2)+"%");
-        newGame();
-    }
-    showWorth();
-}
-
 //array of options that player can play
 //Output [card][side][row x, col y]
 function getOptions(cards) {
@@ -417,23 +269,12 @@ function cardOptions(card) {
 
 //pick up new card
 function drawCard(player,card,team,replace) {
-    if (animate) {
-        $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(players[player][card])+"</div>");
-    }
-    if (showMoves) {
-        showPlaces(player);
-    }
-    var remove = false;
     if (cardsleft !== -1) {
         players[player][card] = deck[cardsleft];
         cardsleft--;
     } else {
         players[player].splice(card,1);
-        remove = true;
         checkNoCards();
-    }
-    if (animate) {
-        animateHand(player,card,remove,replace);
     }
 }
 
@@ -683,30 +524,15 @@ function shuffle(array) {
 //changes a team to 0 because of remove J
 function removePoint(x,y) {
     points[x][y] = 0;
-        var position = 10*x + y + 1;
-        if (animate) {
-        $('#'+position).removeClass();
-        $('#'+position).addClass('v0');
-        }
 }
 
 //changes team to given team of card played
 function addPoint(x,y,team) {
     points[x][y] = team;
-        var position = 10*x + y + 1;
-        if (animate) {
-        $('#'+position).removeClass('v0');
-        $('#'+position).addClass('v'+team);
-        }
 }
 
 //creates a line
 function finishLine(x,y,team) {
     points[x][y] = team + 1;
     pointworth[x][y]++;
-        var position = 10*x + y + 1;
-        if (animate) {
-        $('#'+position).removeClass('v'+team);
-        $('#'+position).addClass('v'+(team+1));
-        }
 }
