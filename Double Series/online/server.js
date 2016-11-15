@@ -80,8 +80,6 @@ function playCard(player,result) {
     var ret = game.play(player,result);
     if (ret.status === -1) {
         console.log("something wrong with play");
-    } else if (ret.status === 3) {
-        sendEnd(ret.winner);
     } else {
         sendPlay(ret.player,ret.play,ret.newCard,ret.nextPlayer);
         if (ret.status === 2) {
@@ -89,6 +87,8 @@ function playCard(player,result) {
         } else if (ret.status === 1) {
             //calls with no parameters
             setTimeout(playCard,500);
+        } else if (ret.status === 3) {
+            sendEnd(ret.winner);
         } else {
             console.log("something went wrong");
         }
