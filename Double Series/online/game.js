@@ -88,11 +88,12 @@ function play(player,result) {
     //the play is checked in here
     var play = playCard(player,result);
     if (play[0]) {
-        var nextPlayer = play[2];
+        var nextPlayer = play[3];
         ret.player = player;
         ret.status = 1;
         ret.play = result;
-        ret.newCard = play[1];
+        ret.cardPlayed = play[1];
+        ret.newCard = play[2];
         ret.nextPlayer = nextPlayer;
         if (gameEnd) {
             ret.status = 3;
@@ -145,7 +146,8 @@ function playCard(player,result) {
         checkGameDone();
         break;
     }
-    cardsPlayed.push([player,action,players[player][card],[x,y]]);
+    var cardPlayed = players[player][card];
+    cardsPlayed.push([player,action,cardPlayed,[x,y]]);
     drawCard(player,card,team,replace);
 
     var nextPlayer;
@@ -165,7 +167,7 @@ function playCard(player,result) {
             nextPlayer = (player+1) % 4;
         }
     }
-    return [true,players[player][card],nextPlayer];
+    return [true,cardPlayed,players[player][card],nextPlayer];
 }
 
 //updates gameEnd if game is done

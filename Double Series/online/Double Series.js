@@ -125,10 +125,10 @@ connection.onmessage = function (message) {
         if (data.cardsPlayed) {
             for (var i = 0 ; i < data.cardsPlayed.length ; i++) {
                 var card = data.cardsPlayed[i];
-                $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card[2])+"</div>");
                 var x = card[3][0];
                 var y = card[3][1];
                 var team = (card[0] % 2) * 2 + 1;
+                $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card[2])+"</div>");
                 switch (card[1]) {
                 case PLAY_REPLACE:
                     //do nothing here
@@ -193,8 +193,8 @@ connection.onmessage = function (message) {
                     finishLine(x,y,team);
                     break;
                 }
-                //var card = data.cardsPlayed[i];
-                //$("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card[2])+"</div>");
+                var card = data.cardPlayed;
+                $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card)+"</div>");
             }
             if (data.myTurn) {
                 setTimeout(function() {
