@@ -113,7 +113,9 @@ var server = http.createServer(function(request, response) {
             fileStream.pipe(response);
         }
     });
-}).listen(port);
+}).listen(port,function() {
+    console.log("Server running at http://localhost:" + port);
+});
 
 
 var wsServer = new WebSocketServer({
@@ -136,7 +138,6 @@ wsServer.on('request', function(request) {
             var ret = "";
             switch(type) {
             case "play":
-                console.log(query.result);
                 playCard(query.player,query.result);
                 ret = "OK";
                 break;
@@ -151,6 +152,3 @@ wsServer.on('request', function(request) {
         removeHumanPlayer(player);
     });
 });
-
-// Console will print the message
-console.log("Server running at http://localhost:" + port);
