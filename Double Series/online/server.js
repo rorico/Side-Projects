@@ -28,7 +28,6 @@ function playCard(player,result) {
 
 function playAI() {
     var ret = game.play();
-    console.log(ret);
     if (ret.status === 3) {
         sendEnd(ret.winner);
     } else if (ret.status === 2) {

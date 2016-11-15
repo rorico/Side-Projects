@@ -110,7 +110,6 @@ connection.onerror = function (error) {
 };
 
 connection.onmessage = function (message) {
-    console.log(message);
     var data = JSON.parse(message.data);
     switch (data.type) {
     case "start":
@@ -217,7 +216,7 @@ connection.onmessage = function (message) {
                 break;
         }
         gameN++;
-        var totalGames = game;// + 1;  //0-index
+        var totalGames = gameN;// + 1;  //0-index
         $('#bluewin').text(bluewin);
         $('#greenwin').text(greenwin);
         $('#ties').text(ties);
