@@ -4,16 +4,14 @@ var maxGame = 1000;
 var speed = 500;
 var human = [false,false,false,false];
 var checkValid = true;
+var playerAIs = [];
+var defaultAI = require("./playRandom.js").play;
 
-var playerAIs = [,,,];
-
-setAI([0,1,2,3],"playRandom");
-
-var gameN = 0;
-var turnN = 0;
 //game parts
 var board = [];
 var deck = [];
+var gameN = 0;
+var turnN = 0;
 var greenwin = 0;
 var bluewin = 0;
 var ties = 0;
@@ -56,7 +54,6 @@ exports.board = board;
 exports.players = players;
 exports.newBoard = createBoard;
 exports.newGame = newGame;
-exports.start = delayedStart;
 exports.playCard = playCard;
 exports.setAI = setAI;
 exports.play = play;
@@ -80,7 +77,9 @@ function play(player,result) {
         var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
         var hand = players[player];
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
-        result = playerAIs[player](hand,team,info);
+        var AI = playerAIs[player];
+        AI = AI ? AI : defaultAI;
+        result = AI(hand,team,info);
     } else if (player !== turnN % 4) {
         console.log("not your turn");
     }
