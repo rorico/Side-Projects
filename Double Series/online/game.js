@@ -88,42 +88,56 @@ exports.newGame = newGame;
 exports.start = delayedStart;
 exports.playCard = playCard;
 exports.setAI = setAI;
-exports.play = playAI;
-function playAI() {
-    var player = turnN % 4;
-    var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
-    var hand = players[player];
-    var ret = {};
-    if (gameEnd) {
-        ret.status = 3;
-        ret.winner = winner;
-    } else if (!players[player].length) {
-        turnN++;
-        console.log("this might get stuck in infinite loop if gameEnd isn't updated properly");
-        //much larger than a game could possible last
-        //may still get into a stack overflow
-        if (turn > 200) {
-            return;
+exports.play = play;
+
+function setAI(playerList,AIname) {
+    try {
+        var AI = require("./" + AIname + ".js").play;
+        for (var i = 0 ; i < playerList.length ; i++) {
+            playerAIs[playerList[i]] = AI;
         }
-        return playAI();
-    } else if (human[player]) {
-        ret.status = 2;
-        ret.player = player;
-    } else {
+        return true;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+}
+
+function play(player,result) {
+    if (player === undefined) {
+        player = turnN % 4;
+        var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
+        var hand = players[player];
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
-        var result = playerAIs[player](hand,team,info);
-        var play = playCard(player,team,result);
+        result = playerAIs[player](hand,team,info);
+    } else if (player !== turnN % 4) {
+        console.log("not your turn");
+    }
+
+    var ret = {};
+    //the play is checked in here
+    var play = playCard(player,result);
+    if (play[0]) {
+        var nextPlayer = play[2];
         ret.player = player;
         ret.status = 1;
         ret.play = result;
         ret.newCard = play[1];
-        ret.nextPlayer = play[2];
+        ret.nextPlayer = nextPlayer;
+        if (gameEnd) {
+            ret.status = 3;
+            ret.winner = winner;
+        } else if (human[nextPlayer]) {
+            ret.status = 2;
+        }
+    } else {
+        ret.status = -1;
     }
     return ret;
 }
 
-function playCard(player,team,result) {
-    console.log(player,team,result);
+function playCard(player,result) {
+    var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
     var hand = players[player];
     var action = result[0];
     var card = result[1];
@@ -131,7 +145,7 @@ function playCard(player,team,result) {
     var x = place[0];
     var y = place[1];
     if (checkValid) {
-        if (!checkValidPlay(action,hand[card],x,y,team,result[3])) {
+        if (!checkValidPlay(player,action,card,x,y,team,result[3])) {
             pause();
             console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
             return [false,-2];
@@ -161,6 +175,9 @@ function playCard(player,team,result) {
         checkGameDone();
         break;
     }
+    cardsPlayed.push([player,action,players[player][card],[x,y]]);
+    drawCard(player,card,team,replace);
+
     var nextPlayer;
     if (replace) {
         nextPlayer = player;
@@ -168,8 +185,16 @@ function playCard(player,team,result) {
         turnN++;
         nextPlayer = (player+1) % 4;
     }
-    cardsPlayed.push([player,action,players[player][card],[x,y]]);
-    drawCard(player,card,team,replace);
+
+    //if nextHand is empty, keep going
+    for (var i = 0 ; i < 4 ; i++) {
+        if (players[nextPlayer].length) {
+            break;
+        } else {
+            turnN++;
+            nextPlayer = (player+1) % 4;
+        }
+    }
     return [true,players[player][card],nextPlayer];
 }
 
@@ -182,34 +207,6 @@ function checkGameDone() {
         winner = 1;
         gameEnd = true;
     }
-}
-
-function setAI(playerList,AIname) {
-    console.log("test");
-    try {
-        var test = require("./" + AIname + ".js");
-        console.log(test);
-        var AI = require("./" + AIname + ".js").play;
-        console.log(AI);
-        for (var i = 0 ; i < playerList.length ; i++) {
-            playerAIs[playerList[i]] = AI;
-            /*if (player % 2 === 1) {
-                playBlue = AI;
-            } else {
-                playGreen = AI;
-            }*/
-        }
-        return true;
-    } catch (err) {
-        console.log(err);
-        return false;
-    }
-    console.log("end");
-}
-
-
-exports.test = function() {
-    console.log(animate);
 }
 
 function start(turn,game) {
@@ -291,7 +288,14 @@ function delayedStart(turn,game) {
     }
 }
 
-function checkValidPlay(action,card,x,y,team,finishedLine) {
+function checkValidPlay(player,action,cardIndex,x,y,team,finishedLine) {
+    if (gameEnd) {
+        return false;
+    }
+    if (turnN % 4 !== player) {
+        return false;
+    }
+    var card = players[player][cardIndex];
     switch (action) {
     case PLAY_REPLACE: //throw away card
         if (card === 0 || card === -1) {

@@ -77,22 +77,21 @@ wsServer.on('request', function(request) {
 });
 
 function playCard(player,result) {
-    var ret = game.playCard(player,((player%2) * 2) + 1,result);
-    if (ret[0]) {
-        sendPlay(player,result,ret[1],ret[2]);
-        setTimeout(playAI,500);
-    }
-}
-
-function playAI() {
-    var ret = game.play();
-    if (ret.status === 3) {
+    var ret = game.play(player,result);
+    if (ret.status === -1) {
+        console.log("something wrong with play");
+    } else if (ret.status === 3) {
         sendEnd(ret.winner);
-    } else if (ret.status === 2) {
-        waitingFor = ret.player;
-    } else if (ret.status === 1) {
+    } else {
         sendPlay(ret.player,ret.play,ret.newCard,ret.nextPlayer);
-        setTimeout(playAI,500);
+        if (ret.status === 2) {
+            waitingFor = ret.nextPlayer;
+        } else if (ret.status === 1) {
+            //calls with no parameters
+            setTimeout(playCard,500);
+        } else {
+            console.log("something went wrong");
+        }
     }
 }
 
