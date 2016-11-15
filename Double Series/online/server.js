@@ -81,7 +81,8 @@ function playCard(player,result) {
     if (ret.status === -1) {
         console.log("something wrong with play");
     } else {
-        sendPlay(ret.player,ret.play,ret.newCard,ret.nextPlayer);
+        //only set if waiting for player, so reset
+        waitingFor = -1;
         if (ret.status === 2) {
             waitingFor = ret.nextPlayer;
         } else if (ret.status === 1) {
@@ -92,10 +93,11 @@ function playCard(player,result) {
         } else {
             console.log("something went wrong");
         }
+        sendPlay(ret.player,ret.play,ret.newCard);
     }
 }
 
-function sendPlay(player,result,newCard,nextPlayer) {
+function sendPlay(player,result,newCard) {
     var data = {type:"play",player:player,play:result};
     var info = JSON.stringify(data);
     
@@ -103,14 +105,14 @@ function sendPlay(player,result,newCard,nextPlayer) {
     var nextPlayerInfo = JSON.stringify(data);
     //if nextPlayer is this player, will be given allData
     data.newCard = newCard;
-    if (player !== nextPlayer) {
+    if (player !== waitingFor) {
         data.myTurn = false;
     }
     var allData = JSON.stringify(data);
     for (var i = 0 ; i < activePlayers.length ; i++) {
         if (i === player) {
             activePlayers[i].sendUTF(allData);
-        } else if (i === nextPlayer) {
+        } else if (i === waitingFor) {
             activePlayers[i].sendUTF(nextPlayerInfo);
         } else {
             activePlayers[i].sendUTF(info);
