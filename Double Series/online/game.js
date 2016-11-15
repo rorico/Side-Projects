@@ -57,6 +57,7 @@ var greenLines = 0;
 var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 var gameEnd = false;
+var winner = -1;
 var animate = false;
 var info = {
     board:board,
@@ -93,14 +94,23 @@ function playAI() {
     var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
     var hand = players[player];
     var ret = {};
-    if (human[player]) {
+    if (gameEnd) {
+        ret.status = 3;
+        ret.winner = winner;
+    } else if (!players[player].length) {
+        turnN++;
+        console.log("this might get stuck in infinite loop if gameEnd isn't updated properly");
+        //much larger than a game could possible last
+        //may still get into a stack overflow
+        if (turn > 200) {
+            return;
+        }
+        return playAI();
+    } else if (human[player]) {
         ret.status = 2;
         ret.player = player;
     } else {
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
-
-        console.log(playerAIs);
-        console.log(playerAIs[player]);
         var result = playerAIs[player](hand,team,info);
         var play = playCard(player,team,result);
         ret.player = player;
@@ -110,6 +120,68 @@ function playAI() {
         ret.nextPlayer = play[2];
     }
     return ret;
+}
+
+function playCard(player,team,result) {
+    console.log(player,team,result);
+    var hand = players[player];
+    var action = result[0];
+    var card = result[1];
+    var place = result[2];
+    var x = place[0];
+    var y = place[1];
+    if (checkValid) {
+        if (!checkValidPlay(action,hand[card],x,y,team,result[3])) {
+            pause();
+            console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
+            return [false,-2];
+        }
+    }
+    var replace = false;
+    switch (action) {
+    case PLAY_REPLACE:
+        //do nothing here
+        replace = true;
+        break;
+    case PLAY_REMOVE:
+        removePoint(x,y);
+        break;
+    case PLAY_ADD:
+        addPoint(x,y,team);
+        checker(x,y);
+        checkGameDone();
+        break;
+    case PLAY_FINISH:
+        addPoint(x,y,team);
+        var finishedLine = result[3];
+        for (var i = 0 ; i < finishedLine.length ; i++) {
+            finishLine(finishedLine[i][0],finishedLine[i][1]);
+        }
+        finishLine(x,y,team);
+        checkGameDone();
+        break;
+    }
+    var nextPlayer;
+    if (replace) {
+        nextPlayer = player;
+    } else {
+        turnN++;
+        nextPlayer = (player+1) % 4;
+    }
+    cardsPlayed.push([player,action,players[player][card],[x,y]]);
+    drawCard(player,card,team,replace);
+    return [true,players[player][card],nextPlayer];
+}
+
+//updates gameEnd if game is done
+function checkGameDone() {
+    if (greenLines >= 2) {
+        winner = 3;
+        gameEnd = true;
+    } else if (blueLines >= 2) {
+        winner = 1;
+        gameEnd = true;
+    }
 }
 
 function setAI(playerList,AIname) {
@@ -217,55 +289,6 @@ function delayedStart(turn,game) {
             start(turn,game);
         },speed);
     }
-}
-
-function playCard(player,team,result) {
-    console.log(player,team,result);
-    var hand = players[player];
-    var action = result[0];
-    var card = result[1];
-    var place = result[2];
-    var x = place[0];
-    var y = place[1];
-    if (checkValid) {
-        if (!checkValidPlay(action,hand[card],x,y,team,result[3])) {
-            pause();
-            console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
-            return [false,-2];
-        }
-    }
-    var replace = false;
-    switch (action) {
-    case PLAY_REPLACE:
-        //do nothing here
-        replace = true;
-        break;
-    case PLAY_REMOVE:
-        removePoint(x,y);
-        break;
-    case PLAY_ADD:
-        addPoint(x,y,team);
-        checker(x,y);
-        break;
-    case PLAY_FINISH:
-        addPoint(x,y,team);
-        var finishedLine = result[3];
-        for (var i = 0 ; i < finishedLine.length ; i++) {
-            finishLine(finishedLine[i][0],finishedLine[i][1]);
-        }
-        finishLine(x,y,team);
-        break;
-    }
-    var nextPlayer;
-    if (replace) {
-        nextPlayer = player;
-    } else {
-        turnN++;
-        nextPlayer = (player+1) % 4;
-    }
-    cardsPlayed.push([player,action,players[player][card],[x,y]]);
-    drawCard(player,card,team,replace);
-    return [true,players[player][card],nextPlayer];
 }
 
 function checkValidPlay(action,card,x,y,team,finishedLine) {
@@ -403,10 +426,23 @@ function drawCard(player,card,team,replace) {
     } else {
         players[player].splice(card,1);
         remove = true;
+        checkNoCards();
     }
     if (animate) {
         animateHand(player,card,remove,replace);
     }
+}
+
+//updates gameEnd if no cards left to play is done
+function checkNoCards() {
+    for (var i = 0 ; i < players.length ; i++) {
+        if (players[i].length) {
+            return;
+        }
+    }
+    //no cards left
+    gameEnd = true;
+    winner = 0;
 }
 
 //checks if lines is won and turns them over
@@ -613,6 +649,8 @@ function newGame() {
     pastCardIndex = -1;
     pastCard = -2;
     cardsPlayed = [];
+    //change this later
+    exports.cardsPlayed = cardsPlayed;
     cardsleft = maxCards - 4 * handLength - 1;
     blueLines = 0;
     greenLines = 0;

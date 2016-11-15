@@ -3,38 +3,44 @@ const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const qs = require("querystring");
+const WebSocketServer = require("websocket").server;
+
 
 const game = require("./game.js");
 game.newBoard();
 game.newGame();
-console.log(game);
 var waitingFor = 0;//-1;
+var activePlayers = [];
+
+function addPlayer() {
+    var player = getOpenPlayerSlot();
+    activePlayers[player] = {request:null};
+}
+
 //process.exit();
 function playCard(player,result) {
     var ret = game.playCard(player,((player%2) * 2) + 1,result);
     if (ret[0]) {
-        sendAllResponses(player,result,ret[1],ret[2]);
-        playAI();
+        sendPlay(player,result,ret[1],ret[2]);
+        setTimeout(playAI,500);
     }
 }
 
 function playAI() {
-    //while (true) {
-    var blah = setInterval(function() {
-        var ret = game.play();
-        console.log(ret);
-        if (ret.status === 2) {
-            waitingFor = ret.player;
-            clearInterval(blah);
-        } else if (ret.status === 1) {
-            sendAllResponses(ret.player,ret.play,ret.newCard,ret.nextPlayer);
-        }
-    },500);
-    //}
+    var ret = game.play();
+    console.log(ret);
+    if (ret.status === 3) {
+        sendEnd(ret.winner);
+    } else if (ret.status === 2) {
+        waitingFor = ret.player;
+    } else if (ret.status === 1) {
+        sendPlay(ret.player,ret.play,ret.newCard,ret.nextPlayer);
+        setTimeout(playAI,500);
+    }
 }
 
-function sendAllResponses(player,result,newCard,nextPlayer) {
-    var data = {player:player,play:result};
+function sendPlay(player,result,newCard,nextPlayer) {
+    var data = {type:"play",player:player,play:result};
     var info = JSON.stringify(data);
     
     data.myTurn = true;
@@ -45,29 +51,22 @@ function sendAllResponses(player,result,newCard,nextPlayer) {
         data.myTurn = false;
     }
     var allData = JSON.stringify(data);
-    console.log(dataRequests);
-    for (var i = 0 ; i < dataRequests.length ; i++) {
-        var response = dataRequests[i][0];
-        response.writeHead(200, {"Content-Type":"text/plain"});
-        console.log("player" + dataRequests[i][1] + " is waiting")
-        if (dataRequests[i][1] === player) {
-            response.end(allData);
-        } else if (dataRequests[i][1] === nextPlayer) {
-            response.end(nextPlayerInfo);
+    for (var i = 0 ; i < activePlayers.length ; i++) {
+        if (i === player) {
+            activePlayers[i].sendUTF(allData);
+        } else if (i === nextPlayer) {
+            activePlayers[i].sendUTF(nextPlayerInfo);
         } else {
-            response.end(info);
+            activePlayers[i].sendUTF(info);
         }
     }
-    dataRequests = [];
 }
 
-function sendPlayerResponse(player) {
-    for (var i = 0 ; i < dataRequests.length ; i++) {
-        if (dataRequests[i][1] === player) {
-            var data = {player:player,play,result};
-            dataRequests[i][0].writeHead(200, {"Content-Type":"text/plain"});
-            dataRequests[i][0].end(allData);
-        }
+function sendEnd(winner) {
+    var data = {type:"end",winner:winner};
+    var info = JSON.stringify(data);
+    for (var i = 0 ; i < activePlayers.length ; i++) {
+        activePlayers[i].sendUTF(info);
     }
 }
 
@@ -79,6 +78,12 @@ function getOpenPlayerSlot() {
             return i;
         }
     }
+    return -1;
+}
+
+function removeHumanPlayer(player) {
+    var human = game.human;
+    human[player] = false;
 }
 
 var mimeTypes = {
@@ -90,65 +95,13 @@ var mimeTypes = {
 var port = 8082;
 var dataRequests = [];
 
-http.createServer(function(request, response) {
+var server = http.createServer(function(request, response) {
     var svrUrl = url.parse(request.url);
     var filename = svrUrl.path;
-    //console.log(svrUrl);
     if (filename === "/game") {
         filename = "Double Series.html";
-    } else if (filename === "/data") {
-        if (request.method == "POST") {
-            var body = "";
-
-            request.on("data", function (data) {
-                body += data;
-
-                // Too much POST data, kill the connection!
-                if (body.length > 1e6)
-                    request.connection.destroy();
-            });
-
-            request.on("end", function () {
-                //var query = qs.parse(body);
-                var query = JSON.parse(body);
-                console.log(body);
-                console.log(query);
-                //var query = svrUrl.query;
-                var type = query ? query.type : "";
-                var ret = "";
-                switch(type) {
-                case "start":
-                    var player = getOpenPlayerSlot();
-                    var myTurn = player === waitingFor ? true : false;
-                    ret = JSON.stringify({player:player,hand:game.players[player],cardsPlayed:game.cardsPlayed,myTurn:myTurn});
-                    break;
-                case "play":
-                    console.log(query.result);
-                    playCard(query.player,query.result);
-                    ret = "OK";
-                    break;
-                case "get":
-                    dataRequests.push([response,query.player]);
-                    //remember to send a response within a time limit
-                    break;
-                default:
-                    ret = "NOK";
-                    break;
-                }
-
-                if (ret) {
-                    response.writeHead(200, {"Content-Type": "text/plain"});
-                    response.end(ret);
-                }
-            });
-        }
-
-
-
-        return;
     }
     filename = path.basename(filename.replace(/\%20/g," "));
-    console.log(filename);
     fs.access(filename, function(err) {
         if (err) {
             console.log(err);
@@ -160,8 +113,44 @@ http.createServer(function(request, response) {
             fileStream.pipe(response);
         }
     });
-    //
 }).listen(port);
+
+
+var wsServer = new WebSocketServer({
+    httpServer: server
+});
+
+// WebSocket server
+wsServer.on('request', function(request) {
+    var connection = request.accept(null, request.origin);
+    var player = getOpenPlayerSlot();
+    activePlayers[player] = connection;
+
+    var myTurn = player === waitingFor ? true : false;
+    connection.sendUTF(JSON.stringify({type:"start",player:player,hand:game.players[player],cardsPlayed:game.cardsPlayed,myTurn:myTurn}));
+
+    connection.on('message', function(message) {
+        if (message.type === 'utf8') {
+            var query = JSON.parse(message.utf8Data);
+            var type = query ? query.type : "";
+            var ret = "";
+            switch(type) {
+            case "play":
+                console.log(query.result);
+                playCard(query.player,query.result);
+                ret = "OK";
+                break;
+            default:
+                ret = "NOK";
+                break;
+            }
+        }
+    });
+
+    connection.on('close', function(connection) {
+        removeHumanPlayer(player);
+    });
+});
 
 // Console will print the message
 console.log("Server running at http://localhost:" + port);

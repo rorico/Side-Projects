@@ -96,13 +96,24 @@ $(document).ready(function() {
     //delayedStart(0,0);
 });
 
-$.ajax({
-    type: "POST",
-    url: "/data",
-    data: JSON.stringify({type:"start"}),
-    dataType: "json",
-    success: function(data){
-        console.log(data);
+var socket = window.WebSocket || window.MozWebSocket;
+var loc = window.location, new_uri;
+if (loc.protocol === "https:") {
+    new_uri = "wss:";
+} else {
+    new_uri = "ws:";
+}
+new_uri += "//" + loc.host;
+var connection = new socket(new_uri);
+connection.onerror = function (error) {
+    console.log(error);
+};
+
+connection.onmessage = function (message) {
+    console.log(message);
+    var data = JSON.parse(message.data);
+    switch (data.type) {
+    case "start":
         if (data.player === undefined) {
             alert("something went very wrong");
         } else {
@@ -145,80 +156,81 @@ $.ajax({
         if (data.myTurn) {
             playHuman(me,(me % 2) * 2 + 1);
         }
-        getData();
-    }
-});
-
-function getData() {
-    var data = {type:"get",player:me};
-    $.ajax({
-        type: "POST",
-        url: "/data",
-        data: JSON.stringify(data),
-        success: function(data){
-            console.log(data);
-            //doStuff
-            if (data.player === undefined) {
-                alert("something went very wrong");
-            } else {
-                if (data.player === me) {
-                    if (data.newCard === undefined) {
-                        alert("something went very wrong");
-                    } else {
-                        players[me][playedCard] = data.newCard;
-                        $('#p'+me+'_'+playedCard).html(changeToCards(data.newCard));
-                    }
-                }
-                if (data.play) {
-                    var play = data.play;
-                    var x = play[2][0];
-                    var y = play[2][1];
-                    var team = (data.player % 2) * 2 + 1;
-                    switch (play[0]) {
-                    case PLAY_REPLACE:
-                        //do nothing here
-                        break;
-                    case PLAY_REMOVE:
-                        removePoint(x,y);
-                        break;
-                    case PLAY_ADD:
-                        addPoint(x,y,team);
-                        checker(x,y);
-                        break;
-                    case PLAY_FINISH:
-                        addPoint(x,y,team);
-                        var finishedLine = result[3];
-                        for (var i = 0 ; i < finishedLine.length ; i++) {
-                            finishLine(finishedLine[i][0],finishedLine[i][1]);
-                        }
-                        finishLine(x,y,team);
-                        break;
-                    }
-                }
-                if (data.myTurn) {
-                    playHuman(me,(me % 2) * 2 + 1);
+        break;
+    case "play":
+        if (data.player === undefined) {
+            alert("something went very wrong");
+        } else {
+            if (data.player === me) {
+                if (data.newCard === undefined) {
+                    alert("something went very wrong");
+                } else {
+                    players[me][playedCard] = data.newCard;
+                    $('#p'+me+'_'+playedCard).html(changeToCards(data.newCard));
                 }
             }
-            getData();
-        },
-        dataType: "json"
-    });
+            if (data.play) {
+                var play = data.play;
+                var x = play[2][0];
+                var y = play[2][1];
+                var team = (data.player % 2) * 2 + 1;
+                switch (play[0]) {
+                case PLAY_REPLACE:
+                    //do nothing here
+                    break;
+                case PLAY_REMOVE:
+                    removePoint(x,y);
+                    break;
+                case PLAY_ADD:
+                    addPoint(x,y,team);
+                    checker(x,y);
+                    break;
+                case PLAY_FINISH:
+                    addPoint(x,y,team);
+                    var finishedLine = result[3];
+                    for (var i = 0 ; i < finishedLine.length ; i++) {
+                        finishLine(finishedLine[i][0],finishedLine[i][1]);
+                    }
+                    finishLine(x,y,team);
+                    break;
+                }
+                //var card = data.cardsPlayed[i];
+                //$("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card[2])+"</div>");
+            }
+            if (data.myTurn) {
+                setTimeout(function() {
+                    playHuman(me,(me % 2) * 2 + 1);
+                },speed);
+            }
+        }
+        break;
+    case "end":
+        switch (data.winner) {
+            case 0:
+                ties++;
+                break;
+            case 1:
+                bluewin++;
+                break;
+            case 3:
+                greenwin++;
+                break;
+        }
+        gameN++;
+        var totalGames = game;// + 1;  //0-index
+        $('#bluewin').text(bluewin);
+        $('#greenwin').text(greenwin);
+        $('#ties').text(ties);
+        $('#blueP').text(getPercentage(bluewin,totalGames));
+        $('#greenP').text(getPercentage(greenwin,totalGames));
+        $('#tieP').text(getPercentage(ties,totalGames));
+        break;
+    }
 }
 
 function playData(player,result) {
     var data = {type:"play",player:player,result:result};
-    $.ajax({
-        type: "POST",
-        url: "/data",
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        success: function(data){
-            if(data !== "OK") {
-                alert("play error");
-            }
-            console.log(data);
-        }
-    });
+    connection.send(JSON.stringify(data));
 }
 
 function playCard(player,team,result) {
