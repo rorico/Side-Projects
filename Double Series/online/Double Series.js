@@ -150,7 +150,6 @@ connection.onmessage = function (message) {
                     break;
                 }
             }
-            //if ((!data.cardsPlayed.length && !me) || data.cardsPlayed[data.cardsPlayed.length -1])
         }
         if (data.myTurn) {
             playHuman(me,(me % 2) * 2 + 1);

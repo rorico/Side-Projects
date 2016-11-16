@@ -93,12 +93,12 @@ function playCard(player,result) {
         } else {
             console.log("something went wrong");
         }
-        sendPlay(ret.player,ret.play,ret.newCard);
+        sendPlay(ret.player,ret.play,ret.cardPlayed,ret.newCard);
     }
 }
 
-function sendPlay(player,result,newCard) {
-    var data = {type:"play",player:player,play:result};
+function sendPlay(player,result,cardPlayed,newCard) {
+    var data = {type:"play",player:player,play:result,cardPlayed:cardPlayed};
     var info = JSON.stringify(data);
     
     data.myTurn = true;
