@@ -204,6 +204,9 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLine) {
         }
         break;
     case PLAY_FINISH: //add and finish line
+        if (!finishedLine) {
+            return false;
+        }
         for (var i = 0 ; i < finishedLine.length ; i++) {
             if (points[finishedLine[i][0]][finishedLine[i][1]] !== team) {
                 return false;
