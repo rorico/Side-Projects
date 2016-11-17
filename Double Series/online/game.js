@@ -161,7 +161,7 @@ function playCard(player,result) {
             break;
         } else {
             turnN++;
-            nextPlayer = (player+1) % 4;
+            nextPlayer = (nextPlayer+1) % 4;
         }
     }
     return [true,cardPlayed,players[player][card],nextPlayer];
