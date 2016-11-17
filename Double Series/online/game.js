@@ -115,12 +115,9 @@ function playCard(player,result) {
     var place = result[2];
     var x = place[0];
     var y = place[1];
-    if (checkValid) {
-        if (!checkValidPlay(player,action,card,x,y,team,result[3])) {
-            pause();
-            console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
-            return [false,-2];
-        }
+    if (checkValid && !checkValidPlay(player,action,card,x,y,team,result[3])) {
+        console.log("error playing: player:",player,"cards:",hand,"team:",team,"play:",result);
+        return [false,-2];
     }
     var replace = false;
     switch (action) {
