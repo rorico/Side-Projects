@@ -10,8 +10,6 @@ function addJoptions() {
     }
     return options;
 }
-//allow old files to use the same function name
-var addJR = addJoptions;
 
 //random remove jack 
 function removeJoptions(team) {
@@ -26,8 +24,6 @@ function removeJoptions(team) {
     }
     return options;
 }
-//allow old files to use the same function name
-var removeJR = removeJoptions;
 
 //add jack
 function addJ(colour,offensive) {

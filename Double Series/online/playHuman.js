@@ -40,10 +40,10 @@ function chooseCard(player,team,card,options) {
 
     var action = PLAY_ADD;
     if (players[player][card] === 0) {
-        options = addJR();
+        options = addJoptions();
     } else if (players[player][card] === -1) {
         action = PLAY_REMOVE;
-        options = removeJR(team);
+        options = removeJoptions(team);
     } else if (!options.length) {     //useless card
         action = PLAY_REPLACE;
         var removeButton = $("<div class='choose option' id='remove'>REMOVE</div>");
