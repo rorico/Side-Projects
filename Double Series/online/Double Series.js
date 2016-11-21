@@ -257,211 +257,8 @@ function playCard(player,team,result) {
     return [true,players[player][card]];
 }
 
-function start(turn,game) {
-    pauseable = true;
-    if (turn < maxCards && greenLines<2 && blueLines<2 && keepgoing && !gameEnd) {
-        gameN = game;
-        turnN = turn;
-        var player = turn % 4;
-        var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
-        var hand = players[player];
-
-        if (human[player]) {
-            keepgoing = true;
-            pauseable = false;
-            hideHands(player);
-            showCardWorth(cardWorth(getOptions(hand),team,true));
-            playHuman(player,team);
-            return;
-        } else {
-            if (hand.length) {
-                var AI;
-                if (team === 1) {
-                    AI = playBlue;
-                } else if (team === 3) {
-                    AI = playGreen;
-                }
-                var result = AI(hand); //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
-                //results checked here
-                playCard(player,team,result);
-                //would like another way to do this
-                if (result[0] === PLAY_REPLACE) {
-                    turn--;
-                }
-            }
-        }
-        delayedStart(turn+1,game);
-    } else if (!keepgoing) {       //pauses
-        gameN = game;
-        turnN = turn;
-        unpauseable = true;
-        $('#pause').css('display','block');
-    } else if (gameEnd) {         //this allows for game ends shown at 0 speed
-        gameEnd = false;
-        newGame();
-        delayedStart(0,game+1);
-    } else {                //end game
-        if (greenLines >= 2){
-            greenwin++;
-        } else if (blueLines >= 2){
-            bluewin++;
-        } else {
-            ties++;
-        }
-        gameN = game;
-        turnN = turn;
-        var totalGames = game + 1;  //0-index
-        $('#bluewin').text(bluewin);
-        $('#greenwin').text(greenwin);
-        $('#ties').text(ties);
-        $('#blueP').text(getPercentage(bluewin,totalGames));
-        $('#greenP').text(getPercentage(greenwin,totalGames));
-        $('#tieP').text(getPercentage(ties,totalGames));
-        
-        if (totalGames < maxGame) {
-            setTimeout(function(){
-                gameEnd = true;
-                start(turn,game);
-            },speed*3);
-        } else {
-            pauseable = false;
-            showWorth();
-        }
-    }
-}
-
 function getPercentage(num,den) {
     return ((num/den)*100).toFixed(2) + "%";
-}
-
-function delayedStart(turn,game) {
-    if (speed <= 0) {
-        start(turn,game);
-    } else {
-        setTimeout(function(){
-            start(turn,game);
-        },speed);
-    }
-}
-
-function playCard(player,team,result) {
-    var hand = players[player];
-    var action = result[0];
-    var card = result[1];
-    var place = result[2];
-    var x = place[0];
-    var y = place[1];
-    if (checkValid) {
-        if (!checkValidPlay(action,hand[card],x,y,team,result[3])) {
-            pause();
-            console.log("player:",player,"cards:",hand,"team:",team,"play:",result);
-            return;
-        }
-    }
-    var replace = false;
-    switch (action) {
-    case PLAY_REPLACE:
-        //do nothing here
-        replace = true;
-        break;
-    case PLAY_REMOVE:
-        removePoint(x,y);
-        break;
-    case PLAY_ADD:
-        addPoint(x,y,team);
-        checker(x,y);
-        break;
-    case PLAY_FINISH:
-        addPoint(x,y,team);
-        var finishedLine = result[3];
-        for (var i = 0 ; i < finishedLine.length ; i++) {
-            finishLine(finishedLine[i][0],finishedLine[i][1]);
-        }
-        finishLine(x,y,team);
-        break;
-    }
-    cardsPlayed.push([players[player][card],[x,y]]);
-    drawCard(player,card,team,replace);
-}
-
-function checkValidPlay(action,card,x,y,team,finishedLine) {
-    switch (action) {
-    case PLAY_REPLACE: //throw away card
-        if (card === 0 || card === -1) {
-            return false;
-        }
-        if (cardOptions(card).length) {
-            return false;
-        }
-        break;
-    case PLAY_REMOVE: //remove J
-        if (card !== -1) {
-            return false;
-        }
-        if (points[x][y] !== 4 - team) {
-            return false;
-        }
-        break;
-    case PLAY_FINISH: //add and finish line
-        for (var i = 0 ; i < finishedLine.length ; i++) {
-            if (points[finishedLine[i][0]][finishedLine[i][1]] !== team) {
-                return false;
-            }
-        }
-        //fall through and also check add
-    case PLAY_ADD: //add
-        if (card !== 0) {
-            if (points[x][y] !== 0) {
-                return false;
-            }
-        }
-        break;
-
-    default: //shouldn't get here
-        return false;
-        break;
-    }
-    return true;
-}
-
-//remove or refactor
-function noDelay() {
-    animate = false;
-    for (var j = 0 ; j < maxGame ; j++) {
-        for ( var i = 0 ; i < 104 && greenLines<2 && blueLines<2 && keepgoing && gameEnd ; i++){
-            switch (i%4) {
-                case 0:
-                    playBlue(0);
-                    break;
-                case 1:
-                    playGreen(1);
-                    break;
-                case 2:
-                    playBlue(2);
-                    break;
-                case 3:
-                    playGreen(3);
-                    break;
-            }
-        }
-        if (greenLines>=2){
-            greenwin++;
-        } else if (blueLines>=2){
-            bluewin++;
-        } else {
-            ties++;
-        }
-        gameN=j;
-        turnN=i;
-        $('#bluewin').text(bluewin);
-        $('#greenwin').text(greenwin);
-        $('#ties').text(ties);
-        $('#blueP').text(((bluewin/(j+1))*100).toFixed(2)+"%");
-        $('#greenP').text(((greenwin/(j+1))*100).toFixed(2)+"%");
-        $('#tieP').text(((ties/(j+1))*100).toFixed(2)+"%");
-        newGame();
-    }
-    showWorth();
 }
 
 //array of options that player can play
@@ -527,67 +324,110 @@ function drawCard(player,card,team,replace) {
 
 //checks if lines is won and turns them over
 //if can finish multiple, finishes all
-function checker(x,y) {
-    var team = points[x][y];
-    checkDirection(x,y,1,1,team);
-    checkDirection(x,y,1,0,team);
-    checkDirection(x,y,0,1,team);
-    checkDirection(x,y,1,-1,team);
+function checker(x,y,team) {
+    var ret = [];
+    var changed = false;
+    var dirs = [
+        [1,1],
+        [1,0],
+        [0,1],
+        [1,-1]
+    ];
+    for (var i = 0 ; i < dirs.length ; i++) {
+        var lines = checkDirection(x,y,dirs[i][0],dirs[i][1],team);
+        if (lines.length === 9) {
+            //2 lines, seperate them
+            ret.push(lines.slice(0,5));
+            ret.push(lines.slice(4,9));
+        } else if (lines.length >= 5) {
+            ret.push(lines);
+        }
+    }
+    return ret;
 }
+/*function checker(x,y,team) {
+    //var team = points[x][y];
+    var linesFinished = team === 1 ? blueLines : greenLines;
+    var ret = [];
+    var changed = false;
+    var dirs = [
+        [1,1],
+        [1,0],
+        [0,1],
+        [1,-1]
+    ];
+    for (var i = 0 ; i < dirs.length ; i++) {
+        var lines = checkDirection(x,y,dirs[i][0],dirs[i][1],team);
+        if (lines.length >= 4) {
+            if (!changed) {
+                finishLine([[x,y]],team);
+                changed = true;
+            }
+
+            if (lines.length % 4 === 0) {
+                finishLine(lines,team);
+                linesFinished += lines.length / 4;
+            } else {
+                //assume lines needed is only 2
+                if (linesFinished) {
+                    //pick a line at random
+                    var random = Math.floor(Math.random() * (lines.length - 3));
+                    finishLine(lines.slice(random,random + 4),team);
+                    linesFinished++;
+                } else if (ret.length) {
+                    //pick a line at random
+                    var random = Math.floor(Math.random() * (lines.length - 3));
+                    finishLine(lines.slice(random,random + 4),team);
+
+                    //pick a line at random
+                    var random = Math.floor(Math.random() * (ret.length - 3));
+                    finishLine(ret.slice(random,random + 4),team);
+                    linesFinished += 2;
+                    ret = [];
+                } else {
+                    ret = lines;
+                }
+            }
+        }
+    }
+    if (team === 1) {
+        blueLines = linesFinished;
+    } else if (team === 3){
+        greenLines = linesFinished;
+    }
+    return ret;
+}*/
 
 function checkDirection(x,y,dirX,dirY,team) {
-    var tnp = [];
+    var list = [[x,y]];
 
     var checkUp = true;
     var checkDown = true;
-    
-    var cnt = 0;
     
     var xUp = x;
     var xDown = x;
     var yUp = y;
     var yDown = y;
     
-    for (var i = 1 ; i < 5 ; i++) {
+    for (var i = 1 ; i < 5 && checkUp; i++) {
         xUp += dirX;
         yUp += dirY;
-        if (!outOfBounds(xUp,yUp) && checkUp && points[xUp][yUp]===team) {
-            cnt++;
-            tnp.push([xUp,yUp]);
+        if (!outOfBounds(xUp,yUp) && points[xUp][yUp]===team) {
+            list.push([xUp,yUp]);
         } else {
             checkUp = false;
         }
-
+    }
+    for (var i = 1 ; i < 5 && checkDown; i++) {
         xDown -= dirX;
         yDown -= dirY;
-        if (!outOfBounds(xDown,yDown) && checkDown && points[xDown][yDown]===team) {
-            cnt++;
-            tnp.push([xDown,yDown]);
+        if (!outOfBounds(xDown,yDown) && points[xDown][yDown]===team) {
+            list.unshift([xDown,yDown]);
         } else {
             checkDown = false;
         }
     }
-    if (cnt === 8) {
-        if (team === 1) {
-            blueLines += 2;
-        } else if (team === 3){
-            greenLines += 2;
-        }
-        finishLine(x,y,team);
-        for (var i = 0 ; i < 8 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],team);
-        }
-    } else if (cnt >= 4) {
-        if (team === 1) {
-            blueLines++;
-        } else if (team === 3){
-            greenLines++;
-        }
-        finishLine(x,y,team);
-        for (var i = 0 ; i < 4 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],team);
-        }
-    }
+    return list;
 }
 
 function outOfBounds(x,y) {
