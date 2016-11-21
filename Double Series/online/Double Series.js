@@ -599,24 +599,20 @@ function shuffle(array) {
     return array;
 }
 
+function getPosition(x,y) {
+    return $("#" + (10*x + y + 1));
+}
+
 //changes a team to 0 because of remove J
 function removePoint(x,y) {
     points[x][y] = 0;
-        var position = 10*x + y + 1;
-        if (animate) {
-        $('#'+position).removeClass();
-        $('#'+position).addClass('v0');
-        }
+    getPosition(x,y).removeClass().addClass();
 }
 
 //changes team to given team of card played
 function addPoint(x,y,team) {
     points[x][y] = team;
-        var position = 10*x + y + 1;
-        if (animate) {
-        $('#'+position).removeClass('v0');
-        $('#'+position).addClass('v'+team);
-        }
+    getPosition(x,y).removeClass("v0").addClass("v"+team);
 }
 
 //creates a line
@@ -628,9 +624,7 @@ function finishLines(lines,team) {
             var y = line[j][1];
             points[x][y] = team + 1;
             pointworth[x][y]++;
-            var position = 10*x + y + 1;
-            $('#'+position).removeClass('v'+team);
-            $('#'+position).addClass('v'+(team+1));
+            showFinishPoint(x,y,team);
         }
         if (team === 1) {
             blueLines++;
@@ -647,9 +641,7 @@ function showFinishLine(line,team) {
 }
 
 function showFinishPoint(x,y,team) {
-    var position = 10*x + y + 1;
-    $('#'+position).removeClass('v'+team);
-    $('#'+position).addClass('v'+(team+1));
+    getPosition(x,y).removeClass("v" + team).addClass("v"+(team+1));
 }
 
 //shows Hand on board
@@ -697,10 +689,7 @@ function animateHand(player,card,remove,replace) {
 function showWorth() {
     for (var x = 0 ; x < 10; x++) {
         for (var y = 0 ; y < 10; y++) {
-            var i = x*10 + y + 1;
-            $('#'+i).removeClass();
-            $('#'+i).addClass('v0');
-            $('#'+i).text(pointworth[x][y]);
+            getPosition(x,y).removeClass().addClass("v0").text(pointworth[x][y]);
         }
     }
     $("#values").append(JSON.stringify(pointworth));
