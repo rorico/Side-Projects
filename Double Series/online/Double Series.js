@@ -125,11 +125,12 @@ connection.onmessage = function (message) {
         if (data.cardsPlayed) {
             for (var i = 0 ; i < data.cardsPlayed.length ; i++) {
                 var card = data.cardsPlayed[i];
-                var x = card[3][0];
-                var y = card[3][1];
-                var team = (card[0] % 2) * 2 + 1;
-                $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card[2])+"</div>");
-                switch (card[1]) {
+                var position = card.position;
+                var x = position ? position[0] : -1;
+                var y = position ? position[1] : -1;
+                var team = (card.player % 2) * 2 + 1;
+                $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card.cardPlayed)+"</div>");
+                switch (card.action) {
                 case PLAY_REPLACE:
                     //do nothing here
                     break;
@@ -138,15 +139,10 @@ connection.onmessage = function (message) {
                     break;
                 case PLAY_ADD:
                     addPoint(x,y,team);
-                    checker(x,y);
                     break;
                 case PLAY_FINISH:
                     addPoint(x,y,team);
-                    var finishedLine = result[3];
-                    for (var i = 0 ; i < finishedLine.length ; i++) {
-                        finishLine(finishedLine[i][0],finishedLine[i][1]);
-                    }
-                    finishLine(x,y,team);
+                    finishLines(card.finishedLines,team);
                     break;
                 }
             }
@@ -167,34 +163,27 @@ connection.onmessage = function (message) {
                     $('#p'+me+'_'+playedCard).html(changeToCards(data.newCard));
                 }
             }
-            if (data.play) {
-                var play = data.play;
-                var x = play[2][0];
-                var y = play[2][1];
-                var team = (data.player % 2) * 2 + 1;
-                switch (play[0]) {
-                case PLAY_REPLACE:
-                    //do nothing here
-                    break;
-                case PLAY_REMOVE:
-                    removePoint(x,y);
-                    break;
-                case PLAY_ADD:
-                    addPoint(x,y,team);
-                    checker(x,y);
-                    break;
-                case PLAY_FINISH:
-                    addPoint(x,y,team);
-                    var finishedLine = result[3];
-                    for (var i = 0 ; i < finishedLine.length ; i++) {
-                        finishLine(finishedLine[i][0],finishedLine[i][1]);
-                    }
-                    finishLine(x,y,team);
-                    break;
-                }
-                var card = data.cardPlayed;
-                $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card)+"</div>");
+            var position = data.position;
+            var x = position ? position[0] : -1;
+            var y = position ? position[1] : -1;
+            var team = (data.player % 2) * 2 + 1;
+            switch (data.action) {
+            case PLAY_REPLACE:
+                //do nothing here
+                break;
+            case PLAY_REMOVE:
+                removePoint(x,y);
+                break;
+            case PLAY_ADD:
+                addPoint(x,y,team);
+                break;
+            case PLAY_FINISH:
+                addPoint(x,y,team);
+                finishLines(data.finishedLines,team);
+                break;
             }
+            var card = data.cardPlayed;
+            $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card)+"</div>");
             if (data.myTurn) {
                 setTimeout(function() {
                     playHuman(me,(me % 2) * 2 + 1);
@@ -791,14 +780,36 @@ function addPoint(x,y,team) {
 }
 
 //creates a line
-function finishLine(x,y,team) {
-    points[x][y] = team + 1;
-    pointworth[x][y]++;
-        var position = 10*x + y + 1;
-        if (animate) {
-        $('#'+position).removeClass('v'+team);
-        $('#'+position).addClass('v'+(team+1));
+function finishLines(lines,team) {
+    for (var i = 0 ; i < lines.length ; i++) {
+        var line = lines[i];
+        for (var j = 0 ; j < line.length ; j++) {
+            var x = line[j][0];
+            var y = line[j][1];
+            points[x][y] = team + 1;
+            pointworth[x][y]++;
+            var position = 10*x + y + 1;
+            $('#'+position).removeClass('v'+team);
+            $('#'+position).addClass('v'+(team+1));
         }
+        if (team === 1) {
+            blueLines++;
+        } else if (team === 3){
+            greenLines++;
+        }
+    }
+}
+
+function showFinishLine(line,team) {
+    for (var i = 0 ; i < line.length ; i++) {
+        showFinishPoint(line[i][0],line[i][1],team);
+    }
+}
+
+function showFinishPoint(x,y,team) {
+    var position = 10*x + y + 1;
+    $('#'+position).removeClass('v'+team);
+    $('#'+position).addClass('v'+(team+1));
 }
 
 //shows Hand on board
