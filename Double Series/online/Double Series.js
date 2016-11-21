@@ -606,7 +606,7 @@ function getPosition(x,y) {
 //changes a team to 0 because of remove J
 function removePoint(x,y) {
     points[x][y] = 0;
-    getPosition(x,y).removeClass().addClass();
+    getPosition(x,y).removeClass().addClass("v0");
 }
 
 //changes team to given team of card played
