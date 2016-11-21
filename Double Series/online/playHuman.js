@@ -21,20 +21,20 @@ function playHuman(player,team) {
                 }
             }
         }
-        cardEle.bind('click',{player:player,team:team,card:card,options:options}, function(event) {
+        //need to add event data because loop
+        cardEle.click({card:card,options:options}, function(event) {
             clearHuman();
             var e = event.data;
-            chooseCard(e.player,e.team,e.card,e.options);
+            chooseCard(player,team,e.card,e.options);
         });
     }
 }
 
 function chooseCard(player,team,card,options) {
     var backButton = $("<div class='choose option' id='back'>BACK</div>");
-    backButton.bind('click',{player:player,team:team}, function(event) {
+    backButton.click(function() {
         clearHuman();
-        var e = event.data;
-        playHuman(e.player,e.team);
+        playHuman(player,team);
     });
     $('#o'+player).append(backButton);
 
@@ -47,11 +47,10 @@ function chooseCard(player,team,card,options) {
     } else if (!options.length) {     //useless card
         action = PLAY_REPLACE;
         var removeButton = $("<div class='choose option' id='remove'>REMOVE</div>");
-        removeButton.bind('click',{player:player,team:team,card:card,action:action}, function(event) {
+        removeButton.click(function() {
             clearHuman();
-            var e = event.data;
             //x,y doesn't matter
-            choosePlay(e.player,e.team,e.card,e.action,-1,-1);
+            choosePlay(player,team,card,action,-1,-1);
         });
         $('#o'+player).append(removeButton);
     }
@@ -65,14 +64,13 @@ function chooseCard(player,team,card,options) {
 
 function showChoose(player,team,card,action,x,y) {
     getPosition(x,y).addClass("choose").unbind()
-    .bind('click',{player:player,team:team,card:card,action:action,x:x,y:y}, function(event) {
+    .click(function() {
         clearHuman();
-        var e = event.data;
         var possible;
-        if (action === PLAY_ADD && (addPoint(x,y,team),possible = checker(e.x,e.y,e.team),possible.length)) {
-            showFinish(e.player,e.team,e.card,e.action,e.x,e.y,possible);
+        if (action === PLAY_ADD && (addPoint(x,y,team),possible = checker(x,y,team),possible.length)) {
+            showFinish(player,team,card,action,x,y,possible);
         } else {
-            choosePlay(e.player,e.team,e.card,e.action,e.x,e.y);
+            choosePlay(player,team,card,action,x,y);
         }
     });
 }
@@ -80,6 +78,7 @@ function showChoose(player,team,card,action,x,y) {
 function showFinish(player,team,card,action,x,y,possible) {
     var linesFinished = team === 1 ? blueLines : greenLines;
     var choose = [];
+    //if play is going to finish the game, it doesn't matter what i picked
     if (possible.length >= 2 - linesFinished) {
         for (var i = 0 ; i < possible.length ; i++) {
             var line = possible[i];
@@ -89,7 +88,7 @@ function showFinish(player,team,card,action,x,y,possible) {
         finishLines(choose);
         var action = PLAY_FINISH;
         clearHuman();
-        choosePlay(e.player,e.team,e.card,action,e.x,e.y,choose);
+        choosePlay(player,team,card,action,x,y,choose);
     } else {
         var unFinished = 0;
         var startIndexes = [];
@@ -107,7 +106,7 @@ function showFinish(player,team,card,action,x,y,possible) {
                 showFinishLine(line.slice(start,end),team);
                 for (var j = 0 ; j < line.length ; j = j === start - 1 ? end : j + 1) {
                     getPosition(line[j][0],line[j][1]).addClass('choose')
-                    .bind('click',{player:player,team:team,card:card,action:action,x:x,y:y,line:line,i:j}, function(event) {
+                    .click({line:line,i:j}, function(event) {
                         var e = event.data;
                         var poss = e.line;
                         if (e.i >= 5) {
@@ -131,7 +130,7 @@ function showFinish(player,team,card,action,x,y,possible) {
                             if (!--unFinished) {
                                 var action = PLAY_FINISH;
                                 clearHuman();
-                                choosePlay(e.player,e.team,e.card,action,e.x,e.y,choose);
+                                choosePlay(player,team,card,action,x,y,choose);
                             }
                         }
                     });
