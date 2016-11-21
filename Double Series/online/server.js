@@ -93,25 +93,31 @@ function playCard(player,result) {
         } else {
             console.log("something went wrong");
         }
-        sendPlay(ret.player,ret.play,ret.cardPlayed,ret.newCard);
+        sendPlay(ret);
     }
 }
 
-function sendPlay(player,result,cardPlayed,newCard) {
-    var data = {type:"play",player:player,play:result,cardPlayed:cardPlayed};
-    var info = JSON.stringify(data);
+function sendPlay(data) {
+    var send = data.all;
+    var player = send.player;
+    var newCard = data.newCard
+
+    //will affect outside of function, but it is not used
+    //actually affects cardsPlayed array, will need to change
+    send.type = "play";
+    var info = JSON.stringify(send);
     
-    data.myTurn = true;
-    var nextPlayerInfo = JSON.stringify(data);
+    send.myTurn = true;
+    var nextPlayerInfo = JSON.stringify(send);
     //if nextPlayer is this player, will be given allData
-    data.newCard = newCard;
+    send.newCard = newCard;
     if (player !== waitingFor) {
-        data.myTurn = false;
+        send.myTurn = false;
     }
-    var allData = JSON.stringify(data);
+    var prevPlayerInfo = JSON.stringify(send);
     for (var i = 0 ; i < activePlayers.length ; i++) {
         if (i === player) {
-            activePlayers[i].sendUTF(allData);
+            activePlayers[i].sendUTF(prevPlayerInfo);
         } else if (i === waitingFor) {
             activePlayers[i].sendUTF(nextPlayerInfo);
         } else {
@@ -126,6 +132,10 @@ function sendEnd(winner) {
     for (var i = 0 ; i < activePlayers.length ; i++) {
         activePlayers[i].sendUTF(info);
     }
+}
+
+function startNewGame() {
+    game.newGame();
 }
 
 function getOpenPlayerSlot() {

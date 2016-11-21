@@ -35,7 +35,6 @@ var info = {
     greenLines:greenLines,
     cardsPlayed:cardsPlayed,
     cardsleft:cardsleft,
-    getOptions:getOptions
 };
 
 var PLAY_REPLACE = 0;
@@ -46,7 +45,7 @@ exports.startGame = function() {
     createBoard();
     newGame();
     //delayedStart(0,0);
-}
+};
 exports.human = human;
 exports.checkValid = checkValid;
 exports.cardsPlayed = cardsPlayed;
@@ -54,7 +53,6 @@ exports.board = board;
 exports.players = players;
 exports.newBoard = createBoard;
 exports.newGame = newGame;
-exports.playCard = playCard;
 exports.setAI = setAI;
 exports.play = play;
 
@@ -83,31 +81,12 @@ function play(player,result) {
     } else if (player !== turnN % 4) {
         console.log("not your turn");
     }
-
-    var ret = {};
     //the play is checked in here
-    var play = playCard(player,result);
-    if (play[0]) {
-        var nextPlayer = play[3];
-        ret.player = player;
-        ret.status = 1;
-        ret.play = result;
-        ret.cardPlayed = play[1];
-        ret.newCard = play[2];
-        ret.nextPlayer = nextPlayer;
-        if (gameEnd) {
-            ret.status = 3;
-            ret.winner = winner;
-        } else if (human[nextPlayer]) {
-            ret.status = 2;
-        }
-    } else {
-        ret.status = -1;
-    }
-    return ret;
+    return playCard(player,result);
 }
 
 function playCard(player,result) {
+    var ret = {};
     var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
     var hand = players[player];
     var action = result[0];
@@ -115,56 +94,93 @@ function playCard(player,result) {
     var place = result[2];
     var x = place[0];
     var y = place[1];
-    if (checkValid && !checkValidPlay(player,action,card,x,y,team,result[3])) {
+    var finishedLines = result[3];
+    if (checkValid && !checkValidPlay(player,action,card,x,y,team,finishedLines)) {
         console.log("error playing: player:",player,"cards:",hand,"team:",team,"play:",result);
-        return [false,-2];
-    }
-    var replace = false;
-    switch (action) {
-    case PLAY_REPLACE:
-        //do nothing here
-        replace = true;
-        break;
-    case PLAY_REMOVE:
-        removePoint(x,y);
-        break;
-    case PLAY_ADD:
-        addPoint(x,y,team);
-        checker(x,y);
-        checkGameDone();
-        break;
-    case PLAY_FINISH:
-        addPoint(x,y,team);
-        var finishedLine = result[3];
-        for (var i = 0 ; i < finishedLine.length ; i++) {
-            finishLine(finishedLine[i][0],finishedLine[i][1]);
-        }
-        finishLine(x,y,team);
-        checkGameDone();
-        break;
-    }
-    var cardPlayed = players[player][card];
-    cardsPlayed.push([player,action,cardPlayed,[x,y]]);
-    drawCard(player,card,team,replace);
-
-    var nextPlayer;
-    if (replace) {
-        nextPlayer = player;
+        ret.status = -1;
+        //return [false,-2];
     } else {
-        turnN++;
-        nextPlayer = (player+1) % 4;
-    }
-
-    //if nextHand is empty, keep going
-    for (var i = 0 ; i < 4 ; i++) {
-        if (players[nextPlayer].length) {
+        ret.status = 1; //this may be overriten later
+        var all = {};   //used to tell everyone what happened this turn
+        ret.all = all;
+        all.player = player;
+        all.cardPlayed = cardPlayed;
+        var replace = false;
+        switch (action) {
+        case PLAY_REPLACE:
+            //do nothing here
+            replace = true;
             break;
+        case PLAY_REMOVE:
+            all.position = place;
+            removePoint(x,y);
+            break;
+        case PLAY_ADD:
+            all.position = place;
+            addPoint(x,y,team);
+            var check = checker(x,y,team);
+            if (check.length) {
+                action = PLAY_FINISH;
+                var checkLines = chooseFinishLine(check);
+                all.finishedLines = checkLines;
+                finishLines(checkLines,team);
+                checkGameDone();
+                if (gameEnd) {
+                    ret.status = 3;
+                    all.winner = winner;
+                }
+            }
+            break;
+        case PLAY_FINISH:
+            all.position = place;
+            all.finishedLines = finishedLines;
+            finishLines(finishedLines,team);
+            //need to finish before checking, or will get same lines
+            var check = checker(x,y,team);
+            if (check.length) {
+                var checkLines = chooseFinishLine(check);
+                all.finishedLines.concat(checkLines);
+                finishLines(chooseFinishLine(check),team);
+            }
+            checkGameDone();
+            if (gameEnd) {
+                ret.status = 3;
+                all.winner = winner;
+            }
+            break;
+        }
+        all.action = action;
+        var cardPlayed = players[player][card];
+        all.cardPlayed = cardPlayed;
+        cardsPlayed.push(all);//[player,action,cardPlayed,[x,y],finishedLine]);
+        drawCard(player,card,team,replace);
+        ret.newCard = players[player][card];
+
+        //get player who plays next
+        var nextPlayer;
+        if (replace) {
+            nextPlayer = player;
         } else {
             turnN++;
-            nextPlayer = (nextPlayer+1) % 4;
+            nextPlayer = (player+1) % 4;
+        }
+
+        //if nextHand is empty, keep going
+        for (var i = 0 ; i < 4 ; i++) {
+            if (players[nextPlayer].length) {
+                break;
+            } else {
+                turnN++;
+                nextPlayer = (nextPlayer+1) % 4;
+            }
+        }
+        ret.nextPlayer = nextPlayer;
+        if (human[nextPlayer]) {
+            //means waiting for player next turn
+            ret.status = 2;
         }
     }
-    return [true,cardPlayed,players[player][card],nextPlayer];
+    return ret;
 }
 
 //updates gameEnd if game is done
@@ -178,7 +194,7 @@ function checkGameDone() {
     }
 }
 
-function checkValidPlay(player,action,cardIndex,x,y,team,finishedLine) {
+function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
     if (gameEnd) {
         return false;
     }
@@ -204,11 +220,37 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLine) {
         }
         break;
     case PLAY_FINISH: //add and finish line
-        if (!finishedLine) {
+        if (!finishedLines) {
             return false;
         }
-        for (var i = 0 ; i < finishedLine.length ; i++) {
-            if (points[finishedLine[i][0]][finishedLine[i][1]] !== team) {
+        for (var i = 0 ; i < finishedLines.length ; i++) {
+            var line = finishedLines[i];
+            //has to include current point
+            var hasPoint = false;
+            var slope = [-1,-1];
+            for (var j  = 0 ; j < line.length ; j++) {
+                var point = line[j];
+                if (x===point[0] && y===point[1]) {
+                    hasPoint = true;
+                } else if (points[point[0]][point[1]] !== team) {
+                    //can't check current point, maybe not updated yet
+                    return false;
+                }
+                //check the line is all in the same line
+                if (j) {
+                    var prevPoint = line[j - 1];
+                    var thisSlope = [point[0] - prevPoint[0],point[1] - prevPoint[1]];
+                    if (j !== 1 && !(thisSlope[0] === slope[0] && thisSlope[1] === slope[1])) {
+                        return false;
+                    }
+                    slope = thisSlope;
+                }
+            }
+            if (!hasPoint) {
+                return false;
+            }
+            //check the line has correct length
+            if ((line.length - 1*hasPoint) % 4) {
                 return false;
             }
         }
@@ -293,67 +335,73 @@ function checkNoCards() {
 
 //checks if lines is won and turns them over
 //if can finish multiple, finishes all
-function checker(x,y) {
-    var team = points[x][y];
-    checkDirection(x,y,1,1,team);
-    checkDirection(x,y,1,0,team);
-    checkDirection(x,y,0,1,team);
-    checkDirection(x,y,1,-1,team);
+function checker(x,y,team) {
+    var ret = [];
+    var changed = false;
+    var dirs = [
+        [1,1],
+        [1,0],
+        [0,1],
+        [1,-1]
+    ];
+    for (var i = 0 ; i < dirs.length ; i++) {
+        var lines = checkDirection(x,y,dirs[i][0],dirs[i][1],team);
+        if (lines.length === 9) {
+            //2 lines, seperate them
+            ret.push(lines.slice(0,5));
+            ret.push(lines.slice(4,9));
+        } else if (lines.length >= 5) {
+            ret.push(lines);
+        }
+    }
+    return ret;
 }
 
 function checkDirection(x,y,dirX,dirY,team) {
-    var tnp = [];
+    var list = [[x,y]];
 
     var checkUp = true;
     var checkDown = true;
-    
-    var cnt = 0;
     
     var xUp = x;
     var xDown = x;
     var yUp = y;
     var yDown = y;
     
-    for (var i = 1 ; i < 5 ; i++) {
+    for (var i = 1 ; i < 5 && checkUp; i++) {
         xUp += dirX;
         yUp += dirY;
-        if (!outOfBounds(xUp,yUp) && checkUp && points[xUp][yUp]===team) {
-            cnt++;
-            tnp.push([xUp,yUp]);
+        if (!outOfBounds(xUp,yUp) && points[xUp][yUp]===team) {
+            list.push([xUp,yUp]);
         } else {
             checkUp = false;
         }
-
+    }
+    for (var i = 1 ; i < 5 && checkDown; i++) {
         xDown -= dirX;
         yDown -= dirY;
-        if (!outOfBounds(xDown,yDown) && checkDown && points[xDown][yDown]===team) {
-            cnt++;
-            tnp.push([xDown,yDown]);
+        if (!outOfBounds(xDown,yDown) && points[xDown][yDown]===team) {
+            list.unshift([xDown,yDown]);
         } else {
             checkDown = false;
         }
     }
-    if (cnt === 8) {
-        if (team === 1) {
-            blueLines += 2;
-        } else if (team === 3){
-            greenLines += 2;
-        }
-        finishLine(x,y,team);
-        for (var i = 0 ; i < 8 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],team);
-        }
-    } else if (cnt >= 4) {
-        if (team === 1) {
-            blueLines++;
-        } else if (team === 3){
-            greenLines++;
-        }
-        finishLine(x,y,team);
-        for (var i = 0 ; i < 4 ; i++){
-            finishLine(tnp[i][0],tnp[i][1],team);
+    return list;
+}
+
+//default choose, picks randomly
+function chooseFinishLine(lines) {
+    var chosen = [];
+    for (var i = 0 ; i < lines.length ; i++) {
+        var line = lines[i];
+        if (line.length > 5) {
+            var random = Math.floor(Math.random() * (line.length - 5));
+            chosen.push(line.slice(random,random + 5));
+        } else if (line.length === 5) {
+            chosen.push(line);
         }
     }
+    return chosen;
 }
 
 function outOfBounds(x,y) {
@@ -533,7 +581,19 @@ function addPoint(x,y,team) {
 }
 
 //creates a line
-function finishLine(x,y,team) {
-    points[x][y] = team + 1;
-    pointworth[x][y]++;
+function finishLines(lines,team) {
+    for (var i = 0 ; i < lines.length ; i++) {
+        var line = lines[i];
+        for (var j = 0 ; j < line.length ; j++) {
+            var x = line[j][0];
+            var y = line[j][1];
+            points[x][y] = team + 1;
+            pointworth[x][y]++;
+        }
+        if (team === 1) {
+            blueLines++;
+        } else if (team === 3){
+            greenLines++;
+        }  
+    }
 }
