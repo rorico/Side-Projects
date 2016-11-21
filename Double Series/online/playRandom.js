@@ -11,7 +11,7 @@ function playRandom(hand,value,info) {
     var options = getOptions(hand,info);
     var useless = hasUselessCard(options);
     if (useless !== -1) {
-        return [0,useless,[-1,-1]];
+        return {action:0,card:useless};
     }
     var action = 1;
     var card = Math.floor(Math.random()*options.length);
@@ -24,10 +24,8 @@ function playRandom(hand,value,info) {
             //have to choose another card, just change cards
             return playRandom(hand,value,info);
         }
-        var action = -1;
+        action = -1;
     }
     var side = Math.floor(Math.random()*spots.length);
-    var x = spots[side][0];
-    var y = spots[side][1];
-    return [action,card,[x,y]];
+    return {action:action,card:card,position:spots[side]};
 }

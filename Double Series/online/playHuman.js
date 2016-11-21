@@ -1,17 +1,17 @@
 function playHuman(player,team) {
     var hand = players[player];
     for (var card = 0 ; card < hand.length ; card++) {
-        var cardEle = $('#p'+player+'_'+card);
-        cardEle.addClass('choose');
+        var cardEle = $("#p"+player+"_"+card);
+        cardEle.addClass("choose");
         var options = [];
         //jacks, don't need to calculate possible for them at this stage
         if (hand[card] === 0 || hand[card] === -1) {
-            cardEle.addClass('special');
+            cardEle.addClass("special");
         } else {
             options = cardOptions(hand[card]);
             //no possible moves for the card
             if (!options.length) {
-                cardEle.addClass('special');
+                cardEle.addClass("special");
             } else {
                 //show possible moves
                 for (var side = 0 ; side < options.length ; side++) {
@@ -36,7 +36,7 @@ function chooseCard(player,team,card,options) {
         clearHuman();
         playHuman(player,team);
     });
-    $('#o'+player).append(backButton);
+    $("#o"+player).append(backButton);
 
     var action = PLAY_ADD;
     if (players[player][card] === 0) {
@@ -49,10 +49,13 @@ function chooseCard(player,team,card,options) {
         var removeButton = $("<div class='choose option' id='remove'>REMOVE</div>");
         removeButton.click(function() {
             clearHuman();
-            //x,y doesn't matter
-            choosePlay(player,team,card,action,-1,-1);
+            var ret = {
+                card:card,
+                action:action
+            }
+            choosePlay(player,ret);
         });
-        $('#o'+player).append(removeButton);
+        $("#o"+player).append(removeButton);
     }
     
     for (var side = 0 ; side < options.length ; side++) {
@@ -66,16 +69,23 @@ function showChoose(player,team,card,action,x,y) {
     getPosition(x,y).addClass("choose").unbind()
     .click(function() {
         clearHuman();
+        var ret = {
+            card:card,
+            action:action,
+            position:[x,y]
+        };
         var possible;
         if (action === PLAY_ADD && (addPoint(x,y,team),possible = checker(x,y,team),possible.length)) {
-            showFinish(player,team,card,action,x,y,possible);
+            showFinish(player,ret,possible);
         } else {
-            choosePlay(player,team,card,action,x,y);
+            choosePlay(player,ret);
         }
     });
 }
 
-function showFinish(player,team,card,action,x,y,possible) {
+function showFinish(player,ret,possible) {
+    ret.action = PLAY_FINISH;
+    var team = ret.team;
     var linesFinished = team === 1 ? blueLines : greenLines;
     var choose = [];
     //if play is going to finish the game, it doesn't matter what i picked
@@ -86,9 +96,9 @@ function showFinish(player,team,card,action,x,y,possible) {
             choose.push(line.slice(random,random + 5));
         }
         finishLines(choose);
-        var action = PLAY_FINISH;
         clearHuman();
-        choosePlay(player,team,card,action,x,y,choose);
+        ret.finishedLines = choose;
+        choosePlay(player,ret);
     } else {
         var unFinished = 0;
         var startIndexes = [];
@@ -105,7 +115,7 @@ function showFinish(player,team,card,action,x,y,possible) {
                 var end = 5;
                 showFinishLine(line.slice(start,end),team);
                 for (var j = 0 ; j < line.length ; j = j === start - 1 ? end : j + 1) {
-                    getPosition(line[j][0],line[j][1]).addClass('choose')
+                    getPosition(line[j][0],line[j][1]).addClass("choose")
                     .click({line:line,i:j}, function(event) {
                         var e = event.data;
                         var poss = e.line;
@@ -128,33 +138,34 @@ function showFinish(player,team,card,action,x,y,possible) {
                         if (end - start >= 5) {
                             choose.push(poss.slice(start,end));
                             if (!--unFinished) {
-                                var action = PLAY_FINISH;
                                 clearHuman();
-                                choosePlay(player,team,card,action,x,y,choose);
+                                ret.finishedLines = choose;
+                                choosePlay(player,ret);
                             }
                         }
                     });
                 }
             }
         }
+        //no choices
         if (!unFinished) {
-            var action = PLAY_FINISH;
             clearHuman();
-            choosePlay(player,team,card,action,x,y,choose);
+            ret.finishedLines = choose;
+            choosePlay(player,ret);
         }
     }
 }
 
 //clears clicks and classes that playHuman made
 function clearHuman() {
-    $('.choose').unbind('click');
-    $('.special').removeClass('special');
-    $('.choose').removeClass('choose');
-    $('.option').remove();
+    $(".choose").unbind("click");
+    $(".special").removeClass("special");
+    $(".choose").removeClass("choose");
+    $(".option").remove();
 }
 
-function choosePlay(player,team,card,action,x,y,finishedLine) {
-    var result = [action,card,[x,y],finishedLine];
-    playedCard = card;
-    playData(player,result);
+function choosePlay(player,ret) {
+    console.log(player,ret);
+    playedCard = ret.card;
+    playData(player,ret);
 }

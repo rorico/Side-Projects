@@ -702,7 +702,7 @@ function hideHands(player) {
         if (i === player) {
             continue;
         }
-        for (var j = 0 ; j<players[i].length; j++) {
+        for (var j = 0 ; j < players[i].length; j++) {
             $('#p'+i+'_'+j).addClass('hide');
         }
     }

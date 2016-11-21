@@ -87,26 +87,26 @@ function play(player,play) {
     return playCard(player,play);
 }
 
-function playCard(player,result) {
+function playCard(player,play) {
     var ret = {};
     var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
     var hand = players[player];
-    var action = result[0];
-    var card = result[1];
-    var place = result[2];
-    var x = place[0];
-    var y = place[1];
-    var finishedLines = result[3];
+    var action = play.action;
+    var card = play.card;
+    var position = play.position;
+    var x = position ? position[0] : -1;
+    var y = position ? position[1] : -1;
+    var finishedLines = play.finishedLines;
     if (checkValid && !checkValidPlay(player,action,card,x,y,team,finishedLines)) {
-        console.log("error playing: player:",player,"cards:",hand,"team:",team,"play:",result);
+        console.log("error playing: player:",player,"cards:",hand,"team:",team,"play:",play);
         ret.status = -1;
         //return [false,-2];
     } else {
         ret.status = 1; //this may be overriten later
-        var all = {};   //used to tell everyone what happened this turn
+        //play object will change, but not used outside the function
+        var all = play;   //used to tell everyone what happened this turn
         ret.all = all;
         all.player = player;
-        all.cardPlayed = cardPlayed;
         var replace = false;
         switch (action) {
         case PLAY_REPLACE:
@@ -114,11 +114,9 @@ function playCard(player,result) {
             replace = true;
             break;
         case PLAY_REMOVE:
-            all.position = place;
             removePoint(x,y);
             break;
         case PLAY_ADD:
-            all.position = place;
             addPoint(x,y,team);
             var check = checker(x,y,team);
             if (check.length) {
@@ -134,8 +132,6 @@ function playCard(player,result) {
             }
             break;
         case PLAY_FINISH:
-            all.position = place;
-            all.finishedLines = finishedLines;
             finishLines(finishedLines,team);
             //need to finish before checking, or will get same lines
             var check = checker(x,y,team);
@@ -154,7 +150,7 @@ function playCard(player,result) {
         all.action = action;
         var cardPlayed = players[player][card];
         all.cardPlayed = cardPlayed;
-        cardsPlayed.push(all);//[player,action,cardPlayed,[x,y],finishedLine]);
+        cardsPlayed.push(all);
         drawCard(player,card,team,replace);
         ret.newCard = players[player][card];
 
