@@ -1,6 +1,6 @@
 //start of ingame controls
-$('#speed').val(speed);
-$('#speed').keyup(function () {
+$("#speed").val(speed);
+$("#speed").keyup(function () {
     var thisSpeed = $(this).val();
     if (!isNaN(thisSpeed)) {
         speed = thisSpeed;
@@ -9,20 +9,20 @@ $('#speed').keyup(function () {
 $(window).keydown(function(e) {
     if (e.keyCode == 38) { //up key
         speed++;
-        $('#speed').val(speed);
+        $("#speed").val(speed);
     } else if (e.keyCode == 40&&speed>0) { //down key
         speed--;
-        $('#speed').val(speed);
+        $("#speed").val(speed);
     }
 });
 for (var i = 0 ; i < human.length ; i++) {
     if (human[i]) {
-        $('input[name='+(i+1)+'][value=human]').attr('checked','checked');
+        $("input[name="+(i+1)+"][value=human]").attr("checked","checked");
     } else {
-        $('input[name='+(i+1)+'][value=computer]').attr('checked','checked');
+        $("input[name="+(i+1)+"][value=computer]").attr("checked","checked");
     }
 }
-$('input[type=radio]').on('change',function() {
+$("input[type=radio]").on("change",function() {
     event.stopPropagation();
     if (this.value=="human") {
         human[this.name-1] = true;
@@ -30,7 +30,7 @@ $('input[type=radio]').on('change',function() {
         human[this.name-1] = false;
     }
 });
-$('input[type=radio]').click(function() {
+$("input[type=radio]").click(function() {
     event.stopPropagation();
 });
 
@@ -49,13 +49,13 @@ function pause() {
     if (pauseable) {
         keepgoing = !keepgoing;
         if (keepgoing) {
-            $('#pause').css('display','none');
+            $("#pause").css("display","none");
             if (unpauseable) {
                 unpauseable = false;
                 delayedStart(turnN,gameN);
             }
         } else {
-            $('#pause').css('display','block');
+            $("#pause").css("display","block");
         }
     }
 }
@@ -162,7 +162,7 @@ connection.onmessage = function (message) {
                     alert("something went very wrong");
                 } else {
                     players[me][playedCard] = data.newCard;
-                    $('#p'+me+'_'+playedCard).html(changeToCards(data.newCard));
+                    $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard));
                 }
             }
             var position = data.position;
@@ -207,12 +207,12 @@ connection.onmessage = function (message) {
         }
         gameN++;
         var totalGames = gameN;// + 1;  //0-index
-        $('#bluewin').text(bluewin);
-        $('#greenwin').text(greenwin);
-        $('#ties').text(ties);
-        $('#blueP').text(getPercentage(bluewin,totalGames));
-        $('#greenP').text(getPercentage(greenwin,totalGames));
-        $('#tieP').text(getPercentage(ties,totalGames));
+        $("#bluewin").text(bluewin);
+        $("#greenwin").text(greenwin);
+        $("#ties").text(ties);
+        $("#blueP").text(getPercentage(bluewin,totalGames));
+        $("#greenP").text(getPercentage(greenwin,totalGames));
+        $("#tieP").text(getPercentage(ties,totalGames));
         break;
     }
 };
@@ -528,9 +528,9 @@ function createBoard() {
     //create board display
     var cnt = 1;
     for (var i = 0 ; i < board.length ; i++) {
-        $('#board').append('<tr id =board'+i+'></tr>');
+        $("#board").append("<tr id =board"+i+"></tr>");
         for (var j = 0 ; j < board[i].length ; j++) {
-            $('#board'+i).append('<td class="v'+points[i][j]+'" id="'+cnt+'">'+changeToCards(board[i][j])+'</td>');
+            $("#board"+i).append("<td class='v"+points[i][j]+"' id='"+cnt+"'>"+changeToCards(board[i][j])+"</td>");
             cnt++;
         }
     }
@@ -565,15 +565,15 @@ function newGame() {
     showHands();
     
     for (var i = 1 ; i <= 100 && animate; i++) {
-        $('#'+i).removeClass();
-        $('#'+i).addClass('v0');
+        $("#"+i).removeClass();
+        $("#"+i).addClass("v0");
     }
     currentPlayer = 0;
     pastPlayer = -1;
     pastCardIndex = -1;
     pastCard = -2;
     if (animate) {
-        $('#card_played').empty();
+        $("#card_played").empty();
     }
     cardsPlayed = [];
     cardsleft = maxCards - 4 * handLength - 1;
@@ -666,19 +666,19 @@ function animateHand(player,card,remove,replace) {
         nextTurn = undefined;
     }
 
-    $('#p'+player+'_'+card).addClass('raise');
+    $("#p"+player+"_"+card).addClass("raise");
 
     nextTurn = function() {
         if (remove) {
-            $('#p'+player+'_'+card).removeClass('raise');
+            $("#p"+player+"_"+card).removeClass("raise");
             var size = players[player].length;
-            $('#p'+player+'_'+size).remove();
+            $("#p"+player+"_"+size).remove();
             for (var i = card ; i < size ; i++) {
-                $('#p'+player+'_'+i).html(changeToCards(players[player][i]));
+                $("#p"+player+"_"+i).html(changeToCards(players[player][i]));
             }
         } else {
-            $('#p'+player+'_'+card).removeClass('raise');
-            $('#p'+player+'_'+card).html(changeToCards(players[player][card]));
+            $("#p"+player+"_"+card).removeClass("raise");
+            $("#p"+player+"_"+card).html(changeToCards(players[player][card]));
         }
     };
     //want to update quicker as will have to use hand again
@@ -703,7 +703,7 @@ function hideHands(player) {
             continue;
         }
         for (var j = 0 ; j < players[i].length; j++) {
-            $('#p'+i+'_'+j).addClass('hide');
+            $("#p"+i+"_"+j).addClass("hide");
         }
     }
 }
@@ -819,12 +819,12 @@ function changeToCards(number) {
 }
 
 function showPlaces(player) {
-    $('.possible').removeClass('possible');
+    $(".possible").removeClass("possible");
     var options = getOptions(players[player]);
     for (var card = 0 ; card < options.length ; card++) {
         for (var side = 0 ; side < options[card].length ; side++) {
             var position = options[card][side][0]*10 + options[card][side][1] + 1;
-            $('#'+position).addClass('possible');
+            $("#"+position).addClass("possible");
         }
     }
 }
