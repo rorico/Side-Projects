@@ -312,9 +312,9 @@ function cardOptions(card) {
 
 //pick up new card
 function drawCard(player,card,team,replace) {
-    if (cardsleft !== -1) {
+    if (cardsleft > 0) {
+        cardsleft--; //0 index
         players[player][card] = deck[cardsleft];
-        cardsleft--;
     } else {
         players[player].splice(card,1);
         checkNoCards();
@@ -337,7 +337,6 @@ function checkNoCards() {
 //if can finish multiple, finishes all
 function checker(x,y,team) {
     var ret = [];
-    var changed = false;
     var dirs = [
         [1,1],
         [1,0],
@@ -517,35 +516,16 @@ function newGame() {
             points[row][col]=0;
         }
     }
-
     shuffle(deck);
-    var player1 = [];
-    var player2 = [];
-    var player3 = [];
-    var player4 = [];
-    for (var i = maxCards - handLength ; i < maxCards ; i++) {
-        player1.push(deck[i]);
+    cardsleft = maxCards;
+    //4 players
+    for (var i = 0 ; i < 4 ; i++) {
+        players[i] = deck.slice(cardsleft - handLength,cardsleft);
+        cardsleft -= handLength;
     }
-    for (var i = maxCards - 2 * handLength ; i < maxCards - handLength ; i++) {
-        player2.push(deck[i]);
-    }
-    for (var i = maxCards - 3 * handLength ; i < maxCards - 2 * handLength ; i++) {
-        player3.push(deck[i]);
-    }
-    for (var i = maxCards - 4 * handLength ; i < maxCards - 3 * handLength ; i++) {
-        player4.push(deck[i]);
-    }
-    players = [player1,player2,player3,player4];
-    //change this later
-    exports.players = players;
-    currentPlayer = 0;
-    pastPlayer = -1;
-    pastCardIndex = -1;
-    pastCard = -2;
     cardsPlayed = [];
     //change this later
     exports.cardsPlayed = cardsPlayed;
-    cardsleft = maxCards - 4 * handLength - 1;
     blueLines = 0;
     greenLines = 0;
 }
