@@ -52,7 +52,7 @@ wsServer.on('request', function(request) {
     activePlayers[player] = connection;
 
     var myTurn = player === waitingFor ? true : false;
-    connection.sendUTF(JSON.stringify({type:"start",player:player,hand:game.players[player],cardsPlayed:game.cardsPlayed,myTurn:myTurn}));
+    connection.sendUTF(JSON.stringify({type:"start",player:player,hand:game.getHand(player),myTurn:myTurn,gameInfo:game.getInfo()}));
 
     connection.on('message', function(message) {
         if (message.type === 'utf8') {

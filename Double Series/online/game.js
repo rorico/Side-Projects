@@ -1,4 +1,3 @@
-const fs = require("fs");
 //settings
 var maxGame = 1000;
 var speed = 500;
@@ -28,33 +27,36 @@ var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 var gameEnd = false;
 var winner = -1;
-var info = {
-    board:board,
-    points:points,
-    blueLines:blueLines,
-    greenLines:greenLines,
-    cardsPlayed:cardsPlayed,
-    cardsleft:cardsleft,
-};
 
 var PLAY_REPLACE = 0;
 var PLAY_REMOVE = -1;
 var PLAY_ADD = 1;
 var PLAY_FINISH = 2;
-exports.startGame = function() {
-    createBoard();
-    newGame();
-    //delayedStart(0,0);
-};
+
+exports.getInfo = getInfo;
 exports.human = human;
+exports.getHand = getHand;
 exports.checkValid = checkValid;
-exports.cardsPlayed = cardsPlayed;
-exports.board = board;
-exports.players = players;
 exports.newBoard = createBoard;
 exports.newGame = newGame;
 exports.setAI = setAI;
 exports.play = play;
+
+//since there are primitive types, need to refresh everything called
+function getInfo() {
+    return {
+        board:board,
+        points:points,
+        blueLines:blueLines,
+        greenLines:greenLines,
+        cardsPlayed:cardsPlayed,
+        cardsleft:cardsleft,
+    };
+}
+
+function getHand(player) {
+    return players[player];
+}
 
 function setAI(playerList,AIname) {
     try {
@@ -69,7 +71,7 @@ function setAI(playerList,AIname) {
     }
 }
 
-function play(player,result) {
+function play(player,play) {
     if (player === undefined) {
         player = turnN % 4;
         var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
@@ -77,12 +79,12 @@ function play(player,result) {
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
         var AI = playerAIs[player];
         AI = AI ? AI : defaultAI;
-        result = AI(hand,team,info);
+        play = AI(hand,team,getInfo());
     } else if (player !== turnN % 4) {
         console.log("not your turn");
     }
     //the play is checked in here
-    return playCard(player,result);
+    return playCard(player,play);
 }
 
 function playCard(player,result) {
@@ -524,8 +526,6 @@ function newGame() {
         cardsleft -= handLength;
     }
     cardsPlayed = [];
-    //change this later
-    exports.cardsPlayed = cardsPlayed;
     blueLines = 0;
     greenLines = 0;
 }

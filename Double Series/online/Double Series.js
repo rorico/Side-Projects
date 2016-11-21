@@ -92,8 +92,7 @@ var playedCard = -1;
 
 $(document).ready(function() {
     createBoard();
-    newGame();
-    //delayedStart(0,0);
+    //newGame();
 });
 
 var socket = window.WebSocket || window.MozWebSocket;
@@ -122,29 +121,32 @@ connection.onmessage = function (message) {
             }
             showHands();
         }
-        if (data.cardsPlayed) {
-            for (var i = 0 ; i < data.cardsPlayed.length ; i++) {
-                var card = data.cardsPlayed[i];
-                var position = card.position;
-                var x = position ? position[0] : -1;
-                var y = position ? position[1] : -1;
-                var team = (card.player % 2) * 2 + 1;
-                $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card.cardPlayed)+"</div>");
-                switch (card.action) {
-                case PLAY_REPLACE:
-                    //do nothing here
-                    break;
-                case PLAY_REMOVE:
-                    removePoint(x,y);
-                    break;
-                case PLAY_ADD:
-                    addPoint(x,y,team);
-                    break;
-                case PLAY_FINISH:
-                    addPoint(x,y,team);
-                    finishLines(card.finishedLines,team);
-                    break;
+        var info = data.gameInfo;
+
+        if (info) {
+            if (info.points) {
+                points = info.points;
+                for (var x = 0 ; x < points.length ; x++) {
+                    for (var y = 0 ; y < points[x].length ; y++) {
+                        if (points[x][y]) {
+                            getPosition(x,y).removeClass("v0").addClass("v" + points[x][y]);
+                        }
+                    }
                 }
+            }
+            if (info.cardsPlayed) {
+                cardsPlayed = info.cardsPlayed;
+                for (var i = 0 ; i < cardsPlayed.length ; i++) {
+                    var card = cardsPlayed[i];
+                    var team = (card.player % 2) * 2 + 1;
+                    $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card.cardPlayed)+"</div>");
+                }
+            }
+            if (info.blueLines) {
+                blueLines = blueLines;
+            }
+            if (info.greenLines) {
+                greenLines = greenLines;
             }
         }
         if (data.myTurn) {
@@ -213,7 +215,7 @@ connection.onmessage = function (message) {
         $('#tieP').text(getPercentage(ties,totalGames));
         break;
     }
-}
+};
 
 function playData(player,result) {
     var data = {type:"play",player:player,result:result};
