@@ -153,28 +153,30 @@ function playCard(player,play) {
         cardsPlayed.push(all);
         ret.newCard = drawCard(player,card,team,replace);
 
-        //get player who plays next
-        var nextPlayer;
-        if (replace) {
-            nextPlayer = player;
-        } else {
-            turnN++;
-            nextPlayer = (player+1) % 4;
-        }
-
-        //if nextHand is empty, keep going
-        for (var i = 0 ; i < 4 ; i++) {
-            if (players[nextPlayer].length) {
-                break;
+        if (ret.status === 1) {
+            //get player who plays next
+            var nextPlayer;
+            if (replace) {
+                nextPlayer = player;
             } else {
                 turnN++;
-                nextPlayer = (nextPlayer+1) % 4;
+                nextPlayer = (player+1) % 4;
             }
-        }
-        ret.nextPlayer = nextPlayer;
-        if (human[nextPlayer]) {
-            //means waiting for player next turn
-            ret.status = 2;
+
+            //if nextHand is empty, keep going
+            for (var i = 0 ; i < 4 ; i++) {
+                if (players[nextPlayer].length) {
+                    break;
+                } else {
+                    turnN++;
+                    nextPlayer = (nextPlayer+1) % 4;
+                }
+            }
+            ret.nextPlayer = nextPlayer;
+            if (human[nextPlayer]) {
+                //means waiting for player next turn
+                ret.status = 2;
+            }
         }
     }
     return ret;
