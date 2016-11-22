@@ -151,8 +151,7 @@ function playCard(player,play) {
         var cardPlayed = players[player][card];
         all.cardPlayed = cardPlayed;
         cardsPlayed.push(all);
-        drawCard(player,card,team,replace);
-        ret.newCard = players[player][card];
+        ret.newCard = drawCard(player,card,team,replace);
 
         //get player who plays next
         var nextPlayer;
@@ -308,14 +307,16 @@ function cardOptions(card) {
     return sides;
 }
 
-//pick up new card
+//pick up new card, return value of newCard
 function drawCard(player,card,team,replace) {
     if (cardsleft > 0) {
         cardsleft--; //0 index
         players[player][card] = deck[cardsleft];
+        return players[player][card];
     } else {
         players[player].splice(card,1);
         checkNoCards();
+        //returns nothing
     }
 }
 

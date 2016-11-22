@@ -119,7 +119,7 @@ connection.onmessage = function (message) {
             if (data.hand) {
                 players[me] = data.hand;
             }
-            showHands();
+            showHand(me);
         }
         var info = data.gameInfo;
 
@@ -159,7 +159,11 @@ connection.onmessage = function (message) {
         } else {
             if (data.player === me) {
                 if (data.newCard === undefined) {
-                    alert("something went very wrong");
+                    var size = players[me].length;
+                    $("#p"+player+"_"+size).remove();
+                    for (var i = playedCard ; i < size ; i++) {
+                        $("#p"+player+"_"+i).html(changeToCards(players[player][i]));
+                    }
                 } else {
                     players[me][playedCard] = data.newCard;
                     $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard));
@@ -644,6 +648,14 @@ function showFinishLine(line,team) {
 
 function showFinishPoint(x,y,team) {
     getPosition(x,y).removeClass("v" + team).addClass("v"+(team+1));
+}
+
+//shows Hand on board
+function showHand(player) {
+    $("#p" + player).empty();
+    for (var j = 0 ; j < players[player].length ; j++) {
+        $("#p"+player).append("<div id='p"+player+"_"+j+"'>"+changeToCards(players[player][j])+"</div>");
+    }
 }
 
 //shows Hand on board
