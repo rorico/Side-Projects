@@ -52,7 +52,7 @@ function cardOptions(card) {
 
 //checks if lines is won and turns them over
 //if can finish multiple, finishes all
-function checker(x,y,team) {
+function checker(x,y,team,finishedLines) {
     var ret = [];
     var changed = false;
     var dirs = [
@@ -61,6 +61,32 @@ function checker(x,y,team) {
         [0,1],
         [1,-1]
     ];
+
+    //if there are finished lines, don't search for those directions
+    if (finishedLines) {
+        for (var i = 0 ; i < finishedLines.length ; i++) {
+            var line = finishedLines[i];
+            if (line[0] && line[1]) {
+                var slope = [line[1][0] - line[0][0],line[1][1] - line[0][1]];
+                //first should be positive
+                if (slope[0] < 0) {
+                    slope[0] = -slope[0];
+                    slope[1] = -slope[1];
+                }
+                for (var j = 0 ; j < dirs.length ; j++) {
+                    if (dirs[j][0] === slope[0] && dirs[j][1] === slope[1]) {
+                        dirs.splice(j,1);
+                        break;
+                    }
+                }
+            } else {
+                console.log("this shouldn't happen");
+            }
+        }
+    }
+
+
+
     for (var i = 0 ; i < dirs.length ; i++) {
         var lines = checkDirection(x,y,dirs[i][0],dirs[i][1],team);
         if (lines.length === 9) {

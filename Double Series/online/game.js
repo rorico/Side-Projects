@@ -86,10 +86,11 @@ function play(player,play) {
         console.log("not your turn");
     }
     //the play is checked in here
-    return playCard(player,play);
+    return processTurn(player,play);
 }
 
-function playCard(player,play) {
+function processTurn(player,play) {
+    //play object will change, but not used outside the function
     var ret = {};
     var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
     var hand = players[player];
@@ -102,13 +103,7 @@ function playCard(player,play) {
     if (checkValid && !checkValidPlay(player,action,card,x,y,team,finishedLines)) {
         console.log("error playing: player:",player,"cards:",hand,"team:",team,"play:",play);
         ret.status = -1;
-        //return [false,-2];
     } else {
-        ret.status = 1; //this may be overriten later
-        //play object will change, but not used outside the function
-        var all = play;   //used to tell everyone what happened this turn
-        ret.all = all;
-        all.player = player;
         var replace = false;
         switch (action) {
         case constants.PLAY_REPLACE:
@@ -116,42 +111,32 @@ function playCard(player,play) {
             replace = true;
             break;
         case constants.PLAY_REMOVE:
-            removePoint(x,y);
             break;
-        case constants.PLAY_ADD:
-            addPoint(x,y,team);
-            var check = helper.checker(x,y,team);
+        case constants.PLAY_ADD: //same check for both
+        case constants.PLAY_FINISH:
+            //need to finish before checking, or will get same lines
+            var check = helper.checker(x,y,team,finishedLines);
             if (check.length) {
-                action = constants.PLAY_FINISH;
                 var checkLines = chooseFinishLine(check);
-                all.finishedLines = checkLines;
-                finishLines(checkLines,team);
-                checkGameDone();
-                if (gameEnd) {
-                    ret.status = 3;
-                    all.winner = winner;
+                if (action === constants.PLAY_FINISH) {
+                    play.finishedLines.concat(checkLines);
+                } else {
+                    play.action = constants.PLAY_FINISH;
+                    play.finishedLines = checkLines;
                 }
             }
             break;
-        case constants.PLAY_FINISH:
-            finishLines(finishedLines,team);
-            //need to finish before checking, or will get same lines
-            var check = helper.checker(x,y,team);
-            if (check.length) {
-                var checkLines = chooseFinishLine(check);
-                all.finishedLines.concat(checkLines);
-                finishLines(chooseFinishLine(check),team);
-            }
-            checkGameDone();
-            if (gameEnd) {
-                ret.status = 3;
-                all.winner = winner;
-            }
-            break;
         }
+        playCard(player,play);
+
+        ret.status = 1; //this may be overriten later
+        
+        var all = play;   //used to tell everyone what happened this turn
+        ret.all = all;
+        all.player = player;
         all.action = action;
-        var cardPlayed = players[player][card];
-        all.cardPlayed = cardPlayed;
+        all.cardPlayed = players[player][card];
+
         cardsPlayed.push(all);
         ret.newCard = drawCard(player,card,team,replace);
 
@@ -182,6 +167,29 @@ function playCard(player,play) {
         }
     }
     return ret;
+}
+
+
+function playCard(player,play) {
+    var position = play.position;
+    var x = position ? position[0] : -1;
+    var y = position ? position[1] : -1;
+    var team = (player % 2) * 2 + 1;
+    switch (play.action) {
+    case constants.PLAY_REPLACE:
+        //do nothing here
+        break;
+    case constants.PLAY_REMOVE:
+        removePoint(x,y);
+        break;
+    case constants.PLAY_ADD:
+        addPoint(x,y,team);
+        break;
+    case constants.PLAY_FINISH:
+        addPoint(x,y,team);
+        finishLines(play.finishedLines,team);
+        break;
+    }
 }
 
 //updates gameEnd if game is done
