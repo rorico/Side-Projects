@@ -159,10 +159,11 @@ connection.onmessage = function (message) {
         } else {
             if (data.player === me) {
                 if (data.newCard === undefined) {
+                    players[me].splice(playedCard,1);
                     var size = players[me].length;
-                    $("#p"+player+"_"+size).remove();
+                    $("#p"+me+"_"+size).remove();
                     for (var i = playedCard ; i < size ; i++) {
-                        $("#p"+player+"_"+i).html(changeToCards(players[player][i]));
+                        $("#p"+me+"_"+i).html(changeToCards(players[me][i]));
                     }
                 } else {
                     players[me][playedCard] = data.newCard;
