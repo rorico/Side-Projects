@@ -97,12 +97,11 @@ function playCard(player,result) {
 }
 
 function sendPlay(data) {
-    var send = data.all;
+    //copy to not affect outside function
+    var send = copyObject(data.all);
     var player = send.player;
     var newCard = data.newCard
 
-    //will affect outside of function, but it is not used
-    //actually affects cardsPlayed array, will need to change
     send.type = "play";
     var info = JSON.stringify(send);
     
@@ -151,4 +150,8 @@ function getOpenPlayerSlot() {
 function removeHumanPlayer(player) {
     var human = game.human;
     human[player] = false;
+}
+
+function copyObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
 }
