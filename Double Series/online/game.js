@@ -1,4 +1,5 @@
 const helper = require("./gameFunctions.js");
+const constants = require("./constants.js");
 
 //settings
 var maxGame = 1000;
@@ -29,11 +30,6 @@ var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 var gameEnd = false;
 var winner = -1;
-
-var PLAY_REPLACE = 0;
-var PLAY_REMOVE = -1;
-var PLAY_ADD = 1;
-var PLAY_FINISH = 2;
 
 //start
 createBoard();
@@ -115,18 +111,18 @@ function playCard(player,play) {
         all.player = player;
         var replace = false;
         switch (action) {
-        case PLAY_REPLACE:
+        case constants.PLAY_REPLACE:
             //do nothing here
             replace = true;
             break;
-        case PLAY_REMOVE:
+        case constants.PLAY_REMOVE:
             removePoint(x,y);
             break;
-        case PLAY_ADD:
+        case constants.PLAY_ADD:
             addPoint(x,y,team);
             var check = helper.checker(x,y,team);
             if (check.length) {
-                action = PLAY_FINISH;
+                action = constants.PLAY_FINISH;
                 var checkLines = chooseFinishLine(check);
                 all.finishedLines = checkLines;
                 finishLines(checkLines,team);
@@ -137,7 +133,7 @@ function playCard(player,play) {
                 }
             }
             break;
-        case PLAY_FINISH:
+        case constants.PLAY_FINISH:
             finishLines(finishedLines,team);
             //need to finish before checking, or will get same lines
             var check = helper.checker(x,y,team);
@@ -208,7 +204,7 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
     }
     var card = players[player][cardIndex];
     switch (action) {
-    case PLAY_REPLACE: //throw away card
+    case constants.PLAY_REPLACE: //throw away card
         if (card === 0 || card === -1) {
             return false;
         }
@@ -216,7 +212,7 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
             return false;
         }
         break;
-    case PLAY_REMOVE: //remove J
+    case constants.PLAY_REMOVE: //remove J
         if (card !== -1) {
             return false;
         }
@@ -224,7 +220,7 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
             return false;
         }
         break;
-    case PLAY_FINISH: //add and finish line
+    case constants.PLAY_FINISH: //add and finish line
         if (!finishedLines) {
             return false;
         }
@@ -260,7 +256,7 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
             }
         }
         //fall through and also check add
-    case PLAY_ADD: //add
+    case constants.PLAY_ADD: //add
         if (card !== 0) {
             if (points[x][y] !== 0) {
                 return false;
