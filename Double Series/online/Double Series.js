@@ -81,11 +81,6 @@ var gameEnd = false;
 var animate = true;
 var info = {board:board};
 
-var PLAY_REPLACE = 0;
-var PLAY_REMOVE = -1;
-var PLAY_ADD = 1;
-var PLAY_FINISH = 2;
-
 var me;
 var playedCard = -1;
 
@@ -175,16 +170,16 @@ connection.onmessage = function (message) {
             var y = position ? position[1] : -1;
             var team = (data.player % 2) * 2 + 1;
             switch (data.action) {
-            case PLAY_REPLACE:
+            case constants.PLAY_REPLACE:
                 //do nothing here
                 break;
-            case PLAY_REMOVE:
+            case constants.PLAY_REMOVE:
                 removePoint(x,y);
                 break;
-            case PLAY_ADD:
+            case constants.PLAY_ADD:
                 addPoint(x,y,team);
                 break;
-            case PLAY_FINISH:
+            case constants.PLAY_FINISH:
                 addPoint(x,y,team);
                 finishLines(data.finishedLines,team);
                 break;
@@ -225,43 +220,6 @@ connection.onmessage = function (message) {
 function playData(player,result) {
     var data = {type:"play",player:player,result:result};
     connection.send(JSON.stringify(data));
-}
-
-function playCard(player,team,result) {
-    var hand = players[player];
-    var action = result[0];
-    var card = result[1];
-    var place = result[2];
-    var x = place[0];
-    var y = place[1];
-    var replace = false;
-    switch (action) {
-    case PLAY_REPLACE:
-        //do nothing here
-        replace = true;
-        break;
-    case PLAY_REMOVE:
-        removePoint(x,y);
-        break;
-    case PLAY_ADD:
-        addPoint(x,y,team);
-        checker(x,y);
-        break;
-    case PLAY_FINISH:
-        addPoint(x,y,team);
-        var finishedLine = result[3];
-        for (var i = 0 ; i < finishedLine.length ; i++) {
-            finishLine(finishedLine[i][0],finishedLine[i][1]);
-        }
-        finishLine(x,y,team);
-        break;
-    }
-    if (!replace) {
-        turnN++;
-    }
-    cardsPlayed.push([player,action,players[player][card],[x,y]]);
-    drawCard(player,card,team,replace);
-    return [true,players[player][card]];
 }
 
 function getPercentage(num,den) {

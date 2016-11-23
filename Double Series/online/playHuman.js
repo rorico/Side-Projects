@@ -17,7 +17,7 @@ function playHuman(player,team) {
                 for (var side = 0 ; side < options.length ; side++) {
                     var x = options[side][0];
                     var y = options[side][1];
-                    showChoose(player,team,card,PLAY_ADD,x,y);
+                    showChoose(player,team,card,constants.PLAY_ADD,x,y);
                 }
             }
         }
@@ -38,14 +38,14 @@ function chooseCard(player,team,card,options) {
     });
     $("#o"+player).append(backButton);
 
-    var action = PLAY_ADD;
+    var action = constants.PLAY_ADD;
     if (players[player][card] === 0) {
         options = addJoptions();
     } else if (players[player][card] === -1) {
-        action = PLAY_REMOVE;
+        action = constants.PLAY_REMOVE;
         options = removeJoptions(team);
     } else if (!options.length) {     //useless card
-        action = PLAY_REPLACE;
+        action = constants.PLAY_REPLACE;
         var removeButton = $("<div class='choose option' id='remove'>REMOVE</div>");
         removeButton.click(function() {
             clearHuman();
@@ -75,7 +75,7 @@ function showChoose(player,team,card,action,x,y) {
             position:[x,y]
         };
         var possible;
-        if (action === PLAY_ADD && (addPoint(x,y,team),possible = checker(x,y,team),possible.length)) {
+        if (action === constants.PLAY_ADD && (addPoint(x,y,team),possible = checker(x,y,team),possible.length)) {
             showFinish(player,ret,possible);
         } else {
             choosePlay(player,ret);
@@ -84,7 +84,7 @@ function showChoose(player,team,card,action,x,y) {
 }
 
 function showFinish(player,ret,possible) {
-    ret.action = PLAY_FINISH;
+    ret.action = constants.PLAY_FINISH;
     var team = ret.team;
     var linesFinished = team === 1 ? blueLines : greenLines;
     var choose = [];
@@ -165,7 +165,6 @@ function clearHuman() {
 }
 
 function choosePlay(player,ret) {
-    console.log(player,ret);
     playedCard = ret.card;
     playData(player,ret);
 }
