@@ -3,7 +3,7 @@ if (typeof module === "object" && module && typeof module.exports === "object") 
     var points;
     exports.setUp = function(info){
         points = info.points;
-    }
+    };
     exports.getOptions = getOptions;
     exports.checker = checker;
     exports.cardOptions = cardOptions;
@@ -85,8 +85,6 @@ function checker(x,y,team,finishedLines) {
         }
     }
 
-
-
     for (var i = 0 ; i < dirs.length ; i++) {
         var lines = checkDirection(x,y,dirs[i][0],dirs[i][1],team);
         if (lines.length === 9) {
@@ -134,4 +132,57 @@ function checkDirection(x,y,dirX,dirY,team) {
 
 function outOfBounds(x,y) {
     return x > 9 || x < 0 || y > 9 || y < 0;
+}
+
+function playCard(player,play) {
+    var position = play.position;
+    var x = position ? position[0] : -1;
+    var y = position ? position[1] : -1;
+    var team = (player % 2) * 2 + 1;
+    switch (play.action) {
+    case constants.PLAY_REPLACE:
+        //do nothing here
+        break;
+    case constants.PLAY_REMOVE:
+        removePoint(x,y);
+        break;
+    case constants.PLAY_ADD:
+        addPoint(x,y,team);
+        break;
+    case constants.PLAY_FINISH:
+        addPoint(x,y,team);
+        finishLines(play.finishedLines,team);
+        break;
+    }
+}
+
+//changes a team to 0 because of remove J
+function removePoint(x,y) {
+    points[x][y] = 0;
+    getPosition(x,y).removeClass().addClass("v0");
+}
+
+//changes team to given team of card played
+function addPoint(x,y,team) {
+    points[x][y] = team;
+    getPosition(x,y).removeClass("v0").addClass("v"+team);
+}
+
+//creates a line
+function finishLines(lines,team) {
+    for (var i = 0 ; i < lines.length ; i++) {
+        var line = lines[i];
+        for (var j = 0 ; j < line.length ; j++) {
+            var x = line[j][0];
+            var y = line[j][1];
+            points[x][y] = team + 1;
+            pointworth[x][y]++;
+            showFinishPoint(x,y,team);
+        }
+        if (team === 1) {
+            blueLines++;
+        } else if (team === 3){
+            greenLines++;
+        }
+    }
 }

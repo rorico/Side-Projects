@@ -165,27 +165,8 @@ connection.onmessage = function (message) {
                     $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard));
                 }
             }
-            var position = data.position;
-            var x = position ? position[0] : -1;
-            var y = position ? position[1] : -1;
-            var team = (data.player % 2) * 2 + 1;
-            switch (data.action) {
-            case constants.PLAY_REPLACE:
-                //do nothing here
-                break;
-            case constants.PLAY_REMOVE:
-                removePoint(x,y);
-                break;
-            case constants.PLAY_ADD:
-                addPoint(x,y,team);
-                break;
-            case constants.PLAY_FINISH:
-                addPoint(x,y,team);
-                finishLines(data.finishedLines,team);
-                break;
-            }
-            var card = data.cardPlayed;
-            $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card)+"</div>");
+            playCard(data.player,data);
+            $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(data.cardPlayed)+"</div>");
             if (data.myTurn) {
                 setTimeout(function() {
                     playHuman(me,(me % 2) * 2 + 1);
@@ -222,6 +203,28 @@ connection.onmessage = function (message) {
 function playData(player,result) {
     var data = {type:"play",player:player,result:result};
     connection.send(JSON.stringify(data));
+}
+
+function playCard(player,play) {
+    var position = play.position;
+    var x = position ? position[0] : -1;
+    var y = position ? position[1] : -1;
+    var team = (player % 2) * 2 + 1;
+    switch (play.action) {
+    case constants.PLAY_REPLACE:
+        //do nothing here
+        break;
+    case constants.PLAY_REMOVE:
+        removePoint(x,y);
+        break;
+    case constants.PLAY_ADD:
+        addPoint(x,y,team);
+        break;
+    case constants.PLAY_FINISH:
+        addPoint(x,y,team);
+        finishLines(play.finishedLines,team);
+        break;
+    }
 }
 
 function getPercentage(num,den) {
