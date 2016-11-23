@@ -41,7 +41,6 @@ var wsServer = new WebSocketServer({
 });
 
 const game = require("./game.js");
-game.newBoard();
 game.newGame();
 var waitingFor = 0;
 var activePlayers = [];

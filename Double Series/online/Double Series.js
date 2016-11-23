@@ -214,6 +214,8 @@ connection.onmessage = function (message) {
         $("#greenP").text(getPercentage(greenwin,totalGames));
         $("#tieP").text(getPercentage(ties,totalGames));
         break;
+    case "newGame":
+        break;
     }
 };
 
@@ -225,231 +227,6 @@ function playData(player,result) {
 function getPercentage(num,den) {
     return ((num/den)*100).toFixed(2) + "%";
 }
-
-//array of options that player can play
-//Output [card][side][row x, col y]
-function getOptions(cards) {
-    var options = [];
-    for ( var k = 0 ; k < cards.length ; k++) {
-        var sides = [];
-        var card = cards[k];
-        //if jacks, just push jacks
-        if (card === 0 || card === -1) {
-            sides = card;
-        } else {
-            sides = cardOptions(card);
-        }
-        options.push(sides);
-    }
-    return options;
-}
-
-//returns x,y coordinates for the card, does not work with Js
-function cardOptions(card) {
-    var possible = [];
-    if (card === 1) {
-        possible = [[0,0],[0,9],[9,0],[9,9]];
-    } else if (card < 10) {
-        possible = [[0,card-1],[9,10-card]];
-    } else {
-        var x = Math.floor(card/10);
-        var y = card % 10;
-        possible = [[x,y],[9-x,9-y]];
-    }
-    var sides = [];
-    for ( var i = 0 ; i < possible.length ; i++ )
-    {
-        if (points[possible[i][0]][possible[i][1]]===0) {
-            sides.push([possible[i][0],possible[i][1]]);
-        }
-    }
-    return sides;
-}
-
-//pick up new card
-function drawCard(player,card,team,replace) {
-    if (animate) {
-        $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(players[player][card])+"</div>");
-    }
-    if (showMoves) {
-        showPlaces(player);
-    }
-    var remove = false;
-    if (cardsleft !== -1) {
-        players[player][card] = deck[cardsleft];
-        cardsleft--;
-    } else {
-        players[player].splice(card,1);
-        remove = true;
-    }
-    if (animate) {
-        animateHand(player,card,remove,replace);
-    }
-}
-
-//checks if lines is won and turns them over
-//if can finish multiple, finishes all
-function checker(x,y,team) {
-    var ret = [];
-    var changed = false;
-    var dirs = [
-        [1,1],
-        [1,0],
-        [0,1],
-        [1,-1]
-    ];
-    for (var i = 0 ; i < dirs.length ; i++) {
-        var lines = checkDirection(x,y,dirs[i][0],dirs[i][1],team);
-        if (lines.length === 9) {
-            //2 lines, seperate them
-            ret.push(lines.slice(0,5));
-            ret.push(lines.slice(4,9));
-        } else if (lines.length >= 5) {
-            ret.push(lines);
-        }
-    }
-    return ret;
-}
-/*function checker(x,y,team) {
-    //var team = points[x][y];
-    var linesFinished = team === 1 ? blueLines : greenLines;
-    var ret = [];
-    var changed = false;
-    var dirs = [
-        [1,1],
-        [1,0],
-        [0,1],
-        [1,-1]
-    ];
-    for (var i = 0 ; i < dirs.length ; i++) {
-        var lines = checkDirection(x,y,dirs[i][0],dirs[i][1],team);
-        if (lines.length >= 4) {
-            if (!changed) {
-                finishLine([[x,y]],team);
-                changed = true;
-            }
-
-            if (lines.length % 4 === 0) {
-                finishLine(lines,team);
-                linesFinished += lines.length / 4;
-            } else {
-                //assume lines needed is only 2
-                if (linesFinished) {
-                    //pick a line at random
-                    var random = Math.floor(Math.random() * (lines.length - 3));
-                    finishLine(lines.slice(random,random + 4),team);
-                    linesFinished++;
-                } else if (ret.length) {
-                    //pick a line at random
-                    var random = Math.floor(Math.random() * (lines.length - 3));
-                    finishLine(lines.slice(random,random + 4),team);
-
-                    //pick a line at random
-                    var random = Math.floor(Math.random() * (ret.length - 3));
-                    finishLine(ret.slice(random,random + 4),team);
-                    linesFinished += 2;
-                    ret = [];
-                } else {
-                    ret = lines;
-                }
-            }
-        }
-    }
-    if (team === 1) {
-        blueLines = linesFinished;
-    } else if (team === 3){
-        greenLines = linesFinished;
-    }
-    return ret;
-}*/
-
-function checkDirection(x,y,dirX,dirY,team) {
-    var list = [[x,y]];
-
-    var checkUp = true;
-    var checkDown = true;
-    
-    var xUp = x;
-    var xDown = x;
-    var yUp = y;
-    var yDown = y;
-    
-    for (var i = 1 ; i < 5 && checkUp; i++) {
-        xUp += dirX;
-        yUp += dirY;
-        if (!outOfBounds(xUp,yUp) && points[xUp][yUp]===team) {
-            list.push([xUp,yUp]);
-        } else {
-            checkUp = false;
-        }
-    }
-    for (var i = 1 ; i < 5 && checkDown; i++) {
-        xDown -= dirX;
-        yDown -= dirY;
-        if (!outOfBounds(xDown,yDown) && points[xDown][yDown]===team) {
-            list.unshift([xDown,yDown]);
-        } else {
-            checkDown = false;
-        }
-    }
-    return list;
-}
-
-function outOfBounds(x,y) {
-    return x > 9 || x < 0 || y > 9 || y < 0;
-}
-
-//-----------auxilary functions-------------------//
-//position of Add J, -1 if none
-function hasAdd(player) {
-    for (var i = 0 ; i < player.length ; i++){
-        if (player[i] === 0) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-//position of Remove J, -1 if none
-function hasRemove(player) {
-    for (var i = 0 ; i < player.length ; i++){
-        if (player[i] === -1) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-function hasOnlyJ(player) {
-    for (var i = 0 ; i < player.length ; i++){
-        if (player[i]!==-1 && player[i]!==0) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function hasOnlyRemoveJ(player) {
-    for (var i = 0 ; i < player.length ; i++){
-        if (player[i] !== -1) {
-            return false;
-        }
-    }
-    return true;
-}
-
-//has a useless card
-function hasUselessCard(options) {
-    for (var i = 0 ; i < options.length ; i++){
-        //if J, length will be undefined
-        if (options[i].length === 0) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-//---------------------------------------------//
 
 //-----------------game functions--------------//
 //creates board and deck
@@ -502,7 +279,7 @@ function createBoard() {
 //restart game
 function newGame() {
     for (var row = 0 ; row < 10 ; row++) {
-        for ( var col = 0 ; col < 10 ; col++) {
+        for (var col = 0 ; col < 10 ; col++) {
             points[row][col]=0;
         }
     }
@@ -542,26 +319,6 @@ function newGame() {
     cardsleft = maxCards - 4 * handLength - 1;
     blueLines = 0;
     greenLines = 0;
-}
-
-
-//shuffle deck
-function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex ;
-  
-    // While there remain elements to shuffle...
-    while (currentIndex) {
-      // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-  
-      // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-  
-    return array;
 }
 
 function getPosition(x,y) {
@@ -617,48 +374,7 @@ function showHand(player) {
     }
 }
 
-//shows Hand on board
-function showHands() {
-    $("#p0").empty();
-    $("#p1").empty();
-    $("#p2").empty();
-    $("#p3").empty();
-    for (var i = 0 ; i < players.length ; i++) {
-        for (var j = 0 ; j < players[i].length ; j++) {
-            $("#p"+i).append("<div id='p"+i+"_"+j+"'>"+changeToCards(players[i][j])+"</div>");
-        }
-    }
-}
-
-var nextTurn;
-function animateHand(player,card,remove,replace) {
-    if (nextTurn) {
-        nextTurn();
-        nextTurn = undefined;
-    }
-
-    $("#p"+player+"_"+card).addClass("raise");
-
-    nextTurn = function() {
-        if (remove) {
-            $("#p"+player+"_"+card).removeClass("raise");
-            var size = players[player].length;
-            $("#p"+player+"_"+size).remove();
-            for (var i = card ; i < size ; i++) {
-                $("#p"+player+"_"+i).html(changeToCards(players[player][i]));
-            }
-        } else {
-            $("#p"+player+"_"+card).removeClass("raise");
-            $("#p"+player+"_"+card).html(changeToCards(players[player][card]));
-        }
-    };
-    //want to update quicker as will have to use hand again
-    if (replace) {
-        nextTurn();
-        nextTurn = undefined;
-    }
-}
-
+//for showing statistics of what points is used to win
 function showWorth() {
     for (var x = 0 ; x < 10; x++) {
         for (var y = 0 ; y < 10; y++) {
@@ -666,17 +382,6 @@ function showWorth() {
         }
     }
     $("#values").append(JSON.stringify(pointworth));
-}
-
-function hideHands(player) {
-    for (var i = 0 ; i < players.length ; i++) {
-        if (i === player) {
-            continue;
-        }
-        for (var j = 0 ; j < players[i].length; j++) {
-            $("#p"+i+"_"+j).addClass("hide");
-        }
-    }
 }
 
 //change card numbers to corresponding card in game
@@ -786,16 +491,5 @@ function changeToCards(number) {
             return "7 &#9671";
         default:
             return "-2";
-    }
-}
-
-function showPlaces(player) {
-    $(".possible").removeClass("possible");
-    var options = getOptions(players[player]);
-    for (var card = 0 ; card < options.length ; card++) {
-        for (var side = 0 ; side < options[card].length ; side++) {
-            var position = options[card][side][0]*10 + options[card][side][1] + 1;
-            $("#"+position).addClass("possible");
-        }
     }
 }
