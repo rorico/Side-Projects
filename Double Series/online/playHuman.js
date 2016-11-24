@@ -76,16 +76,15 @@ function showChoose(player,team,card,action,x,y) {
         };
         var possible;
         if (action === constants.PLAY_ADD && (addPoint(x,y,team),possible = checker(x,y,team),possible.length)) {
-            showFinish(player,ret,possible);
+            showFinish(player,team,ret,possible);
         } else {
             choosePlay(player,ret);
         }
     });
 }
 
-function showFinish(player,ret,possible) {
+function showFinish(player,team,ret,possible) {
     ret.action = constants.PLAY_FINISH;
-    var team = ret.team;
     var linesFinished = team === 1 ? blueLines : greenLines;
     var choose = [];
     //if play is going to finish the game, it doesn't matter what i picked
