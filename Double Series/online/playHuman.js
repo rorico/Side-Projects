@@ -31,12 +31,10 @@ function playHuman(player,team) {
 }
 
 function chooseCard(player,team,card,options) {
-    var backButton = $("<div class='choose option' id='back'>BACK</div>");
-    backButton.click(function() {
+    addOption(player,"BACK",function() {
         clearHuman();
         playHuman(player,team);
     });
-    $("#o"+player).append(backButton);
 
     var action = constants.PLAY_ADD;
     if (players[player][card] === 0) {
@@ -45,17 +43,14 @@ function chooseCard(player,team,card,options) {
         action = constants.PLAY_REMOVE;
         options = removeJoptions(team);
     } else if (!options.length) {     //useless card
-        action = constants.PLAY_REPLACE;
-        var removeButton = $("<div class='choose option' id='remove'>REMOVE</div>");
-        removeButton.click(function() {
+        addOption(player,"REMOVE",function() {
             clearHuman();
             var ret = {
                 card:card,
-                action:action
+                action:constants.PLAY_REPLACE
             }
             choosePlay(player,ret);
         });
-        $("#o"+player).append(removeButton);
     }
     
     for (var side = 0 ; side < options.length ; side++) {
@@ -63,6 +58,12 @@ function chooseCard(player,team,card,options) {
         var y = options[side][1];
         showChoose(player,team,card,action,x,y);
     }
+}
+
+function addOption(player,text,funct) {
+    var button = $("<div class='choose option' id='back'>" + text + "</div>");
+    button.click(funct);
+    $("#o"+player).append(button);
 }
 
 function showChoose(player,team,card,action,x,y) {
