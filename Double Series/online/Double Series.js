@@ -166,6 +166,7 @@ connection.onmessage = function (message) {
                 }
             }
             playCard(data.player,data);
+            var team = (data.player % 2) * 2 + 1;
             $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(data.cardPlayed)+"</div>");
             if (data.myTurn) {
                 setTimeout(function() {
