@@ -23,7 +23,7 @@ var handLength = 7;
 
 var pointworth = [];
 var points = [];
-var players = [];
+var hands = [];
 var blueLines = 0;
 var greenLines = 0;
 var cardsleft = maxCards - 4 * handLength - 1;
@@ -57,7 +57,7 @@ function getInfo() {
 }
 
 function getHand(player) {
-    return players[player];
+    return hands[player];
 }
 
 function setAI(playerList,AIname) {
@@ -76,8 +76,8 @@ function setAI(playerList,AIname) {
 function play(player,play) {
     if (player === undefined) {
         player = turnN % 4;
-        var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
-        var hand = players[player];
+        var team = ((player%2)*2) + 1;    //1 for player 1 and 3, 3 for 2 and 4
+        var hand = hands[player];
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
         var AI = playerAIs[player];
         AI = AI ? AI : defaultAI;
@@ -93,7 +93,7 @@ function processTurn(player,play) {
     //play object will change, but not used outside the function
     var ret = {};
     var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
-    var hand = players[player];
+    var hand = hands[player];
     var action = play.action;
     var card = play.card;
     var position = play.position;
@@ -135,7 +135,7 @@ function processTurn(player,play) {
         ret.all = all;
         all.player = player;
         all.action = action;
-        all.cardPlayed = players[player][card];
+        all.cardPlayed = hands[player][card];
 
         cardsPlayed.push(all);
         ret.newCard = drawCard(player,card,team,replace);
@@ -152,7 +152,7 @@ function processTurn(player,play) {
 
             //if nextHand is empty, keep going
             for (var i = 0 ; i < 4 ; i++) {
-                if (players[nextPlayer].length) {
+                if (hands[nextPlayer].length) {
                     break;
                 } else {
                     turnN++;
@@ -168,7 +168,6 @@ function processTurn(player,play) {
     }
     return ret;
 }
-
 
 function playCard(player,play) {
     var position = play.position;
@@ -210,7 +209,7 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
     if (turnN % 4 !== player) {
         return false;
     }
-    var card = players[player][cardIndex];
+    var card = hands[player][cardIndex];
     switch (action) {
     case constants.PLAY_REPLACE: //throw away card
         if (card === 0 || card === -1) {
@@ -283,10 +282,10 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
 function drawCard(player,card,team,replace) {
     if (cardsleft > 0) {
         cardsleft--; //0 index
-        players[player][card] = deck[cardsleft];
-        return players[player][card];
+        hands[player][card] = deck[cardsleft];
+        return hands[player][card];
     } else {
-        players[player].splice(card,1);
+        hands[player].splice(card,1);
         checkNoCards();
         //returns nothing
     }
@@ -294,8 +293,8 @@ function drawCard(player,card,team,replace) {
 
 //updates gameEnd if no cards left to play is done
 function checkNoCards() {
-    for (var i = 0 ; i < players.length ; i++) {
-        if (players[i].length) {
+    for (var i = 0 ; i < hands.length ; i++) {
+        if (hands[i].length) {
             return;
         }
     }
@@ -436,7 +435,7 @@ function newGame() {
     cardsleft = maxCards;
     //4 players
     for (var i = 0 ; i < 4 ; i++) {
-        players[i] = deck.slice(cardsleft - handLength,cardsleft);
+        hands[i] = deck.slice(cardsleft - handLength,cardsleft);
         cardsleft -= handLength;
     }
     cardsPlayed = [];
