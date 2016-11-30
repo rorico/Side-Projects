@@ -187,6 +187,7 @@ function playCard(player,play) {
     case constants.PLAY_FINISH:
         addPoint(x,y,team);
         finishLines(play.finishedLines,team);
+        checkGameDone();
         break;
     }
 }
