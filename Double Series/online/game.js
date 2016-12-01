@@ -13,7 +13,7 @@ var defaultAI = require("./playRandom.js").play;
 var board = [];
 var deck = [];
 var gameN = 0;
-var turnN = 0;
+var nextPlayer = 0;
 var greenwin = 0;
 var bluewin = 0;
 var ties = 0;
@@ -77,14 +77,14 @@ function setAI(playerList,AIname) {
 
 function play(player,play) {
     if (player === undefined) {
-        player = turnN % 4;
+        player = nextPlayer;
         var team = ((player%2)*2) + 1;    //1 for player 1 and 3, 3 for 2 and 4
         var hand = hands[player];
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
         var AI = playerAIs[player];
         AI = AI ? AI : defaultAI;
         play = AI(hand,team,getInfo());
-    } else if (player !== turnN % 4) {
+    } else if (player !== nextPlayer) {
         console.log("not your turn");
     }
     //the play is checked in here
@@ -151,11 +151,9 @@ function processTurn(player,play) {
 
         if (ret.status === 1) {
             //get player who plays next
-            var nextPlayer;
             if (replace) {
                 nextPlayer = player;
             } else {
-                turnN++;
                 nextPlayer = (player+1) % 4;
             }
 
@@ -164,7 +162,6 @@ function processTurn(player,play) {
                 if (hands[nextPlayer].length) {
                     break;
                 } else {
-                    turnN++;
                     nextPlayer = (nextPlayer+1) % 4;
                 }
             }
@@ -216,7 +213,7 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
     if (gameEnd) {
         return false;
     }
-    if (turnN % 4 !== player) {
+    if (nextPlayer !== player) {
         return false;
     }
     var card = hands[player][cardIndex];
