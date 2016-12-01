@@ -24,6 +24,7 @@ var handLength = 7;
 var pointworth = [];
 var points = [];
 var hands = [];
+var handLengths = [];
 var blueLines = 0;
 var greenLines = 0;
 var cardsleft = maxCards - 4 * handLength - 1;
@@ -53,6 +54,7 @@ function getInfo() {
         greenLines:greenLines,
         cardsPlayed:cardsPlayed,
         cardsleft:cardsleft,
+        handLengths:handLengths
     };
 }
 
@@ -138,6 +140,10 @@ function processTurn(player,play) {
 
         cardsPlayed.push(all);
         ret.newCard = drawCard(player,card,team,replace);
+        if (ret.newCard === undefined) {
+            all.handSize = handLengths[player];
+        }
+
         if (gameEnd) {
             ret.status = 3;
             ret.winner = winner;
@@ -290,6 +296,7 @@ function drawCard(player,card,team,replace) {
         return hands[player][card];
     } else {
         hands[player].splice(card,1);
+        handLengths[player]--;
         checkNoCards();
         //returns nothing
     }
@@ -440,6 +447,7 @@ function newGame() {
     //4 players
     for (var i = 0 ; i < 4 ; i++) {
         hands[i] = deck.slice(cardsleft - handLength,cardsleft);
+        handLengths[i] = handLength;
         cardsleft -= handLength;
     }
     cardsPlayed = [];
