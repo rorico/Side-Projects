@@ -139,6 +139,10 @@ function processTurn(player,play) {
 
         cardsPlayed.push(all);
         ret.newCard = drawCard(player,card,team,replace);
+        if (gameEnd) {
+            ret.status = 3;
+            ret.winner = winner;
+        }
 
         if (ret.status === 1) {
             //get player who plays next
