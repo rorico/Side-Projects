@@ -134,7 +134,6 @@ function processTurn(player,play) {
         var all = play;   //used to tell everyone what happened this turn
         ret.all = all;
         all.player = player;
-        all.action = action;
         all.cardPlayed = hands[player][card];
 
         cardsPlayed.push(all);
