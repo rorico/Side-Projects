@@ -1,5 +1,5 @@
-var helpers = require("./helper.js");
-var constants = require("./constants.js");
+var helpers = require("./helper");
+var constants = require("./constants");
 var getOptions = helpers.getOptions;
 var hasUselessCard = helpers.hasUselessCard;
 var addJoptions = helpers.addJoptions;
@@ -32,5 +32,5 @@ function playRandom(hand,value,info) {
 }
 
 function setup(info) {
-    helper.setup(info);
+    helpers.setup(info);
 }

@@ -1,11 +1,10 @@
-
 var board;
 var points;
 //may want to change this later
 exports.setup = function(info) {
     board = info.board;
     points = info.points;
-}
+};
 
 
 exports.getOptions = getOptions;
