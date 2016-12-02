@@ -7,7 +7,7 @@ var speed = 500;
 var human = [false,false,false,false];
 var checkValid = true;
 var playerAIs = [];
-var defaultAI = getAI("playRandom");
+var defaultAI;
 
 //game parts
 var board = [];
@@ -35,6 +35,7 @@ var winner = -1;
 //start
 createBoard();
 helper.setUp(getInfo());
+defaultAI = getAI("playRandom");
 
 exports.getInfo = getInfo;
 exports.getAllInfo = getAllInfo;
