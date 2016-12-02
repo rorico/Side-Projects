@@ -7,6 +7,7 @@ if (typeof module === "object" && module && typeof module.exports === "object") 
     exports.getOptions = getOptions;
     exports.checker = checker;
     exports.cardOptions = cardOptions;
+    exports.getTeam = getTeam;
 }
 
 //array of options that player can play
@@ -138,7 +139,7 @@ function playCard(player,play) {
     var position = play.position;
     var x = position ? position[0] : -1;
     var y = position ? position[1] : -1;
-    var team = (player % 2) * 2 + 1;
+    var team = getTeam(player);
     switch (play.action) {
     case constants.PLAY_REPLACE:
         //do nothing here
@@ -185,4 +186,9 @@ function finishLines(lines,team) {
             greenLines++;
         }
     }
+}
+
+function getTeam(player) {
+    //1 for player 1 and 3, 3 for 2 and 4
+    return ((player % 2) * 2) + 1;
 }

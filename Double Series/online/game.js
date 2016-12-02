@@ -93,7 +93,7 @@ function setAI(playerList,AIname) {
 function play(player,play) {
     if (player === undefined) {
         player = nextPlayer;
-        var team = ((player%2)*2) + 1;    //1 for player 1 and 3, 3 for 2 and 4
+        var team = helper.getTeam(player);
         var hand = hands[player];
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
         var AI = playerAIs[player];
@@ -109,7 +109,7 @@ function play(player,play) {
 function processTurn(player,play) {
     //play object will change, but not used outside the function
     var ret = {};
-    var team = ((player%2)*2) + 1;    //1 for players 1 and 3, 3 for 2 and 4
+    var team = helper.getTeam(player);
     var hand = hands[player];
     var action = play.action;
     var card = play.card;
@@ -194,7 +194,7 @@ function playCard(player,play) {
     var position = play.position;
     var x = position ? position[0] : -1;
     var y = position ? position[1] : -1;
-    var team = (player % 2) * 2 + 1;
+    var team = helper.getTeam(player);
     switch (play.action) {
     case constants.PLAY_REPLACE:
         //do nothing here

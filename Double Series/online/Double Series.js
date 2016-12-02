@@ -77,7 +77,7 @@ function startConnection() {
                     if (cardsPlayed.length) {
                         for (var i = 0 ; i < cardsPlayed.length ;i++) {
                             var card = cardsPlayed[i];
-                            var team = (card.player % 2) * 2 + 1;
+                            var team = getTeam(card.player);
                             addCardPlayed(card,team);
                         }
                     }
@@ -110,7 +110,7 @@ function startConnection() {
             }
             createPlayers();
             if (data.myTurn) {
-                playHuman(me,(me % 2) * 2 + 1);
+                playHuman(me,getTeam(me));
             }
             break;
         case "play":
@@ -130,7 +130,7 @@ function startConnection() {
                         $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard));
                     }
                 } else {
-                    $("#p" + data.player).removeClass("myTurn" + ((data.player % 2) * 2 + 1));
+                    $("#p" + data.player).removeClass("myTurn" + getTeam(data.player));
                     if (data.handSize !== undefined) {
                         //assume handSize drops by 1
                         $("#p" + data.player + " div").first().remove();
@@ -139,14 +139,14 @@ function startConnection() {
                 }
 
                 playCard(data.player,data);
-                var team = (data.player % 2) * 2 + 1;
+                var team = getTeam(data.player);
                 addCardPlayed(data,team);
                 if (data.myTurn) {
                     setTimeout(function() {
-                        playHuman(me,(me % 2) * 2 + 1);
+                        playHuman(me,getTeam(me));
                     },speed);
                 } else if (data.nextPlayer !== undefined) {
-                    $("#p" + data.nextPlayer).addClass("myTurn" + ((data.nextPlayer % 2) * 2 + 1));
+                    $("#p" + data.nextPlayer).addClass("myTurn" + getTeam(data.nextPlayer));
                 }
             }
             break;
@@ -181,7 +181,7 @@ function playCard(player,play) {
     var position = play.position;
     var x = position ? position[0] : -1;
     var y = position ? position[1] : -1;
-    var team = (player % 2) * 2 + 1;
+    var team = getTeam(player);
     switch (play.action) {
     case constants.PLAY_REPLACE:
         //do nothing here
