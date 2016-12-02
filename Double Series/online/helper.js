@@ -2,11 +2,9 @@
 var board;
 var points;
 //may want to change this later
-exports.setUp = function(info) {
-    if (!board) {
-        board = info.board;
-        points = info.points;
-    }
+exports.setup = function(info) {
+    board = info.board;
+    points = info.points;
 }
 
 

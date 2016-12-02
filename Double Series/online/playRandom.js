@@ -6,9 +6,9 @@ var addJoptions = helpers.addJoptions;
 var removeJoptions = helpers.removeJoptions;
 
 exports.play = playRandom;
+exports.setup = setup;
 
 function playRandom(hand,value,info) {
-    helpers.setUp(info);
     var options = getOptions(hand,info);
     var useless = hasUselessCard(options);
     if (useless !== -1) {
@@ -29,4 +29,8 @@ function playRandom(hand,value,info) {
     }
     var side = Math.floor(Math.random()*spots.length);
     return {action:action,card:card,position:spots[side]};
+}
+
+function setup(info) {
+    helper.setup(info);
 }

@@ -7,7 +7,7 @@ var speed = 500;
 var human = [false,false,false,false];
 var checkValid = true;
 var playerAIs = [];
-var defaultAI = require("./playRandom.js").play;
+var defaultAI = getAI("playRandom");
 
 //game parts
 var board = [];
@@ -78,15 +78,24 @@ function getHand(player) {
 }
 
 function setAI(playerList,AIname) {
-    try {
-        var AI = require("./" + AIname + ".js").play;
-        for (var i = 0 ; i < playerList.length ; i++) {
+    for (var i = 0 ; i < playerList.length ; i++) {
+        //create a seperate closure for each player
+        var AI = getAI(AIname);
+        if (AI) {
             playerAIs[playerList[i]] = AI;
         }
-        return true;
+    }
+}
+
+function getAI(AIname) {
+    try {
+        var AI = require("./" + AIname);
+        if (AI.setup) {
+            AI.setup(getInfo());
+        }
+        return AI;
     } catch (err) {
         console.log(err);
-        return false;
     }
 }
 
@@ -97,8 +106,8 @@ function play(player,play) {
         var hand = hands[player];
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
         var AI = playerAIs[player];
-        AI = AI ? AI : defaultAI;
-        play = AI(hand,team,getInfo());
+        var AIplay = AI && AI.play ? AI.play : defaultAI.play;
+        play = AIplay(hand,team,getInfo());
     } else if (player !== nextPlayer) {
         console.log("not your turn");
     }
