@@ -10,99 +10,10 @@
 
 <body>
 <div id="pause">Paused</div>
-<div style = "float:initial">
-    <div><table id="board"></table></div>
-    <div id="card_played"></div>
-    <div style = "overflow:hidden;float:initial;display:block;">
-        <div>
-            <div class="playerTitle">Player 1</div>
-            <div class="players" id="p0"></div>
-            <div class="playerTitle">Player 2</div>
-            <div class="players" id="p1"></div>
-            <div class="playerTitle">Player 3</div>
-            <div class="players" id="p2"></div>
-            <div class="playerTitle">Player 4</div>
-            <div class="players" id="p3"></div>
-        </div>
-        <div>
-            <div class="options" id="o0"></div>
-            <div class="options" id="o1"></div>
-            <div class="options" id="o2"></div>
-            <div class="options" id="o3"></div>
-        </div>
-    </div>
+<div id="holder">
+    <div id="game"></div>
 </div>
-<div id="options">
-    <p>Speed(ms): <input type="number" id="speed"></p>
-    <p>Player1: Human<input name="1" value="human" type="radio">Computer<input name="1" value="computer" type="radio"></p>
-    <p>Player2: Human<input name="2" value="human" type="radio">Computer<input name="2" value="computer" type="radio"></p>
-    <p>Player3: Human<input name="3" value="human" type="radio">Computer<input name="3" value="computer" type="radio"></p>
-    <p>Player4: Human<input name="4" value="human" type="radio">Computer<input name="4" value="computer" type="radio"></p>
-</div>
-<table id="scores">
-    <tr>
-        <td></td>
-        <td>Blue</td>
-        <td>Green</td>
-        <td>Ties</td>
-    </tr><tr>
-        <td>Number</td>
-        <td id="bluewin">0</td>
-        <td id="greenwin">0</td>
-        <td id="ties">0</td>
-    </tr><tr>
-        <td>Percentage</td>
-        <td id="blueP">0.00%</td>
-        <td id="greenP">0.00%</td>
-        <td id="tieP">0.00%</td>
-    </tr>
-</table>
-<br>
-<table id="scores">
-    <tr>
-        <td id="p110"></td>
-        <td id="p111"></td>
-        <td id="p112"></td>
-        <td id="p113"></td>
-        <td id="p114"></td>
-        <td id="p115"></td>
-        <td id="p116"></td>
-    </tr><tr>
-        <td id="worth00"></td>
-        <td id="worth10"></td>
-        <td id="worth20"></td>
-        <td id="worth30"></td>
-        <td id="worth40"></td>
-        <td id="worth50"></td>
-        <td id="worth60"></td>
-    </tr><tr>
-        <td id="worth01"></td>
-        <td id="worth11"></td>
-        <td id="worth21"></td>
-        <td id="worth31"></td>
-        <td id="worth41"></td>
-        <td id="worth51"></td>
-        <td id="worth61"></td>
-    </tr><tr>
-        <td id="worth02"></td>
-        <td id="worth12"></td>
-        <td id="worth22"></td>
-        <td id="worth32"></td>
-        <td id="worth42"></td>
-        <td id="worth52"></td>
-        <td id="worth62"></td>
-    </tr><tr>
-        <td id="worth03"></td>
-        <td id="worth13"></td>
-        <td id="worth23"></td>
-        <td id="worth33"></td>
-        <td id="worth43"></td>
-        <td id="worth53"></td>
-        <td id="worth63"></td>
-    </tr>
-</table>
 <p id="values"></p>
-<script src="settings.js"></script>
 <script src="Double Series.js"></script>
 <script src="gameFunctions.js"></script>
 <script src="constants.js"></script>

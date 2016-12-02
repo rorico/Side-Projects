@@ -1,5 +1,5 @@
 function playHuman(player,team) {
-    var hand = players[player];
+    var hand = hands[player];
     for (var card = 0 ; card < hand.length ; card++) {
         var cardEle = $("#p"+player+"_"+card);
         cardEle.addClass("choose");
@@ -17,7 +17,7 @@ function playHuman(player,team) {
                 for (var side = 0 ; side < options.length ; side++) {
                     var x = options[side][0];
                     var y = options[side][1];
-                    showChoose(player,team,card,constants.PLAY_ADD,x,y);
+                    showChoosePosition(player,team,card,constants.PLAY_ADD,x,y);
                 }
             }
         }
@@ -37,9 +37,9 @@ function chooseCard(player,team,card,options) {
     });
 
     var action = constants.PLAY_ADD;
-    if (players[player][card] === 0) {
+    if (hands[player][card] === 0) {
         options = addJoptions();
-    } else if (players[player][card] === -1) {
+    } else if (hands[player][card] === -1) {
         action = constants.PLAY_REMOVE;
         options = removeJoptions(team);
     } else if (!options.length) {     //useless card
@@ -56,17 +56,17 @@ function chooseCard(player,team,card,options) {
     for (var side = 0 ; side < options.length ; side++) {
         var x = options[side][0];
         var y = options[side][1];
-        showChoose(player,team,card,action,x,y);
+        showChoosePosition(player,team,card,action,x,y);
     }
 }
 
 function addOption(player,text,funct) {
-    var button = $("<div class='choose option' id='back'>" + text + "</div>");
+    var button = $("<div class='choose options' id='back'>" + text + "</div>");
     button.click(funct);
     $("#o"+player).append(button);
 }
 
-function showChoose(player,team,card,action,x,y) {
+function showChoosePosition(player,team,card,action,x,y) {
     getPosition(x,y).addClass("choose").unbind()
     .click(function() {
         clearHuman();
@@ -161,7 +161,7 @@ function clearHuman() {
     $(".choose").unbind("click");
     $(".special").removeClass("special");
     $(".choose").removeClass("choose");
-    $(".option").remove();
+    $(".options").remove();
 }
 
 function choosePlay(player,ret) {

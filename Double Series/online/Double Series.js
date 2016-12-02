@@ -1,64 +1,5 @@
-//start of ingame controls
-$("#speed").val(speed);
-$("#speed").keyup(function () {
-    var thisSpeed = $(this).val();
-    if (!isNaN(thisSpeed)) {
-        speed = thisSpeed;
-    }
-});
-$(window).keydown(function(e) {
-    if (e.keyCode == 38) { //up key
-        speed++;
-        $("#speed").val(speed);
-    } else if (e.keyCode == 40&&speed>0) { //down key
-        speed--;
-        $("#speed").val(speed);
-    }
-});
-for (var i = 0 ; i < human.length ; i++) {
-    if (human[i]) {
-        $("input[name="+(i+1)+"][value=human]").attr("checked","checked");
-    } else {
-        $("input[name="+(i+1)+"][value=computer]").attr("checked","checked");
-    }
-}
-$("input[type=radio]").on("change",function() {
-    event.stopPropagation();
-    if (this.value=="human") {
-        human[this.name-1] = true;
-    } else if (this.value=="computer") {
-        human[this.name-1] = false;
-    }
-});
-$("input[type=radio]").click(function() {
-    event.stopPropagation();
-});
-
-var keepgoing = true;       //allows for pauses anywhere in code
-var gameN = 0;
-var turnN = 0;
-var pauseable = true;
-var unpauseable = false;
-$(window).keypress(function(e) {
-    if (e.keyCode === 0 || e.keyCode === 32) { //spacebar
-        pause();
-    }
-});
-
-function pause() {
-    if (pauseable) {
-        keepgoing = !keepgoing;
-        if (keepgoing) {
-            $("#pause").css("display","none");
-            if (unpauseable) {
-                unpauseable = false;
-                delayedStart(turnN,gameN);
-            }
-        } else {
-            $("#pause").css("display","block");
-        }
-    }
-}
+var speed = 500;
+var games = 0;
 
 //game parts
 var board = [];
@@ -72,7 +13,8 @@ var handLength = 7;
 
 var pointworth = [];
 var points = [];
-var players = [];
+var hands = [];
+var handLengths = [];
 var blueLines = 0;
 var greenLines = 0;
 var cardsleft = maxCards - 4 * handLength - 1;
@@ -105,6 +47,7 @@ connection.onerror = function (error) {
 
 connection.onmessage = function (message) {
     var data = JSON.parse(message.data);
+    console.log(data);
     switch (data.type) {
     case "start":
         if (data.player === undefined) {
@@ -112,7 +55,7 @@ connection.onmessage = function (message) {
         } else {
             me = data.player;
             if (data.hand) {
-                players[me] = data.hand;
+                hands[me] = data.hand;
             }
             showHand(me);
         }
@@ -131,10 +74,10 @@ connection.onmessage = function (message) {
             }
             if (info.cardsPlayed) {
                 cardsPlayed = info.cardsPlayed;
-                for (var i = 0 ; i < cardsPlayed.length ; i++) {
-                    var card = cardsPlayed[i];
+                if (cardsPlayed.length) {
+                    var card = cardsPlayed[cardsPlayed.length - 1];
                     var team = (card.player % 2) * 2 + 1;
-                    $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(card.cardPlayed)+"</div>");
+                    addCardPlayed(card,team);
                 }
             }
             if (info.blueLines) {
@@ -142,6 +85,26 @@ connection.onmessage = function (message) {
             }
             if (info.greenLines) {
                 greenLines = greenLines;
+            }
+            if (info.games) {
+                games = info.games;
+                $("#bluewin").text(getPercentage(bluewin,games));
+                $("#greenwin").text(getPercentage(greenwin,games));
+            }
+            if (info.games) {
+                games = info.games;
+                if (info.bluewin) {
+                    bluewin = info.bluewin;
+                    $("#bluewin").text(getPercentage(bluewin,games));
+                }
+                if (info.greenwin) {
+                    greenwin = info.greenwin;
+                    $("#greenwin").text(getPercentage(greenwin,games));
+                }
+            }
+            if (info.handLengths) {
+                handLengths = info.handLengths;
+                showHands(me);
             }
         }
         if (data.myTurn) {
@@ -154,24 +117,34 @@ connection.onmessage = function (message) {
         } else {
             if (data.player === me) {
                 if (data.newCard === undefined) {
-                    players[me].splice(playedCard,1);
-                    var size = players[me].length;
+                    hands[me].splice(playedCard,1);
+                    var size = hands[me].length;
                     $("#p"+me+"_"+size).remove();
                     for (var i = playedCard ; i < size ; i++) {
-                        $("#p"+me+"_"+i).html(changeToCards(players[me][i]));
+                        $("#p"+me+"_"+i).html(changeToCards(hands[me][i]));
                     }
                 } else {
-                    players[me][playedCard] = data.newCard;
+                    hands[me][playedCard] = data.newCard;
                     $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard));
                 }
+            } else {
+                $("#p" + data.player).removeClass("myTurn" + ((data.player % 2) * 2 + 1));
+                if (data.handSize !== undefined) {
+                    //assume handSize drops by 1
+                    $("#p" + data.player + " div").first().remove();
+                    //doesn't matter which is removed
+                }
             }
+
             playCard(data.player,data);
             var team = (data.player % 2) * 2 + 1;
-            $("#card_played").prepend("<div class='c"+team+"'>"+changeToCards(data.cardPlayed)+"</div>");
+            addCardPlayed(data,team);
             if (data.myTurn) {
                 setTimeout(function() {
                     playHuman(me,(me % 2) * 2 + 1);
                 },speed);
+            } else if (data.nextPlayer !== undefined) {
+                $("#p" + data.nextPlayer).addClass("myTurn" + ((data.nextPlayer % 2) * 2 + 1));
             }
         }
         break;
@@ -187,14 +160,9 @@ connection.onmessage = function (message) {
                 greenwin++;
                 break;
         }
-        gameN++;
-        var totalGames = gameN;// + 1;  //0-index
-        $("#bluewin").text(bluewin);
-        $("#greenwin").text(greenwin);
-        $("#ties").text(ties);
-        $("#blueP").text(getPercentage(bluewin,totalGames));
-        $("#greenP").text(getPercentage(greenwin,totalGames));
-        $("#tieP").text(getPercentage(ties,totalGames));
+        games++;
+        $("#bluewin").text(getPercentage(bluewin,games));
+        $("#greenwin").text(getPercentage(greenwin,games));
         break;
     case "newGame":
         break;
@@ -229,7 +197,7 @@ function playCard(player,play) {
 }
 
 function getPercentage(num,den) {
-    return ((num/den)*100).toFixed(2) + "%";
+    return num + " (" + ((num/den)*100).toFixed(2) + "%)";
 }
 
 //-----------------game functions--------------//
@@ -270,14 +238,49 @@ function createBoard() {
     }
 
     //create board display
+
     var cnt = 1;
+
+    var display = $("<table><tr><td></td><td id='topPlayer'></td><td id='card_played'></td></tr>" + 
+                    "<tr><td id='leftPlayer'></td><td id='board'></td><td id='rightPlayer'></td></tr>" + 
+                    "<tr><td id='blueData'></td><td id='botPlayer'></td><td id='greenData'></td></tr></table>");
+    $("#game").append(display);
+
+
+    var html = "";
     for (var i = 0 ; i < board.length ; i++) {
-        $("#board").append("<tr id =board"+i+"></tr>");
+        html += "<tr>";
         for (var j = 0 ; j < board[i].length ; j++) {
-            $("#board"+i).append("<td class='v"+points[i][j]+"' id='"+cnt+"'>"+changeToCards(board[i][j])+"</td>");
+            html += "<td class='v" + points[i][j] + "' id='" + cnt  +"'>" + changeToCards(board[i][j]) + "</td>";
             cnt++;
         }
+        html += "</tr>";
     }
+    $("#board").html(html);
+
+    $("#botPlayer").html(playerHtml(0,"Player 1"));
+    $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(1,"Player 2") + "</div></div>");
+    $("#leftPlayer").html("<div class='boardSide sideHolder'><div id='leftSide' class='rotate90'>" + playerHtml(3,"Player 4") + "</div></div>");
+    $("#topPlayer").html("<div class='sideHolder'><div class='rotate180'>" + playerHtml(2,"Player 3") + "</div></div>");
+
+    var height = $("#botPlayer").height();
+    var width = $("#botPlayer").width();
+
+    $(".boardSide").width(height).height(width);
+    $("#rightSide").width(width).height(height);
+    $("#leftSide").width(width).height(height);
+
+    //only bot has options, add this after to not affect the widths
+    $("#botPlayer").append("<div id='o0'></div>");
+
+    $("#blueData").html("Blue<br /><span id='bluewin'>0 (0.00%)</span>");
+    $("#greenData").html("Green<br /><span id='greenwin'>0 (0.00%)</span>");
+
+    $("#buffer").width($("#options").width());
+}
+
+function playerHtml(player,name) {
+    return "<div class='playerTitle'>" + name + "</div><div class='hand' id='p" + player + "'>";
 }
 
 //restart game
@@ -305,7 +308,7 @@ function newGame() {
     for (var i = maxCards - 4 * handLength ; i < maxCards - 3 * handLength ; i++) {
         player4.push(deck[i]);
     }
-    players = [player1,player2,player3,player4];
+    hands = [player1,player2,player3,player4];
     showHands();
     
     for (var i = 1 ; i <= 100 && animate; i++) {
@@ -327,6 +330,10 @@ function newGame() {
 
 function getPosition(x,y) {
     return $("#" + (10*x + y + 1));
+}
+
+function addCardPlayed(obj,team) {
+    $("#card_played").html("<div class='c"+team+"'>"+changeToCards(obj.cardPlayed)+"</div>");
 }
 
 //changes a team to 0 because of remove J
@@ -373,8 +380,20 @@ function showFinishPoint(x,y,team) {
 //shows Hand on board
 function showHand(player) {
     $("#p" + player).empty();
-    for (var j = 0 ; j < players[player].length ; j++) {
-        $("#p"+player).append("<div id='p"+player+"_"+j+"'>"+changeToCards(players[player][j])+"</div>");
+    for (var j = 0 ; j < hands[player].length ; j++) {
+        $("#p"+player).append("<div id='p"+player+"_"+j+"'>"+changeToCards(hands[player][j])+"</div>");
+    }
+}
+
+//shows Hand on board
+function showHands(player) {
+    for (var i = 0 ; i < handLengths.length ; i++) {
+        if (i === player) {
+            continue;
+        }
+        for (var j = 0 ; j < handLengths[i] ; j++) {
+            $("#p"+i).append("<div></div>");
+        }
     }
 }
 

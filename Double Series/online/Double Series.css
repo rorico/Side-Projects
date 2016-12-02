@@ -1,8 +1,38 @@
-::-webkit-scrollbar { 
+::-webkit-scrollbar {
     display: none; 
 }
+#holder {
+    justify-content: center;
+    text-align: center;
+}
+#game {
+    display: inline-block;
+}
+.sideHolder {
+    position: relative;
+}
+.rotate90 {
+    -moz-transform: translateX(-50%) translateY(-50%) rotate(90deg);
+    -webkit-transform: translateX(-50%) translateY(-50%) rotate(90deg);
+    transform: translateX(-50%) translateY(-50%) rotate(90deg);
+    top: 50%;
+    left: 50%;
+    position: absolute;
+}
+.rotate270 {
+    -moz-transform: translateX(-50%) translateY(-50%) rotate(-90deg);
+    -webkit-transform: translateX(-50%) translateY(-50%) rotate(-90deg);
+    transform: translateX(-50%) translateY(-50%) rotate(-90deg);
+    top: 50%;
+    left: 50%;
+    position: absolute;
+}
+.rotate180 {
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
 #board {
-    padding-bottom: 10px;
     color: white;
     text-align: center;
 }
@@ -36,9 +66,6 @@
     background-color: #6e8b3d;
     border: 3px black solid;
 }
-#options {
-    float: right;
-}
 .c1 {
     background-color: #191970;
     color: white;
@@ -48,25 +75,17 @@
     color: white;
 }
 #card_played {
-    margin-top: 40px;
-    margin-left: 30px;
-    width: 61px;
-    max-height: 378px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow-y: hidden;
+    overflow-x: auto;
     text-align: center;
 }
 #card_played div {
     height: 40px;
     width: 40px;
     border: 1px solid black;
-    display: block;
+    display: inline-block;
     vertical-align: middle;
     line-height: 40px;
-}
-div {
-    float: left;
-    display: inline-block;
 }
 #pause {
     opacity: 0.5;
@@ -79,55 +98,43 @@ div {
     border: 1px black solid;
     padding: 10px;
 }
-.players {
-    float: initial;
+.hand {
+    justify-content: center;
     overflow: hidden;
     height: 50px;
     display: block;
     text-align: center;
 }
-.players div {
+.hand div {
     margin-top: 8px;
     height: 40px;
     width: 40px;
     border: 1px solid black;
-    display: block;
+    display: inline-block;
     vertical-align: middle;
     line-height: 40px;
 }
-.players div.hide {
-    color: white;
-}
-.players .raise {
+.hand .raise {
     margin-top: 0px;
 }
+.hand.myTurn1 div {
+    background-color: #191970;
+}
+.hand.myTurn3 div {
+    background-color: #6e8b3d;
+}
 .playerTitle {
-    float: initial;
+    white-space: nowrap;
     overflow: hidden;
     height: 30px;
     display: block;
     text-align: center;
-    margin-top: 20px;
 }
 .options {
-    margin-top: 50px;
-    min-width: 10px;
-    float: initial;
-    overflow: hidden;
-    height: 50px;
+    border: 1px solid black;
+    margin-top: 2px;
     display: block;
     text-align: center;
-}
-.options div {
-    margin-left: 10px;
-    margin-top: 8px;
-    height: 40px;
-    padding-left: 10px;
-    padding-right: 10px;
-    border: 1px solid black;
-    display: block;
-    vertical-align: middle;
-    line-height: 40px;
 }
 .choose {
     background-color: orange !important;
