@@ -25,149 +25,152 @@ var info = {board:board};
 
 var me;
 var playedCard = -1;
-
+var connection;
 
 $(document).ready(function() {
     createBoard();
+    startConnection();
 });
 
-var socket = window.WebSocket || window.MozWebSocket;
-var loc = window.location, new_uri;
-if (loc.protocol === "https:") {
-    new_uri = "wss:";
-} else {
-    new_uri = "ws:";
-}
-new_uri += "//" + loc.host;
-var connection = new socket(new_uri);
-connection.onerror = function (error) {
-    console.log(error);
-};
+function startConnection() {
+    var socket = window.WebSocket || window.MozWebSocket;
+    var loc = window.location, new_uri;
+    if (loc.protocol === "https:") {
+        new_uri = "wss:";
+    } else {
+        new_uri = "ws:";
+    }
+    new_uri += "//" + loc.host;
+    connection = new socket(new_uri);
+    connection.onerror = function (error) {
+        console.log(error);
+    };
 
-connection.onmessage = function (message) {
-    var data = JSON.parse(message.data);
-    console.log(data);
-    switch (data.type) {
-    case "start":
-        if (data.player === undefined) {
-            alert("something went very wrong");
-        } else {
-            me = data.player;
-            if (data.hand) {
-                hands[me] = data.hand;
+    connection.onmessage = function (message) {
+        var data = JSON.parse(message.data);
+        console.log(data);
+        switch (data.type) {
+        case "start":
+            if (data.player === undefined) {
+                alert("something went very wrong");
+            } else {
+                me = data.player;
+                if (data.hand) {
+                    hands[me] = data.hand;
+                }
             }
-        }
-        var info = data.gameInfo;
+            var info = data.gameInfo;
 
-        if (info) {
-            if (info.points) {
-                points = info.points;
-                for (var x = 0 ; x < points.length ; x++) {
-                    for (var y = 0 ; y < points[x].length ; y++) {
-                        if (points[x][y]) {
-                            getPosition(x,y).removeClass("v0").addClass("v" + points[x][y]);
+            if (info) {
+                if (info.points) {
+                    points = info.points;
+                    for (var x = 0 ; x < points.length ; x++) {
+                        for (var y = 0 ; y < points[x].length ; y++) {
+                            if (points[x][y]) {
+                                getPosition(x,y).removeClass("v0").addClass("v" + points[x][y]);
+                            }
                         }
                     }
                 }
-            }
-            if (info.cardsPlayed) {
-                cardsPlayed = info.cardsPlayed;
-                if (cardsPlayed.length) {
-                    for (var i = 0 ; i < cardsPlayed.length ;i++) {
-                        var card = cardsPlayed[i];
-                        var team = (card.player % 2) * 2 + 1;
-                        addCardPlayed(card,team);
+                if (info.cardsPlayed) {
+                    cardsPlayed = info.cardsPlayed;
+                    if (cardsPlayed.length) {
+                        for (var i = 0 ; i < cardsPlayed.length ;i++) {
+                            var card = cardsPlayed[i];
+                            var team = (card.player % 2) * 2 + 1;
+                            addCardPlayed(card,team);
+                        }
                     }
                 }
-            }
-            if (info.blueLines) {
-                blueLines = blueLines;
-            }
-            if (info.greenLines) {
-                greenLines = greenLines;
-            }
-            if (info.games) {
-                games = info.games;
-                $("#bluewin").text(getPercentage(bluewin,games));
-                $("#greenwin").text(getPercentage(greenwin,games));
-            }
-            if (info.games) {
-                games = info.games;
-                if (info.bluewin) {
-                    bluewin = info.bluewin;
-                    $("#bluewin").text(getPercentage(bluewin,games));
+                if (info.blueLines) {
+                    blueLines = blueLines;
                 }
-                if (info.greenwin) {
-                    greenwin = info.greenwin;
+                if (info.greenLines) {
+                    greenLines = greenLines;
+                }
+                if (info.games) {
+                    games = info.games;
+                    $("#bluewin").text(getPercentage(bluewin,games));
                     $("#greenwin").text(getPercentage(greenwin,games));
                 }
+                if (info.games) {
+                    games = info.games;
+                    if (info.bluewin) {
+                        bluewin = info.bluewin;
+                        $("#bluewin").text(getPercentage(bluewin,games));
+                    }
+                    if (info.greenwin) {
+                        greenwin = info.greenwin;
+                        $("#greenwin").text(getPercentage(greenwin,games));
+                    }
+                }
+                if (info.handLengths) {
+                    handLengths = info.handLengths;
+                }
             }
-            if (info.handLengths) {
-                handLengths = info.handLengths;
+            createPlayers();
+            if (data.myTurn) {
+                playHuman(me,(me % 2) * 2 + 1);
             }
-        }
-        createPlayers();
-        if (data.myTurn) {
-            playHuman(me,(me % 2) * 2 + 1);
-        }
-        break;
-    case "play":
-        if (data.player === undefined) {
-            alert("something went very wrong");
-        } else {
-            if (data.player === me) {
-                if (data.newCard === undefined) {
-                    hands[me].splice(playedCard,1);
-                    var size = hands[me].length;
-                    $("#p"+me+"_"+size).remove();
-                    for (var i = playedCard ; i < size ; i++) {
-                        $("#p"+me+"_"+i).html(changeToCards(hands[me][i]));
+            break;
+        case "play":
+            if (data.player === undefined) {
+                alert("something went very wrong");
+            } else {
+                if (data.player === me) {
+                    if (data.newCard === undefined) {
+                        hands[me].splice(playedCard,1);
+                        var size = hands[me].length;
+                        $("#p"+me+"_"+size).remove();
+                        for (var i = playedCard ; i < size ; i++) {
+                            $("#p"+me+"_"+i).html(changeToCards(hands[me][i]));
+                        }
+                    } else {
+                        hands[me][playedCard] = data.newCard;
+                        $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard));
                     }
                 } else {
-                    hands[me][playedCard] = data.newCard;
-                    $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard));
+                    $("#p" + data.player).removeClass("myTurn" + ((data.player % 2) * 2 + 1));
+                    if (data.handSize !== undefined) {
+                        //assume handSize drops by 1
+                        $("#p" + data.player + " div").first().remove();
+                        //doesn't matter which is removed
+                    }
                 }
-            } else {
-                $("#p" + data.player).removeClass("myTurn" + ((data.player % 2) * 2 + 1));
-                if (data.handSize !== undefined) {
-                    //assume handSize drops by 1
-                    $("#p" + data.player + " div").first().remove();
-                    //doesn't matter which is removed
-                }
-            }
 
-            playCard(data.player,data);
-            var team = (data.player % 2) * 2 + 1;
-            addCardPlayed(data,team);
-            if (data.myTurn) {
-                setTimeout(function() {
-                    playHuman(me,(me % 2) * 2 + 1);
-                },speed);
-            } else if (data.nextPlayer !== undefined) {
-                $("#p" + data.nextPlayer).addClass("myTurn" + ((data.nextPlayer % 2) * 2 + 1));
+                playCard(data.player,data);
+                var team = (data.player % 2) * 2 + 1;
+                addCardPlayed(data,team);
+                if (data.myTurn) {
+                    setTimeout(function() {
+                        playHuman(me,(me % 2) * 2 + 1);
+                    },speed);
+                } else if (data.nextPlayer !== undefined) {
+                    $("#p" + data.nextPlayer).addClass("myTurn" + ((data.nextPlayer % 2) * 2 + 1));
+                }
             }
+            break;
+        case "end":
+            switch (data.winner) {
+                case 0:
+                    ties++;
+                    break;
+                case 1:
+                    bluewin++;
+                    break;
+                case 3:
+                    greenwin++;
+                    break;
+            }
+            games++;
+            $("#bluewin").text(getPercentage(bluewin,games));
+            $("#greenwin").text(getPercentage(greenwin,games));
+            break;
+        case "newGame":
+            break;
         }
-        break;
-    case "end":
-        switch (data.winner) {
-            case 0:
-                ties++;
-                break;
-            case 1:
-                bluewin++;
-                break;
-            case 3:
-                greenwin++;
-                break;
-        }
-        games++;
-        $("#bluewin").text(getPercentage(bluewin,games));
-        $("#greenwin").text(getPercentage(greenwin,games));
-        break;
-    case "newGame":
-        break;
-    }
-};
+    };
+}
 
 function playData(player,result) {
     var data = {type:"play",player:player,result:result};
