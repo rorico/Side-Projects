@@ -35,9 +35,9 @@ var winner = -1;
 //start
 createBoard();
 helper.setUp(getInfo());
-exports.getAllInfo = getAllInfo;
 
 exports.getInfo = getInfo;
+exports.getAllInfo = getAllInfo;
 exports.human = human;
 exports.getHand = getHand;
 exports.checkValid = checkValid;
@@ -180,7 +180,7 @@ function processTurn(player,play) {
                     nextPlayer = (nextPlayer+1) % 4;
                 }
             }
-            ret.nextPlayer = nextPlayer;
+            all.nextPlayer = nextPlayer;
             if (human[nextPlayer]) {
                 //means waiting for player next turn
                 ret.status = 2;

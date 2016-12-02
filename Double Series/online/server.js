@@ -83,7 +83,7 @@ function playCard(player,result) {
         //only set if waiting for player, so reset
         waitingFor = -1;
         if (ret.status === 2) {
-            waitingFor = ret.nextPlayer;
+            waitingFor = ret.all.nextPlayer;
         } else if (ret.status === 1) {
             //calls with no parameters
             setTimeout(playCard,500);
