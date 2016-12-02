@@ -12,7 +12,7 @@ var defaultAI = require("./playRandom.js").play;
 //game parts
 var board = [];
 var deck = [];
-var gameN = 0;
+var games = 0;
 var nextPlayer = 0;
 var greenwin = 0;
 var bluewin = 0;
@@ -35,7 +35,7 @@ var winner = -1;
 //start
 createBoard();
 helper.setUp(getInfo());
-
+exports.getAllInfo = getAllInfo;
 
 exports.getInfo = getInfo;
 exports.human = human;
@@ -52,6 +52,21 @@ function getInfo() {
         points:points,
         blueLines:blueLines,
         greenLines:greenLines,
+        cardsPlayed:cardsPlayed,
+        cardsleft:cardsleft,
+        handLengths:handLengths
+    };
+}
+
+function getAllInfo() {
+    return {
+        board:board,
+        points:points,
+        blueLines:blueLines,
+        greenLines:greenLines,
+        bluewin:bluewin,
+        greenwin:greenwin,
+        games:games,
         cardsPlayed:cardsPlayed,
         cardsleft:cardsleft,
         handLengths:handLengths
@@ -202,9 +217,13 @@ function playCard(player,play) {
 function checkGameDone() {
     if (greenLines >= 2) {
         winner = 3;
+        greenwin++;
+        games++;
         gameEnd = true;
     } else if (blueLines >= 2) {
         winner = 1;
+        bluewin++;
+        games++;
         gameEnd = true;
     }
 }
@@ -309,6 +328,7 @@ function checkNoCards() {
     //no cards left
     gameEnd = true;
     winner = 0;
+    ties++;
 }
 
 //default choose, picks randomly

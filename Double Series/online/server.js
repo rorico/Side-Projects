@@ -51,7 +51,7 @@ wsServer.on('request', function(request) {
     activePlayers[player] = connection;
 
     var myTurn = player === waitingFor ? true : false;
-    connection.sendUTF(JSON.stringify({type:"start",player:player,hand:game.getHand(player),myTurn:myTurn,gameInfo:game.getInfo()}));
+    connection.sendUTF(JSON.stringify({type:"start",player:player,hand:game.getHand(player),myTurn:myTurn,gameInfo:game.getAllInfo()}));
 
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
@@ -100,7 +100,7 @@ function sendPlay(data) {
     //copy to not affect outside function
     var send = copyObject(data.all);
     var player = send.player;
-    var newCard = data.newCard
+    var newCard = data.newCard;
 
     send.type = "play";
     var info = JSON.stringify(send);
