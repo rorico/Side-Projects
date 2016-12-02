@@ -73,9 +73,11 @@ connection.onmessage = function (message) {
             if (info.cardsPlayed) {
                 cardsPlayed = info.cardsPlayed;
                 if (cardsPlayed.length) {
-                    var card = cardsPlayed[cardsPlayed.length - 1];
-                    var team = (card.player % 2) * 2 + 1;
-                    addCardPlayed(card,team);
+                    for (var i = 0 ; i < cardsPlayed.length ;i++) {
+                        var card = cardsPlayed[i];
+                        var team = (card.player % 2) * 2 + 1;
+                        addCardPlayed(card,team);
+                    }
                 }
             }
             if (info.blueLines) {
@@ -258,6 +260,7 @@ function createBoard() {
 
     $("#blueData").html("Blue<br /><span id='bluewin'>0 (0.00%)</span>");
     $("#greenData").html("Green<br /><span id='greenwin'>0 (0.00%)</span>");
+    cardHistorySetup();
 }
 
 //restart game
@@ -309,8 +312,31 @@ function getPosition(x,y) {
     return $("#" + (10*x + y + 1));
 }
 
+function cardHistorySetup() {
+    $("#card_played").append("<div id='placeholder' class='block'><div id='cardHolder'></div></div>")
+    $("#cardHolder").hover(function(){
+        $("#cardHolder").css("maxHeight","250px");
+    },function(){
+        $("#cardHolder").css("maxHeight","40px").scrollTop(0);
+    });
+}
+
 function addCardPlayed(obj,team) {
-    $("#card_played").html("<div class='c"+team+"'>"+changeToCards(obj.cardPlayed)+"</div>");
+    $("#cardHolder").prepend(cardPlayedEle(obj,team));
+}
+
+function cardPlayedEle(obj,team) {
+    var card = $("<div class='c"+team+" block'>"+changeToCards(obj.cardPlayed)+"</div>");
+    var position = obj.position;
+    card.hover(function(){
+        $("body").append("<div class='hide'></div>");
+        $("#card_played").addClass("show");
+        getPosition(position[0],position[1]).addClass("show");
+    },function(){
+        $(".hide").remove();
+        $(".show").removeClass("show");
+    });
+    return card;
 }
 
 //changes a team to 0 because of remove J
