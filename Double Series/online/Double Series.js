@@ -381,9 +381,9 @@ function createPlayers() {
     currentPlayer = (currentPlayer + 1) % 4;
     $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(currentPlayer) + "</div></div>");
     currentPlayer = (currentPlayer + 1) % 4;
-    $("#leftPlayer").html("<div class='boardSide sideHolder'><div id='leftSide' class='rotate90'>" + playerHtml(currentPlayer) + "</div></div>");
-    currentPlayer = (currentPlayer + 1) % 4;
     $("#topPlayer").html("<div class='sideHolder'><div class='rotate180'>" + playerHtml(currentPlayer) + "</div></div>");
+    currentPlayer = (currentPlayer + 1) % 4;
+    $("#leftPlayer").html("<div class='boardSide sideHolder'><div id='leftSide' class='rotate90'>" + playerHtml(currentPlayer) + "</div></div>");
 
     var height = $("#botPlayer").height();
     var width = $("#botPlayer").width();
