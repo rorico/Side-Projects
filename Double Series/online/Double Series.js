@@ -29,7 +29,6 @@ var playedCard = -1;
 
 $(document).ready(function() {
     createBoard();
-    //newGame();
 });
 
 var socket = window.WebSocket || window.MozWebSocket;
@@ -57,7 +56,6 @@ connection.onmessage = function (message) {
             if (data.hand) {
                 hands[me] = data.hand;
             }
-            showHand(me);
         }
         var info = data.gameInfo;
 
@@ -104,9 +102,9 @@ connection.onmessage = function (message) {
             }
             if (info.handLengths) {
                 handLengths = info.handLengths;
-                showHands(me);
             }
         }
+        createPlayers();
         if (data.myTurn) {
             playHuman(me,(me % 2) * 2 + 1);
         }
@@ -258,29 +256,8 @@ function createBoard() {
     }
     $("#board").html(html);
 
-    $("#botPlayer").html(playerHtml(0,"Player 1"));
-    $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(1,"Player 2") + "</div></div>");
-    $("#leftPlayer").html("<div class='boardSide sideHolder'><div id='leftSide' class='rotate90'>" + playerHtml(3,"Player 4") + "</div></div>");
-    $("#topPlayer").html("<div class='sideHolder'><div class='rotate180'>" + playerHtml(2,"Player 3") + "</div></div>");
-
-    var height = $("#botPlayer").height();
-    var width = $("#botPlayer").width();
-
-    $(".boardSide").width(height).height(width);
-    $("#rightSide").width(width).height(height);
-    $("#leftSide").width(width).height(height);
-
-    //only bot has options, add this after to not affect the widths
-    $("#botPlayer").append("<div id='o0'></div>");
-
     $("#blueData").html("Blue<br /><span id='bluewin'>0 (0.00%)</span>");
     $("#greenData").html("Green<br /><span id='greenwin'>0 (0.00%)</span>");
-
-    $("#buffer").width($("#options").width());
-}
-
-function playerHtml(player,name) {
-    return "<div class='playerTitle'>" + name + "</div><div class='hand' id='p" + player + "'>";
 }
 
 //restart game
@@ -386,15 +363,53 @@ function showHand(player) {
 }
 
 //shows Hand on board
-function showHands(player) {
+function showHands(me) {
     for (var i = 0 ; i < handLengths.length ; i++) {
-        if (i === player) {
+        if (i === me) {
             continue;
         }
         for (var j = 0 ; j < handLengths[i] ; j++) {
             $("#p"+i).append("<div></div>");
         }
     }
+}
+
+//shows Hand on board
+function createPlayers() {
+    var currentPlayer = me;
+    $("#botPlayer").html(playerHtml(me));
+    currentPlayer = (currentPlayer + 1) % 4;
+    $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(currentPlayer) + "</div></div>");
+    currentPlayer = (currentPlayer + 1) % 4;
+    $("#leftPlayer").html("<div class='boardSide sideHolder'><div id='leftSide' class='rotate90'>" + playerHtml(currentPlayer) + "</div></div>");
+    currentPlayer = (currentPlayer + 1) % 4;
+    $("#topPlayer").html("<div class='sideHolder'><div class='rotate180'>" + playerHtml(currentPlayer) + "</div></div>");
+
+    var height = $("#botPlayer").height();
+    var width = $("#botPlayer").width();
+
+    $(".boardSide").width(height).height(width);
+    $("#rightSide").width(width).height(height);
+    $("#leftSide").width(width).height(height);
+
+    //only bot has options, add this after to not affect the widths
+    $("#botPlayer").append("<div id='o" + me + "'></div>");
+}
+
+function playerHtml(player) {
+    var cardHtml = "";
+    if (player === me) {
+        for (var i = 0 ; i < hands[player].length ; i++) {
+            cardHtml += "<div id='p" + player + "_" + i + "'>" + changeToCards(hands[player][i]) + "</div>";
+        }
+    } else {
+        //should be defined, but assume 7 incase
+        var handLength = handLengths[player] === undefined ? 7 : handLengths[player];
+        for (var i = 0 ; i < handLength ; i++) {
+            cardHtml += "<div></div>";
+        }
+    }
+    return "<div class='playerTitle'>Player " + (player + 1) + "</div><div class='hand' id='p" + player + "'>" + cardHtml + "</div>";
 }
 
 //for showing statistics of what points is used to win
