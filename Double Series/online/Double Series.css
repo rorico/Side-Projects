@@ -2,6 +2,9 @@
     display: none; 
 }
 div {
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
 #holder {
@@ -36,6 +39,8 @@ div {
     transform: rotate(180deg);
 }
 #board {
+    border: 1px black solid;
+    border-radius: 5px;
     color: white;
     text-align: center;
 }
@@ -44,9 +49,6 @@ div {
     height: 40px;
     border: 1px black solid;
     padding: 0;
-    -moz-box-sizing: border-box;
-    -ms-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
 }
 #scores td {
     width: 75px;
