@@ -42,7 +42,6 @@ var wsServer = new WebSocketServer({
 
 const game = require("./game.js");
 game.newGame();
-var waitingFor = 0;
 var activePlayers = [];
 
 wsServer.on('request', function(request) {
@@ -50,8 +49,13 @@ wsServer.on('request', function(request) {
     var player = getOpenPlayerSlot();
     activePlayers[player] = connection;
 
-    var myTurn = player === waitingFor ? true : false;
-    connection.sendUTF(JSON.stringify({type:"start",player:player,hand:game.getHand(player),myTurn:myTurn,gameInfo:game.getAllInfo()}));
+    var gameInfo = game.getAllInfo();
+    gameInfo.type = "start";
+    gameInfo.player = player;
+    gameInfo.hand = game.getHand(player);
+
+
+    connection.sendUTF(JSON.stringify(gameInfo));
 
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
@@ -80,10 +84,8 @@ function playCard(player,result) {
     if (ret.status === -1) {
         console.log("something wrong with play");
     } else {
-        //only set if waiting for player, so reset
-        waitingFor = -1;
         if (ret.status === 2) {
-            waitingFor = ret.all.nextPlayer;
+            //waiting for player input
         } else if (ret.status === 1) {
             //calls with no parameters
             setTimeout(playCard,500);
@@ -104,20 +106,12 @@ function sendPlay(data) {
 
     send.type = "play";
     var info = JSON.stringify(send);
-    
-    send.myTurn = true;
-    var nextPlayerInfo = JSON.stringify(send);
-    //if nextPlayer is this player, will be given allData
+
     send.newCard = newCard;
-    if (player !== waitingFor) {
-        send.myTurn = false;
-    }
     var prevPlayerInfo = JSON.stringify(send);
     for (var i = 0 ; i < activePlayers.length ; i++) {
         if (i === player) {
             activePlayers[i].sendUTF(prevPlayerInfo);
-        } else if (i === waitingFor) {
-            activePlayers[i].sendUTF(nextPlayerInfo);
         } else {
             activePlayers[i].sendUTF(info);
         }

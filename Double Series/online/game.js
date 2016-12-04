@@ -70,7 +70,8 @@ function getAllInfo() {
         games:games,
         cardsPlayed:cardsPlayed,
         cardsleft:cardsleft,
-        handLengths:handLengths
+        handLengths:handLengths,
+        nextPlayer:nextPlayer
     };
 }
 
@@ -172,6 +173,8 @@ function processTurn(player,play) {
         if (gameEnd) {
             ret.status = 3;
             ret.winner = winner;
+            //for allInfo - new player
+            nextPlayer = -1;
         }
 
         if (ret.status === 1) {

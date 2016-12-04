@@ -59,58 +59,54 @@ function startConnection() {
                     hands[me] = data.hand;
                 }
             }
-            var info = data.gameInfo;
-
-            if (info) {
-                if (info.points) {
-                    points = info.points;
-                    for (var x = 0 ; x < points.length ; x++) {
-                        for (var y = 0 ; y < points[x].length ; y++) {
-                            if (points[x][y]) {
-                                getPosition(x,y).removeClass("v0").addClass("v" + points[x][y]);
-                            }
-                        }
-                    }
-                }
-                if (info.cardsPlayed) {
-                    cardsPlayed = info.cardsPlayed;
-                    if (cardsPlayed.length) {
-                        for (var i = 0 ; i < cardsPlayed.length ;i++) {
-                            var card = cardsPlayed[i];
-                            var team = getTeam(card.player);
-                            addCardPlayed(card,team);
-                        }
-                    }
-                }
-                if (info.blueLines) {
-                    blueLines = blueLines;
-                }
-                if (info.greenLines) {
-                    greenLines = greenLines;
-                }
-                if (info.games) {
-                    games = info.games;
-                    $("#bluewin").text(getPercentage(bluewin,games));
-                    $("#greenwin").text(getPercentage(greenwin,games));
-                }
-                if (info.games) {
-                    games = info.games;
-                    if (info.bluewin) {
-                        bluewin = info.bluewin;
-                        $("#bluewin").text(getPercentage(bluewin,games));
-                    }
-                    if (info.greenwin) {
-                        greenwin = info.greenwin;
-                        $("#greenwin").text(getPercentage(greenwin,games));
-                    }
-                }
-                if (info.handLengths) {
-                    handLengths = info.handLengths;
-                }
+            if (data.handLengths) {
+                handLengths = data.handLengths;
             }
             createPlayers();
-            if (data.myTurn) {
-                playHuman(me,getTeam(me));
+
+            if (data.points) {
+                points = data.points;
+                for (var x = 0 ; x < points.length ; x++) {
+                    for (var y = 0 ; y < points[x].length ; y++) {
+                        if (points[x][y]) {
+                            getPosition(x,y).removeClass("v0").addClass("v" + points[x][y]);
+                        }
+                    }
+                }
+            }
+            if (data.cardsPlayed) {
+                cardsPlayed = data.cardsPlayed;
+                if (cardsPlayed.length) {
+                    for (var i = 0 ; i < cardsPlayed.length ;i++) {
+                        var card = cardsPlayed[i];
+                        var team = getTeam(card.player);
+                        addCardPlayed(card,team);
+                    }
+                }
+            }
+            if (data.blueLines) {
+                blueLines = blueLines;
+            }
+            if (data.greenLines) {
+                greenLines = greenLines;
+            }
+            if (data.games) {
+                games = data.games;
+                if (data.bluewin) {
+                    bluewin = data.bluewin;
+                    $("#bluewin").text(getPercentage(bluewin,games));
+                }
+                if (data.greenwin) {
+                    greenwin = data.greenwin;
+                    $("#greenwin").text(getPercentage(greenwin,games));
+                }
+            }
+            if (data.nextPlayer !== undefined) {
+                if (data.nextPlayer === me) {
+                    playHuman(me,getTeam(me));
+                } else {
+                    $("#p" + data.nextPlayer).addClass("myTurn" + getTeam(data.nextPlayer));
+                }
             }
             break;
         case "play":
@@ -141,12 +137,14 @@ function startConnection() {
                 playCard(data.player,data);
                 var team = getTeam(data.player);
                 addCardPlayed(data,team);
-                if (data.myTurn) {
-                    setTimeout(function() {
-                        playHuman(me,getTeam(me));
-                    },speed);
-                } else if (data.nextPlayer !== undefined) {
-                    $("#p" + data.nextPlayer).addClass("myTurn" + getTeam(data.nextPlayer));
+                if (data.nextPlayer !== undefined) {
+                    if (data.nextPlayer === me) {
+                        setTimeout(function() {
+                            playHuman(me,getTeam(me));
+                        },speed);
+                    } else {
+                        $("#p" + data.nextPlayer).addClass("myTurn" + getTeam(data.nextPlayer));
+                    }
                 }
             }
             break;
