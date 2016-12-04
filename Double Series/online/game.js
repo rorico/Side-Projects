@@ -468,7 +468,7 @@ function createBoard() {
 
 //restart game
 function newGame() {
-    nextPlayer = winningPlayer + 1;
+    nextPlayer = (winningPlayer + 1) % 4;
 
     for (var row = 0 ; row < 10 ; row++) {
         for (var col = 0 ; col < 10 ; col++) {
