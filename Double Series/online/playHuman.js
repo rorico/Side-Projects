@@ -63,7 +63,7 @@ function chooseCard(player,team,card,options) {
 function addOption(player,text,funct) {
     var button = $("<div class='choose options' id='back'>" + text + "</div>");
     button.click(funct);
-    $("#o"+player).append(button);
+    $("#options").append(button);
 }
 
 function showChoosePosition(player,team,card,action,x,y) {

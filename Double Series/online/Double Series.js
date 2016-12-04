@@ -244,7 +244,8 @@ function createBoard() {
 
     var display = $("<table><tr><td></td><td id='topPlayer'></td><td id='card_played'></td></tr>" + 
                     "<tr><td id='leftPlayer'></td><td id='board'></td><td id='rightPlayer'></td></tr>" + 
-                    "<tr><td id='blueData'></td><td id='botPlayer'></td><td id='greenData'></td></tr></table>");
+                    "<tr><td id='blueData'></td><td id='botPlayer'></td><td id='greenData'></td></tr>" + 
+                    "<tr><td></td><td id='options'></td><td></td></tr></table>");
     $("#game").append(display);
 
 
@@ -418,9 +419,6 @@ function createPlayers() {
     $(".boardSide").width(height).height(width);
     $("#rightSide").width(width).height(height);
     $("#leftSide").width(width).height(height);
-
-    //only bot has options, add this after to not affect the widths
-    $("#botPlayer").append("<div id='o" + me + "'></div>");
 }
 
 function playerHtml(player) {
