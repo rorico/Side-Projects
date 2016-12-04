@@ -202,7 +202,7 @@ function getPercentage(num,den) {
 }
 
 //-----------------game functions--------------//
-//creates board and deck
+//creates board and deck, before any data comes in
 function createBoard() {
     //creates indexes for rows 1 - 5
     for (var row = 0 ; row < 5 ; row++) {
@@ -265,6 +265,41 @@ function createBoard() {
     cardHistorySetup();
 }
 
+//shows Hand on board
+function createPlayers() {
+    var currentPlayer = me;
+    $("#botPlayer").html(playerHtml(me));
+    currentPlayer = (currentPlayer + 1) % 4;
+    $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(currentPlayer) + "</div></div>");
+    currentPlayer = (currentPlayer + 1) % 4;
+    $("#topPlayer").html("<div class='sideHolder'><div class='rotate180'>" + playerHtml(currentPlayer) + "</div></div>");
+    currentPlayer = (currentPlayer + 1) % 4;
+    $("#leftPlayer").html("<div class='boardSide sideHolder'><div id='leftSide' class='rotate90'>" + playerHtml(currentPlayer) + "</div></div>");
+
+    var height = $("#botPlayer").height();
+    var width = $("#botPlayer").width();
+
+    $(".boardSide").width(height).height(width);
+    $("#rightSide").width(width).height(height);
+    $("#leftSide").width(width).height(height);
+}
+
+function playerHtml(player) {
+    var cardHtml = "";
+    if (player === me) {
+        for (var i = 0 ; i < hands[player].length ; i++) {
+            cardHtml += "<div id='p" + player + "_" + i + "'>" + changeToCards(hands[player][i]) + "</div>";
+        }
+    } else {
+        //should be defined, but assume 7 incase
+        var handLength = handLengths[player] === undefined ? 7 : handLengths[player];
+        for (var i = 0 ; i < handLength ; i++) {
+            cardHtml += "<div></div>";
+        }
+    }
+    return "<div class='playerTitle'>Player " + (player + 1) + "</div><div class='hand' id='p" + player + "'>" + cardHtml + "</div>";
+}
+
 //restart game
 function newGame() {
     for (var row = 0 ; row < 10 ; row++) {
@@ -310,10 +345,6 @@ function newGame() {
     greenLines = 0;
 }
 
-function getPosition(x,y) {
-    return $("#" + (10*x + y + 1));
-}
-
 function cardHistorySetup() {
     $("#card_played").append("<div id='placeholder' class='block'><div id='cardHolder'></div></div>")
     $("#cardHolder").hover(function(){
@@ -339,6 +370,10 @@ function cardPlayedEle(obj,team) {
         $(".show").removeClass("show");
     });
     return card;
+}
+
+function getPosition(x,y) {
+    return $("#" + (10*x + y + 1));
 }
 
 //changes a team to 0 because of remove J
@@ -380,61 +415,6 @@ function showFinishLine(line,team) {
 
 function showFinishPoint(x,y,team) {
     getPosition(x,y).removeClass("v" + team).addClass("v"+(team+1));
-}
-
-//shows Hand on board
-function showHand(player) {
-    $("#p" + player).empty();
-    for (var j = 0 ; j < hands[player].length ; j++) {
-        $("#p"+player).append("<div id='p"+player+"_"+j+"'>"+changeToCards(hands[player][j])+"</div>");
-    }
-}
-
-//shows Hand on board
-function showHands(me) {
-    for (var i = 0 ; i < handLengths.length ; i++) {
-        if (i === me) {
-            continue;
-        }
-        for (var j = 0 ; j < handLengths[i] ; j++) {
-            $("#p"+i).append("<div></div>");
-        }
-    }
-}
-
-//shows Hand on board
-function createPlayers() {
-    var currentPlayer = me;
-    $("#botPlayer").html(playerHtml(me));
-    currentPlayer = (currentPlayer + 1) % 4;
-    $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(currentPlayer) + "</div></div>");
-    currentPlayer = (currentPlayer + 1) % 4;
-    $("#topPlayer").html("<div class='sideHolder'><div class='rotate180'>" + playerHtml(currentPlayer) + "</div></div>");
-    currentPlayer = (currentPlayer + 1) % 4;
-    $("#leftPlayer").html("<div class='boardSide sideHolder'><div id='leftSide' class='rotate90'>" + playerHtml(currentPlayer) + "</div></div>");
-
-    var height = $("#botPlayer").height();
-    var width = $("#botPlayer").width();
-
-    $(".boardSide").width(height).height(width);
-    $("#rightSide").width(width).height(height);
-    $("#leftSide").width(width).height(height);
-}
-
-function playerHtml(player) {
-    var cardHtml = "";
-    if (player === me) {
-        for (var i = 0 ; i < hands[player].length ; i++) {
-            cardHtml += "<div id='p" + player + "_" + i + "'>" + changeToCards(hands[player][i]) + "</div>";
-        }
-    } else {
-        //should be defined, but assume 7 incase
-        var handLength = handLengths[player] === undefined ? 7 : handLengths[player];
-        for (var i = 0 ; i < handLength ; i++) {
-            cardHtml += "<div></div>";
-        }
-    }
-    return "<div class='playerTitle'>Player " + (player + 1) + "</div><div class='hand' id='p" + player + "'>" + cardHtml + "</div>";
 }
 
 //for showing statistics of what points is used to win
