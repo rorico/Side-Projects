@@ -3,7 +3,6 @@ var games = 0;
 
 //game parts
 var board = [];
-var deck = [];
 var greenwin = 0;
 var bluewin = 0;
 var ties = 0;
@@ -19,9 +18,6 @@ var blueLines = 0;
 var greenLines = 0;
 var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
-var gameEnd = false;
-var animate = true;
-var info = {board:board};
 
 var me;
 var playedCard = -1;
@@ -165,6 +161,21 @@ function startConnection() {
             $("#greenwin").text(getPercentage(greenwin,games));
             break;
         case "newGame":
+            if (data.hand) {
+                hands[me] = data.hand;
+            }
+            if (data.handLengths) {
+                handLengths = data.handLengths;
+            }
+            newPlayers();
+            newGame();
+            if (data.nextPlayer !== undefined) {
+                if (data.nextPlayer === me) {
+                    playHuman(me,getTeam(me));
+                } else {
+                    $("#p" + data.nextPlayer).addClass("myTurn" + getTeam(data.nextPlayer));
+                }
+            }
             break;
         }
     };
@@ -285,19 +296,29 @@ function createPlayers() {
 }
 
 function playerHtml(player) {
-    var cardHtml = "";
+    return "<div class='playerTitle'>Player " + (player + 1) + "</div><div class='hand' id='p" + player + "'>" + cardHtml(player) + "</div>";
+}
+
+function newPlayers() {
+    for (var player = 0 ; player < hands.length ; player++) {
+        $("#p" + player).html(cardHtml(player));
+    }
+}
+
+function cardHtml(player) {
+    var html = "";
     if (player === me) {
         for (var i = 0 ; i < hands[player].length ; i++) {
-            cardHtml += "<div id='p" + player + "_" + i + "'>" + changeToCards(hands[player][i]) + "</div>";
+            html += "<div id='p" + player + "_" + i + "'>" + changeToCards(hands[player][i]) + "</div>";
         }
     } else {
         //should be defined, but assume 7 incase
         var handLength = handLengths[player] === undefined ? 7 : handLengths[player];
         for (var i = 0 ; i < handLength ; i++) {
-            cardHtml += "<div></div>";
+            html += "<div></div>";
         }
     }
-    return "<div class='playerTitle'>Player " + (player + 1) + "</div><div class='hand' id='p" + player + "'>" + cardHtml + "</div>";
+    return html;
 }
 
 //restart game
@@ -307,46 +328,20 @@ function newGame() {
             points[row][col]=0;
         }
     }
-
-    shuffle(deck);
-    var player1 = [];
-    var player2 = [];
-    var player3 = [];
-    var player4 = [];
-    for (var i = maxCards - handLength ; i < maxCards ; i++) {
-        player1.push(deck[i]);
-    }
-    for (var i = maxCards - 2 * handLength ; i < maxCards - handLength ; i++) {
-        player2.push(deck[i]);
-    }
-    for (var i = maxCards - 3 * handLength ; i < maxCards - 2 * handLength ; i++) {
-        player3.push(deck[i]);
-    }
-    for (var i = maxCards - 4 * handLength ; i < maxCards - 3 * handLength ; i++) {
-        player4.push(deck[i]);
-    }
-    hands = [player1,player2,player3,player4];
-    showHands();
     
-    for (var i = 1 ; i <= 100 && animate; i++) {
+    for (var i = 1 ; i <= 100 ; i++) {
         $("#"+i).removeClass();
         $("#"+i).addClass("v0");
     }
-    currentPlayer = 0;
-    pastPlayer = -1;
-    pastCardIndex = -1;
-    pastCard = -2;
-    if (animate) {
-        $("#card_played").empty();
-    }
+    $("#cardHolder").empty();
     cardsPlayed = [];
-    cardsleft = maxCards - 4 * handLength - 1;
+    cardsleft = maxCards - 4 * handLength;
     blueLines = 0;
     greenLines = 0;
 }
 
 function cardHistorySetup() {
-    $("#card_played").append("<div id='placeholder' class='block'><div id='cardHolder'></div></div>")
+    $("#card_played").append("<div id='placeholder' class='block'><div id='cardHolder'></div></div>");
     $("#cardHolder").hover(function(){
         $("#cardHolder").css("maxHeight","250px");
     },function(){

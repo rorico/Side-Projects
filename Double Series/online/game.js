@@ -25,12 +25,13 @@ var pointworth = [];
 var points = [];
 var hands = [];
 var handLengths = [];
-var blueLines = 0;
-var greenLines = 0;
-var cardsleft = maxCards - 4 * handLength - 1;
-var cardsPlayed = [];
-var gameEnd = false;
-var winner = -1;
+var blueLines;
+var greenLines;
+var cardsleft;
+var cardsPlayed;
+var gameEnd;
+var winner;
+var winningPlayer = -1;
 
 //start
 createBoard();
@@ -173,6 +174,7 @@ function processTurn(player,play) {
         if (gameEnd) {
             ret.status = 3;
             ret.winner = winner;
+            winningPlayer = player;
             //for allInfo - new player
             nextPlayer = -1;
         }
@@ -462,11 +464,12 @@ function createBoard() {
         deck.push(0);
         deck.push(-1);
     }
-    
 }
 
 //restart game
 function newGame() {
+    nextPlayer = winningPlayer + 1;
+
     for (var row = 0 ; row < 10 ; row++) {
         for (var col = 0 ; col < 10 ; col++) {
             points[row][col]=0;
@@ -483,8 +486,11 @@ function newGame() {
     cardsPlayed = [];
     blueLines = 0;
     greenLines = 0;
-}
+    gameEnd = false;
+    winner = -1;
 
+    return hands;
+}
 
 //shuffle deck
 function shuffle(array) {

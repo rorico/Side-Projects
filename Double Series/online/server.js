@@ -2,7 +2,6 @@ const http = require("http");
 const url = require("url");
 const fs = require("fs");
 const path = require("path");
-const qs = require("querystring");
 const WebSocketServer = require("websocket").server;
 
 var mimeTypes = {
@@ -91,6 +90,7 @@ function playCard(player,result) {
             setTimeout(playCard,500);
         } else if (ret.status === 3) {
             sendEnd(ret.winner);
+            setTimeout(startNewGame,1500);
         } else {
             console.log("something went wrong");
         }
@@ -127,7 +127,19 @@ function sendEnd(winner) {
 }
 
 function startNewGame() {
-    game.newGame();
+    var newHands = game.newGame();
+    sendNewGame(newHands);
+    setTimeout(playCard,500);
+}
+
+function sendNewGame(hands) {
+    var data = game.getAllInfo();
+    data.type = "newGame";
+    for (var i = 0 ; i < activePlayers.length ; i++) {
+        data.hand = hands[i];
+        var info = JSON.stringify(data);
+        activePlayers[i].sendUTF(info);
+    }
 }
 
 function getOpenPlayerSlot() {
