@@ -10,7 +10,8 @@ var mimeTypes = {
     ".css": "text/css",
     ".ico": "image/x-icon"
 };
-var port = 8082;
+var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
+    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0";
 
 var server = http.createServer(function(request, response) {
     var svrUrl = url.parse(request.url);
@@ -31,7 +32,7 @@ var server = http.createServer(function(request, response) {
         }
     });
 }).listen(port,function() {
-    console.log("Server running at http://localhost:" + port);
+    console.log("Server running at http://" + ip + ":" + port);
 });
 
 
