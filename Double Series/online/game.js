@@ -36,7 +36,8 @@ var winningPlayer = -1;
 //start
 createBoard();
 helper.setUp(getInfo());
-defaultAI = getAI("playRandom");
+//defaultAI = getAI("playRandom");
+defaultAI = getAI("playBest");
 
 exports.getInfo = getInfo;
 exports.getAllInfo = getAllInfo;

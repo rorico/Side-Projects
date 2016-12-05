@@ -1,8 +1,33 @@
-function playBest(hand,value,offensive) {
+var helpers = require("./helper.js");
+var constants = require("./constants");
+var getOptions = helpers.getOptions;
+var cardOptions = helpers.cardOptions;
+var hasAdd = helpers.hasAdd;
+var hasRemove = helpers.hasRemove;
+var hasOnlyJ = helpers.hasOnlyJ;
+var hasOnlyRemoveJ = helpers.hasOnlyRemoveJ;
+var addJoptions = helpers.addJoptions;
+var removeJoptions = helpers.removeJoptions;
+var hasUselessCard = helpers.hasUselessCard;
+var addJ = helpers.addJ;
+var removeJ = helpers.removeJ;
+
+exports.play = playBest;
+exports.setup = setup;
+
+var offensive = true;
+var points;
+
+function setup(info) {
+    helpers.setup(info);
+    points = info.points
+}
+
+function playBest(hand,value,info) {
     var options = getOptions(hand);
     var useless = hasUselessCard(options);
     if (useless !== -1) {
-        return [0,useless,[-1,-1]]
+        return {action:constants.PLAY_REPLACE,card:useless};
     }
     var best = bestMove(options,value,offensive);
 
@@ -15,15 +40,11 @@ function playBest(hand,value,offensive) {
             var options2 = removeJ(value);
             if (options2.length!==0) {
                 var side = Math.floor(Math.random()*options2.length);
-                var x = options2[side][0];
-                var y = options2[side][1];
-                return [-1,removePos,[x,y]];
+                return {action:constants.PLAY_REMOVE,card:removePos,position:options2[side]};
             }  else if (hasOnlyRemoveJ(hand)){
-                options = removeJR(value);
+                options = removeJoptions(value);
                 var side = Math.floor(Math.random()*options.length);
-                var x = options[side][0];
-                var y = options[side][1];
-                return [-1,removePos,[x,y]];
+                return {action:constants.PLAY_REMOVE,card:removePos,position:options[side]};
             }
         }
 
@@ -33,15 +54,11 @@ function playBest(hand,value,offensive) {
             var options2 = addJ(value,offensive);
             if (options2.length!=0) {
                 var side = Math.floor(Math.random()*options2.length);
-                var x = options2[side][0];
-                var y = options2[side][1];
-                return [1,addPos,[x,y]];
+                return {action:constants.PLAY_ADD,card:addPos,position:options2[side]};
             } else if (hasOnlyJ(hand)){
-                options = addJR();
+                options = addJoptions();
                 var side = Math.floor(Math.random()*options.length);
-                var x = options[side][0];
-                var y = options[side][1];
-                return [1,addPos,[x,y]];
+                return {action:constants.PLAY_ADD,card:addPos,position:options[side]};
             }
         }
     }
@@ -56,11 +73,9 @@ function playBest(hand,value,offensive) {
     var card = best[1][random][0];
     var side = best[1][random][1];
 
-    //after the play
-    var x = options[card][side][0];
-    var y = options[card][side][1];
-    return [1,card,[x,y]];
+    return {action:constants.PLAY_ADD,card:card,position:options[card][side]};
 }
+
 //returns indexes for options with greatest value
 function bestMove(options,value,offensive) {
     var type = value;
