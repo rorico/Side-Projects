@@ -16,7 +16,7 @@ var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
 var server = http.createServer(function(request, response) {
     var svrUrl = url.parse(request.url);
     var filename = svrUrl.path;
-    if (filename === "/game") {
+    if (filename === "/game" || filename === "/") {
         filename = "Double Series.html";
     }
     filename = path.basename(filename.replace(/\%20/g," "));
@@ -26,6 +26,7 @@ var server = http.createServer(function(request, response) {
             response.writeHead(404, {"Content-Type": "text/plain"});
             response.end("Hello World\n");
         } else {
+            console.log(filename);
             response.writeHead(200, {"Content-Type": mimeTypes[path.extname(filename)]});
             var fileStream = fs.createReadStream(filename);
             fileStream.pipe(response);
