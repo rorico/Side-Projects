@@ -111,7 +111,12 @@ function play(player,play) {
         //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
         var AI = playerAIs[player];
         var AIplay = AI && AI.play ? AI.play : defaultAI.play;
-        play = AIplay(hand,team,getInfo());
+        try {
+            play = AIplay(hand,team,getInfo());
+        } catch (err) {
+            //this will stop everything
+            console.log(err);
+        }
     } else if (player !== nextPlayer) {
         console.log("not your turn");
     }
