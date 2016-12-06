@@ -116,6 +116,8 @@ function play(player,play) {
         } catch (err) {
             //this will stop everything
             console.log(err);
+            //as to not break the next part
+            play = {};
         }
     } else if (player !== nextPlayer) {
         console.log("not your turn");
