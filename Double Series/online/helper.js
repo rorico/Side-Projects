@@ -17,6 +17,10 @@ exports.addJoptions = addJoptions;
 exports.removeJoptions = removeJoptions;
 exports.hasUselessCard = hasUselessCard;
 
+exports.addJ = addJ;
+exports.removeJ = removeJ;
+
+
 //array of options that player can play
 //Output [card][side][row x, col y]
 function getOptions(cards) {// {,info) {
