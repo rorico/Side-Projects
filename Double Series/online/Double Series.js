@@ -14,8 +14,7 @@ var pointworth = [];
 var points = [];
 var hands = [];
 var handLengths = [];
-var blueLines = 0;
-var greenLines = 0;
+var linesDone = {};
 var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 
@@ -80,11 +79,9 @@ function startConnection() {
                     }
                 }
             }
-            if (data.blueLines) {
-                blueLines = blueLines;
-            }
-            if (data.greenLines) {
-                greenLines = greenLines;
+
+            if (data.linesDone) {
+                linesDone = linesDone;
             }
             if (data.games) {
                 games = data.games;
@@ -336,8 +333,8 @@ function newGame() {
     $("#cardHolder").empty();
     cardsPlayed = [];
     cardsleft = maxCards - 4 * handLength;
-    blueLines = 0;
-    greenLines = 0;
+    linesDone[1] = 0;
+    linesDone[3] = 0;
 }
 
 function cardHistorySetup() {
@@ -394,11 +391,7 @@ function finishLines(lines,team) {
             pointworth[x][y]++;
             showFinishPoint(x,y,team);
         }
-        if (team === 1) {
-            blueLines++;
-        } else if (team === 3){
-            greenLines++;
-        }
+        linesDone[team]++;
     }
 }
 

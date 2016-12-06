@@ -1,5 +1,6 @@
-const helper = require("./gameFunctions.js");
-const constants = require("./constants.js");
+const helper = require("./gameFunctions");
+const constants = require("./constants");
+const board = require("./board");
 
 //settings
 var maxGame = 1000;
@@ -10,7 +11,6 @@ var playerAIs = [];
 var defaultAI;
 
 //game parts
-var board = [];
 var deck = [];
 var games = 0;
 var nextPlayer = 0;
@@ -21,12 +21,8 @@ var ties = 0;
 var maxCards = 108;
 var handLength = 7;
 
-var pointworth = [];
-var points = [];
 var hands = [];
 var handLengths = [];
-var blueLines;
-var greenLines;
 var cardsleft;
 var cardsPlayed;
 var gameEnd;
@@ -34,12 +30,12 @@ var winner;
 var winningPlayer = -1;
 
 //start
-createBoard();
-helper.setUp(getInfo());
+createDeck();
+helper.setUp(board.getInfo());
 //defaultAI = getAI("playRandom");
 defaultAI = getAI("playBest");
 
-exports.getInfo = getInfo;
+exports.getInfo = board.getInfo;
 exports.getAllInfo = getAllInfo;
 exports.human = human;
 exports.getHand = getHand;
@@ -48,33 +44,41 @@ exports.newGame = newGame;
 exports.setAI = setAI;
 exports.play = play;
 
-//since there are primitive types, need to refresh everything called
+/*var ret = game.play(player,result);
+if (ret.status === -1) {
+    console.log("something wrong with play");
+} else {
+    //only set if waiting for player, so reset
+    waitingFor = -1;
+    if (ret.status === 2) {
+        waitingFor = ret.nextPlayer;
+    } else if (ret.status === 1) {
+        //calls with no parameters
+        setTimeout(playCard,50);
+    } else if (ret.status === 3) {
+        sendEnd(ret.winner);
+    } else {
+        console.log("something went wrong");
+    }
+    sendPlay(ret);
+}*/
+
 function getInfo() {
-    return {
-        board:board,
-        points:points,
-        blueLines:blueLines,
-        greenLines:greenLines,
-        cardsPlayed:cardsPlayed,
-        cardsleft:cardsleft,
-        handLengths:handLengths
-    };
+    var info = board.getInfo();
+    info.cardsPlayed = cardsPlayed;
+    info.cardsleft = cardsleft;
+    info.handLengths = handLengths;
+    return info;
 }
 
 function getAllInfo() {
-    return {
-        board:board,
-        points:points,
-        blueLines:blueLines,
-        greenLines:greenLines,
-        bluewin:bluewin,
-        greenwin:greenwin,
-        games:games,
-        cardsPlayed:cardsPlayed,
-        cardsleft:cardsleft,
-        handLengths:handLengths,
-        nextPlayer:nextPlayer
-    };
+    var info = getInfo();
+    info.bluewin = bluewin;
+    info.greenwin = greenwin;
+    info.games = games;
+    info.handLengths = handLengths;
+    info.nextPlayer = nextPlayer;
+    return info;
 }
 
 function getHand(player) {
@@ -95,7 +99,7 @@ function getAI(AIname) {
     try {
         var AI = require("./" + AIname);
         if (AI.setup) {
-            AI.setup(getInfo());
+            AI.setup(board.getInfo());
         }
         return AI;
     } catch (err) {
@@ -108,11 +112,10 @@ function play(player,play) {
         player = nextPlayer;
         var team = helper.getTeam(player);
         var hand = hands[player];
-        //return is [action,card,[x,y]]  action: 1 = add, 0 = replaceCard, -1 = removeJ, 2 = add and finish line
         var AI = playerAIs[player];
         var AIplay = AI && AI.play ? AI.play : defaultAI.play;
         try {
-            play = AIplay(hand,team,getInfo());
+            play = AIplay(hand,team,board.getInfo());
         } catch (err) {
             //this will stop everything
             console.log(err);
@@ -164,7 +167,12 @@ function processTurn(player,play) {
             }
             break;
         }
-        playCard(player,play);
+        board.playCard(player,play);
+
+        //add check to see if finished
+        if (play.action === constants.PLAY_FINISH) {
+            checkGameDone();
+        }
 
         ret.status = 1; //this may be overriten later
         
@@ -213,44 +221,6 @@ function processTurn(player,play) {
     return ret;
 }
 
-function playCard(player,play) {
-    var position = play.position;
-    var x = position ? position[0] : -1;
-    var y = position ? position[1] : -1;
-    var team = helper.getTeam(player);
-    switch (play.action) {
-    case constants.PLAY_REPLACE:
-        //do nothing here
-        break;
-    case constants.PLAY_REMOVE:
-        removePoint(x,y);
-        break;
-    case constants.PLAY_ADD:
-        addPoint(x,y,team);
-        break;
-    case constants.PLAY_FINISH:
-        addPoint(x,y,team);
-        finishLines(play.finishedLines,team);
-        checkGameDone();
-        break;
-    }
-}
-
-//updates gameEnd if game is done
-function checkGameDone() {
-    if (greenLines >= 2) {
-        winner = 3;
-        greenwin++;
-        games++;
-        gameEnd = true;
-    } else if (blueLines >= 2) {
-        winner = 1;
-        bluewin++;
-        games++;
-        gameEnd = true;
-    }
-}
-
 function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
     if (gameEnd) {
         return false;
@@ -272,7 +242,7 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
         if (card !== -1) {
             return false;
         }
-        if (points[x][y] !== 4 - team) {
+        if (board.points[x][y] !== 4 - team) {
             return false;
         }
         break;
@@ -289,7 +259,7 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
                 var point = line[j];
                 if (x===point[0] && y===point[1]) {
                     hasPoint = true;
-                } else if (points[point[0]][point[1]] !== team) {
+                } else if (board.points[point[0]][point[1]] !== team) {
                     //can't check current point, maybe not updated yet
                     return false;
                 }
@@ -314,15 +284,13 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
         //fall through and also check add
     case constants.PLAY_ADD: //add
         if (card !== 0) {
-            if (points[x][y] !== 0) {
+            if (board.points[x][y] !== 0) {
                 return false;
             }
         }
         break;
-
     default: //shouldn't get here
         return false;
-        break;
     }
     return true;
 }
@@ -338,6 +306,21 @@ function drawCard(player,card,team,replace) {
         handLengths[player]--;
         checkNoCards();
         //returns nothing
+    }
+}
+
+//updates gameEnd if game is done
+function checkGameDone() {
+    if (board.linesDone[3] >= 2) {
+        winner = 3;
+        greenwin++;
+        games++;
+        gameEnd = true;
+    } else if (board.linesDone[1] >= 2) {
+        winner = 1;
+        bluewin++;
+        games++;
+        gameEnd = true;
     }
 }
 
@@ -369,99 +352,8 @@ function chooseFinishLine(lines) {
     return chosen;
 }
 
-function outOfBounds(x,y) {
-    return x > 9 || x < 0 || y > 9 || y < 0;
-}
-
-//-----------auxilary functions-------------------//
-//position of Add J, -1 if none
-function hasAdd(player) {
-    for (var i = 0 ; i < player.length ; i++){
-        if (player[i] === 0) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-//position of Remove J, -1 if none
-function hasRemove(player) {
-    for (var i = 0 ; i < player.length ; i++){
-        if (player[i] === -1) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-function hasOnlyJ(player) {
-    for (var i = 0 ; i < player.length ; i++){
-        if (player[i]!==-1 && player[i]!==0) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function hasOnlyRemoveJ(player) {
-    for (var i = 0 ; i < player.length ; i++){
-        if (player[i] !== -1) {
-            return false;
-        }
-    }
-    return true;
-}
-
-//has a useless card
-function hasUselessCard(options) {
-    for (var i = 0 ; i < options.length ; i++){
-        //if J, length will be undefined
-        if (options[i].length === 0) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-//---------------------------------------------//
-
 //-----------------game functions--------------//
-//creates board and deck
-function createBoard() {
-    //creates indexes for rows 1 - 5
-    for (var row = 0 ; row < 5 ; row++) {
-        var rowinfo = [];
-        var pointsrow = [];
-        var pointworthrow = [];
-        for (var col = 1 ; col <= 10 ; col++) {
-            if (row === 0) {
-                if (col === 1 || col === 10) {
-                    rowinfo.push(1);
-                    pointsrow.push(0);
-                    pointworthrow.push(0);
-                } else {
-                    rowinfo.push(col);
-                    pointsrow.push(0);
-                    pointworthrow.push(0);
-                }
-            } else {
-                rowinfo.push(10*row + col - 1);
-                pointsrow.push(0);
-                pointworthrow.push(0);
-            }
-        }
-        board.push(rowinfo);
-        points.push(pointsrow);
-        pointworth.push(pointworthrow);
-    }
-
-    //copies a reverse of rows 1 - 5
-    for (var i = 0 ; i < 5 ; i++) {
-        board.push(board[4-i].slice().reverse());
-        points.push(points[4-i].slice());
-        pointworth.push(pointworth[4-i].slice());
-    }
-
+function createDeck() {
     //creates deck with 4 add Js, 4 remove Js, 4 corner pieces, and 2 of each other card
     for (var i = 2 ; i < 50 ; i++) {
         deck.push(i);
@@ -476,13 +368,10 @@ function createBoard() {
 
 //restart game
 function newGame() {
+    board.newGame();
+    gameEnd = false;
+    winner = -1;
     nextPlayer = (winningPlayer + 1) % 4;
-
-    for (var row = 0 ; row < 10 ; row++) {
-        for (var col = 0 ; col < 10 ; col++) {
-            points[row][col]=0;
-        }
-    }
     shuffle(deck);
     cardsleft = maxCards;
     //4 players
@@ -492,11 +381,6 @@ function newGame() {
         cardsleft -= handLength;
     }
     cardsPlayed = [];
-    blueLines = 0;
-    greenLines = 0;
-    gameEnd = false;
-    winner = -1;
-
     return hands;
 }
 
@@ -517,32 +401,4 @@ function shuffle(array) {
     }
   
     return array;
-}
-
-//changes a team to 0 because of remove J
-function removePoint(x,y) {
-    points[x][y] = 0;
-}
-
-//changes team to given team of card played
-function addPoint(x,y,team) {
-    points[x][y] = team;
-}
-
-//creates a line
-function finishLines(lines,team) {
-    for (var i = 0 ; i < lines.length ; i++) {
-        var line = lines[i];
-        for (var j = 0 ; j < line.length ; j++) {
-            var x = line[j][0];
-            var y = line[j][1];
-            points[x][y] = team + 1;
-            pointworth[x][y]++;
-        }
-        if (team === 1) {
-            blueLines++;
-        } else if (team === 3){
-            greenLines++;
-        }  
-    }
 }

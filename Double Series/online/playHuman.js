@@ -86,7 +86,7 @@ function showChoosePosition(player,team,card,action,x,y) {
 
 function showFinish(player,team,ret,possible) {
     ret.action = constants.PLAY_FINISH;
-    var linesFinished = team === 1 ? blueLines : greenLines;
+    var linesFinished = linesDone[team];
     var choose = [];
     //if play is going to finish the game, it doesn't matter what i picked
     if (possible.length >= 2 - linesFinished) {
