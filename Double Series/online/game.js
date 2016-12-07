@@ -77,6 +77,8 @@ function addPlayer(connection) {
 
         if (player === nextPlayer) {
             clearTimeout(nextPlayTimer);
+        } else {
+            nextPlayTimer = setTimeout(playCard,speed);
         }
     }
 }
