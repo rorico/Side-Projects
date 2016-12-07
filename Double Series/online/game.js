@@ -30,6 +30,7 @@ var winner;
 var winningPlayer = -1;
 
 var activePlayers = [];
+var nextPlayTimer = -1;
 
 //start
 createDeck();
@@ -73,6 +74,10 @@ function addPlayer(connection) {
         connection.on('close', function(connection) {
             removePlayer(player);
         });
+
+        if (player === nextPlayer) {
+            clearTimeout(nextPlayTimer);
+        }
     }
 }
 
@@ -87,6 +92,20 @@ function getOpenPlayerSlot() {
 
 function removePlayer(player) {
     human[player] = false;
+    for (var i = 0 ; i < activePlayers.length ; i++) {
+        if (activePlayers[i].player === player) {
+            activePlayers.splice(i,1);
+            break;
+        }
+    }
+    if (activePlayers.length) {
+        if (nextPlayer === player) {
+            nextPlayTimer = setTimeout(playCard,speed * 10);
+        }
+    } else {
+        //stop game if no one is playing
+        clearTimeout(nextPlayTimer);
+    }
 }
 
 function playCard(player,result) {
@@ -98,10 +117,10 @@ function playCard(player,result) {
             //waiting for player input
         } else if (ret.status === 1) {
             //calls with no parameters
-            setTimeout(playCard,500);
+            nextPlayTimer = setTimeout(playCard,speed);
         } else if (ret.status === 3) {
             sendEnd(ret.winner);
-            setTimeout(startNewGame,1500);
+            setTimeout(startNewGame,speed * 3);
         } else {
             console.log("something went wrong");
         }
@@ -141,7 +160,7 @@ function sendEnd(winner) {
 function startNewGame() {
     var newHands = newGame();
     sendNewGame(newHands);
-    setTimeout(playCard,500);
+    nextPlayTimer = setTimeout(playCard,speed);
 }
 
 function sendNewGame(hands) {
