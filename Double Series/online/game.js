@@ -140,7 +140,6 @@ function sendPlay(data) {
     send.newCard = newCard;
     var prevPlayerInfo = JSON.stringify(send);
     for (var i = 0 ; i < activePlayers.length ; i++) {
-        console.log(activePlayers[i])
         if (activePlayers[i].player === player) {
             activePlayers[i].conn.sendUTF(prevPlayerInfo);
         } else {
@@ -160,7 +159,9 @@ function sendEnd(winner) {
 function startNewGame() {
     var newHands = newGame();
     sendNewGame(newHands);
-    nextPlayTimer = setTimeout(playCard,speed);
+    if (!human[nextPlayer]) {
+        nextPlayTimer = setTimeout(playCard,speed);
+    }
 }
 
 function sendNewGame(hands) {
