@@ -125,7 +125,7 @@ function sendPlay(data) {
         if (activePlayers[i].player === player) {
             activePlayers[i].conn.sendUTF(prevPlayerInfo);
         } else {
-            activePlayers[i].sendUTF(info);
+            activePlayers[i].conn.sendUTF(info);
         }
     }
 }
