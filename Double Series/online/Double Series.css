@@ -163,7 +163,7 @@ div, td {
     text-align: center;
 }
 .choose {
-    background-color: orange !important;
+    background-color: yellow !important;
 }
 .choose.special {
     background-color: red !important;
