@@ -3,6 +3,7 @@ const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const WebSocketServer = require("websocket").server;
+const game = require("./game.js");
 
 var mimeTypes = {
     ".html": "text/html",
@@ -40,9 +41,6 @@ var server = http.createServer(function(request, response) {
 var wsServer = new WebSocketServer({
     httpServer: server
 });
-
-const game = require("./game.js");
-game.newGame();
 
 wsServer.on('request', function(request) {
     var connection = request.accept(null, request.origin);

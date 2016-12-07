@@ -36,16 +36,9 @@ createDeck();
 helper.setUp(board.getInfo());
 //defaultAI = getAI("playRandom");
 defaultAI = getAI("playBest");
+newGame();
 
-
-exports.getInfo = board.getInfo;
-exports.getAllInfo = getAllInfo;
-exports.human = human;
-exports.getHand = getHand;
-exports.checkValid = checkValid;
-exports.newGame = newGame;
 exports.setAI = setAI;
-exports.play = play;
 exports.addPlayer = addPlayer;
 
 
@@ -53,13 +46,13 @@ exports.addPlayer = addPlayer;
 function addPlayer(connection) {
     var player = getOpenPlayerSlot();
     if (player !== -1) {
-        activePlayers[player] = connection;
+        activePlayers.push({player:player,conn:connection});
         human[player] = true;
 
         var gameInfo = getAllInfo();
         gameInfo.type = "start";
         gameInfo.player = player;
-        gameInfo.hand = getHand(player);
+        gameInfo.hand = hands[player];
 
         connection.sendUTF(JSON.stringify(gameInfo));
 
@@ -128,8 +121,9 @@ function sendPlay(data) {
     send.newCard = newCard;
     var prevPlayerInfo = JSON.stringify(send);
     for (var i = 0 ; i < activePlayers.length ; i++) {
-        if (i === player) {
-            activePlayers[i].sendUTF(prevPlayerInfo);
+        console.log(activePlayers[i])
+        if (activePlayers[i].player === player) {
+            activePlayers[i].conn.sendUTF(prevPlayerInfo);
         } else {
             activePlayers[i].sendUTF(info);
         }
@@ -140,7 +134,7 @@ function sendEnd(winner) {
     var data = {type:"end",winner:winner};
     var info = JSON.stringify(data);
     for (var i = 0 ; i < activePlayers.length ; i++) {
-        activePlayers[i].sendUTF(info);
+        activePlayers[i].conn.sendUTF(info);
     }
 }
 
@@ -156,7 +150,7 @@ function sendNewGame(hands) {
     for (var i = 0 ; i < activePlayers.length ; i++) {
         data.hand = hands[i];
         var info = JSON.stringify(data);
-        activePlayers[i].sendUTF(info);
+        activePlayers[i].conn.sendUTF(info);
     }
 }
 
@@ -180,10 +174,6 @@ function getAllInfo() {
     info.handLengths = handLengths;
     info.nextPlayer = nextPlayer;
     return info;
-}
-
-function getHand(player) {
-    return hands[player];
 }
 
 function setAI(playerList,AIname) {
