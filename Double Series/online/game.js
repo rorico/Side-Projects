@@ -29,8 +29,6 @@ var gameEnd;
 var winner;
 var winningPlayer = -1;
 
-var activePlayers = [];
-var nextPlayTimer = -1;
 
 //start
 createDeck();
@@ -40,145 +38,148 @@ defaultAI = getAI("playBest");
 newGame();
 
 exports.setAI = setAI;
-exports.addPlayer = addPlayer;
 
+//this iife generally controls the flow of the game
+exports.addPlayer = (function(){
+    var activePlayers = [];
+    var nextPlayTimer = -1;
+    return addPlayer;
+    function addPlayer(connection) {
+        var player = getOpenPlayerSlot();
+        if (player !== -1) {
+            activePlayers.push({player:player,conn:connection});
+            human[player] = true;
 
+            var gameInfo = getAllInfo();
+            gameInfo.type = "start";
+            gameInfo.player = player;
+            gameInfo.hand = hands[player];
 
-function addPlayer(connection) {
-    var player = getOpenPlayerSlot();
-    if (player !== -1) {
-        activePlayers.push({player:player,conn:connection});
-        human[player] = true;
+            connection.sendUTF(JSON.stringify(gameInfo));
 
-        var gameInfo = getAllInfo();
-        gameInfo.type = "start";
-        gameInfo.player = player;
-        gameInfo.hand = hands[player];
-
-        connection.sendUTF(JSON.stringify(gameInfo));
-
-        connection.on('message', function(message) {
-            if (message.type === 'utf8') {
-                var query = JSON.parse(message.utf8Data);
-                var type = query ? query.type : "";
-                switch(type) {
-                case "play":
-                    playCard(query.player,query.result);
-                    break;
-                default:
-                    break;
+            connection.on('message', function(message) {
+                if (message.type === 'utf8') {
+                    var query = JSON.parse(message.utf8Data);
+                    var type = query ? query.type : "";
+                    switch(type) {
+                    case "play":
+                        playCard(query.player,query.result);
+                        break;
+                    default:
+                        break;
+                    }
                 }
+            });
+
+            connection.on('close', function(connection) {
+                removePlayer(player);
+            });
+
+            if (player === nextPlayer) {
+                clearTimeout(nextPlayTimer);
+            } else {
+                nextPlayTimer = setTimeout(playCard,speed);
             }
-        });
+        }
+    }
 
-        connection.on('close', function(connection) {
-            removePlayer(player);
-        });
+    function getOpenPlayerSlot() {
+        for (var i = 0 ; i < human.length ; i++) {
+            if (!human[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
-        if (player === nextPlayer) {
+    function removePlayer(player) {
+        human[player] = false;
+        for (var i = 0 ; i < activePlayers.length ; i++) {
+            if (activePlayers[i].player === player) {
+                activePlayers.splice(i,1);
+                break;
+            }
+        }
+        if (activePlayers.length) {
+            if (nextPlayer === player) {
+                nextPlayTimer = setTimeout(playCard,speed * 10);
+            }
+        } else {
+            //stop game if no one is playing
             clearTimeout(nextPlayTimer);
+        }
+    }
+
+    function playCard(player,result) {
+        var ret = play(player,result);
+        if (ret.status === -1) {
+            console.log("something wrong with play");
         } else {
-            nextPlayTimer = setTimeout(playCard,speed);
+            if (ret.status === 2) {
+                //waiting for player input
+            } else if (ret.status === 1) {
+                //calls with no parameters
+                nextPlayTimer = setTimeout(playCard,speed);
+            } else if (ret.status === 3) {
+                sendEnd(ret.winner);
+                setTimeout(startNewGame,speed * 3);
+            } else {
+                console.log("something went wrong");
+            }
+            sendPlay(ret);
         }
     }
-}
 
-function getOpenPlayerSlot() {
-    for (var i = 0 ; i < human.length ; i++) {
-        if (!human[i]) {
-            return i;
+    function sendPlay(data) {
+        //copy to not affect outside function
+        var send = copyObject(data.all);
+        var player = send.player;
+        var newCard = data.newCard;
+
+        send.type = "play";
+        var info = JSON.stringify(send);
+
+        send.newCard = newCard;
+        var prevPlayerInfo = JSON.stringify(send);
+        for (var i = 0 ; i < activePlayers.length ; i++) {
+            if (activePlayers[i].player === player) {
+                activePlayers[i].conn.sendUTF(prevPlayerInfo);
+            } else {
+                activePlayers[i].conn.sendUTF(info);
+            }
         }
     }
-    return -1;
-}
 
-function removePlayer(player) {
-    human[player] = false;
-    for (var i = 0 ; i < activePlayers.length ; i++) {
-        if (activePlayers[i].player === player) {
-            activePlayers.splice(i,1);
-            break;
-        }
-    }
-    if (activePlayers.length) {
-        if (nextPlayer === player) {
-            nextPlayTimer = setTimeout(playCard,speed * 10);
-        }
-    } else {
-        //stop game if no one is playing
-        clearTimeout(nextPlayTimer);
-    }
-}
-
-function playCard(player,result) {
-    var ret = play(player,result);
-    if (ret.status === -1) {
-        console.log("something wrong with play");
-    } else {
-        if (ret.status === 2) {
-            //waiting for player input
-        } else if (ret.status === 1) {
-            //calls with no parameters
-            nextPlayTimer = setTimeout(playCard,speed);
-        } else if (ret.status === 3) {
-            sendEnd(ret.winner);
-            setTimeout(startNewGame,speed * 3);
-        } else {
-            console.log("something went wrong");
-        }
-        sendPlay(ret);
-    }
-}
-
-function sendPlay(data) {
-    //copy to not affect outside function
-    var send = copyObject(data.all);
-    var player = send.player;
-    var newCard = data.newCard;
-
-    send.type = "play";
-    var info = JSON.stringify(send);
-
-    send.newCard = newCard;
-    var prevPlayerInfo = JSON.stringify(send);
-    for (var i = 0 ; i < activePlayers.length ; i++) {
-        if (activePlayers[i].player === player) {
-            activePlayers[i].conn.sendUTF(prevPlayerInfo);
-        } else {
+    function sendEnd(winner) {
+        var data = {type:"end",winner:winner};
+        var info = JSON.stringify(data);
+        for (var i = 0 ; i < activePlayers.length ; i++) {
             activePlayers[i].conn.sendUTF(info);
         }
     }
-}
 
-function sendEnd(winner) {
-    var data = {type:"end",winner:winner};
-    var info = JSON.stringify(data);
-    for (var i = 0 ; i < activePlayers.length ; i++) {
-        activePlayers[i].conn.sendUTF(info);
+    function startNewGame() {
+        var newHands = newGame();
+        sendNewGame(newHands);
+        if (!human[nextPlayer]) {
+            nextPlayTimer = setTimeout(playCard,speed);
+        }
     }
-}
 
-function startNewGame() {
-    var newHands = newGame();
-    sendNewGame(newHands);
-    if (!human[nextPlayer]) {
-        nextPlayTimer = setTimeout(playCard,speed);
+    function sendNewGame(hands) {
+        var data = getAllInfo();
+        data.type = "newGame";
+        for (var i = 0 ; i < activePlayers.length ; i++) {
+            data.hand = hands[i];
+            var info = JSON.stringify(data);
+            activePlayers[i].conn.sendUTF(info);
+        }
     }
-}
 
-function sendNewGame(hands) {
-    var data = getAllInfo();
-    data.type = "newGame";
-    for (var i = 0 ; i < activePlayers.length ; i++) {
-        data.hand = hands[i];
-        var info = JSON.stringify(data);
-        activePlayers[i].conn.sendUTF(info);
+    function copyObject(obj) {
+        return JSON.parse(JSON.stringify(obj));
     }
-}
-
-function copyObject(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
+})();
 
 function getInfo() {
     var info = board.getInfo();
