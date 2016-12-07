@@ -77,7 +77,8 @@ exports.addPlayer = (function(){
 
             if (player === nextPlayer) {
                 clearTimeout(nextPlayTimer);
-            } else {
+            } else if (activePlayers.length === 1) {
+                //this means this is only player
                 nextPlayTimer = setTimeout(playCard,speed);
             }
         }
