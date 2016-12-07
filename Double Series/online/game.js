@@ -29,11 +29,14 @@ var gameEnd;
 var winner;
 var winningPlayer = -1;
 
+var activePlayers = [];
+
 //start
 createDeck();
 helper.setUp(board.getInfo());
 //defaultAI = getAI("playRandom");
 defaultAI = getAI("playBest");
+
 
 exports.getInfo = board.getInfo;
 exports.getAllInfo = getAllInfo;
@@ -43,25 +46,123 @@ exports.checkValid = checkValid;
 exports.newGame = newGame;
 exports.setAI = setAI;
 exports.play = play;
+exports.addPlayer = addPlayer;
 
-/*var ret = game.play(player,result);
-if (ret.status === -1) {
-    console.log("something wrong with play");
-} else {
-    //only set if waiting for player, so reset
-    waitingFor = -1;
-    if (ret.status === 2) {
-        waitingFor = ret.nextPlayer;
-    } else if (ret.status === 1) {
-        //calls with no parameters
-        setTimeout(playCard,50);
-    } else if (ret.status === 3) {
-        sendEnd(ret.winner);
-    } else {
-        console.log("something went wrong");
+
+
+function addPlayer(connection) {
+    var player = getOpenPlayerSlot();
+    if (player !== -1) {
+        activePlayers[player] = connection;
+        human[player] = true;
+
+        var gameInfo = getAllInfo();
+        gameInfo.type = "start";
+        gameInfo.player = player;
+        gameInfo.hand = getHand(player);
+
+        connection.sendUTF(JSON.stringify(gameInfo));
+
+        connection.on('message', function(message) {
+            if (message.type === 'utf8') {
+                var query = JSON.parse(message.utf8Data);
+                var type = query ? query.type : "";
+                switch(type) {
+                case "play":
+                    playCard(query.player,query.result);
+                    break;
+                default:
+                    break;
+                }
+            }
+        });
+
+        connection.on('close', function(connection) {
+            removePlayer(player);
+        });
     }
-    sendPlay(ret);
-}*/
+}
+
+function getOpenPlayerSlot() {
+    for (var i = 0 ; i < human.length ; i++) {
+        if (!human[i]) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+function removePlayer(player) {
+    human[player] = false;
+}
+
+function playCard(player,result) {
+    var ret = play(player,result);
+    if (ret.status === -1) {
+        console.log("something wrong with play");
+    } else {
+        if (ret.status === 2) {
+            //waiting for player input
+        } else if (ret.status === 1) {
+            //calls with no parameters
+            setTimeout(playCard,500);
+        } else if (ret.status === 3) {
+            sendEnd(ret.winner);
+            setTimeout(startNewGame,1500);
+        } else {
+            console.log("something went wrong");
+        }
+        sendPlay(ret);
+    }
+}
+
+function sendPlay(data) {
+    //copy to not affect outside function
+    var send = copyObject(data.all);
+    var player = send.player;
+    var newCard = data.newCard;
+
+    send.type = "play";
+    var info = JSON.stringify(send);
+
+    send.newCard = newCard;
+    var prevPlayerInfo = JSON.stringify(send);
+    for (var i = 0 ; i < activePlayers.length ; i++) {
+        if (i === player) {
+            activePlayers[i].sendUTF(prevPlayerInfo);
+        } else {
+            activePlayers[i].sendUTF(info);
+        }
+    }
+}
+
+function sendEnd(winner) {
+    var data = {type:"end",winner:winner};
+    var info = JSON.stringify(data);
+    for (var i = 0 ; i < activePlayers.length ; i++) {
+        activePlayers[i].sendUTF(info);
+    }
+}
+
+function startNewGame() {
+    var newHands = newGame();
+    sendNewGame(newHands);
+    setTimeout(playCard,500);
+}
+
+function sendNewGame(hands) {
+    var data = getAllInfo();
+    data.type = "newGame";
+    for (var i = 0 ; i < activePlayers.length ; i++) {
+        data.hand = hands[i];
+        var info = JSON.stringify(data);
+        activePlayers[i].sendUTF(info);
+    }
+}
+
+function copyObject(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
 
 function getInfo() {
     var info = board.getInfo();
