@@ -195,10 +195,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             showSchedule("#D"+i, date);
             date.setDate(date.getDate()+1);
         }
-        var length = $("#calendar").width();
-        $(".class").width((length-100)/5-2);
-        $(".placeholder").width((length-100)/5);
-        $("#now").width((length-100)/5);
+        var width = Math.floor(($("#calendar").width() - 100) / 5);
+        $(".class").width(width);
+        $(".placeholder").width(width);
+        $("#now").width(width);
         showNow();
     }
 });
