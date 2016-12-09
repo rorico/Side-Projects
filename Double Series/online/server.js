@@ -11,7 +11,7 @@ var mimeTypes = {
     ".css": "text/css",
     ".ico": "image/x-icon"
 };
-var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
+var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8081,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0";
 
 var server = http.createServer(function(request, response) {
@@ -27,7 +27,6 @@ var server = http.createServer(function(request, response) {
             response.writeHead(404, {"Content-Type": "text/plain"});
             response.end("Hello World\n");
         } else {
-            console.log(filename);
             response.writeHead(200, {"Content-Type": mimeTypes[path.extname(filename)]});
             var fileStream = fs.createReadStream(filename);
             fileStream.pipe(response);
