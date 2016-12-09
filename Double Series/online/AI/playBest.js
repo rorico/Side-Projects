@@ -1,5 +1,5 @@
 var helpers = require("./playHelper.js");
-var constants = require("./constants");
+var constants = require("../constants");
 var getOptions = helpers.getOptions;
 var cardOptions = helpers.cardOptions;
 var hasAdd = helpers.hasAdd;

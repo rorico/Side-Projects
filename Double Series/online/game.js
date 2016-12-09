@@ -212,7 +212,7 @@ function setAI(playerList,AIname) {
 
 function getAI(AIname) {
     try {
-        var AI = require("./" + AIname);
+        var AI = require("./AI/" + AIname);
         if (AI.setup) {
             AI.setup(board.getInfo());
         }
