@@ -1,4 +1,4 @@
-const helper = require("./gameFunctions");
+const helper = require("./boardHelper");
 const constants = require("./constants");
 const board = require("./board");
 
