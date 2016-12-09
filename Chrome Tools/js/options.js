@@ -2,6 +2,7 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
     var maxNameLevel = 2;
     var timezoneOffset = (new Date()).getTimezoneOffset() * 60000;
     var hourAmount = 3600000; //num of millisec
+    var defaultZoom = 604800000; //1 week
     
     var redirectIndexes = item.redirectIndexes;
     if (!redirectIndexes) {
@@ -60,8 +61,9 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
                     var data = series[i].data;
                     data.push([data[data.length-1][0] + hourAmount, 0]);
                 }
-                var test = $("#redirects").highcharts({
+                var chart = new Highcharts.Chart({
                     chart: {
+                        renderTo: "redirects",
                         zoomType: "x",
                         type: "spline"
                     },
@@ -104,6 +106,9 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
                         }
                     }
                 });
+                var last = data[data.length-1][0];
+                chart.xAxis[0].setExtremes(last - defaultZoom,last);
+                chart.showResetZoom();
             }
         }
 
