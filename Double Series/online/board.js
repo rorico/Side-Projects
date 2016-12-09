@@ -1,5 +1,3 @@
-const constants = require("./constants.js");
-
 //game parts
 var board = [];
 var pointworth = [];
@@ -9,24 +7,34 @@ var linesDone = {
     3:0
 };
 
-//start
-createBoard();
+var frontEnd = true;
 
-exports.getInfo = getInfo;
-exports.newGame = newGame;
-exports.playCard = playCard;
-exports.board = board;
-exports.points = points;
-exports.linesDone = linesDone;
+//shared between back end and front end
+if (typeof module === "object" && module && typeof module.exports === "object") {
+    frontEnd = false;
 
-//since there are primitive types, need to refresh everything called
-function getInfo() {
-    return {
-        board:board,
-        points:points,
-        linesDone:linesDone
-    };
+    const constants = require("./constants.js");
+
+    //start
+    createBoard();
+
+    exports.getInfo = getInfo;
+    exports.newGame = newGame;
+    exports.playCard = playCard;
+    exports.board = board;
+    exports.points = points;
+    exports.linesDone = linesDone;
+
+    //since there are primitive types, need to refresh everything called
+    function getInfo() {
+        return {
+            board:board,
+            points:points,
+            linesDone:linesDone
+        };
+    }
 }
+
 
 function playCard(player,team,play) {
     var position = play.position;
@@ -86,6 +94,9 @@ function createBoard() {
         points.push(points[4-i].slice());
         pointworth.push(pointworth[4-i].slice());
     }
+    if (frontEnd) {
+        boardDisplay();
+    }
 }
 
 //restart game
@@ -97,16 +108,25 @@ function newGame() {
     }
     linesDone[1] = 0;
     linesDone[3] = 0;
+    if (frontEnd) {
+        newGameDisplay();
+    }
 }
 
 //changes a team to 0 because of remove J
 function removePoint(x,y) {
     points[x][y] = 0;
+    if (frontEnd) {
+        changeBoard(x,y,0);
+    }
 }
 
 //changes team to given team of card played
 function addPoint(x,y,team) {
     points[x][y] = team;
+    if (frontEnd) {
+        changeBoard(x,y,team);
+    }
 }
 
 //creates a line
@@ -118,6 +138,9 @@ function finishLines(lines,team) {
             var y = line[j][1];
             points[x][y] = team + 1;
             pointworth[x][y]++;
+            if (frontEnd) {
+                showFinishPoint(x,y,team);
+            }
         }
         linesDone[team]++;
     }
