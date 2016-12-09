@@ -35,7 +35,7 @@ function startConnection() {
     } else {
         new_uri = "ws:";
     }
-    new_uri += "//" + loc.host;
+    new_uri += "//" + loc.host + "/websocket";
     connection = new socket(new_uri);
     connection.onerror = function (error) {
         console.log(error);
