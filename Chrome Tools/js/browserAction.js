@@ -401,12 +401,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     case 88:        //x
                         snooze();
                         break;
-                    case 87:        //w
-                        setAlarm(15);
-                        break;
-                    case 69:        //e
-                        setAlarm(30);
-                        break;
                     case 49:        //1
                     case 50:
                     case 51:
