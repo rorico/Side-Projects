@@ -50,6 +50,32 @@ function cardOptions(card) {
     return sides;
 }
 
+//random add jack
+function addJoptions() {
+    var options = [];
+    for (var x = 0 ; x < board.length ; x++) {
+        for (var y = 0 ; y < board[x].length ; y++) {
+            if (points[x][y] === 0) {
+                options.push([x,y]);
+            }
+        }
+    }
+    return options;
+}
+
+//random remove jack 
+function removeJoptions(team) {
+    var opTeam = 4 - team;
+    var options = [];
+    for (var x = 0 ; x < board.length ; x++) {
+        for (var y = 0 ; y < board[x].length ; y++) {
+            if (points[x][y] === opTeam) {
+                options.push([x,y]);
+            }
+        }
+    }
+    return options;
+}
 
 //checks if lines is won and turns them over
 //if can finish multiple, finishes all
