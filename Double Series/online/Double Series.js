@@ -37,6 +37,14 @@ function startConnection() {
         console.log(error);
     };
 
+    connection.onclose = function () {
+        var message = "Connection to server closed";
+        $("body").append("<div id='msg'>" + message + "</div>");
+        var leftOffset = ($("body").innerWidth() - $("#msg").outerWidth())/2;
+        var topOffset = ($("body").innerHeight() - $("#msg").outerHeight())/2;
+        $("#msg").css("left",leftOffset).css("top",topOffset);
+    }
+
     connection.onmessage = function (message) {
         var data = JSON.parse(message.data);
         console.log(data);

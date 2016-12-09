@@ -113,14 +113,10 @@ div, td {
     position: relative;
     z-index: 2;
 }
-#pause {
-    opacity: 0.5;
+#msg {
     background-color: white;
     font-size: 100px;
-    top: 40%;
-    left: 80%;
     position: fixed;
-    display: none;
     border: 1px black solid;
     padding: 10px;
 }
