@@ -72,11 +72,13 @@ function ringAlarm(alarmNumber,type) {
     if (type === 1) {
         //hold local copy
         var timestamp = alarms[alarmNumber][1];
-        setInterval(function(){
+        setTimeout(function(){
             //check if alarm is still ringing
             if (timestamp === alarms[alarmNumber][1] && alarms[alarmNumber][0] === 2) {
                 removeAlarm(alarmNumber,type);
                 setAlarm(5,1);
+            } else {
+
             }
         },5000);//5 seconds
     }
