@@ -13,7 +13,7 @@ var frontEnd = true;
 if (typeof module === "object" && module && typeof module.exports === "object") {
     frontEnd = false;
 
-    const constants = require("./constants.js");
+    var constants = require("./constants.js");
 
     //start
     createBoard();
