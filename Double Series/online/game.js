@@ -282,7 +282,7 @@ function processTurn(player,play) {
             }
             break;
         }
-        board.playCard(player,play);
+        board.playCard(player,team,play);
 
         //add check to see if finished
         if (play.action === constants.PLAY_FINISH) {

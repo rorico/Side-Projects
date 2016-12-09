@@ -127,8 +127,8 @@ function startConnection() {
                     }
                 }
 
-                playCard(data.player,data);
                 var team = getTeam(data.player);
+                playCard(data.player,team,data);
                 addCardPlayed(data,team);
                 if (data.nextPlayer !== undefined) {
                     if (data.nextPlayer === me) {
@@ -183,11 +183,10 @@ function playData(player,result) {
     connection.send(JSON.stringify(data));
 }
 
-function playCard(player,play) {
+function playCard(player,team,play) {
     var position = play.position;
     var x = position ? position[0] : -1;
     var y = position ? position[1] : -1;
-    var team = getTeam(player);
     switch (play.action) {
     case constants.PLAY_REPLACE:
         //do nothing here

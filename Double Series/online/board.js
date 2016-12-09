@@ -1,4 +1,3 @@
-const helper = require("./gameFunctions.js");
 const constants = require("./constants.js");
 
 //game parts
@@ -12,7 +11,6 @@ var linesDone = {
 
 //start
 createBoard();
-helper.setUp(getInfo());
 
 exports.getInfo = getInfo;
 exports.newGame = newGame;
@@ -30,11 +28,10 @@ function getInfo() {
     };
 }
 
-function playCard(player,play) {
+function playCard(player,team,play) {
     var position = play.position;
     var x = position ? position[0] : -1;
     var y = position ? position[1] : -1;
-    var team = helper.getTeam(player);
     switch (play.action) {
     case constants.PLAY_REPLACE:
         //do nothing here
