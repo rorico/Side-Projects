@@ -122,8 +122,6 @@ var setupClass;
                 var activeTab = tabs[0];
                 handleNewPage(activeTab.url,activeTab.title);
                 tabId = activeTab.tabId;
-            } else {
-                log("window empty tab");
             }
         });
         returnTime(timeLineLength - timeLeft);
