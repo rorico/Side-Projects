@@ -113,7 +113,7 @@ var setupClass;
     }
 
     function UTCtoMilitary(time) {
-        return time.getHours()*100 + time.getMinutes()/0.6;
+        return time.getHours()*60 + time.getMinutes();
     }
 
     function startTimeLine() {
