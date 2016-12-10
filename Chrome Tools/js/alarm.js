@@ -67,21 +67,28 @@ function ringAlarm(alarmNumber,type) {
     alarms[alarmNumber][0] = 2;
     playAlarmCheck = true;
     sendRequest("ringing",alarmNumber);
-    audio.play();
-    //sleep auto snoozes
-    if (type === 1) {
-        //hold local copy
-        var timestamp = alarms[alarmNumber][1];
-        setTimeout(function(){
-            //check if alarm is still ringing
-            if (timestamp === alarms[alarmNumber][1] && alarms[alarmNumber][0] === 2) {
-                removeAlarm(alarmNumber,type);
-                setAlarm(5,1);
-            } else {
+    //don't ring if chrome is closed
+    //likely want to change the way this is done later
+    chrome.windows.getAll(function(windows){
+        if (windows.length) {
+            audio.play();
 
+            //sleep auto snoozes
+            if (type === 1) {
+                //hold local copy
+                var timestamp = alarms[alarmNumber][1];
+                setTimeout(function(){
+                    //check if alarm is still ringing
+                    if (timestamp === alarms[alarmNumber][1] && alarms[alarmNumber][0] === 2) {
+                        removeAlarm(alarmNumber,type);
+                        setAlarm(5,1);
+                    } else {
+
+                    }
+                },5000);//5 seconds
             }
-        },5000);//5 seconds
-    }
+        }
+    });
 }
 
 //returns true if alarm is removed
