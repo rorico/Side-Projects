@@ -2,28 +2,68 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var todaySchedule = backgroundPage.todaySchedule;
 
     var now = new Date();
+    now.setDate(now.getDate() - 5);
     var startTime = 7 * 60;        //7AM
     var endTime = 19 * 60;         //7PM
     var nowTimeOffset = 50;     //for showing now bar
+    var pxPerHr = 50;
     var weekMode = false;
     var offset = 0;
     var nowTimer = -1;
 
-    $("#datepicker").datepicker({
-        onSelect: function(dateText) {
-            if (weekMode) {
-                showWeek($("#datepicker").datepicker("getDate"));
-            } else {
-                changeDate($("#datepicker").datepicker("getDate"));
-            }
-        },
-        dateFormat: "DD MM d, yy"
-    });
-    $("#datepicker").datepicker("setDate", now);
-    showSchedule("#currentDay", now);
+    init();
+
+    function init() {
+        var html = "<div id='calendar'>";
+
+        var header = "<div id='header'>" + 
+                        "<input type='button' value='Prev' id='prev'>\n" + 
+                        "<input type='text' id='datepicker'>\n" + 
+                        "<input type='button' value='Next' id='next'>\n" + 
+                        "<input type='button' value='Show Week' id='showWeek'>" + 
+                        "</div>";
+
+        var side = "<div class='timeline'>";
+        var right1 = "<div class='timeline right'>";
+        var right2 = "<div class='timeline right'>";
+        for (var i = startTime ; i < endTime ; i += 60) {
+            side += "<div class='timeslotBorder'></div>";
+            right1 += "<div class='timeslotBorder'></div>";
+            right2 += "<div class='half timeslotBorder'></div><div class='half halftimeslotBorder'></div>";
+        }
+        side += "<div class='bottom'></div></div>";
+        right1 += "<div class='bottom'></div></div>";
+        right2 += "<div class='bottom'></div></div>";
+
+        var mid = "<div class='timeline number'><div class='half timeslotBorder'></div>";
+        for (var i = (startTime/60) + 1 ; i < (endTime/60) ; i++) {
+            mid += "<div>" + (i > 12 ? i - 12 : i) + "</div>";
+        }
+        mid += "<div class='half'></div><div class='bottom'></div></div>";
+
+        var container = "<div id='container'><div id='currentDay' class='day'></div></div>";
+        var holder = "<div id='holder'>" + side + mid + right1 + right2 + container + "</div>";
+
+        var html = "<div id='calendar'>" + header + holder + "</div>";
+        $("body").html(html);
+
+        $("#datepicker").datepicker({
+            onSelect: function(dateText) {
+                if (weekMode) {
+                    showWeek($("#datepicker").datepicker("getDate"));
+                } else {
+                    changeDate($("#datepicker").datepicker("getDate"));
+                }
+            },
+            dateFormat: "DD MM d, yy"
+        });
+        $("#datepicker").datepicker("setDate", now);
+        showSchedule("#currentDay", now);
+    }
 
     function showSchedule(container,date) {
         var today = todaySchedule(date);    //function in scheduleInfo.js
+        console.log(today);
         now = new Date();
         if (sameDay(date,now)) {
             nowTimeOffset = 50 * !weekMode;
@@ -31,17 +71,23 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             clearTimeout(nowTimer);
             showNow();
         }
-
+        var topBorder = 60/pxPerHr;
         if (!today.length) {
-            addTimeSlot(container,"class",endTime - startTime,["No Classes Today"]);
-        } else {
-            addTimeSlot(container,"placeholder placeborder",0);
-            var length = today[0][0][1] - startTime - 1;
-            while (length > 60) {
-                addTimeSlot(container,"placeholder placeborder",60);
-                length -= 60;
+            addTimeSlot(container,"placeholder placeborder",endTime - startTime,["No Classes Today"]);
+            addTimeSlot(container,"placeholder placeborder",1);
+            /*addTimeSlot(container,"placeholder placeborder",0);
+            var beginning = startTime;
+            var end = endTime;
+            var next;
+            while ((next = Math.floor((beginning+60)/60)*60)<=end) {
+                length = next - beginning;
+                addTimeSlot(container,"placeholder placeborder",length);
+                beginning += length;
             }
-            addTimeSlot(container,"placeholder",length);
+            addTimeSlot(container,"placeholder",end-beginning);*/
+        } else {
+            
+            addPlaceholder(container,startTime,today[0][0][1]);
             for (var i = 0 ; i < today.length ; i++) {
                 var start = today[i][0][1];
                 var finish = today[i][0][2];
@@ -50,28 +96,38 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 var className = today[i][2][1];
                 var location = today[i][1];
 
-                var height = finish - start + 1;
+                var height = finish - start;// + 1;
                 var classInfo = [classCode + (weekMode ? "" : " " + className) + " - " + classType, location];
                 addTimeSlot(container,"class " + classType,height,classInfo);
 
                 var beginning = finish;
-                var end = (i === today.length - 1 ? endTime : today[i+1][0][1] - 1);
-                var next;
-                while ((next = Math.floor((beginning+60)/60)*60)<=end) {
-                    length = next - beginning;
-                    addTimeSlot(container,"placeholder placeborder",length);
-                    beginning += length;
-                }
-                addTimeSlot(container,"placeholder",end-beginning);
+                var end = (i === today.length - 1 ? endTime : today[i+1][0][1]);
+                addPlaceholder(container,beginning,end);
             }
+            addTimeSlot(container,"placeholder placeborder",topBorder);
         }
         $(container).parent().append("<div id='side'></div>");
     }
 
+    function addPlaceholder(container,start,end) {
+        while (start < end) {
+            var nextHour = Math.floor((start+60)/60)*60;
+            var next = nextHour < end ? nextHour : end;
+            length = next - start;
+            var cls = "placeholder";
+            if (start % 60 === 0) {
+                cls += " placeborder";
+            }
+            addTimeSlot(container,cls,length);
+            start += length;
+        }
+    }
+
     function addTimeSlot(container,classType,time,content) {
         //do no need to account for border as using box-sizing:border-box
-        var height = time/1.2;
+        var height = time/(60/pxPerHr);
         var thisHeight = height + offset;
+        console.log(thisHeight)
         offset = thisHeight % 1;
         thisHeight = Math.floor(thisHeight);
 
