@@ -81,14 +81,12 @@ function getClassLength(range) {
 
 function parseTime(time) {
     var timeParts = time.split(":");
-    var timeHour = timeParts[0];
-    var timeValue = timeHour * 100;
-    if (timeParts[1].indexOf("PM")>-1&&timeParts[0]!="12") {
-        timeValue+=1200;
+    var hour = timeParts[0] - 0;
+    if (timeParts[1].indexOf("PM")>-1 && hour!="12") {
+        hour += 12;
     }
-    timeParts[1]=timeParts[1].slice(0,-2); //remove pm/am
-    timeValue+=((timeParts[1])/(0.6));
-    return timeValue;
+    minutes = timeParts[1].slice(0,-2) - 0; //remove pm/am
+    return (60 * hour) + minutes;
 }
 
 //send requests to background

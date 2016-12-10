@@ -2,8 +2,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var todaySchedule = backgroundPage.todaySchedule;
 
     var now = new Date();
-    var startTime = 700;        //7AM
-    var endTime = 1900;         //7PM
+    var startTime = 7 * 60;        //7AM
+    var endTime = 19 * 60;         //7PM
     var nowTimeOffset = 50;     //for showing now bar
     var weekMode = false;
     var offset = 0;
@@ -37,9 +37,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         } else {
             addTimeSlot(container,"placeholder placeborder",0);
             var length = today[0][0][1] - startTime - 1;
-            while (length > 100) {
-                addTimeSlot(container,"placeholder placeborder",100);
-                length -= 100;
+            while (length > 60) {
+                addTimeSlot(container,"placeholder placeborder",60);
+                length -= 60;
             }
             addTimeSlot(container,"placeholder",length);
             for (var i = 0 ; i < today.length ; i++) {
@@ -55,9 +55,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 addTimeSlot(container,"class " + classType,height,classInfo);
 
                 var beginning = finish;
-                var end = (i === today.length - 1 ? endTime : end = today[i+1][0][1] - 1);
+                var end = (i === today.length - 1 ? endTime : today[i+1][0][1] - 1);
                 var next;
-                while ((next = Math.floor((beginning+100)/100)*100)<=end) {
+                while ((next = Math.floor((beginning+60)/60)*60)<=end) {
                     length = next - beginning;
                     addTimeSlot(container,"placeholder placeborder",length);
                     beginning += length;
@@ -70,7 +70,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function addTimeSlot(container,classType,time,content) {
         //do no need to account for border as using box-sizing:border-box
-        var height = time/2;
+        var height = time/1.2;
         var thisHeight = height + offset;
         offset = thisHeight % 1;
         thisHeight = Math.floor(thisHeight);

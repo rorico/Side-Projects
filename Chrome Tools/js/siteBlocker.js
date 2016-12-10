@@ -100,11 +100,11 @@ var setupClass;
         }
     }
 
-    //probably not actually military time, but similar
+    //after change, its not even close to military time, but too lazy to switch function names
     function militaryToUTC(time) {
         var ret = new Date();
-        var hour = Math.floor(time/100);
-        var minutes = (time % 100) * 0.6;
+        var hour = Math.floor(time/60);
+        var minutes = time % 60;
         ret.setHours(hour);
         ret.setMinutes(minutes);
         ret.setSeconds(0);
