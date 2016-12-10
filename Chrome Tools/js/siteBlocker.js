@@ -121,7 +121,7 @@ var setupClass;
             if (tabs.length) {
                 var activeTab = tabs[0];
                 handleNewPage(activeTab.url,activeTab.title);
-                tabId = activeTab.tabId;
+                tabId = activeTab.id;
             }
         });
         returnTime(timeLineLength - timeLeft);
@@ -144,7 +144,7 @@ var setupClass;
 
     chrome.windows.onFocusChanged.addListener(function(id) {
         //due to browserAction triggering this, gonna have to workaround it
-        if (windowId === chrome.windows.WINDOW_ID_NONE) {
+        if (id === chrome.windows.WINDOW_ID_NONE) {
             //handleNewPage("","Outside Chrome");
         } else {
             if (windowId !== id) {
@@ -152,7 +152,7 @@ var setupClass;
                     if (tabs.length) {
                         var activeTab = tabs[0];
                         handleNewPage(activeTab.url,activeTab.title);
-                        tabId = activeTab.tabId;
+                        tabId = activeTab.id;
                     } else {
                         log("window empty tab");
                     }
