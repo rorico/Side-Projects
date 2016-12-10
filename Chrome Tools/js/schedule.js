@@ -196,9 +196,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             date.setDate(date.getDate()+1);
         }
         var width = Math.floor(($("#calendar").width() - 100) / 5);
-        $(".class").width(width);
-        $(".placeholder").width(width);
-        $("#now").width(width);
+        $(".class").outerWidth(width);
+        $(".placeholder").outerWidth(width);
+        $("#now").outerWidth(width);
         showNow();
     }
 });
