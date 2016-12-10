@@ -2,7 +2,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var todaySchedule = backgroundPage.todaySchedule;
 
     var now = new Date();
-    now.setDate(now.getDate() - 5);
     var startTime = 7 * 60;        //7AM
     var endTime = 19 * 60;         //7PM
     var nowTimeOffset = 50;     //for showing now bar
@@ -63,7 +62,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function showSchedule(container,date) {
         var today = todaySchedule(date);    //function in scheduleInfo.js
-        console.log(today);
         now = new Date();
         if (sameDay(date,now)) {
             nowTimeOffset = 50 * !weekMode;
@@ -75,16 +73,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         if (!today.length) {
             addTimeSlot(container,"placeholder placeborder",endTime - startTime,["No Classes Today"]);
             addTimeSlot(container,"placeholder placeborder",1);
-            /*addTimeSlot(container,"placeholder placeborder",0);
-            var beginning = startTime;
-            var end = endTime;
-            var next;
-            while ((next = Math.floor((beginning+60)/60)*60)<=end) {
-                length = next - beginning;
-                addTimeSlot(container,"placeholder placeborder",length);
-                beginning += length;
-            }
-            addTimeSlot(container,"placeholder",end-beginning);*/
         } else {
             
             addPlaceholder(container,startTime,today[0][0][1]);
@@ -127,7 +115,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         //do no need to account for border as using box-sizing:border-box
         var height = time/(60/pxPerHr);
         var thisHeight = height + offset;
-        console.log(thisHeight)
         offset = thisHeight % 1;
         thisHeight = Math.floor(thisHeight);
 
