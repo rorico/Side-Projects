@@ -1,8 +1,6 @@
-#chromeTools_calendar body,
-#chromeTools_calendar p,
-#chromeTools_calendar div {
+#chromeTools_calendar {
     font-family: 'Times New Roman';
-    font-size: 100%;
+    font-size: 16px;
 }
 #chromeTools_calendar div {
     text-align: center;

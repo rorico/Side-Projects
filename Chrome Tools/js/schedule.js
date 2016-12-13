@@ -133,11 +133,12 @@ var scheduleInit = (function() {
                 all.append(holder).append("<div id='side'></div>");
             }
             $(container).html(all);
-            if (dates.length > 1) {
+            if (weekMode) {
                 var width = Math.floor(($("#chromeTools_calendar").width() - 100) / dates.length);
                 $(".class").outerWidth(width);
                 $(".placeholder").outerWidth(width);
                 $("#now").outerWidth(width);
+                clearTimeout(nowTimer);
                 showNow();
             }
         });
@@ -147,7 +148,7 @@ var scheduleInit = (function() {
         while (start < end) {
             var nextHour = Math.floor((start + 60)/60) * 60;
             var next = nextHour < end ? nextHour : end;
-            length = next - start;
+            var length = next - start;
             var cls = "placeholder";
             if (start % 60 === 0) {
                 cls += " placeborder";
