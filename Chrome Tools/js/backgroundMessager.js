@@ -43,4 +43,13 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
                 break;
         }
     }
-});
+});});
+
+//for displaying in an open browser action
+function sendRequest(action,input) {
+    chrome.runtime.sendMessage({
+        from: "background",
+        action: action,
+        input: input
+    });
+}

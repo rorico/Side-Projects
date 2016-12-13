@@ -520,14 +520,4 @@ var setupClass;
         returnTime();
         timeLeftOutput();
     };
-    ///////////////////////////////////////////////
-
-    //for displaying in an open browser action
-    function sendRequest(action,input) {
-        chrome.runtime.sendMessage({
-            from: "background",
-            action: action,
-            input: input
-        });
-    }
 })();
