@@ -88,8 +88,8 @@ var scheduleInit = (function() {
         var start = date.getDay() - 1;
         date.setDate(date.getDate() - start);    //set to monday
         for (var i = 0 ; i<5 ; i++) {
-            date.setDate(date.getDate() + 1);
             dates.push(+date);
+            date.setDate(date.getDate() + 1);
         }
         showSchedule("#container", dates);
     }
