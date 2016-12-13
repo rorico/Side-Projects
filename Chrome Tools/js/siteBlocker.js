@@ -153,6 +153,9 @@ var setupClass;
 
 
     chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
+        if (removedTabId === VIPtab) {
+            VIPtab = addedTabId;
+        }
         chrome.tabs.get(addedTabId,function(tab) {
             if (matchesURL(tab.url) === 1) {
                 addContentScripts(tabId);
