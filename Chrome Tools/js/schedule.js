@@ -1,14 +1,11 @@
 var scheduleInit = (function() {
-
     var now = new Date();
     var startTime = 7 * 60;        //7AM
     var endTime = 19 * 60;         //7PM
     var nowTimeOffset = 50;     //for showing now bar
     var pxPerHr = 50;
     var weekMode = false;
-    var offset = 0;
     var nowTimer = -1;
-    return scheduleInit;
 
     function scheduleInit(container) {
         //accepts jquery object
@@ -94,89 +91,94 @@ var scheduleInit = (function() {
         showSchedule("#container", dates);
     }
 
-    function showSchedule(container,dates) {
-        weekSchedule(dates,function(info) {     //function set outside
-            var all = $("<div></div>");
-            now = new Date();
-            for (var j = 0 ; j < dates.length ; j++) {
-                var today = info[j];    //probably not the best variable name
-                var holder = $("<div class='day'></div>");
-                if (sameDay(dates[j],now)) {
-                    nowTimeOffset = 50 * !weekMode;
-                    holder.prepend("<div id='nowHolder'><div id='now'></div></div>");
+    var showSchedule = (function() {
+        var offset = 0;
+        return showSchedule;
+        function showSchedule(container,dates) {
+            weekSchedule(dates,function(info) {     //function set outside
+                var all = $("<div></div>");
+                now = new Date();
+                for (var j = 0 ; j < dates.length ; j++) {
+                    var today = info[j];    //probably not the best variable name
+                    var holder = $("<div class='day'></div>");
+                    offset = 0;
+                    if (sameDay(dates[j],now)) {
+                        nowTimeOffset = 50 * !weekMode;
+                        holder.prepend("<div id='nowHolder'><div id='now'></div></div>");
+                        clearTimeout(nowTimer);
+                        showNow();
+                    }
+                    if (!today.length) {
+                        addTimeSlot(holder,"placeholder placeborder",endTime - startTime,["No Classes Today"]);
+                        addTimeSlot(holder,"placeholder placeborder",1);
+                    } else {
+                        addPlaceholder(holder,startTime,today[0][0][1]);
+                        for (var i = 0 ; i < today.length ; i++) {
+                            var start = today[i][0][1];
+                            var finish = today[i][0][2];
+                            var classType = today[i][3];
+                            var classCode = today[i][2][0];
+                            var className = today[i][2][1];
+                            var location = today[i][1];
+
+                            var height = finish - start;
+                            var classInfo = [classCode + (weekMode ? "" : " " + className) + " - " + classType, location];
+                            addTimeSlot(holder,"class " + classType,height,classInfo);
+
+                            var beginning = finish;
+                            var end = (i === today.length - 1 ? endTime : today[i+1][0][1]);
+                            addPlaceholder(holder,beginning,end);
+                        }
+                        addTimeSlot(holder,"placeholder placeborder",0);
+                    }
+                    all.append(holder).append("<div id='side'></div>");
+                }
+                $(container).html(all);
+                if (weekMode) {
+                    var width = Math.floor(($("#chromeTools_calendar").width() - 100) / dates.length);
+                    $(".class").outerWidth(width);
+                    $(".placeholder").outerWidth(width);
+                    $("#now").outerWidth(width);
                     clearTimeout(nowTimer);
                     showNow();
                 }
-                if (!today.length) {
-                    addTimeSlot(holder,"placeholder placeborder",endTime - startTime,["No Classes Today"]);
-                    addTimeSlot(holder,"placeholder placeborder",1);
-                } else {
-                    addPlaceholder(holder,startTime,today[0][0][1]);
-                    for (var i = 0 ; i < today.length ; i++) {
-                        var start = today[i][0][1];
-                        var finish = today[i][0][2];
-                        var classType = today[i][3];
-                        var classCode = today[i][2][0];
-                        var className = today[i][2][1];
-                        var location = today[i][1];
+            });
+        }
 
-                        var height = finish - start;
-                        var classInfo = [classCode + (weekMode ? "" : " " + className) + " - " + classType, location];
-                        addTimeSlot(holder,"class " + classType,height,classInfo);
-
-                        var beginning = finish;
-                        var end = (i === today.length - 1 ? endTime : today[i+1][0][1]);
-                        addPlaceholder(holder,beginning,end);
-                    }
-                    addTimeSlot(holder,"placeholder placeborder",0);
+        function addPlaceholder(container,start,end) {
+            while (start < end) {
+                var nextHour = Math.floor((start + 60)/60) * 60;
+                var next = nextHour < end ? nextHour : end;
+                var length = next - start;
+                var cls = "placeholder";
+                if (start % 60 === 0) {
+                    cls += " placeborder";
                 }
-                all.append(holder).append("<div id='side'></div>");
+                addTimeSlot(container,cls,length);
+                start += length;
             }
-            $(container).html(all);
-            if (weekMode) {
-                var width = Math.floor(($("#chromeTools_calendar").width() - 100) / dates.length);
-                $(".class").outerWidth(width);
-                $(".placeholder").outerWidth(width);
-                $("#now").outerWidth(width);
-                clearTimeout(nowTimer);
-                showNow();
-            }
-        });
-    }
-
-    function addPlaceholder(container,start,end) {
-        while (start < end) {
-            var nextHour = Math.floor((start + 60)/60) * 60;
-            var next = nextHour < end ? nextHour : end;
-            var length = next - start;
-            var cls = "placeholder";
-            if (start % 60 === 0) {
-                cls += " placeborder";
-            }
-            addTimeSlot(container,cls,length);
-            start += length;
         }
-    }
 
-    function addTimeSlot(container,classType,time,content) {
-        //do no need to account for border as using box-sizing:border-box
-        var height = time/(60/pxPerHr);
-        var thisHeight = height + offset;
-        offset = thisHeight % 1;
-        thisHeight = Math.floor(thisHeight);
-
-        var thisContent = "";
-        if (content && content.length) {
-            thisContent = "<p style='top:" + (thisHeight - 15.2 * content.length)/2 + "px'>" + content.join("<br />") + "</p>";
+        function addTimeSlot(container,classType,time,content) {
+            //do no need to account for border as using box-sizing:border-box
+            var height = time/(60/pxPerHr);
+            var thisHeight = height + offset;
+            offset = thisHeight % 1;
+            thisHeight = Math.floor(thisHeight);
+            
+            var thisContent = "";
+            if (content && content.length) {
+                thisContent = "<p style='top:" + (thisHeight - 15.2 * content.length)/2 + "px'>" + content.join("<br />") + "</p>";
+            }
+            container.append("<div class='" + classType + "' style='height:" + thisHeight + "px'>" + thisContent + "</div>");
         }
-        container.append("<div class='" + classType + "' style='height:" + thisHeight + "px'>" + thisContent + "</div>");
-    }
 
-    function sameDay(day1,day2) {
-        var date1 = new Date(day1);
-        var date2 = new Date(day2);
-        return date1.getDate()==date2.getDate()&&date1.getMonth()==date2.getMonth()&&date1.getYear()==date2.getYear();
-    }
+        function sameDay(day1,day2) {
+            var date1 = new Date(day1);
+            var date2 = new Date(day2);
+            return date1.getDate()==date2.getDate()&&date1.getMonth()==date2.getMonth()&&date1.getYear()==date2.getYear();
+        }
+    })();
 
     function showNow() {
         if ($("#now").size()) {
@@ -248,4 +250,5 @@ var scheduleInit = (function() {
             changeDate(now);
         }
     }
+    return scheduleInit;
 })();
