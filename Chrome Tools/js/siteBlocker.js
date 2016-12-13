@@ -47,6 +47,7 @@ var setupClass;
     //functions in their own closure
     var blockSite;
     var unblockSite;
+    var addContentScripts;
 
     //set-up first time when opened
     startTimeLine();
@@ -135,11 +136,29 @@ var setupClass;
     });
 
     chrome.tabs.onUpdated.addListener(function(id, changeInfo, tab) {
-        if (changeInfo && changeInfo.status === "loading" && tabId == id) {
-            handleNewPage(tab.url,tab.title);
-        } else if (changeInfo && changeInfo.title && tabId == id) {
-            title = changeInfo.title;
+        console.log(id, changeInfo, tab)
+        if (tabId === id && changeInfo) {
+            if (changeInfo.status === "loading") {
+                handleNewPage(tab.url,tab.title);
+            } else if (changeInfo.status === "complete" && matchesURL(tab.url) === 1) {
+                //programmically add the scripts in, incase i want to change the list later
+                //could also use manifest.json, but would need to copy every change
+                //use onReplaced event for cached pages
+                addContentScripts(tabId);
+            }
+            if (changeInfo.title) {
+                title = changeInfo.title;
+            }
         }
+    });
+
+
+    chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
+        chrome.tabs.get(addedTabId,function(tab) {
+            if (matchesURL(tab.url) === 1) {
+                addContentScripts(tabId);
+            }
+        });
     });
 
     chrome.windows.onFocusChanged.addListener(function(id) {
@@ -318,17 +337,38 @@ var setupClass;
 
     (function() {
         var blockedTab = -2;
+        var blocked = false; //hold whether the tab should currently be blocked
+        var scripts = ["/lib/jquery.min.js","/js/content.js"];
+        addContentScripts = function(tab) {
+            addContentScript(tab,scripts,0,function(){
+                //if call to block happened while script was added
+                if (blocked) {
+                    blockSite(tab);
+                }
+                console.log("test");
+            });
+        };
+
+        function addContentScript(tab,list,i,funct) {
+            chrome.tabs.executeScript(tab,{file:list[i]},function() {
+                i++;
+                if (list.length === i) {
+                    funct();
+                } else {
+                    addContentScript(tab,list,i,funct);
+                }
+            });
+        }
+
         blockSite = function(tab) {
             //all changes in tabs should be caught, but in case, check
             if (tab === tabId) {
                 //use a wrapper in case tabId gets changed in the meantime, may not be needed
                 var thisUrl = url;
-                chrome.tabs.executeScript(tabId,{file:"/lib/jquery.min.js"},function() {
-                    chrome.tabs.executeScript(tabId,{file:"/js/content.js"},function() {
-                        blockedTab = tab;
-                        storeRedirect(thisUrl);
-                    });
-                });
+                blockedTab = tab;
+                blocked = true;
+                storeRedirect(thisUrl);
+                chrome.tabs.sendMessage(blockedTab,{action:"block"});
             } else {
                 log("uncaught change in tabId");
             }
@@ -339,6 +379,7 @@ var setupClass;
             if (blockedTab !== -2) {
                 chrome.tabs.sendMessage(blockedTab,{action:"unblock"});
                 blockedTab = -2;
+                blocked = false;
             }
         };
 
