@@ -40,7 +40,7 @@ var scheduleInit = (function() {
         var html = "<div id='chromeTools_calendar'>" + header + holder + "</div>";
         container.html(html);
 
-        $(window).keydown(function(e) {
+        container.attr("tabindex",1).focus().keydown(function(e) {
             switch (e.keyCode) {
                 case 78:        //n
                     setToday();
@@ -165,7 +165,7 @@ var scheduleInit = (function() {
             var thisHeight = height + offset;
             offset = thisHeight % 1;
             thisHeight = Math.floor(thisHeight);
-            
+
             var thisContent = "";
             if (content && content.length) {
                 thisContent = "<p style='top:" + (thisHeight - 15.2 * content.length)/2 + "px'>" + content.join("<br />") + "</p>";
