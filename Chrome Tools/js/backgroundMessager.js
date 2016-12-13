@@ -42,8 +42,15 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
                 setScheduleInfo();
                 break;
         }
+    } else if (a.from === "content") {
+        switch(a.action) {
+            //from scheduleInfo.js
+            case "weekSchedule":
+                c(weekSchedule(a.input));
+                break;
+        }
     }
-});});
+});
 
 //for displaying in an open browser action
 function sendRequest(action,input) {

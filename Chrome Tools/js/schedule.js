@@ -1,5 +1,4 @@
-chrome.runtime.getBackgroundPage(function (backgroundPage) {
-    var todaySchedule = backgroundPage.todaySchedule;
+var scheduleInit = (function() {
 
     var now = new Date();
     var startTime = 7 * 60;        //7AM
@@ -9,12 +8,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var weekMode = false;
     var offset = 0;
     var nowTimer = -1;
+    return scheduleInit;
 
-    init();
-
-    function init() {
-        var html = "<div id='calendar'>";
-
+    function scheduleInit(container) {
+        //accepts jquery object
         var header = "<div id='header'>" + 
                         "<input type='button' value='Prev' id='prev'>\n" + 
                         "<input type='text' id='datepicker'>\n" + 
@@ -40,11 +37,32 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
         mid += "<div class='half'></div><div class='bottom'></div></div>";
 
-        var container = "<div id='container'><div id='currentDay' class='day'></div></div>";
-        var holder = "<div id='holder'>" + side + mid + right1 + right2 + container + "</div>";
+        var contain = "<div id='container'><div id='currentDay' class='day'></div></div>";
+        var holder = "<div id='holder'>" + side + mid + right1 + right2 + contain + "</div>";
 
-        var html = "<div id='calendar'>" + header + holder + "</div>";
-        $("body").html(html);
+        var html = "<div id='chromeTools_calendar'>" + header + holder + "</div>";
+        container.html(html);
+
+        $(window).keydown(function(e) {
+            switch (e.keyCode) {
+                case 78:        //n
+                    setToday();
+                    break;
+                case 77:        //m
+                    weekView();
+                    break;
+                case 188:        //,
+                    prev();
+                    break;
+                case 190:        //.
+                    next();
+                    break;
+            }
+        });
+
+        $("#showWeek").click(weekView);
+        $("#next").click(next);
+        $("#prev").click(prev);
 
         $("#datepicker").datepicker({
             onSelect: function(dateText) {
@@ -55,51 +73,79 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 }
             },
             dateFormat: "DD MM d, yy"
-        });
-        $("#datepicker").datepicker("setDate", now);
-        showSchedule("#currentDay", now);
+        }).datepicker("setDate", now).datepicker("widget").detach().appendTo(container);
+        //normally the widget is outside container, move inside
+
+        changeDate(now);
     }
 
-    function showSchedule(container,date) {
-        var today = todaySchedule(date);    //function in scheduleInfo.js
-        now = new Date();
-        if (sameDay(date,now)) {
-            nowTimeOffset = 50 * !weekMode;
-            $(container).prepend("<div id='nowHolder'><div id='now'></div></div>");
-            clearTimeout(nowTimer);
-            showNow();
+    function changeDate(date) { //single day
+        showSchedule("#currentDay",[+date]);
+    }
+
+    function showWeek(date) {
+        var dates = [];
+        var start = date.getDay() - 1;
+        date.setDate(date.getDate() - start);    //set to monday
+        for (var i = 0 ; i<5 ; i++) {
+            date.setDate(date.getDate() + 1);
+            dates.push(+date);
         }
-        var topBorder = 60/pxPerHr;
-        if (!today.length) {
-            addTimeSlot(container,"placeholder placeborder",endTime - startTime,["No Classes Today"]);
-            addTimeSlot(container,"placeholder placeborder",1);
-        } else {
-            
-            addPlaceholder(container,startTime,today[0][0][1]);
-            for (var i = 0 ; i < today.length ; i++) {
-                var start = today[i][0][1];
-                var finish = today[i][0][2];
-                var classType = today[i][3];
-                var classCode = today[i][2][0];
-                var className = today[i][2][1];
-                var location = today[i][1];
+        showSchedule("#container", dates);
+    }
 
-                var height = finish - start;// + 1;
-                var classInfo = [classCode + (weekMode ? "" : " " + className) + " - " + classType, location];
-                addTimeSlot(container,"class " + classType,height,classInfo);
+    function showSchedule(container,dates) {
+        weekSchedule(dates,function(info) {     //function set outside
+            var all = $("<div></div>");
+            now = new Date();
+            for (var j = 0 ; j < dates.length ; j++) {
+                var today = info[j];    //probably not the best variable name
+                var holder = $("<div class='day'></div>");
+                if (sameDay(dates[j],now)) {
+                    nowTimeOffset = 50 * !weekMode;
+                    holder.prepend("<div id='nowHolder'><div id='now'></div></div>");
+                    clearTimeout(nowTimer);
+                    showNow();
+                }
+                if (!today.length) {
+                    addTimeSlot(holder,"placeholder placeborder",endTime - startTime,["No Classes Today"]);
+                    addTimeSlot(holder,"placeholder placeborder",1);
+                } else {
+                    addPlaceholder(holder,startTime,today[0][0][1]);
+                    for (var i = 0 ; i < today.length ; i++) {
+                        var start = today[i][0][1];
+                        var finish = today[i][0][2];
+                        var classType = today[i][3];
+                        var classCode = today[i][2][0];
+                        var className = today[i][2][1];
+                        var location = today[i][1];
 
-                var beginning = finish;
-                var end = (i === today.length - 1 ? endTime : today[i+1][0][1]);
-                addPlaceholder(container,beginning,end);
+                        var height = finish - start;
+                        var classInfo = [classCode + (weekMode ? "" : " " + className) + " - " + classType, location];
+                        addTimeSlot(holder,"class " + classType,height,classInfo);
+
+                        var beginning = finish;
+                        var end = (i === today.length - 1 ? endTime : today[i+1][0][1]);
+                        addPlaceholder(holder,beginning,end);
+                    }
+                    addTimeSlot(holder,"placeholder placeborder",0);
+                }
+                all.append(holder).append("<div id='side'></div>");
             }
-            addTimeSlot(container,"placeholder placeborder",topBorder);
-        }
-        $(container).parent().append("<div id='side'></div>");
+            $(container).html(all);
+            if (dates.length > 1) {
+                var width = Math.floor(($("#chromeTools_calendar").width() - 100) / dates.length);
+                $(".class").outerWidth(width);
+                $(".placeholder").outerWidth(width);
+                $("#now").outerWidth(width);
+                showNow();
+            }
+        });
     }
 
     function addPlaceholder(container,start,end) {
         while (start < end) {
-            var nextHour = Math.floor((start+60)/60)*60;
+            var nextHour = Math.floor((start + 60)/60) * 60;
             var next = nextHour < end ? nextHour : end;
             length = next - start;
             var cls = "placeholder";
@@ -122,7 +168,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         if (content && content.length) {
             thisContent = "<p style='top:" + (thisHeight - 15.2 * content.length)/2 + "px'>" + content.join("<br />") + "</p>";
         }
-        $(container).append("<div class='" + classType + "' style='height:" + thisHeight + "px'>" + thisContent + "</div>");
+        container.append("<div class='" + classType + "' style='height:" + thisHeight + "px'>" + thisContent + "</div>");
     }
 
     function sameDay(day1,day2) {
@@ -155,27 +201,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             }
         }
     }
-
-    $(window).keydown(function(e) {
-        switch (e.keyCode) {
-            case 78:        //n
-                setToday();
-                break;
-            case 77:        //m
-                weekView();
-                break;
-            case 188:        //,
-                prev();
-                break;
-            case 190:        //.
-                next();
-                break;
-        }
-    });
-
-    $("#showWeek").click(weekView);
-    $("#next").click(next);
-    $("#prev").click(prev);
 
     function weekView() {
         var date = $("#datepicker").datepicker("getDate");
@@ -222,26 +247,4 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             changeDate(now);
         }
     }
-
-    function changeDate(date) { //single day
-        $("#container").empty();
-        $("#container").append("<div id='currentDay' class='day'></div>");
-        showSchedule("#currentDay",date);
-    }
-
-    function showWeek(date) {
-        $("#container").empty();
-        var start = date.getDay()-1;
-        date.setDate(date.getDate()-start);    //set to monday
-        for (var i = 0 ; i<5 ; i++) {
-            $("#container").append("<div id='D"+i+"' class='day'></div>");
-            showSchedule("#D"+i, date);
-            date.setDate(date.getDate()+1);
-        }
-        var width = Math.floor(($("#calendar").width() - 100) / 5);
-        $(".class").outerWidth(width);
-        $(".placeholder").outerWidth(width);
-        $("#now").outerWidth(width);
-        showNow();
-    }
-});
+})();

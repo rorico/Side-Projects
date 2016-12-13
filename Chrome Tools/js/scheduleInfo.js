@@ -75,6 +75,13 @@ var todaySchedule = (function() {
     }
 })();
 
+function weekSchedule(dates) {
+    var ret = [];
+    for (var i = 0 ; i < dates.length ; i++) {
+        ret.push(todaySchedule(dates[i]));
+    }
+    return ret;
+}
 /* used to add a timeslot somewhere, not used yet
 function add(dayOfW,startT,endT,room,teacher,startD,endD,courseCode,courseInfo,type) {
     info.push([[[dayOfW,startT,endT],room,teacher,[startD,endD],[courseCode,courseInfo],type]])

@@ -1,23 +1,28 @@
-var blockScreen = $("<div></div>");
-blockScreen.css("height","100%");
-blockScreen.css("width","100%");
-blockScreen.css("z-index","999");
-blockScreen.css("display","table");
-blockScreen.css("position","fixed");
-blockScreen.css("top","0");
-blockScreen.css("left","0");
-blockScreen.css("background-color","white");
-blockScreen.css("text-align","center");
-var text = $("<div>Blocked</div>");
-text.css("display","table-cell");
-text.css("vertical-align","middle");
-text.css("font-size","100px");
-blockScreen.html(text);
-$("body").append(blockScreen);
+console.log("created");
+var blockScreen = $("<div id='chromeTools_block'></div>");
+function block() {
+	$("body").append(blockScreen);
+	scheduleInit(blockScreen);
+}
+
+//don't change name, need this as cannot directly use background functions
+function weekSchedule(dates,callback) {
+	sendRequest("weekSchedule",dates,callback);
+}
 
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
-    if (a.action === "unblock") {
-        chrome.runtime.onMessage.removeListener(listener);
+    if (a.action === "block") {
+        block();
+    } else if (a.action === "unblock") {
         blockScreen.remove();
     }
 });
+
+//send requests to background
+function sendRequest(action,input,callback) {
+    chrome.runtime.sendMessage({
+        from: "content",
+        action: action,
+        input: input
+    },callback);
+}

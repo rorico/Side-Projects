@@ -1,95 +1,97 @@
-body {
+#chromeTools_calendar body,
+#chromeTools_calendar p,
+#chromeTools_calendar div {
     font-family: 'Times New Roman';
     font-size: 100%;
 }
-div {
+#chromeTools_calendar div {
     text-align: center;
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
-div p {
+#chromeTools_calendar div p {
     position: relative;
     margin: 0;
 }
-#container {
+#chromeTools_calendar #container {
     float: left;
     display: inline;
 }
-#header {
+#chromeTools_calendar #header {
     margin-bottom: 9px;
 }
-#datepicker {
+#chromeTools_calendar #datepicker {
     text-align: center;
     width: 200px;
 }
-#holder {
+#chromeTools_calendar #holder {
     width: 100%;
     text-align: center;
     justify-content: center;
     display: flex;
 }
-.placeholder {
+#chromeTools_calendar .placeholder {
     display: block;
     width: 300px;
 }
-.placeborder {
+#chromeTools_calendar .placeborder {
     border-top: 1px rgb(228, 228, 228) solid;
 }
-.class {
+#chromeTools_calendar .class {
     width: 300px;
     border: 1px solid black;
     font-size: 13px;
     vertical-align: middle;
     overflow: hidden;
 }
-.timeline {
+#chromeTools_calendar .timeline {
     float: left;
     display: inline;
 }
-.timeline div{
+#chromeTools_calendar .timeline div{
     background-color: rgb(228, 228, 228);
     display: block;
     width: 16px;
     height: 50px;
 }
-.timeline.right div{
+#chromeTools_calendar .timeline.right div{
     width: 8px;
 }
-.timeline.number div{
+#chromeTools_calendar .timeline.number div{
     width: 18px;
     line-height: 50px;
 }
-.timeline .half {
+#chromeTools_calendar .timeline .half {
     height: 25px;
 }
-.timeline .timeslotBorder {
+#chromeTools_calendar .timeline .timeslotBorder {
     border-top: 1px solid black;
 }
-.timeline.right .halftimeslotBorder {
+#chromeTools_calendar .timeline.right .halftimeslotBorder {
     border-top: 1px solid gray;
 }
-.timeline .bottom {
+#chromeTools_calendar .timeline .bottom {
     border-top: 1px solid black;
     height:1px;
 }
-#side {
+#chromeTools_calendar #side {
     float: left;
     height: 600px;
     border-left: 1px solid rgb(228, 228, 228);
 }
-.day {
+#chromeTools_calendar .day {
     float: left;
     display: inline;
     border: none;
 }
-#nowHolder {
+#chromeTools_calendar #nowHolder {
     width: 0px;
     height: 0px;
     position: relative;
 }
-#now {
+#chromeTools_calendar #now {
     width: 402px;
     border-top: 1px solid red;
     position: absolute;
@@ -98,18 +100,18 @@ div p {
     color: red;
     font-size: 12px;
 }
-.TUT {
+#chromeTools_calendar .TUT {
     border-color: orange;
 }
-.SEM {
+#chromeTools_calendar .SEM {
     border-color: blue;
 }
-.LEC {
+#chromeTools_calendar .LEC {
     border-color: green;
 }
-.LAB {
+#chromeTools_calendar .LAB {
     border-color: red;
 }
-.TST {
+#chromeTools_calendar .TST {
     border-color: brown;
 }

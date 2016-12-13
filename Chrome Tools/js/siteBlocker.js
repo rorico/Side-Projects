@@ -136,7 +136,6 @@ var setupClass;
     });
 
     chrome.tabs.onUpdated.addListener(function(id, changeInfo, tab) {
-        console.log(id, changeInfo, tab)
         if (tabId === id && changeInfo) {
             if (changeInfo.status === "loading") {
                 handleNewPage(tab.url,tab.title);
@@ -338,19 +337,22 @@ var setupClass;
     (function() {
         var blockedTab = -2;
         var blocked = false; //hold whether the tab should currently be blocked
-        var scripts = ["/lib/jquery.min.js","/js/content.js"];
+        var scripts = ["/lib/jquery.min.js","/lib/jquery-ui.min.js","/js/schedule.js","/lib/jquery-ui.min.css","/css/schedule.css","/css/content.css","/js/content.js"];
         addContentScripts = function(tab) {
             addContentScript(tab,scripts,0,function(){
-                //if call to block happened while script was added
-                if (blocked) {
+                if(chrome.runtime.lastError) {
+                    log(chrome.runtime.lastError);
+                } else if (blocked) {
+                    //if call to block happened while script was added
                     blockSite(tab);
                 }
-                console.log("test");
             });
         };
 
         function addContentScript(tab,list,i,funct) {
-            chrome.tabs.executeScript(tab,{file:list[i]},function() {
+            var file = list[i];
+            var inject = file.substring(file.lastIndexOf(".")) === ".js" ? chrome.tabs.executeScript : chrome.tabs.insertCSS;
+            inject(tab,{file:file},function() {
                 i++;
                 if (list.length === i) {
                     funct();
