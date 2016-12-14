@@ -111,18 +111,21 @@ var addNumberListener;
         front += "</div>";
         back += "</div>";
         var html = "<div id='phrase'>" + front + back + "</div>";
-        $("#chromeTools_keyPress").html(html);
+
+        var holder = $("#chromeTools_keyPress");
+        var parent = holder.parent();
+        holder.html(html);
         var fontSize = 100;
         var widthMargin = 40;    //don't want text to hug the sides
-        var maxWidth = $("body").width() - widthMargin;
+        var maxWidth = parent.width() - widthMargin;
         if (maxWidth < $("#phraseFront").width()) {
             //shouldn't get stuck in an infinite loop
             fontSize = Math.floor(fontSize / ($("#phraseFront").width() / maxWidth));
             $(".phrasePart").css("font-size",fontSize);
         }
         //center display
-        var leftOffset = ($("body").innerWidth() - $("#phraseFront").outerWidth())/2;
-        var topOffset = ($("body").innerHeight() - $("#phraseFront").outerHeight())/2;
+        var leftOffset = (parent.innerWidth() - $("#phraseFront").outerWidth())/2;
+        var topOffset = (parent.innerHeight() - $("#phraseFront").outerHeight())/2;
         $("#chromeTools_keyPress").css("left",leftOffset).css("top",topOffset);
         if (start) {
             $("#phrase0").addClass("filled");
