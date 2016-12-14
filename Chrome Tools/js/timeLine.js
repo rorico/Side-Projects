@@ -36,8 +36,8 @@ var keyPhrases;
         var top = "<div id='axisTop'>";
         var bot = "<div id='axisBot'>";
         for (var i = 0 ; i < 6 ; i++) {
-            top += "<div class='axisPart top'></div>";
-            bot += "<div class='axisPart bot'></div>";
+            top += "<div class='axisPart top" + (i === 5 ? " end" : "") + "'></div>";
+            bot += "<div class='axisPart bot" + (i === 5 ? " end" : "") + "'></div>";
         }
         top += "</div>";
         bot += "</div>";
