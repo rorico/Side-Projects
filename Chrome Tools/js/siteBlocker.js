@@ -343,9 +343,7 @@ var setupClass;
         var scripts = ["/lib/jquery.min.js","/lib/jquery-ui.min.js","/js/schedule.js","/lib/jquery-ui.min.css","/css/schedule.css","/css/content.css","/js/content.js"];
         addContentScripts = function(tab) {
             addContentScript(tab,scripts,0,function(){
-                if(chrome.runtime.lastError) {
-                    log(chrome.runtime.lastError);
-                } else if (blocked) {
+                if (blocked) {
                     //if call to block happened while script was added
                     blockSite(tab);
                 }
@@ -356,6 +354,10 @@ var setupClass;
             var file = list[i];
             var inject = file.substring(file.lastIndexOf(".")) === ".js" ? chrome.tabs.executeScript : chrome.tabs.insertCSS;
             inject(tab,{file:file},function() {
+                if(chrome.runtime.lastError) {
+                    log(chrome.runtime.lastError);
+                    return;
+                }
                 i++;
                 if (list.length === i) {
                     funct();
