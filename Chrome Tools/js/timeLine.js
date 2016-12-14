@@ -53,6 +53,13 @@ var keyPhrases;
         countDownTimer = -1;
         countDown(timeLeft);
 
+
+        timeLineLeft = parentWidth;
+        offset = 0;
+        timeLineOffset = 0;
+        clearInterval(updateTimeLineInterval);
+        clearInterval(timeCurrentInterval);
+        
         $("#info").html(formatInfo(url,timeCurrent,title));
         timeLine = background.timeLine;
         timeLineLength = background.timeLineLength;

@@ -256,6 +256,7 @@ var setupClass;
             var time = timeLeft - (wastingTime ? new Date() - startTime : 0);
             var endTime = 0;
             var countDown = wastingTime;
+            var blockType = "time";
 
             if (VIPtab === tabId && !tempVIPstartTime) {
                 //if tempVIPstartTime is not set, VIP isn't temp
@@ -264,6 +265,7 @@ var setupClass;
             } else if (time > classStart - new Date()) {
                 time = classStart - new Date();
                 countDown = true;
+                blockType = "class";
             }
 
             //don't even bother if more time left than limit
@@ -278,7 +280,7 @@ var setupClass;
                 //when this turns to 0, will not show actual time left, may want to fix this later
             }
             countDownTimer(time,endTime,countDown);
-            setReminder(time,countDown);
+            setReminder(time,countDown,blockType);
         }
 
         function countDownTimer(time,endTime,countDown) {
@@ -323,7 +325,7 @@ var setupClass;
         }
 
         //sets a reminder when timeLeft reaches 0, and blocks site
-        function setReminder(time,countDown) {
+        function setReminder(time,countDown,blockType) {
             clearTimeout(alarm);
             unblockSite();
             if (countDown && wastingTime === 1) {
@@ -331,7 +333,7 @@ var setupClass;
                     time = tolerance;
                 }
                 alarm = setTimeout(function() {
-                    blockSite(tabId);
+                    blockSite(tabId,blockType);
                 },time);
             }
         }
@@ -340,12 +342,23 @@ var setupClass;
     (function() {
         var blockedTab = -2;
         var blocked = false; //hold whether the tab should currently be blocked
-        var scripts = ["/lib/jquery.min.js","/lib/jquery-ui.min.js","/js/schedule.js","/lib/jquery-ui.min.css","/css/schedule.css","/css/content.css","/js/content.js"];
+        var blockType;
+        var scripts = ["/lib/jquery.min.js",
+                        "/lib/jquery-ui.min.js",
+                        "/lib/jquery-ui.min.css",
+                        "/js/schedule.js",
+                        "/css/schedule.css",
+                        "/js/keyPress.js",
+                        "/js/timeLine.js",
+                        "/css/timeLine.css",
+                        "/css/content.css",
+                        "/js/content.js"];
+
         addContentScripts = function(tab) {
             addContentScript(tab,scripts,0,function(){
                 if (blocked) {
                     //if call to block happened while script was added
-                    blockSite(tab);
+                    blockSite(tab,blockType);
                 }
             });
         };
@@ -367,15 +380,29 @@ var setupClass;
             });
         }
 
-        blockSite = function(tab) {
+        blockSite = function(tab,type) {
             //all changes in tabs should be caught, but in case, check
             if (tab === tabId) {
                 //use a wrapper in case tabId gets changed in the meantime, may not be needed
                 var thisUrl = url;
                 blockedTab = tab;
                 blocked = true;
+                blockType = type;
+
+                if (blockType === "time") {
+                    var info = {
+                        timeLeft: timeLeft,
+                        startTime: +startTime,
+                        wastingTime: wastingTime,
+                        url: url,
+                        title: title,
+                        timeLine: timeLine,
+                        timeLineLength: timeLineLength
+                    };
+                }
+
                 storeRedirect(thisUrl);
-                chrome.tabs.sendMessage(blockedTab,{action:"block"});
+                chrome.tabs.sendMessage(blockedTab,{action:"block",type:type,info:info});
             } else {
                 log("uncaught change in tabId");
             }

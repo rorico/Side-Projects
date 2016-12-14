@@ -1,8 +1,16 @@
-console.log("created");
-var blockScreen = $("<div id='chromeTools_block'></div>");
-function block() {
+function block(type,info) {
+	var blockScreen = $("<div id='chromeTools_block'></div>");
 	$("body").append(blockScreen);
-	scheduleInit(blockScreen);
+	if (type === "time") {
+		timeLineInit(blockScreen,info);
+		keyPressInit(blockScreen,keyPhrases);
+	} else {
+		scheduleInit(blockScreen);	
+	}
+}
+
+function unblock() {
+	$("#chromeTools_block").remove();
 }
 
 //don't change name, need this as cannot directly use background functions
@@ -11,10 +19,11 @@ function weekSchedule(dates,callback) {
 }
 
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
+	console.log(a,b,c);
     if (a.action === "block") {
-        block();
+        block(a.type,a.info);
     } else if (a.action === "unblock") {
-        blockScreen.remove();
+        unblock();
     }
 });
 
