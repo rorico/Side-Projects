@@ -7,6 +7,7 @@ var addTimeLine;
 var changeTimeLine;
 var restartTimeLine;
 var newPage;
+var keyPhrases;
 (function(){
     var timeLeft;
     var startTime;
@@ -25,13 +26,18 @@ var newPage;
     var updateTimeLineInterval = -1;
     var timeCurrentInterval = -1;
 
+    //for setup key presses
+    keyPhrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],
+                    ["VIP",VIP,1],
+                    ["CHANGE",change],
+                    ["TEMP",tempVIP]];
+
     timeLineInit = function(container,background) {
         var top = "<div id='axisTop'>";
         var bot = "<div id='axisBot'>";
         for (var i = 0 ; i < 6 ; i++) {
             top += "<div class='axisPart top'></div>";
             bot += "<div class='axisPart bot'></div>";
-
         }
         top += "</div>";
         bot += "</div>";
@@ -243,4 +249,50 @@ var newPage;
         var secs = Math.ceil(milli/1000);
         return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
     }
+
+    function resetTimeLine() {
+        sendRequest("resetTime");
+    }
+
+    function VIP() {
+        sendRequest("VIP");
+    }
+
+    function change() {
+        sendRequest("change",currentTimePiece);
+    }
+
+    function tempVIP() {
+        sendRequest("temp");
+    }
+
+    //send requests to background
+    function sendRequest(action,input) {
+        chrome.runtime.sendMessage({
+            from: "browserAction",
+            action: action,
+            input: input
+        });
+    }
+
+    //get from background to display
+    chrome.runtime.onMessage.addListener(function(a, b, c) {
+        if (a.from === "background") {
+            switch(a.action) {
+                case "timer":
+                    countDown(a.input);
+                    break;
+                case "change":
+                    var input = a.input;
+                    changeTimeLine(input[0],input[1]);
+                    break;
+                case "reset":
+                    restartTimeLine(background);
+                    break;
+                case "newPage":
+                    newPage(background.startTime,background.wastingTime);
+                    break;
+            }
+        }
+    });
 })();
