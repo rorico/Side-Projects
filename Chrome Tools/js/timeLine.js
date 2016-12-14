@@ -8,7 +8,6 @@ var changeTimeLine;
 var restartTimeLine;
 var newPage;
 (function(){
-    var background;
     var timeLeft;
     var startTime;
     var wastingTime;
@@ -51,10 +50,10 @@ var newPage;
         }
         displayInfo(-1);
         updateTimeLine();
-    }
+    };
 
     //may want to combine with start later
-    restartTimeLine = function() {
+    restartTimeLine = function(background) {
         clearInterval(updateTimeLineInterval);
         clearInterval(timeCurrentInterval);
 
@@ -77,7 +76,7 @@ var newPage;
         addTimeLine(-2,false);
         displayInfo(-1);
         updateTimeLine();
-    }
+    };
 
     //returns true if not done
     addTimeLine = function(index,first,time,wastingTime) {
@@ -122,7 +121,7 @@ var newPage;
             setClick(timeLineEntry,index);
         }
         return ret;
-    }
+    };
 
     function getTimeLineId(index) {
         return (index === -2 ? "timeLineP" : "timeLine" + (index - timeLineOffset));
@@ -158,7 +157,7 @@ var newPage;
 
     changeTimeLine = function(index,prev) {
         $("#" + getTimeLineId(index)).removeClass("wasting" + prev).addClass("wasting0");
-    }
+    };
 
     newPage = function(start,newWasting) {
         $("#" + getTimeLineId(-1)).removeClass("wasting" + wastingTime).addClass("wasting0");
@@ -166,7 +165,7 @@ var newPage;
         wastingTime = newWasting;
         timeLineOffset++;
         addTimeLine(-1,true,new Date() - start,newWasting);
-    }
+    };
 
     countDown = function(timeLeft) {
         if (wastingTime) {
@@ -177,7 +176,7 @@ var newPage;
         }
         clearTimeout(countDownTimer);
         countDownFunction(timeLeft);
-    }
+    };
 
     //not exactly accurate, not too important
     function countDownFunction(time) {

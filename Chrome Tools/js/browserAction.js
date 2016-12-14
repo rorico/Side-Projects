@@ -327,7 +327,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     changeTimeLine(input[0],input[1]);
                     break;
                 case "reset":
-                    restartTimeLine();
+                    restartTimeLine(background);
                     break;
                 case "newPage":
                     newPage(background.startTime,background.wastingTime);
