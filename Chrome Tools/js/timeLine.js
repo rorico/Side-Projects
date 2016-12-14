@@ -198,7 +198,7 @@ var keyPhrases;
 
     //not exactly accurate, not too important
     function countDownFunction(time) {
-        $("#timeLeft").html(MinutesSecondsFormat(time));
+        $("#timeLeft").html(MinutesSecondsFormat(time,false));
         if (wastingTime && time>0) {
             var delay = (time-1)%1000+1;
             countDownTimer = setTimeout(function() {
@@ -230,7 +230,7 @@ var keyPhrases;
     }
 
     function formatInfo(url,time,title) {
-        return shorten(title," ",50) + "<br />" + shorten(url,"/",50) + "<br />Time spent:" + MinutesSecondsFormat(time);
+        return shorten(title," ",50) + "<br />" + shorten(url,"/",50) + "<br />Time spent:" + MinutesSecondsFormat(time,true);
     }
 
     function shorten(info,delim,limit) {
@@ -245,8 +245,8 @@ var keyPhrases;
         return info;
     }
 
-    function MinutesSecondsFormat(milli) {
-        var secs = Math.ceil(milli/1000);
+    function MinutesSecondsFormat(milli,up) {
+        var secs = up ? Math.floor(milli/1000) : Math.ceil(milli/1000);
         return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
     }
 
