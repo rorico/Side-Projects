@@ -162,7 +162,7 @@ var keyPhrases;
         var info = "";
         if (i === -1) {
             timeCurrent = new Date() - startTime;
-            var delay = 1 - (timeCurrent%1);
+            var delay = 1000 - (timeCurrent%1000);
             timeCurrentInterval = setTimeout(function() {
                 displayInfo(i);
             },delay);
