@@ -12,38 +12,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             showRinging(i);
         }
     }
-    var timeLeft = background.timeLeft;
-    var startTime = background.startTime;
-    var wastingTime = background.wastingTime;
-    var url = background.url;
-    var title = background.title;
-    var timeCurrent = new Date() - startTime;
-    var countDownTimer = -1;
-    countDown(timeLeft);
 
-    $("#info").html(formatInfo(url,timeCurrent,title));
-    var timeLine = background.timeLine;
-    var timeLineLength = background.timeLineLength;
-    var parentWidth = 360;      //keep unchanged
-    var timeLineLeft = parentWidth;
-    var offset = 0;
-    var timeLineOffset = 0;
-    var currentTimePiece = -1;
-    var updateTimeLineInterval = -1;
-    var timeCurrentInterval = -1;
-
-    if (addTimeLine(-1,false,timeCurrent,wastingTime)) {
-        for (var i = 0; i < timeLine.length ; i++) {
-            if (!addTimeLine(i,false,timeLine[i][0],timeLine[i][1])) {
-                break;
-            }
-        }
-        //fill in rest
-        addTimeLine(-2,false);
-    }
-    displayInfo(-1);
-    updateTimeLine();
-
+    timeLineInit("test",background);
     var logs = background.allLogs;
     var numUnread = background.numUnread;
     alertLogs();
@@ -55,173 +25,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     setTimeout(function() {
         window.close();
     },60000);//1 minute
-
-    //may want to combine with start later
-    function restartTimeLine() {
-        clearInterval(updateTimeLineInterval);
-        clearInterval(timeCurrentInterval);
-
-        //these values will probably be update from background when called
-        timeLeft = background.timeLeft;
-        startTime = background.startTime;
-        wastingTime = background.wastingTime;
-        url = background.url;
-        title = background.title;
-
-        //reset these to starting
-        timeCurrent = new Date() - startTime;
-        $("#info").html(formatInfo(url,timeCurrent,title));
-        timeLineLeft = parentWidth;
-        currentTimePiece = -1;
-        offset = 0;
-
-        $("#timeLine").empty();
-        addTimeLine(-1,false,timeCurrent,wastingTime);
-        addTimeLine(-2,false);
-        displayInfo(-1);
-        updateTimeLine();
-    }
-
-    //returns true if not done
-    function addTimeLine(index,first,time,wastingTime) {
-        var width = 0;
-        if (index === -2) {
-            width = timeLineLeft;
-        } else {
-            width = time/timeLineLength * parentWidth + offset;
-        }
-        offset = width % 1;
-        width = Math.floor(width);
-        //if smaller than 1px, don't bother adding, unless at very start or end (these will change size)
-        if (width < 1 && index !== -1) {
-            offset += width;
-            return true;
-        }
-        var ret = true;
-        if (width >= timeLineLeft) {
-            width = timeLineLeft;
-            timeLineLeft = 0;
-            ret = false;
-        } else {
-            timeLineLeft -= width;
-        }
-
-        var classes = "timeLine";
-        if (index !== -2) {
-            classes += " wasting" + wastingTime;
-            if (width >= 3) {
-                classes += " timeLineBlock";
-            }
-        }
-
-        var timeLineEntry = $("<div style='width:" + width + "px;' class='" + classes + "' id='" + getTimeLineId(index) + "'></div>");
-        if (first) {
-            $("#timeLine").append(timeLineEntry);
-        } else {
-            $("#timeLine").prepend(timeLineEntry);
-        }
-
-        if (index !== -2) {
-            setClick(timeLineEntry,index);
-        }
-        return ret;
-    }
-
-    function getTimeLineId(index) {
-        return (index === -2 ? "timeLineP" : "timeLine" + (index - timeLineOffset));
-    }
-
-    function setClick(ele,i) {
-        ele.click(function() {
-            currentTimePiece = i + timeLineOffset;
-            displayInfo(currentTimePiece);
-        });
-        ele.hover(function() {
-            displayInfo(i + timeLineOffset);
-        },function() {
-            displayInfo(currentTimePiece);
-        });
-    }
-
-    function displayInfo(i) {
-        clearTimeout(timeCurrentInterval);
-        var info = "";
-        if (i === -1) {
-            timeCurrent = new Date() - startTime;
-            var delay = 1 - (timeCurrent%1);
-            timeCurrentInterval = setTimeout(function() {
-                displayInfo(i);
-            },delay);
-            info = formatInfo(url,timeCurrent,title);
-        } else {
-            info = formatInfo(timeLine[i][2],timeLine[i][0],timeLine[i][3]);
-        }
-        $("#info").html(info);
-    }
-
-    function countDown(timeLeft) {
-        if (wastingTime) {
-            timeLeft -= new Date() - startTime;
-        }
-        if (timeLeft < 0) {
-            timeLeft = 0;
-        }
-        countDownFunction(timeLeft);
-    }
-
-    //not exactly accurate, not too important
-    function countDownFunction(time) {
-        $("#timeLeft").html(MinutesSecondsFormat(time));
-        if (wastingTime && time>0) {
-            var delay = (time-1)%1000+1;
-            countDownTimer = setTimeout(function() {
-                countDownFunction(time - delay);
-            },delay);
-        }
-    }
-
-    function updateTimeLine() {
-        var delay = timeLineLength/parentWidth;
-        updateTimeLineInterval = setInterval(function() {
-            var newEle = $("#timeLine div:last-child");
-            newEle.width(newEle.width() + 1);
-            if (!newEle.hasClass("timeLineBlock") && newEle.width() >= 3) {
-                newEle.addClass("timeLineBlock");
-            }
-            var oldestEle = $("#timeLine div:first-child");
-            //oldest has 0 width, remove
-            while(oldestEle.width() <= 0) {
-                oldestEle.remove();
-                oldestEle = $("#timeLine div:first-child");
-            }
-            oldestEle.width(oldestEle.width() - 1);
-            if (oldestEle.hasClass("timeLineBlock") && oldestEle.width() < 3) {
-                oldestEle.removeClass("timeLineBlock");
-            }
-        },delay);
-    }
-
-    function formatInfo(url,time,title) {
-        return shorten(title," ",50) + "<br />" + shorten(url,"/",50) + "<br />Time spent:" + MinutesSecondsFormat(time);
-    }
-
-    function shorten(info,delim,limit) {
-        if (info.length > limit) { //show be about a line (400px)
-            var index = 0;
-            do {
-                index = info.lastIndexOf(delim);
-                info = info.substring(0,index);
-            } while(index > limit);
-            info += delim + "...";
-        }
-        return info;
-    }
-    
-
-    function MinutesSecondsFormat(milli) {
-        var secs = Math.ceil(milli/1000);
-        return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
-    }
 
     function alertLogs() {
         if (numUnread) {
@@ -241,7 +44,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 allLogEle.append(logEle);
             }
         }
-        var logHolder = $("#logHolder")
+        var logHolder = $("#logHolder");
         logHolder.html(allLogEle);
         //20 is 2 * margin
         logHolder.outerWidth($("body").width() - 20);
@@ -517,22 +320,17 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     showRinging(a.input);
                     break;
                 case "timer":
-                    clearTimeout(countDownTimer);
                     countDown(a.input);
                     break;
                 case "change":
                     var input = a.input;
-                    $("#" + getTimeLineId(input[0])).removeClass("wasting" + input[1]).addClass("wasting0");
+                    changeTimeLine(input[0],input[1]);
                     break;
                 case "reset":
                     restartTimeLine();
                     break;
                 case "newPage":
-                    $("#" + getTimeLineId(-1)).removeClass("wasting" + wastingTime).addClass("wasting0");
-                    startTime = background.startTime;
-                    wastingTime = background.wastingTime;
-                    timeLineOffset++;
-                    addTimeLine(-1,true,new Date() - startTime,wastingTime);
+                    newPage(background.startTime,background.wastingTime);
                     break;
             }
         }
