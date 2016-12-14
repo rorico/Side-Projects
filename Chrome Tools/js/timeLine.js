@@ -211,7 +211,8 @@ var newPage;
             }
             var oldestEle = $("#timeLine div:first-child");
             //oldest has 0 width, remove
-            while(oldestEle.width() <= 0) {
+            //note if div has no children (ie removed), need length check, or will run into infinite loop
+            while(oldestEle.length && oldestEle.width() <= 0) {
                 oldestEle.remove();
                 oldestEle = $("#timeLine div:first-child");
             }
