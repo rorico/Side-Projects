@@ -26,6 +26,18 @@ var newPage;
     var timeCurrentInterval = -1;
 
     timeLineInit = function(container,background) {
+        var top = "<div id='axisTop'>";
+        var bot = "<div id='axisBot'>";
+        for (var i = 0 ; i < 6 ; i++) {
+            top += "<div class='axisPart top'></div>";
+            bot += "<div class='axisPart bot'></div>";
+
+        }
+        top += "</div>";
+        bot += "</div>";
+        var html = "<div id='chromeTools_timeLine'><div id='timeLeft'></div><div id='timeLineHolder'>" + top + "<div id='timeLine'></div>" + bot + "</div><div id='info'></div></div>";
+        container.html(html);
+
         timeLeft = background.timeLeft;
         startTime = background.startTime;
         wastingTime = background.wastingTime;

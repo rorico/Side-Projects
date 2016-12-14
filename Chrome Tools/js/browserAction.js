@@ -13,7 +13,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
     }
 
-    timeLineInit("test",background);
+    timeLineInit($("#timeLineH"),background);
     var logs = background.allLogs;
     var numUnread = background.numUnread;
     alertLogs();
