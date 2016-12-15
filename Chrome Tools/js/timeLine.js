@@ -33,6 +33,9 @@ var keyPhrases;
                     ["TEMP",tempVIP]];
 
     timeLineInit = function(container,background) {
+        var maxWidth = container.width() - 30;
+        parentWidth = Math.floor(maxWidth / 60) * 60;
+
         var top = "<div id='axisTop'>";
         var bot = "<div id='axisBot'>";
         for (var i = 0 ; i < 6 ; i++) {
@@ -43,6 +46,9 @@ var keyPhrases;
         bot += "</div>";
         var html = "<div id='chromeTools_timeLine'><div id='timeLeft'></div><div id='timeLineHolder'>" + top + "<div id='timeLine'></div>" + bot + "</div><div id='info'></div></div>";
         container.html(html);
+
+        $(".axisPart").outerWidth(parentWidth/6);
+
 
         timeLeft = background.timeLeft;
         startTime = background.startTime;
@@ -75,6 +81,10 @@ var keyPhrases;
         }
         displayInfo(-1);
         updateTimeLine();
+
+        //after things are added in, vertically center
+        var topOffset = (container.innerHeight() - $("#chromeTools_timeLine").outerHeight())/2;
+        $("#chromeTools_timeLine").css("top",topOffset);
     };
 
     //may want to combine with start later
