@@ -4,6 +4,9 @@ var today;
 setScheduleInfo();
 function setScheduleInfo() {
     chrome.storage.sync.get("scheduleInfo", function(items) {
+        if (chrome.runtime.lastError) {
+            log(chrome.runtime.lastError);
+        }
         if (items.scheduleInfo) {
             scheduleInfo = items.scheduleInfo;
             today = todaySchedule(date);

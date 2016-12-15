@@ -370,7 +370,6 @@ var sendContent;
 
         //sets a reminder when timeLeft reaches 0, and blocks site
         setReminder = function(time,countDown,blockType) {
-            console.log(tabId,blockedTab, time);
             if (tabId !== blockedTab || time > 0) {
                 clearTimeout(alarm);
                 unblockSite();
@@ -429,6 +428,10 @@ var sendContent;
 
         function storeRedirect(url) {
             chrome.storage.sync.get("redirects", function(items) {
+                if (chrome.runtime.lastError) {
+                    log(chrome.runtime.lastError);
+                    return;
+                }
                 var redirects = items.redirects;
                 if (!redirects) {
                     redirects = [];
@@ -447,13 +450,22 @@ var sendContent;
                     moveRedirect(redirects,url);
                 } else {
                     redirects.push(newEntry);
-                    chrome.storage.sync.set({"redirects": redirects});
+                    chrome.storage.sync.set({"redirects": redirects}, function() {
+                        if (chrome.runtime.lastError) {
+                            log(chrome.runtime.lastError);
+                            return;
+                        }
+                    });
                 }
             });
         }
 
         function moveRedirect(redirects,url) {
             chrome.storage.sync.get("redirectIndexes", function(items) {
+                if (chrome.runtime.lastError) {
+                    log(chrome.runtime.lastError);
+                    return;
+                }
                 var redirectIndexes = items.redirectIndexes;
                 if (!redirectIndexes) {
                     redirectIndexes = [];
@@ -462,7 +474,12 @@ var sendContent;
                 redirectIndexes.push(redirectName);
                 var setObj = {redirectIndexes:redirectIndexes,redirects:[]};
                 setObj[redirectName] = redirects;
-                chrome.storage.sync.set(setObj);
+                chrome.storage.sync.set(setObj, function() {
+                    if (chrome.runtime.lastError) {
+                        log(chrome.runtime.lastError);
+                        return;
+                    }
+                });
                 storeRedirect(url);
             });
         }
