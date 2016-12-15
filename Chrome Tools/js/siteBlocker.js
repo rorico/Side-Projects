@@ -48,6 +48,7 @@ var setupClass;
     var blockSite;
     var unblockSite;
     var addContentScripts;
+    var setReminder;
 
     //set-up first time when opened
     startTimeLine();
@@ -185,7 +186,6 @@ var setupClass;
 
     function handleNewPage(newUrl,newTitle) {
         //handle previous page
-        unblockSite();
         var newWasting = matchesURL(newUrl);
         var timeSpent = new Date() - startTime;
         //if small time spent on wasting, don't count
@@ -245,7 +245,6 @@ var setupClass;
 
     //shows effective timeLeft from this moment on
     var timeLeftOutput = (function() {
-        var alarm = -1;
         var displayTimer = -1;
         var displayTimeStarter = -1;
         return timeLeftOutput;
@@ -323,20 +322,6 @@ var setupClass;
                 return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
             }
         }
-
-        //sets a reminder when timeLeft reaches 0, and blocks site
-        function setReminder(time,countDown,blockType) {
-            clearTimeout(alarm);
-            unblockSite();
-            if (countDown && wastingTime === 1) {
-                if (time < tolerance) {
-                    time = tolerance;
-                }
-                alarm = setTimeout(function() {
-                    blockSite(tabId,blockType);
-                },time);
-            }
-        }
     })();
 
     (function() {
@@ -379,6 +364,23 @@ var setupClass;
                 }
             });
         }
+
+        //sets a reminder when timeLeft reaches 0, and blocks site
+        setReminder = function(time,countDown,blockType) {
+            console.log(tabId,blockedTab, time);
+            if (tabId !== blockedTab || time > 0) {
+                clearTimeout(alarm);
+                unblockSite();
+                if (countDown && wastingTime === 1) {
+                    if (time < tolerance) {
+                        time = tolerance;
+                    }
+                    alarm = setTimeout(function() {
+                        blockSite(tabId,blockType);
+                    },time);
+                }
+            }
+        };
 
         blockSite = function(tab,type) {
             //all changes in tabs should be caught, but in case, check
