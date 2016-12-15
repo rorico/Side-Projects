@@ -34,7 +34,7 @@ var scheduleInit = (function() {
         }
         mid += "<div class='half'></div><div class='bottom'></div></div>";
 
-        var contain = "<div id='container'><div id='currentDay' class='day'></div></div>";
+        var contain = "<div id='container'></div>";
         var holder = "<div id='holder'>" + side + mid + right1 + right2 + contain + "</div>";
 
         var html = "<div id='chromeTools_calendar'>" + header + holder + "</div>";
@@ -77,7 +77,7 @@ var scheduleInit = (function() {
     }
 
     function changeDate(date) { //single day
-        showSchedule("#currentDay",[+date]);
+        showSchedule([+date]);
     }
 
     function showWeek(date) {
@@ -88,13 +88,13 @@ var scheduleInit = (function() {
             dates.push(+date);
             date.setDate(date.getDate() + 1);
         }
-        showSchedule("#container", dates);
+        showSchedule(dates);
     }
 
     var showSchedule = (function() {
         var offset = 0;
         return showSchedule;
-        function showSchedule(container,dates) {
+        function showSchedule(dates) {
             weekSchedule(dates,function(info) {     //function set outside
                 var all = $("<div></div>");
                 now = new Date();
@@ -133,7 +133,7 @@ var scheduleInit = (function() {
                     }
                     all.append(holder).append("<div id='side'></div>");
                 }
-                $(container).html(all);
+                $("#container").html(all);
                 if (weekMode) {
                     var width = Math.floor(($("#chromeTools_calendar").width() - 100) / dates.length);
                     $(".class").outerWidth(width);
@@ -208,6 +208,7 @@ var scheduleInit = (function() {
     function weekView() {
         var date = $("#datepicker").datepicker("getDate");
         weekMode = !weekMode;
+        console.log(weekMode);
         if (weekMode) {
             $("#showWeek").val("Show Day");
             showWeek(date);
