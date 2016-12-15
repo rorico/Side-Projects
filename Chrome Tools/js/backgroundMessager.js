@@ -53,10 +53,16 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
 });
 
 //for displaying in an open browser action
-function sendRequest(action,input) {
-    chrome.runtime.sendMessage({
+function sendRequest(action,input,content) {
+    var data = {
         from: "background",
         action: action,
         input: input
-    });
+    }
+
+    chrome.runtime.sendMessage(data);
+    //if send to content scripts
+    if (content) {
+        sendContent(data);
+    }
 }

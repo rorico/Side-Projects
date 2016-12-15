@@ -59,7 +59,7 @@ var keyPhrases;
         timeLineOffset = 0;
         clearInterval(updateTimeLineInterval);
         clearInterval(timeCurrentInterval);
-        
+
         $("#info").html(formatInfo(url,timeCurrent,title));
         timeLine = background.timeLine;
         timeLineLength = background.timeLineLength;
@@ -294,10 +294,11 @@ var keyPhrases;
                     changeTimeLine(input[0],input[1]);
                     break;
                 case "reset":
-                    restartTimeLine(background);
+                    restartTimeLine(a.input);
                     break;
                 case "newPage":
-                    newPage(background.startTime,background.wastingTime);
+                    var input = a.input;
+                    newPage(input.startTime,input.wastingTime);
                     break;
             }
         }

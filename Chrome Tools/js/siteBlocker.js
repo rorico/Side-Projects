@@ -14,6 +14,8 @@ var resetTime;
 var tempVIP;
 var setupClass;
 
+var sendContent;
+
 (function(){
     var tabId = -2;
     var windowId = -3;
@@ -224,7 +226,7 @@ var setupClass;
             timeLine.splice(load[0],load[1]);
         } else if (action === "change") {
             if (load < timeLine.length || load < 0) {
-                sendRequest("change",[load,timeLine[load][1]]);
+                sendRequest("change",[load,timeLine[load][1]],1);
                 if (timeLine[load][1]) {
                     timeLine[load][1] = 0;
                     changeTimeLeft(timeLine[load][0]);
@@ -251,7 +253,7 @@ var setupClass;
         //ideally, shows lowest timeLeft at all points
         function timeLeftOutput() {
             //have the option to update browserAction every time, but accuracy isn't completely needed
-            sendRequest("timer",timeLeft);
+            sendRequest("timer",timeLeft,1);
             var time = timeLeft - (wastingTime ? new Date() - startTime : 0);
             var endTime = 0;
             var countDown = wastingTime;
@@ -325,6 +327,7 @@ var setupClass;
     })();
 
     (function() {
+        var alarm = -1;
         var blockedTab = -2;
         var blocked = false; //hold whether the tab should currently be blocked
         var blockType;
@@ -404,20 +407,25 @@ var setupClass;
                 }
 
                 storeRedirect(thisUrl);
-                chrome.tabs.sendMessage(blockedTab,{action:"block",type:type,info:info});
+                sendContent({action:"block",info:info,type:type});
             } else {
                 log("uncaught change in tabId");
             }
         };
 
-
         unblockSite = function() {
             if (blockedTab !== -2) {
-                chrome.tabs.sendMessage(blockedTab,{action:"unblock"});
+                sendContent({action:"unblock"});
                 blockedTab = -2;
                 blocked = false;
             }
         };
+
+        sendContent = function(data) {
+            if (blockedTab !== -2) {
+                chrome.tabs.sendMessage(blockedTab,data);
+            }
+        }
 
         function storeRedirect(url) {
             chrome.storage.sync.get("redirects", function(items) {
@@ -518,7 +526,15 @@ var setupClass;
         timeLeft = startingTimeLeft;
         timeLine = [];
         startTimeLine();
-        sendRequest("reset");
+
+        var info = {
+            timeLeft:timeLeft,
+            startTime:+startTime,
+            wastingTime:wastingTime,
+            url:url,
+            title:title
+        }
+        sendRequest("reset",info,1);
     };
 
     function makeCurrentTabVIP() {
@@ -548,7 +564,11 @@ var setupClass;
             wastingTime = 0;
             handleNewPage(url,title);
             //to browserAction, assume only way to get newPage while its open
-            sendRequest("newPage");
+            var info = {
+                startTime:+startTime,
+                wastingTime:wastingTime
+            }
+            sendRequest("newPage",info,1);
         } else {
             modifyTimeLine("change",timeLineIndex);
         }

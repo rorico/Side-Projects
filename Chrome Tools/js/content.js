@@ -19,7 +19,6 @@ function weekSchedule(dates,callback) {
 }
 
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
-	console.log(a,b,c);
     if (a.action === "block") {
         block(a.type,a.info);
     } else if (a.action === "unblock") {
