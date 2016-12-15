@@ -1,0 +1,1 @@
+var weekSchedule;chrome.runtime.getBackgroundPage(function(e){weekSchedule=function(c,u){u(e.weekSchedule(c))},scheduleInit($("body"))});
