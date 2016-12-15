@@ -153,20 +153,17 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function showAlarm(date,alarmNumber,type) {
         var time = date.toLocaleTimeString();
-        $("#alarmText"+(alarmNumber+1)).html("Alarm at "+time);
-        $("#alarm"+(alarmNumber+1)).removeClass("notSet");
-        $("#alarm"+(alarmNumber+1)).css({"color":typeColors[type],"border-color":typeColors[type]});
-        $("#alarm"+(alarmNumber+1)).bind("click",function() {
-            removeAlarm(alarmNumber);
+        var alarm = alarmNumber + 1;
+        $("#alarmText" + alarm).html("Alarm at "+time);
+        $("#alarm" + alarm).removeClass("notSet").css({"color":typeColors[type],"border-color":typeColors[type]}).bind("click",function() {
+            removeAlarm(alarm);
         });
     }
 
     function showRemove(alarmNumber,type) {
-        $("#alarmText"+(alarmNumber+1)).html("Not Set");
-        $("#alarm"+(alarmNumber+1)).addClass("notSet");
-        $("#alarm"+(alarmNumber+1)).unbind("click");
-        $("#alarm"+(alarmNumber+1)).css({"color":defaultColor,"border-color":defaultColor});
-        $("#alarmText"+(alarmNumber+1)).css("visibility","visible");
+        var alarm = alarmNumber + 1;
+        $("#alarmText" + alarm).html("Not Set");
+        $("#alarm" + alarm).addClass("notSet").unbind("click").css({"color":defaultColor,"border-color":defaultColor,"visibility":"visible"});
         clearInterval(ringingAlarms[alarmNumber]);
     }
 
