@@ -160,14 +160,14 @@ exports.addPlayer = (function(){
     }
 
     function startNewGame() {
-        var newHands = newGame();
-        sendNewGame(newHands);
+        newGame();
+        sendNewGame();
         if (!human[nextPlayer]) {
             nextPlayTimer = setTimeout(playCard,speed);
         }
     }
 
-    function sendNewGame(hands) {
+    function sendNewGame() {
         var data = getAllInfo();
         data.type = "newGame";
         for (var i = 0 ; i < activePlayers.length ; i++) {
@@ -496,7 +496,6 @@ function newGame() {
         cardsleft -= handLength;
     }
     cardsPlayed = [];
-    return hands;
 }
 
 //shuffle deck
