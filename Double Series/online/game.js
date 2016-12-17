@@ -29,6 +29,10 @@ var gameEnd;
 var winner;
 var winningPlayer = -1;
 
+var listeners = {
+    "onNewGame":[],
+    "onPlay":[]
+}
 
 //start
 createDeck();
@@ -132,6 +136,17 @@ exports.addPlayer = (function(){
     }
 
     function sendPlay(data) {
+        //send to AIs
+        var playL = listeners.onPlay;
+        for (var i = 0 ; i < playL.length ; i++) {
+            try {
+                playL[i](data);
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        //send to players
         //copy to not affect outside function
         var send = copyObject(data.all);
         var player = send.player;
@@ -216,6 +231,13 @@ function getAI(AIname) {
         if (AI.setup) {
             AI.setup(board.getInfo());
         }
+        for (prop in listeners) {
+            //note doesn't remove old listeners, may want to implement if can replace AIs
+            if (typeof AI[prop] === "function") {
+                listeners[prop].push(AI[prop]);
+            }
+        }
+
         return AI;
     } catch (err) {
         console.log(err);
@@ -496,6 +518,15 @@ function newGame() {
         cardsleft -= handLength;
     }
     cardsPlayed = [];
+
+    var gameL = listeners.onNewGame;
+    for (var i = 0 ; i < gameL.length ; i++) {
+        try {
+            gameL[i]();
+        } catch (err) {
+            console.log(err);
+        }
+    }
 }
 
 //shuffle deck
