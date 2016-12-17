@@ -137,10 +137,11 @@ exports.addPlayer = (function(){
 
     function sendPlay(data) {
         //send to AIs
+        //do not need to send newCard
         var playL = listeners.onPlay;
         for (var i = 0 ; i < playL.length ; i++) {
             try {
-                playL[i](data);
+                playL[i](data.all);
             } catch (err) {
                 console.log(err);
             }
