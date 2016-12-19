@@ -380,6 +380,9 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
         if (card !== -1) {
             return false;
         }
+        if (helper.outOfBounds(x,y)) {
+            return false;
+        }
         if (board.points[x][y] !== 4 - team) {
             return false;
         }
@@ -395,6 +398,9 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
             var slope = [-1,-1];
             for (var j  = 0 ; j < line.length ; j++) {
                 var point = line[j];
+                if (helper.outOfBounds(point[0],point[1])) {
+                    return false;
+                }
                 if (x===point[0] && y===point[1]) {
                     hasPoint = true;
                 } else if (board.points[point[0]][point[1]] !== team) {
@@ -421,8 +427,14 @@ function checkValidPlay(player,action,cardIndex,x,y,team,finishedLines) {
         }
         //fall through and also check add
     case constants.PLAY_ADD: //add
+        if (helper.outOfBounds(x,y)) {
+            return false;
+        }
+        if (board.points[x][y] !== 0) {
+            return false;
+        }
         if (card !== 0) {
-            if (board.points[x][y] !== 0) {
+            if (board.board[x][y] !== card) {
                 return false;
             }
         }

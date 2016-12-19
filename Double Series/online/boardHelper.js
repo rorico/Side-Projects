@@ -8,6 +8,7 @@ if (typeof module === "object" && module && typeof module.exports === "object") 
     exports.checker = checker;
     exports.cardOptions = cardOptions;
     exports.getTeam = getTeam;
+    exports.outOfBounds = outOfBounds;
 }
 
 //array of options that player can play
