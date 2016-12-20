@@ -187,7 +187,7 @@ exports.addPlayer = (function(){
         var data = getAllInfo();
         data.type = "newGame";
         for (var i = 0 ; i < activePlayers.length ; i++) {
-            data.hand = hands[i];
+            data.hand = hands[activePlayers[i].player];
             var info = JSON.stringify(data);
             activePlayers[i].conn.sendUTF(info);
         }
