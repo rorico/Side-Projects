@@ -47,7 +47,6 @@ exports.addPlayer = (function(){
     return addPlayer;
     function addPlayer(connection) {
         var player = getOpenPlayerSlot();
-        console.log(player);
         if (player !== -1) {
             var sendData = function(info) {
                 connection.sendUTF(info);
@@ -67,21 +66,19 @@ exports.addPlayer = (function(){
 
             connection.sendUTF(JSON.stringify(gameInfo));
 
-            connection.on('message', function(message) {
-                if (message.type === 'utf8') {
+            connection.on("message", function(message) {
+                if (message.type === "utf8") {
                     var query = JSON.parse(message.utf8Data);
                     var type = query ? query.type : "";
                     switch(type) {
                     case "play":
                         playCard(query.player,query.result);
                         break;
-                    default:
-                        break;
                     }
                 }
             });
 
-            connection.on('close', function(connection) {
+            connection.on("close", function(connection) {
                 removePlayer(player);
             });
 
@@ -97,7 +94,6 @@ exports.addPlayer = (function(){
 
     function getOpenPlayerSlot() {
         for (var player = 0 ; player < players.length ; player++) {
-        console.log(players[player]);
             if (!players[player].human) {
                 return player;
             }
@@ -239,7 +235,6 @@ function setAI(playerList,AIname) {
 function play(player,play) {
     if (player === undefined) {
         player = nextPlayer;
-        console.log(players[player],player,players);
         if (players[player].human) {
             console.log("should be human playing, not AI");
             play = {};
@@ -309,9 +304,9 @@ function processTurn(player,play) {
             checkGameDone();
         }
 
-        ret.status = 1; //this may be overriten later
-        
-        var all = play;   //used to tell everyone what happened this turn
+        ret.status = 1;     //this may be overriten later
+
+        var all = play;     //used to tell everyone what happened this turn
         ret.all = all;
         all.player = player;
         all.cardPlayed = hands[player][card];
@@ -533,18 +528,18 @@ function newGame() {
 //shuffle deck
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex ;
-  
+
     // While there remain elements to shuffle...
     while (currentIndex) {
-      // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-  
-      // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
     }
-  
+
     return array;
 }
