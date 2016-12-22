@@ -39,6 +39,22 @@ helper.setUp(board.getInfo());
 newGame();
 
 exports.setAI = setAI;
+exports.setSettings = function(obj) {
+    for (var setting in obj) {
+        var val = obj[setting];
+        switch (setting) {
+            case "maxGame":
+                maxGame = val;
+                break;
+            case "speed":
+                speed = val;
+                break;
+            case "checkValid":
+                checkValid = val;
+                break;
+        }
+    }
+}
 
 //this iife generally controls the flow of the game
 exports.addPlayer = (function(){
