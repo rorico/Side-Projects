@@ -5,10 +5,8 @@ const board = require("./board");
 //settings
 var maxGame = 1000;
 var speed = 500;
-var human = [false,false,false,false];
 var checkValid = true;
-var playerAIs = [];
-var defaultAI;
+var defaultAI = "playBest";
 
 //game parts
 var deck = [];
@@ -29,30 +27,38 @@ var gameEnd;
 var winner;
 var winningPlayer = -1;
 
-var listeners = {
-    "onNewGame":[],
-    "onPlay":[]
-}
+var players = [];
+
 
 //start
 createDeck();
+initializeDefaultAI();
+
 helper.setUp(board.getInfo());
-//defaultAI = getAI("playRandom");
-defaultAI = getAI("playBest");
+
 newGame();
 
 exports.setAI = setAI;
 
 //this iife generally controls the flow of the game
 exports.addPlayer = (function(){
-    var activePlayers = [];
+    var activePlayers = 0;
     var nextPlayTimer = -1;
     return addPlayer;
     function addPlayer(connection) {
         var player = getOpenPlayerSlot();
+        console.log(player);
         if (player !== -1) {
-            activePlayers.push({player:player,conn:connection});
-            human[player] = true;
+            var sendData = function(info) {
+                connection.sendUTF(info);
+            };
+
+            players[player] = {
+                human:true,
+                onNewGame:sendData,
+                onPlay:sendData,
+                onEndGame:sendData
+            };
 
             var gameInfo = getAllInfo();
             gameInfo.type = "start";
@@ -79,9 +85,10 @@ exports.addPlayer = (function(){
                 removePlayer(player);
             });
 
+            activePlayers++;
             if (player === nextPlayer) {
                 clearTimeout(nextPlayTimer);
-            } else if (activePlayers.length === 1) {
+            } else if (activePlayers === 1) {
                 //this means this is only player
                 nextPlayTimer = setTimeout(playCard,speed);
             }
@@ -89,23 +96,22 @@ exports.addPlayer = (function(){
     }
 
     function getOpenPlayerSlot() {
-        for (var i = 0 ; i < human.length ; i++) {
-            if (!human[i]) {
-                return i;
+        for (var player = 0 ; player < players.length ; player++) {
+        console.log(players[player]);
+            if (!players[player].human) {
+                return player;
             }
         }
         return -1;
     }
 
     function removePlayer(player) {
-        human[player] = false;
-        for (var i = 0 ; i < activePlayers.length ; i++) {
-            if (activePlayers[i].player === player) {
-                activePlayers.splice(i,1);
-                break;
-            }
+        if (players[player].human) {
+            setAI([player],defaultAI);
         }
-        if (activePlayers.length) {
+        activePlayers--;
+
+        if (activePlayers) {
             if (nextPlayer === player) {
                 nextPlayTimer = setTimeout(playCard,speed * 10);
             }
@@ -136,21 +142,8 @@ exports.addPlayer = (function(){
     }
 
     function sendPlay(data) {
-        //send to AIs
-        //do not need to send newCard
-        var playL = listeners.onPlay;
-        for (var i = 0 ; i < playL.length ; i++) {
-            try {
-                playL[i](data.all);
-            } catch (err) {
-                console.log(err);
-            }
-        }
-
-        //send to players
         //copy to not affect outside function
         var send = copyObject(data.all);
-        var player = send.player;
         var newCard = data.newCard;
 
         send.type = "play";
@@ -158,11 +151,10 @@ exports.addPlayer = (function(){
 
         send.newCard = newCard;
         var prevPlayerInfo = JSON.stringify(send);
-        for (var i = 0 ; i < activePlayers.length ; i++) {
-            if (activePlayers[i].player === player) {
-                activePlayers[i].conn.sendUTF(prevPlayerInfo);
-            } else {
-                activePlayers[i].conn.sendUTF(info);
+        for (var player = 0 ; player < players.length ; player++) {
+            var onPlay = players[player].onPlay;
+            if (onPlay) {
+                onPlay(player === send.player ? prevPlayerInfo : info);
             }
         }
     }
@@ -170,15 +162,17 @@ exports.addPlayer = (function(){
     function sendEnd(winner) {
         var data = {type:"end",winner:winner};
         var info = JSON.stringify(data);
-        for (var i = 0 ; i < activePlayers.length ; i++) {
-            activePlayers[i].conn.sendUTF(info);
+        for (var player = 0 ; player < players.length ; player++) {
+            if (players[player].onEndGame) {
+                players[player].onEndGame(info);
+            }
         }
     }
 
     function startNewGame() {
         newGame();
         sendNewGame();
-        if (!human[nextPlayer]) {
+        if (!players[nextPlayer].human) {
             nextPlayTimer = setTimeout(playCard,speed);
         }
     }
@@ -186,10 +180,12 @@ exports.addPlayer = (function(){
     function sendNewGame() {
         var data = getAllInfo();
         data.type = "newGame";
-        for (var i = 0 ; i < activePlayers.length ; i++) {
-            data.hand = hands[activePlayers[i].player];
-            var info = JSON.stringify(data);
-            activePlayers[i].conn.sendUTF(info);
+        for (var player = 0 ; player < players.length ; player++) {
+            if (players[player].onNewGame) {
+                data.hand = hands[player];
+                var info = JSON.stringify(data);
+                players[player].onNewGame(info);
+            }
         }
     }
 
@@ -216,49 +212,50 @@ function getAllInfo() {
     return info;
 }
 
+function initializeDefaultAI() {
+    setAI([0,1,2,3],defaultAI);
+}
+
+
 function setAI(playerList,AIname) {
     for (var i = 0 ; i < playerList.length ; i++) {
         //create a seperate closure for each player
-        var AI = getAI(AIname);
-        if (AI) {
-            playerAIs[playerList[i]] = AI;
-        }
-    }
-}
-
-function getAI(AIname) {
-    try {
-        var AI = require("./AI/" + AIname);
-        if (AI.setup) {
-            AI.setup(board.getInfo());
-        }
-        for (prop in listeners) {
-            //note doesn't remove old listeners, may want to implement if can replace AIs
-            if (typeof AI[prop] === "function") {
-                listeners[prop].push(AI[prop]);
+        try {
+            var player = playerList[i];
+            var AI = require("./AI/" + AIname);
+            if (AI.play) {
+                if (AI.setup) {
+                    AI.setup(board.getInfo(),player,helper.getTeam(player));
+                }
+                AI.human = false;
+                players[player] = AI;
             }
+        } catch (err) {
+            console.log(err);
         }
-
-        return AI;
-    } catch (err) {
-        console.log(err);
     }
 }
 
 function play(player,play) {
     if (player === undefined) {
         player = nextPlayer;
-        var team = helper.getTeam(player);
-        var hand = hands[player];
-        var AI = playerAIs[player];
-        var AIplay = AI && AI.play ? AI.play : defaultAI.play;
-        try {
-            play = AIplay(hand,team,board.getInfo());
-        } catch (err) {
-            //this will stop everything
-            console.log(err);
-            //as to not break the next part
+        console.log(players[player],player,players);
+        if (players[player].human) {
+            console.log("should be human playing, not AI");
             play = {};
+        } else {
+            var team = helper.getTeam(player);
+            var hand = hands[player];
+            var AI = players[player].play;
+            try {
+                play = AI(hand,team,board.getInfo());
+            } catch (err) {
+                //this will stop everything
+                console.log(err);
+                //as to not break the next part
+                play = {};
+                //may want to change AI to something else
+            }
         }
     } else if (player !== nextPlayer) {
         console.log("not your turn");
@@ -350,7 +347,7 @@ function processTurn(player,play) {
                 }
             }
             all.nextPlayer = nextPlayer;
-            if (human[nextPlayer]) {
+            if (players[nextPlayer].human) {
                 //means waiting for player next turn
                 ret.status = 2;
             }
@@ -531,15 +528,6 @@ function newGame() {
         cardsleft -= handLength;
     }
     cardsPlayed = [];
-
-    var gameL = listeners.onNewGame;
-    for (var i = 0 ; i < gameL.length ; i++) {
-        try {
-            gameL[i]();
-        } catch (err) {
-            console.log(err);
-        }
-    }
 }
 
 //shuffle deck
