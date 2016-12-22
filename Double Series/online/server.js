@@ -43,5 +43,35 @@ var wsServer = new WebSocketServer({
 
 wsServer.on('request', function(request) {
     var connection = request.accept(null, request.origin);
-    game.addPlayer(connection);
+
+    var sendData = function(info) {
+        connection.sendUTF(info);
+    };
+
+    var player = {
+        human:true,
+        setup:sendData,
+        onNewGame:sendData,
+        onPlay:sendData,
+        onEndGame:sendData
+    };
+
+    var res = game.addPlayer(player);
+    if (res.success) {
+        connection.on("message", function(message) {
+            if (message.type === "utf8") {
+                var query = JSON.parse(message.utf8Data);
+                var type = query ? query.type : "";
+                switch(type) {
+                case "play":
+                    res.play(query.result);
+                    break;
+                }
+            }
+        });
+
+        connection.on("close", function(connection) {
+            res.remove();
+        });
+    }
 });

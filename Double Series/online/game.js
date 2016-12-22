@@ -45,42 +45,29 @@ exports.addPlayer = (function(){
     var activePlayers = 0;
     var nextPlayTimer = -1;
     return addPlayer;
-    function addPlayer(connection) {
+    function addPlayer(playerObj) {
+        var ret = {};
         var player = getOpenPlayerSlot();
         if (player !== -1) {
-            var sendData = function(info) {
-                connection.sendUTF(info);
-            };
+            players[player] = playerObj;
 
-            players[player] = {
-                human:true,
-                onNewGame:sendData,
-                onPlay:sendData,
-                onEndGame:sendData
-            };
-
+            //send game info to player, may want to combine with AI version later
             var gameInfo = getAllInfo();
             gameInfo.type = "start";
             gameInfo.player = player;
             gameInfo.hand = hands[player];
+            playerObj.setup(JSON.stringify(gameInfo));
 
-            connection.sendUTF(JSON.stringify(gameInfo));
-
-            connection.on("message", function(message) {
-                if (message.type === "utf8") {
-                    var query = JSON.parse(message.utf8Data);
-                    var type = query ? query.type : "";
-                    switch(type) {
-                    case "play":
-                        playCard(query.player,query.result);
-                        break;
-                    }
-                }
-            });
-
-            connection.on("close", function(connection) {
+            //allow caller to use these functions, but player is protected
+            var remove = function() {
                 removePlayer(player);
-            });
+            }
+            var play = function(result) {
+                playCard(player,result);
+            }
+            ret.success = true;
+            ret.remove = remove;
+            ret.play = play;
 
             activePlayers++;
             if (player === nextPlayer) {
@@ -89,7 +76,10 @@ exports.addPlayer = (function(){
                 //this means this is only player
                 nextPlayTimer = setTimeout(playCard,speed);
             }
+        } else {
+            ret.success = false;
         }
+        return ret;
     }
 
     function getOpenPlayerSlot() {
