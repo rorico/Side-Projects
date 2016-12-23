@@ -58,8 +58,10 @@ exports.setSettings = function(obj) {
 
 //this iife generally controls the flow of the game
 exports.addPlayer = (function(){
+    var spectators = [];
     var activePlayers = 0;
     var nextPlayTimer = -1;
+    exports.addSpectator = addSpectator;
     return addPlayer;
     function addPlayer(playerObj) {
         var ret = {};
@@ -95,6 +97,29 @@ exports.addPlayer = (function(){
         } else {
             ret.success = false;
         }
+        return ret;
+    }
+
+    function addSpectator(spectateObj) {
+        //this is only used for simulation, so a lot things are missing - remove, etc
+        ret = {};
+        spectators.push(spectateObj);
+
+        //from addPlayer
+        var gameInfo = getAllInfo();
+        gameInfo.type = "start";
+        if (spectateObj.setup) {
+            spectateObj.setup(JSON.stringify(gameInfo));
+        }
+
+        ret.success = true;
+
+        activePlayers++;
+        if (activePlayers === 1) {
+            //this means this is only player
+            nextPlayTimer = setTimeout(playCard,speed);
+        }
+
         return ret;
     }
 
@@ -159,6 +184,14 @@ exports.addPlayer = (function(){
                 onPlay(player === send.player ? prevPlayerInfo : info);
             }
         }
+
+        for (var i = 0 ; i < spectators.length ; i++) {
+            var spectator = spectators[i];
+            var onPlay = spectator.onPlay;
+            if (onPlay) {
+                onPlay(spectator.lvl >= 5 || spectator.lvl === send.player ? prevPlayerInfo : info);
+            }
+        }
     }
 
     function sendEnd(winner) {
@@ -167,6 +200,12 @@ exports.addPlayer = (function(){
         for (var player = 0 ; player < players.length ; player++) {
             if (players[player].onEndGame) {
                 players[player].onEndGame(info);
+            }
+        }
+        for (var i = 0 ; i < spectators.length ; i++) {
+            var onEndGame = spectators[i].onEndGame;
+            if (onEndGame) {
+                onEndGame(info);
             }
         }
     }
@@ -193,12 +232,26 @@ exports.addPlayer = (function(){
                 players[player].onNewGame(info);
             }
         }
+        for (var i = 0 ; i < spectators.length ; i++) {
+            var onNewGame = spectators[i].onNewGame;
+            if (onNewGame) {
+                onNewGame(info);
+            }
+        }
+    }
+
     function sendAllDone() {
         var data = {type:"allDone",bluewin:bluewin,greenwin:greenwin,ties:ties,games:games};
         var info = JSON.stringify(data);
         for (var player = 0 ; player < players.length ; player++) {
             if (players[player].onAllDone) {
                 players[player].onAllDone(info);
+            }
+        }
+        for (var i = 0 ; i < spectators.length ; i++) {
+            var onAllDone = spectators[i].onAllDone;
+            if (onAllDone) {
+                onAllDone(info);
             }
         }
     }
@@ -495,6 +548,7 @@ function checkNoCards() {
     gameEnd = true;
     winner = 0;
     ties++;
+    games++;
 }
 
 //default choose, picks randomly
