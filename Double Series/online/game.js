@@ -54,16 +54,16 @@ exports.setSettings = function(obj) {
                 break;
         }
     }
-}
+};
 
 //this iife generally controls the flow of the game
-(function(){
-    exports.addPlayer = addPlayer;
-    exports.addSpectator = addSpectator;
-    
+(function() {
     var spectators = [];
     var activePlayers = 0;
     var nextPlayTimer = -1;
+
+    exports.addPlayer = addPlayer;
+    exports.addSpectator = addSpectator;
 
     function addPlayer(playerObj) {
         var ret = {};
@@ -81,10 +81,10 @@ exports.setSettings = function(obj) {
             //allow caller to use these functions, but player is protected
             var remove = function() {
                 removePlayer(player);
-            }
+            };
             var play = function(result) {
                 playCard(player,result);
-            }
+            };
             ret.success = true;
             ret.remove = remove;
             ret.play = play;
@@ -237,6 +237,7 @@ exports.setSettings = function(obj) {
         for (var i = 0 ; i < spectators.length ; i++) {
             var onNewGame = spectators[i].onNewGame;
             if (onNewGame) {
+                var info = JSON.stringify(data);
                 onNewGame(info);
             }
         }
