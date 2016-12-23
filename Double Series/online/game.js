@@ -61,13 +61,15 @@ exports.setSettings = function(obj) {
     var spectators = [];
     var activePlayers = 0;
     var nextPlayTimer = -1;
+    var recentLeave = -1;
 
     exports.addPlayer = addPlayer;
     exports.addSpectator = addSpectator;
 
     function addPlayer(playerObj) {
         var ret = {};
-        var player = getOpenPlayerSlot();
+        var player = recentLeave === -1 ? getOpenPlayerSlot() : recentLeave;
+        recentLeave = -1;
         if (player !== -1) {
             players[player] = playerObj;
 
@@ -139,6 +141,12 @@ exports.setSettings = function(obj) {
             setAI([player],defaultAI);
         }
         activePlayers--;
+        recentLeave = player;
+        setTimeout(function() {
+            if (recentLeave === player) {
+                recentLeave = -1;
+            }
+        },5000);
 
         if (activePlayers) {
             if (nextPlayer === player) {
