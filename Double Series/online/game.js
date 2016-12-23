@@ -57,12 +57,14 @@ exports.setSettings = function(obj) {
 }
 
 //this iife generally controls the flow of the game
-exports.addPlayer = (function(){
+(function(){
+    exports.addPlayer = addPlayer;
+    exports.addSpectator = addSpectator;
+    
     var spectators = [];
     var activePlayers = 0;
     var nextPlayTimer = -1;
-    exports.addSpectator = addSpectator;
-    return addPlayer;
+
     function addPlayer(playerObj) {
         var ret = {};
         var player = getOpenPlayerSlot();
