@@ -24,12 +24,13 @@ function boardDisplay() {
     $("#blueData").html("Blue<br /><span id='bluewin'>0 (0.00%)</span>");
     $("#greenData").html("Green<br /><span id='greenwin'>0 (0.00%)</span>");
     cardHistorySetup();
+    createPlayers();
 }
 
 //shows Hand on board
 function createPlayers() {
-    var currentPlayer = me;
-    $("#botPlayer").html(playerHtml(me));
+    var currentPlayer = me ? me : 0;
+    $("#botPlayer").html(playerHtml(currentPlayer));
     currentPlayer = (currentPlayer + 1) % 4;
     $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(currentPlayer) + "</div></div>");
     currentPlayer = (currentPlayer + 1) % 4;

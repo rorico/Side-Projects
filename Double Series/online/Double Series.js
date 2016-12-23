@@ -68,7 +68,7 @@ function startConnection() {
                 for (var x = 0 ; x < points.length ; x++) {
                     for (var y = 0 ; y < points[x].length ; y++) {
                         if (points[x][y]) {
-                            getPosition(x,y).removeClass("v0").addClass("v" + points[x][y]);
+                            changeBoard(x,y,points[x][y]);
                         }
                     }
                 }
