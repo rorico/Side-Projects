@@ -20,7 +20,7 @@ var points;
 
 function setup(info) {
     helpers.setup(info);
-    points = info.points
+    points = info.points;
 }
 
 function playBest(hand,value,info) {
