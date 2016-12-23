@@ -172,10 +172,14 @@ exports.addPlayer = (function(){
     }
 
     function startNewGame() {
-        newGame();
-        sendNewGame();
-        if (!players[nextPlayer].human) {
-            nextPlayTimer = setTimeout(playCard,speed);
+        if (games < maxGame) {
+            newGame();
+            sendNewGame();
+            if (!players[nextPlayer].human) {
+                nextPlayTimer = setTimeout(playCard,speed);
+            }
+        } else {
+            sendAllDone();
         }
     }
 
@@ -187,6 +191,14 @@ exports.addPlayer = (function(){
                 data.hand = hands[player];
                 var info = JSON.stringify(data);
                 players[player].onNewGame(info);
+            }
+        }
+    function sendAllDone() {
+        var data = {type:"allDone",bluewin:bluewin,greenwin:greenwin,ties:ties,games:games};
+        var info = JSON.stringify(data);
+        for (var player = 0 ; player < players.length ; player++) {
+            if (players[player].onAllDone) {
+                players[player].onAllDone(info);
             }
         }
     }
