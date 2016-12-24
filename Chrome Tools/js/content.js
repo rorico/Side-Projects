@@ -1,28 +1,63 @@
+var currentBlock;
+var blockId = "chromeTools_block";
+
 function block(type,info) {
-	var blockScreen = $("<div id='chromeTools_block'></div>");
-	$("body").append(blockScreen);
-	if (type === "time") {
-		timeLineInit(blockScreen,info);
-		keyPressInit(blockScreen,keyPhrases);
-	} else {
-		scheduleInit(blockScreen);	
-	}
+    var blockScreen;
+    if (currentBlock) {
+        if (type !== currentBlock) {
+            blockScreen = $("#" + blockId).empty();
+            blockType(blockScreen,type,info);
+        }
+    } else {
+        blockScreen = $("<div id='" + blockId + "'></div>");
+        $("body").append(blockScreen);
+        blockType(blockScreen,type,info);
+    }
+}
+
+//only helper function for block
+function blockType(blockScreen,type,info) {
+    if (type === "time") {
+        if (check(type,timeLineInit)) {
+            timeLineInit(blockScreen,info);
+            if (check(type,keyPressInit)) {
+                keyPressInit(blockScreen,keyPhrases);
+            }
+        }
+    } else {
+        if (check(type,scheduleInit)) {
+            scheduleInit(blockScreen);
+        }
+    }
+    currentBlock = type;
+}
+
+function check(type,funct) {
+    if (typeof funct === "undefined") {
+        console.log(type + " content script missing");
+        return false;
+    }
+    return true;
 }
 
 function unblock() {
-	$("#chromeTools_block").remove();
+    $("#" + blockId).remove();
 }
 
 //don't change name, need this as cannot directly use background functions
 function weekSchedule(dates,callback) {
-	sendRequest("weekSchedule",dates,callback);
+    sendRequest("weekSchedule",dates,callback);
 }
 
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
-    if (a.action === "block") {
-        block(a.type,a.info);
-    } else if (a.action === "unblock") {
-        unblock();
+    console.log(a,b,c);
+    switch (a.action) {
+        case "block":
+            block(a.type,a.info);
+            break;
+        case "unblock":
+            unblock();
+            break;
     }
 });
 
