@@ -18,30 +18,25 @@ function block(type,info) {
 //only helper function for block
 function blockType(blockScreen,type,info) {
     if (type === "time") {
-        if (check(type,timeLineInit)) {
+        if (typeof timeLineInit === "undefined" || typeof keyPressInit === "undefined") {
+            console.log(type + " content script missing");
+        } else {
             timeLineInit(blockScreen,info);
-            if (check(type,keyPressInit)) {
-                keyPressInit(blockScreen,keyPhrases);
-            }
+            keyPressInit(blockScreen,keyPhrases);
         }
     } else {
-        if (check(type,scheduleInit)) {
+        if (typeof scheduleInit === "undefined") {
+            console.log(type + " content script missing");
+        } else {
             scheduleInit(blockScreen);
         }
     }
     currentBlock = type;
 }
 
-function check(type,funct) {
-    if (typeof funct === "undefined") {
-        console.log(type + " content script missing");
-        return false;
-    }
-    return true;
-}
-
 function unblock() {
     $("#" + blockId).remove();
+    currentBlock = "";
 }
 
 //don't change name, need this as cannot directly use background functions
