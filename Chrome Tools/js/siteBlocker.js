@@ -40,16 +40,15 @@ var sendContent;
     var startingTimeLeft = 300000; // 5 mins
     var VIPlength = 20000; // 20s
     var tolerance = 2000; // 2s
-    if (0) { // if in testing mode
+    if (1) { // if in testing mode
         timeLineLength = 120000; // 2 mins
-        startingTimeLeft = 60000; // 1 mins
+        startingTimeLeft = 6000; // 1 mins
     }
     timeLeft = startingTimeLeft;
     
     //functions in their own closure
-    var blockSite;
+    var blockTab;
     var unblockSite;
-    var setReminder;
 
     //set-up first time when opened
     startTimeLine();
@@ -269,7 +268,7 @@ var sendContent;
                 //when this turns to 0, will not show actual time left, may want to fix this later
             }
             countDownTimer(time,endTime,countDown);
-            setReminder(time,countDown,blockType);
+            blockTab(time,countDown,blockType);
         }
 
         function countDownTimer(time,endTime,countDown) {
@@ -315,58 +314,13 @@ var sendContent;
     })();
 
     (function() {
-        var alarm = -1;
         var blockTimer = -1;
         var blockedTab = -2;
         var blocked = false; //hold whether the tab should currently be blocked
         var blockType;
 
-        var scripts = {
-            all:[
-                "/lib/jquery.min.js",
-                "/css/content.css",
-                "/js/content.js"],
-            schedule:[
-                "/lib/jquery-ui.min.js",
-                "/lib/jquery-ui.min.css",
-                "/css/schedule.css",
-                "/js/schedule.js"],
-            time:[
-                "/js/timeLine.js",
-                "/js/keyPress.js",
-                "/css/timeLine.css"]
-        };
-
-        function addContentScripts(tab,list) {
-            addContentScript(tab,list,0,function(){
-                if (blocked) {
-                    //if call to block happened while script was added
-                    blockSite(tab,blockType);
-                }
-            });
-        }
-
-        function addContentScript(tab,list,i,funct) {
-            var file = list[i];
-            var inject = file.substring(file.lastIndexOf(".")) === ".js" ? chrome.tabs.executeScript : chrome.tabs.insertCSS;
-            inject(tab,{file:file},function() {
-                if(chrome.runtime.lastError) {
-                    //this happens a lot due to closing of tab
-                    //don't show front end
-                    console.log(chrome.runtime.lastError);
-                    return;
-                }
-                i++;
-                if (list.length === i) {
-                    funct();
-                } else {
-                    addContentScript(tab,list,i,funct);
-                }
-            });
-        }
-
         //sets a reminder when timeLeft reaches 0, and blocks site
-        setReminder = function(time,countDown,blockType) {
+        blockTab = function(time,countDown,blockType) {
             //do not unblock the site if tab hasn't changed and still no timeLeft
             if (tabId !== blockedTab || time > 0) {
                 unblockSite();
@@ -387,22 +341,75 @@ var sendContent;
                 if (blockTypes) {
                     //if there, but wrong block type
                     if (!blockTypes[blockType]) {
-                        addContentScripts(tabId,scripts[blockType]);
+                        injectScripts(tabId,[blockType]);
                     }
                 } else {
+                    blockType = "schedule";
                     //if not there, inject
                     //want content.js to be last, jquery order doesn't matter until files are called
-                    addContentScripts(tabId,scripts[blockType].concat(scripts.all));
+                    injectScripts(tabId,["all",blockType]);
                 }
 
                 blockTimer = setTimeout(function() {
                     blockSite(tabId,blockType);
                 },time);
             });
-
         }
 
-        blockSite = function(tab,type) {
+        var injectScripts = (function() {
+            var scripts = {
+                all:[
+                    "/lib/jquery.min.js",
+                    "/css/content.css",
+                    "/js/content.js"],
+                schedule:[
+                    "/lib/jquery-ui.min.js",
+                    "/lib/jquery-ui.min.css",
+                    "/css/schedule.css",
+                    "/js/schedule.js"],
+                time:[
+                    "/js/timeLine.js",
+                    "/js/keyPress.js",
+                    "/css/timeLine.css"]
+            };
+            return injectScripts;
+            function injectScripts(tab,types) {
+                if (types.length) {
+                    var list = [];
+                    for (var i = 0 ; i < types.length ; i++) {
+                        list = list.concat(scripts[types[i]]);
+                    }
+                    console.log(list);
+                    addContentScript(tab,list,0,function(){
+                        if (blocked) {
+                            //if call to block happened while script was added
+                            blockSite(tab,blockType);
+                        }
+                    });
+                }
+            }
+
+            function addContentScript(tab,list,i,funct) {
+                var file = list[i];
+                var inject = file.substring(file.lastIndexOf(".")) === ".js" ? chrome.tabs.executeScript : chrome.tabs.insertCSS;
+                inject(tab,{file:file},function() {
+                    if(chrome.runtime.lastError) {
+                        //this happens a lot due to closing of tab
+                        //don't show front end
+                        console.log(chrome.runtime.lastError);
+                        return;
+                    }
+                    i++;
+                    if (list.length === i) {
+                        funct();
+                    } else {
+                        addContentScript(tab,list,i,funct);
+                    }
+                });
+            }
+        })();
+
+        function blockSite(tab,type) {
             //all changes in tabs should be caught, but in case, check
             if (tab === tabId) {
                 //use a wrapper in case tabId gets changed in the meantime, may not be needed
@@ -429,7 +436,7 @@ var sendContent;
             } else {
                 log("uncaught change in tabId");
             }
-        };
+        }
 
         unblockSite = function() {
             if (blockedTab !== -2) {
