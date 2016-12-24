@@ -49,7 +49,6 @@ var sendContent;
     //functions in their own closure
     var blockSite;
     var unblockSite;
-    var addContentScripts;
     var setReminder;
 
     //set-up first time when opened
@@ -142,13 +141,7 @@ var sendContent;
         if (tabId === id && changeInfo) {
             if (changeInfo.status === "loading") {
                 handleNewPage(tab.url,tab.title);
-            } else if (changeInfo.status === "complete" && matchesURL(tab.url) === 1) {
-                //programmically add the scripts in, incase i want to change the list later
-                //could also use manifest.json, but would need to copy every change
-                //use onReplaced event for cached pages
-                addContentScripts(tabId);
-            }
-            if (changeInfo.title) {
+            } else if (changeInfo.title) {
                 title = changeInfo.title;
             }
         }
@@ -159,11 +152,6 @@ var sendContent;
         if (removedTabId === VIPtab) {
             VIPtab = addedTabId;
         }
-        chrome.tabs.get(addedTabId,function(tab) {
-            if (matchesURL(tab.url) === 1) {
-                addContentScripts(tabId);
-            }
-        });
     });
 
     chrome.windows.onFocusChanged.addListener(function(id) {
@@ -328,35 +316,44 @@ var sendContent;
 
     (function() {
         var alarm = -1;
+        var blockTimer = -1;
         var blockedTab = -2;
         var blocked = false; //hold whether the tab should currently be blocked
         var blockType;
-        var scripts = ["/lib/jquery.min.js",
-                        "/lib/jquery-ui.min.js",
-                        "/lib/jquery-ui.min.css",
-                        "/js/schedule.js",
-                        "/css/schedule.css",
-                        "/js/keyPress.js",
-                        "/js/timeLine.js",
-                        "/css/timeLine.css",
-                        "/css/content.css",
-                        "/js/content.js"];
 
-        addContentScripts = function(tab) {
-            addContentScript(tab,scripts,0,function(){
+        var scripts = {
+            all:[
+                "/lib/jquery.min.js",
+                "/css/content.css",
+                "/js/content.js"],
+            schedule:[
+                "/lib/jquery-ui.min.js",
+                "/lib/jquery-ui.min.css",
+                "/css/schedule.css",
+                "/js/schedule.js"],
+            time:[
+                "/js/timeLine.js",
+                "/js/keyPress.js",
+                "/css/timeLine.css"]
+        };
+
+        function addContentScripts(tab,list) {
+            addContentScript(tab,list,0,function(){
                 if (blocked) {
                     //if call to block happened while script was added
                     blockSite(tab,blockType);
                 }
             });
-        };
+        }
 
         function addContentScript(tab,list,i,funct) {
             var file = list[i];
             var inject = file.substring(file.lastIndexOf(".")) === ".js" ? chrome.tabs.executeScript : chrome.tabs.insertCSS;
             inject(tab,{file:file},function() {
                 if(chrome.runtime.lastError) {
-                    log(chrome.runtime.lastError);
+                    //this happens a lot due to closing of tab
+                    //don't show front end
+                    console.log(chrome.runtime.lastError);
                     return;
                 }
                 i++;
@@ -370,19 +367,40 @@ var sendContent;
 
         //sets a reminder when timeLeft reaches 0, and blocks site
         setReminder = function(time,countDown,blockType) {
+            //do not unblock the site if tab hasn't changed and still no timeLeft
             if (tabId !== blockedTab || time > 0) {
-                clearTimeout(alarm);
                 unblockSite();
-                if (countDown && wastingTime === 1) {
-                    if (time < tolerance) {
-                        time = tolerance;
-                    }
-                    alarm = setTimeout(function() {
-                        blockSite(tabId,blockType);
-                    },time);
+            }
+            clearTimeout(blockTimer);
+            if (countDown && wastingTime === 1) {
+                if (time < tolerance) {
+                    time = tolerance;
                 }
+                block(tabId,time,blockType);
             }
         };
+
+        function block(tabId,time,blockType) {
+            var data = {action:"ping"};
+            //see if the page is already injected, and what type
+            chrome.tabs.sendMessage(tabId,data,function(blockTypes) {
+                if (blockTypes) {
+                    //if there, but wrong block type
+                    if (!blockTypes[blockType]) {
+                        addContentScripts(tabId,scripts[blockType]);
+                    }
+                } else {
+                    //if not there, inject
+                    //want content.js to be last, jquery order doesn't matter until files are called
+                    addContentScripts(tabId,scripts[blockType].concat(scripts.all));
+                }
+
+                blockTimer = setTimeout(function() {
+                    blockSite(tabId,blockType);
+                },time);
+            });
+
+        }
 
         blockSite = function(tab,type) {
             //all changes in tabs should be caught, but in case, check
@@ -393,8 +411,9 @@ var sendContent;
                 blocked = true;
                 blockType = type;
 
+                var info;
                 if (blockType === "time") {
-                    var info = {
+                    info = {
                         timeLeft: timeLeft,
                         startTime: +startTime,
                         wastingTime: wastingTime,
@@ -424,7 +443,7 @@ var sendContent;
             if (blockedTab !== -2) {
                 chrome.tabs.sendMessage(blockedTab,data);
             }
-        }
+        };
 
         function storeRedirect(url) {
             chrome.storage.sync.get("redirects", function(items) {
@@ -550,7 +569,7 @@ var sendContent;
             wastingTime:wastingTime,
             url:url,
             title:title
-        }
+        };
         sendRequest("reset",info,1);
     };
 
@@ -584,7 +603,7 @@ var sendContent;
             var info = {
                 startTime:+startTime,
                 wastingTime:wastingTime
-            }
+            };
             sendRequest("newPage",info,1);
         } else {
             modifyTimeLine("change",timeLineIndex);

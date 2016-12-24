@@ -58,6 +58,13 @@ chrome.runtime.onMessage.addListener(function listener(a, b, c) {
         case "unblock":
             unblock();
             break;
+        case "ping":
+            var blockTypes = {
+                time:typeof timeLineInit !== "undefined",
+                schedule:typeof scheduleInit !== "undefined"
+            };
+            c(blockTypes);
+            break;
     }
 });
 
