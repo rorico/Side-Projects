@@ -40,7 +40,7 @@ var sendContent;
     var startingTimeLeft = 300000; // 5 mins
     var VIPlength = 20000; // 20s
     var tolerance = 2000; // 2s
-    if (1) { // if in testing mode
+    if (0) { // if in testing mode
         timeLineLength = 120000; // 2 mins
         startingTimeLeft = 6000; // 1 mins
     }
@@ -335,25 +335,16 @@ var sendContent;
         };
 
         function block(tabId,time,blockType) {
-            var data = {action:"ping"};
-            //see if the page is already injected, and what type
-            chrome.tabs.sendMessage(tabId,data,function(blockTypes) {
-                if (blockTypes) {
-                    //if there, but wrong block type
-                    if (!blockTypes[blockType]) {
-                        injectScripts(tabId,[blockType]);
-                    }
-                } else {
-                    blockType = "schedule";
-                    //if not there, inject
-                    //want content.js to be last, jquery order doesn't matter until files are called
-                    injectScripts(tabId,["all",blockType]);
-                }
-
-                blockTimer = setTimeout(function() {
-                    blockSite(tabId,blockType);
-                },time);
-            });
+            var start = +new Date();
+            blockTimer = setTimeout(function() {
+                //note, won't inject if already injected
+                injectScripts(tabId,blockType,function() {
+                    var elapsed = +new Date() - start;
+                    blockTimer = setTimeout(function() {
+                        blockSite(tabId,blockType);
+                    },time - elapsed);
+                });
+            },time - tolerance);
         }
 
         var injectScripts = (function() {
@@ -373,23 +364,34 @@ var sendContent;
                     "/css/timeLine.css"]
             };
             return injectScripts;
-            function injectScripts(tab,types) {
-                if (types.length) {
-                    var list = [];
-                    for (var i = 0 ; i < types.length ; i++) {
-                        list = list.concat(scripts[types[i]]);
-                    }
-                    console.log(list);
-                    addContentScript(tab,list,0,function(){
-                        if (blocked) {
-                            //if call to block happened while script was added
-                            blockSite(tab,blockType);
+            function injectScripts(tab,blockType,callback) {
+                //see if the page is already injected, and what type
+                var data = {action:"ping"};
+                chrome.tabs.sendMessage(tab,data,function(blockTypes) {
+                    var injectTypes;
+                    if (blockTypes) {
+                        //if there, but wrong block type
+                        if (!blockTypes[blockType]) {
+                            injectTypes = [blockType];
                         }
-                    });
-                }
+                    } else {
+                        //if not there, inject
+                        //want content.js to be last, jquery order doesn't matter until files are called
+                        injectTypes = ["all",blockType];
+                    }
+                    if (injectTypes && injectTypes.length) {
+                        var list = [];
+                        for (var i = 0 ; i < injectTypes.length ; i++) {
+                            list = list.concat(scripts[injectTypes[i]]);
+                        }
+                        addContentScript(tab,list,0,callback);
+                    } else {
+                        callback();
+                    }
+                });
             }
 
-            function addContentScript(tab,list,i,funct) {
+            function addContentScript(tab,list,i,callback) {
                 var file = list[i];
                 var inject = file.substring(file.lastIndexOf(".")) === ".js" ? chrome.tabs.executeScript : chrome.tabs.insertCSS;
                 inject(tab,{file:file},function() {
@@ -401,9 +403,9 @@ var sendContent;
                     }
                     i++;
                     if (list.length === i) {
-                        funct();
+                        callback();
                     } else {
-                        addContentScript(tab,list,i,funct);
+                        addContentScript(tab,list,i,callback);
                     }
                 });
             }
