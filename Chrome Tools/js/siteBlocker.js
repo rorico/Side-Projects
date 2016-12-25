@@ -516,7 +516,7 @@ var sendContent;
     function returnTime(delay) {
         returnTimer = setTimer(function() {
             var date = new Date() - timeLineLength;
-            var endingIndex = 0;
+            var endingIndex = -1;
             var cnt = 0;
             var timeTotal = 0;
             var currentTimeInterval = new Date() - startTime;
@@ -531,22 +531,26 @@ var sendContent;
                     }
                     cnt++;
                 } else {
+                    //note if going through entire array, this will never run
                     timeTotal = timeLine[i][4] - date; //negative
-                    endingIndex = i + 1;
+                    endingIndex = i;
                     break;
                 }
             }
-            if (cnt) {
-                modifyTimeLine("remove",[endingIndex,cnt]);
+            if (endingIndex === -1) {
+                timeTotal = startTime - date; //negative
             }
+
+            if (cnt) {
+                modifyTimeLine("remove",[endingIndex + 1,cnt]);
+            }
+
             //return time and calculate when to call function again
             //ideally check again when can return time again
-            var changed = [];
             var completed = false;
-            for (var i = timeLine.length - 1 ; i != -1 ; i--) {
+            for (var i = endingIndex ; i != -1 ; i--) {
                 if (timeLine[i][1]) {
                     if (timeLeft - currentTimeOffset > timeTotal) {
-                        changed.push([i,timeLine[i][1],timeLine[i][0]]);
                         modifyTimeLine("change",i);
                     } else {
                         completed = true;
