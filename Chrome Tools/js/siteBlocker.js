@@ -550,6 +550,7 @@ var sendContent;
             var completed = false;
             for (var i = endingIndex ; i != -1 ; i--) {
                 if (timeLine[i][1]) {
+                    //note timeLeft can be negative
                     if (timeLeft - currentTimeOffset > timeTotal) {
                         modifyTimeLine("change",i);
                     } else {
@@ -564,7 +565,9 @@ var sendContent;
                 timeTotal += currentTimeInterval;
             }
             timeLeftOutput();
-            returnTime(timeTotal - timeLeft + currentTimeOffset);
+            //upper limit can be passed if currently in very long wastingTime
+            var nextDelay = Math.min(timeTotal - timeLeft + currentTimeOffset,timeLineLength - startingTimeLeft);
+            returnTime(nextDelay);
         },delay);
     }
 
