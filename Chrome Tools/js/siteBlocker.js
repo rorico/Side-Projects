@@ -185,6 +185,10 @@ var sendContent;
         modifyTimeLine("add",newest);
         if (wastingTime) {
             changeTimeLeft(-timeSpent);
+            //don't want to slow down event handler
+            setTimeout(function() {
+                storeData("timeLine",newest);
+            },0);
         }
         //handle new page
         startTime = new Date();
@@ -221,7 +225,7 @@ var sendContent;
         if (action === "add") {
             timeLine.unshift(load);
         } else if (action === "remove") {
-            timeLine.splice(load[0],load[1]);
+            var removed = timeLine.splice(load[0],load[1]);
         } else if (action === "change") {
             if (load < timeLine.length || load < 0) {
                 sendRequest("change",[load,timeLine[load][1]],1);
@@ -623,7 +627,7 @@ var sendContent;
 
     function moveData(name,info,data) {
         var indexName = name + "Indexes";
-        chrome.storage.sync.get(name + "Indexes", function(items) {
+        chrome.storage.sync.get(indexName, function(items) {
             if (chrome.runtime.lastError) {
                 log(chrome.runtime.lastError);
                 return;
