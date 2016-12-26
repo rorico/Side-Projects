@@ -428,7 +428,6 @@ var sendContent;
             //all changes in tabs should be caught, but in case, check
             if (tab === tabId) {
                 //use a wrapper in case tabId gets changed in the meantime, may not be needed
-                var thisUrl = url;
                 blockedTab = tab;
                 blocked = true;
                 blockType = type;
@@ -446,7 +445,7 @@ var sendContent;
                     };
                 }
 
-                storeRedirect(thisUrl);
+                storeData("redirect",[+new Date(),url]);
                 sendContent({action:"block",info:info,type:type});
 
                 blockedUrl = url;
@@ -476,64 +475,6 @@ var sendContent;
                 chrome.tabs.sendMessage(blockedTab,data);
             }
         };
-
-        function storeRedirect(url) {
-            chrome.storage.sync.get("redirects", function(items) {
-                if (chrome.runtime.lastError) {
-                    log(chrome.runtime.lastError);
-                    return;
-                }
-                var redirects = items.redirects;
-                if (!redirects) {
-                    redirects = [];
-                }
-                var newEntry = [+new Date(),url];
-                //approximately the max size per item, slightly smaller
-                //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
-                //can check getBytesInUse, but seems unnecessary
-                var limit = 7000;
-                //if the new entry is larger than it can possibly be stored, shouldn't ever happen
-                //to make sure we don't get into an infinite loop
-                if (JSON.stringify(newEntry).length > limit) {
-                    log("can't store the following, too large:");
-                    log(newEntry);
-                } else if (JSON.stringify(redirects).length + JSON.stringify(newEntry).length > limit) {
-                    moveRedirect(redirects,url);
-                } else {
-                    redirects.push(newEntry);
-                    chrome.storage.sync.set({"redirects": redirects}, function() {
-                        if (chrome.runtime.lastError) {
-                            log(chrome.runtime.lastError);
-                            return;
-                        }
-                    });
-                }
-            });
-        }
-
-        function moveRedirect(redirects,url) {
-            chrome.storage.sync.get("redirectIndexes", function(items) {
-                if (chrome.runtime.lastError) {
-                    log(chrome.runtime.lastError);
-                    return;
-                }
-                var redirectIndexes = items.redirectIndexes;
-                if (!redirectIndexes) {
-                    redirectIndexes = [];
-                }
-                var redirectName = "redirect_" + redirectIndexes.length;
-                redirectIndexes.push(redirectName);
-                var setObj = {redirectIndexes:redirectIndexes,redirects:[]};
-                setObj[redirectName] = redirects;
-                chrome.storage.sync.set(setObj, function() {
-                    if (chrome.runtime.lastError) {
-                        log(chrome.runtime.lastError);
-                        return;
-                    }
-                });
-                storeRedirect(url);
-            });
-        }
     })();
 
     function returnTime(delay) {
@@ -646,4 +587,61 @@ var sendContent;
         returnTime();
         timeLeftOutput();
     };
+
+    function storeData(name,data) {
+        chrome.storage.sync.get(name, function(items) {
+            if (chrome.runtime.lastError) {
+                log(chrome.runtime.lastError);
+                return;
+            }
+
+            var info = items[name] || [];
+            //approximately the max size per item, slightly smaller
+            //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
+            //can check getBytesInUse, but seems unnecessary
+            var limit = 7000;
+            //if the new entry is larger than it can possibly be stored, shouldn't ever happen
+            //to make sure we don't get into an infinite loop
+            if (JSON.stringify(data).length > limit) {
+                log("can't store the following, too large:");
+                log(data);
+            } else if (JSON.stringify(info).length + JSON.stringify(data).length > limit) {
+                moveData(name,info,data);
+            } else {
+                info.push(data);
+                var setObj = {};
+                setObj[name + "s"] = info;
+                chrome.storage.sync.set(setObj, function() {
+                    if (chrome.runtime.lastError) {
+                        log(chrome.runtime.lastError);
+                        return;
+                    }
+                });
+            }
+        });
+    }
+
+    function moveData(name,info,data) {
+        var indexName = name + "Indexes";
+        chrome.storage.sync.get(name + "Indexes", function(items) {
+            if (chrome.runtime.lastError) {
+                log(chrome.runtime.lastError);
+                return;
+            }
+            var indexes = items[indexName] || [];
+            var dataName = name + "_" + indexes.length;
+            indexes.push(dataName);
+            var setObj = {indexes:indexes};
+            setObj[indexName] = indexes;
+            setObj[name + "s"] = [];
+            setObj[dataName] = data;
+            chrome.storage.sync.set(setObj, function() {
+                if (chrome.runtime.lastError) {
+                    log(chrome.runtime.lastError);
+                    return;
+                }
+            });
+            storeData(name,data);
+        });
+    }
 })();
