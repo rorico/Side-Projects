@@ -42,7 +42,7 @@ var sendContent;
     var tolerance = 2000; // 2s
     if (0) { // if in testing mode
         timeLineLength = 120000; // 2 mins
-        startingTimeLeft = 6000; // 1 mins
+        startingTimeLeft = 60000; // 1 mins
     }
     timeLeft = startingTimeLeft;
     
@@ -225,7 +225,7 @@ var sendContent;
         if (action === "add") {
             timeLine.unshift(load);
         } else if (action === "remove") {
-            var removed = timeLine.splice(load[0],load[1]);
+            timeLine.splice(load[0],load[1]);
         } else if (action === "change") {
             if (load < timeLine.length || load < 0) {
                 sendRequest("change",[load,timeLine[load][1]],1);
@@ -462,7 +462,6 @@ var sendContent;
 
         unblockSite = function() {
             if (blockedTab !== -2) {
-                var changedTab = tabId !== blockedTab;
                 sendContent({action:"unblock"});
                 blockedTab = -2;
                 blocked = false;
