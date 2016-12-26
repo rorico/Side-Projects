@@ -4,13 +4,14 @@ var getData;
     var suf = "s";
     var indexSuf = "Indexes";
     storeData = function(name,data) {
-        chrome.storage.sync.get(name, function(items) {
+        var storeName = name + suf;
+        chrome.storage.sync.get(storeName, function(items) {
             if (chrome.runtime.lastError) {
                 log(chrome.runtime.lastError);
                 return;
             }
 
-            var info = items[name] || [];
+            var info = items[storeName] || [];
             //approximately the max size per item, slightly smaller
             //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
             //can check getBytesInUse, but seems unnecessary
@@ -25,7 +26,7 @@ var getData;
             } else {
                 info.push(data);
                 var setObj = {};
-                setObj[name + suf] = info;
+                setObj[storeName] = info;
                 chrome.storage.sync.set(setObj, function() {
                     if (chrome.runtime.lastError) {
                         log(chrome.runtime.lastError);
