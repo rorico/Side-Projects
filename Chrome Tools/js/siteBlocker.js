@@ -181,7 +181,8 @@ var sendContent;
         if (timeSpent < tolerance) {
             wastingTime = 0;
         }
-        modifyTimeLine("add",[timeSpent,wastingTime,url,title,startTime]);
+        var newest = [timeSpent,wastingTime,url,title,startTime];
+        modifyTimeLine("add",newest);
         if (wastingTime) {
             changeTimeLeft(-timeSpent);
         }
@@ -191,6 +192,16 @@ var sendContent;
         url = newUrl;
         title = newTitle;
         timeLeftOutput();
+
+        //to browserAction, doesn't happen often, but can happen
+        var info = {
+            newest:newest,
+            startTime:+startTime,
+            wastingTime:wastingTime,
+            url:url,
+            title:title
+        };
+        sendRequest("newPage",info,1);
     }
 
     //checks all levels and returns the level of url if matched, 0 if none
@@ -318,6 +329,8 @@ var sendContent;
         var blockedTab = -2;
         var blocked = false; //hold whether the tab should currently be blocked
         var blockType;
+        var blockedUrl;
+        var blockedTitle;
 
         //sets a reminder when timeLeft reaches 0, and blocks site
         blockTab = function(time,countDown,blockType) {
@@ -435,6 +448,10 @@ var sendContent;
 
                 storeRedirect(thisUrl);
                 sendContent({action:"block",info:info,type:type});
+
+                blockedUrl = url;
+                blockedTitle = title;
+                handleNewPage("Blocked","Blocked");
             } else {
                 log("uncaught change in tabId");
             }
@@ -442,9 +459,15 @@ var sendContent;
 
         unblockSite = function() {
             if (blockedTab !== -2) {
+                var changedTab = tabId !== blockedTab;
                 sendContent({action:"unblock"});
                 blockedTab = -2;
                 blocked = false;
+
+                //I'm just gonna assume there is no usual url named "Blocked"
+                if (url === "Blocked") {
+                    handleNewPage(blockedUrl,blockedTitle);
+                }
             }
         };
 
@@ -613,14 +636,9 @@ var sendContent;
     change = function(timeLineIndex) {
         if (timeLineIndex === -1) {
             //change the current one and restart counter
+            sendRequest("change",[timeLineIndex,wastingTime],1);
             wastingTime = 0;
             handleNewPage(url,title);
-            //to browserAction, assume only way to get newPage while its open
-            var info = {
-                startTime:+startTime,
-                wastingTime:wastingTime
-            };
-            sendRequest("newPage",info,1);
         } else {
             modifyTimeLine("change",timeLineIndex);
         }

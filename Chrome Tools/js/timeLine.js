@@ -67,7 +67,8 @@ var keyPhrases;
         clearInterval(timeCurrentInterval);
 
         $("#info").html(formatInfo(url,timeCurrent,title));
-        timeLine = background.timeLine;
+        //deep copy to not affect it outside of function call
+        timeLine = JSON.parse(JSON.stringify(background.timeLine));
         timeLineLength = background.timeLineLength;
 
         if (addTimeLine(-1,false,timeCurrent,wastingTime)) {
@@ -153,13 +154,17 @@ var keyPhrases;
         }
 
         if (index !== -2) {
-            setClick(timeLineEntry,index);
+            setClick(timeLineEntry,getIndex(index));
         }
         return ret;
     };
 
+    function getIndex(index) {
+        return index - timeLineOffset;
+    }
+
     function getTimeLineId(index) {
-        return (index === -2 ? "timeLineP" : "timeLine" + (index - timeLineOffset));
+        return (index === -2 ? "timeLineP" : "timeLine" + getIndex(index));
     }
 
     function setClick(ele,i) {
@@ -194,12 +199,14 @@ var keyPhrases;
         $("#" + getTimeLineId(index)).removeClass("wasting" + prev).addClass("wasting0");
     };
 
-    newPage = function(start,newWasting) {
-        $("#" + getTimeLineId(-1)).removeClass("wasting" + wastingTime).addClass("wasting0");
-        startTime = start;
-        wastingTime = newWasting;
+    newPage = function(input) {
+        startTime = input.startTime;
+        wastingTime = input.wastingTime;
+        url = input.url;
+        title = input.title;
+        timeLine.unshift(input.newest);
         timeLineOffset++;
-        addTimeLine(-1,true,new Date() - start,newWasting);
+        addTimeLine(-1,true,new Date() - startTime,wastingTime);
     };
 
     countDown = function(timeLeft) {
@@ -307,8 +314,7 @@ var keyPhrases;
                     restartTimeLine(a.input);
                     break;
                 case "newPage":
-                    var input = a.input;
-                    newPage(input.startTime,input.wastingTime);
+                    newPage(a.input);
                     break;
             }
         }
