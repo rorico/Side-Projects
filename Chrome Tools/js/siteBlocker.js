@@ -181,7 +181,7 @@ var sendContent;
         if (timeSpent < tolerance) {
             wastingTime = 0;
         }
-        var newest = [timeSpent,wastingTime,url,title,startTime];
+        var newest = [timeSpent,wastingTime,url,title,+startTime];
         modifyTimeLine("add",newest);
         if (wastingTime) {
             changeTimeLeft(-timeSpent);
@@ -191,7 +191,7 @@ var sendContent;
             },0);
         }
         //handle new page
-        startTime = new Date();
+        startTime = new Date();     //consider converting to integer right here
         wastingTime = newWasting;
         url = newUrl;
         title = newTitle;

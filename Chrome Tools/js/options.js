@@ -1,48 +1,22 @@
-chrome.storage.sync.get("redirectIndexes", function(item) {
-    var maxNameLevel = 2;
-    var timezoneOffset = (new Date()).getTimezoneOffset() * 60000;
-    var hourAmount = 3600000; //num of millisec
-    var defaultZoom = 604800000; //1 week
-    
-    var redirectIndexes = item.redirectIndexes;
-    if (!redirectIndexes) {
-        redirectIndexes = [];
-    }
-    redirectIndexes.push("redirects");
-
-    var redirectData = [];
-    chrome.storage.sync.get(redirectIndexes, function(items) {
-        var redirects = items.redirects;
-        Object.keys(items).sort().forEach(function(i) {
-            redirectData = redirectData.concat(items[i]);
-        });
-        chartRedirects(maxNameLevel);
-    });
-
-    var levelOptions = "";
-    for (var i = 0 ; i <= maxNameLevel ; i++) {
-        var selected = maxNameLevel === i ? " selected" : "";
-        levelOptions += "<option value='" + i + "'" + selected + ">" + i + "</option>";
-    }
-    $("#nameLevel").html(levelOptions).change(function(){
-        chartRedirects(parseInt(this.value));
-    });
-
-    var chartRedirects = (function(){
-        return chartRedirects;
-        function chartRedirects(level) {
-            //assume sorted
-            if (redirectData && redirectData.length) {
-                var series = [];
+chrome.runtime.getBackgroundPage(function (backgroundPage) {
+    var processRedirect;
+    var processTimeLine;
+    (function() {
+        var hourAmount = 3600000; //num of millisec
+        var defaultZoom = 604800000; //1 week
+        processRedirect = function(typeData,level) {
+            var series = [];
+            var zoom = [];
+            if (typeData && typeData.length) {
                 var indexes = {};
                 var index = 0;
 
                 //set all
-                var allStart = nearestHour(redirectData[0][0]) - hourAmount;
+                var allStart = nearestHour(typeData[0][0]) - hourAmount;
                 var all = [[allStart,0]];
-                for (var j = 0 ; j < redirectData.length ; j++) {
-                    var name = getWebsiteName(redirectData[j][1],level);
-                    var hour = nearestHour(redirectData[j][0]);
+                for (var j = 0 ; j < typeData.length ; j++) {
+                    var name = getWebsiteName(typeData[j][1],level);
+                    var hour = nearestHour(typeData[j][0]);
                     var curIndex = indexes[name];
                     if (curIndex === undefined) {
                         curIndex = index++;
@@ -52,8 +26,8 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
                         series.push({name:name,data:newData});
                     }
                     var data = series[curIndex].data;
-                    addEntry(data,hour);
-                    addEntry(all,hour);
+                    addRedirectEntry(data,hour);
+                    addRedirectEntry(all,hour);
                 }
                 series.push({name:"all",data:all,visible:false});
                 //add a 0 aftet end of data
@@ -61,59 +35,106 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
                     var data = series[i].data;
                     data.push([data[data.length-1][0] + hourAmount, 0]);
                 }
-                var chart = new Highcharts.Chart({
-                    chart: {
-                        renderTo: "redirects",
-                        zoomType: "x",
-                        type: "spline"
-                    },
-                    title: {
-                        text: "Redirects"
-                    },
-                    xAxis:{
-                        type: "datetime"
-                    },
-                    yAxis: {
-                        title: {
-                            text: "Number of Redirects"
-                        }
-                    },
-                    series: series,
-                    plotOptions: {
-                        area: {
-                            fillColor: {
-                                linearGradient: {
-                                    x1: 0,
-                                    y1: 0,
-                                    x2: 0,
-                                    y2: 1
-                                },
-                                stops: [
-                                    [0, Highcharts.getOptions().colors[0]],
-                                    [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get("rgba")]
-                                ]
-                            },
-                            marker: {
-                                radius: 2
-                            },
-                            lineWidth: 1,
-                            states: {
-                                hover: {
-                                    lineWidth: 1
-                                }
-                            },
-                            threshold: null
-                        }
-                    }
-                });
-                var last = data[data.length-1][0];
-                chart.xAxis[0].setExtremes(last - defaultZoom,last);
-                chart.showResetZoom();
+
+                var last = all[all.length-1][0];
+                zoom = [last - defaultZoom,last];
+            }
+            return {series:series,zoom:zoom};
+        };
+
+        function addRedirectEntry(data,hour) {
+            var pastTime = data[data.length-1][0];
+            if (hour === pastTime) {
+                data[data.length-1][1]++;
+            } else {
+                if (hour-pastTime > hourAmount) {
+                    data.push([pastTime + hourAmount,0]);
+                    data.push([hour - hourAmount,0]);
+                }
+                pastTime = hour;
+                data.push([hour,1]);
             }
         }
 
+        processTimeLine = function(typeData,level) {
+            console.log(typeData)
+            var series = [];
+            var zoom = [];
+            var options = {
+                tooltip: {
+                    pointFormatter: function() {
+                        //copied from default with value format changed
+                        return "<span style='color:" + this.color + "'>\u25CF</span> " + this.series.name + ": <b>" + MinutesSecondsFormat(this.y) + "</b><br/>";
+                    }
+                }
+            };
+            if (typeData && typeData.length) {
+                var indexes = {};
+                var index = 0;
+
+                for (var j = 0 ; j < typeData.length ; j++) {
+                    var timestamp = typeData[j][4];
+                    if (!timestamp) {
+                        continue;
+                    }
+                    var name = level === 3 ? "Wasting Level " + typeData[j][1] : getWebsiteName(typeData[j][2],level);
+                    var curIndex = indexes[name];
+                    if (curIndex === undefined) {
+                        curIndex = index++;
+                        indexes[name] = curIndex;
+                        //add a 0 before start of data
+                        var newData = [[nearestHour(timestamp) - hourAmount,0]];
+                        series.push({name:name,data:newData});
+                    }
+                    var data = series[curIndex].data;
+                    addTimeLineEntry(data,timestamp,typeData[j][0]);
+                }
+                var last = -Infinity;
+                //add a 0 aftet end of data
+                for (var i = 0 ; i < series.length ; i++) {
+                    var data = series[i].data;
+                    var lastEntry = data[data.length-1][0];
+                    data.push([lastEntry + hourAmount, 0]);
+                    if (lastEntry > last) {
+                        last = lastEntry;
+                    }
+                }
+
+                zoom = [last - defaultZoom,last];
+            }
+            return {series:series,zoom:zoom,options:options};
+        };
+
+        function addTimeLineEntry(data,time,amount) {
+            do {
+                var hour = nearestHour(time);
+                var nextHour = hour + hourAmount;
+                var thisHour;
+                if (time + amount > nextHour) {
+                    //addEntry(data,nextHour,time + amount - nextHour);
+                    thisHour = nextHour - time;
+                } else {
+                    thisHour = amount;
+                }
+
+                var pastTime = data[data.length-1][0];
+                if (hour === pastTime) {
+                    data[data.length-1][1] += thisHour;
+                } else {
+                    if (hour-pastTime > hourAmount) {
+                        data.push([pastTime + hourAmount,0]);
+                        data.push([hour - hourAmount,0]);
+                    }
+                    pastTime = hour;
+                    data.push([hour,thisHour]);
+                }
+
+                amount -= thisHour;
+            } while (amount);
+        }
+
         function getWebsiteName(name,nameLevel) {
-            name = (name ? name : "unnamed");
+            name = (typeof name === "string" ? name : "unnamed");
             var ret = name;
             switch(nameLevel) {
                 case 2:
@@ -126,7 +147,7 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
                     if (index !== -1) {
                         var rest = name.substring(index + lookFor.length);
                         var slashIndex = rest.indexOf("/");
-                        var subreddit = rest.substring(0,(slashIndex === -1 ? rest.length : slashIndex ));
+                        var subreddit = rest.substring(0,(slashIndex === -1 ? rest.length : slashIndex));
                         ret = base + " -> " + subreddit;
                     } else {
                         ret = base;
@@ -153,21 +174,139 @@ chrome.storage.sync.get("redirectIndexes", function(item) {
 
         function nearestHour(utc) {
             var date = new Date(utc);
-            return +new Date(date.getYear(),date.getMonth(),date.getDate(),date.getHours()) - timezoneOffset;
-        }
-
-        function addEntry(data,hour) {
-            var pastTime = data[data.length-1][0];
-            if (hour === pastTime) {
-                data[data.length-1][1]++;
-            } else {
-                if (hour-pastTime > hourAmount) {
-                    data.push([pastTime + hourAmount,0]);
-                    data.push([hour - hourAmount,0]);
-                }
-                pastTime = hour;
-                data.push([hour,1]);
-            }
+            date.setMinutes(0);
+            date.setSeconds(0);
+            date.setMilliseconds(0);
+            return +date;
         }
     })();
+
+
+    //start
+    var getData = backgroundPage.getData;
+
+    var dataTypes = [
+        {name:"timeLine",maxLevel:3,processData:processTimeLine},
+        {name:"redirect",maxLevel:2,processData:processRedirect}
+    ];
+    var level;
+
+    //set timezone offset for all graphs
+    Highcharts.setOptions({
+        global: {
+            timezoneOffset: (new Date()).getTimezoneOffset()
+        }
+    });
+
+    if (dataTypes.length) {
+        var typeOptions;
+        for (var i = 0 ; i < dataTypes.length ; i++) {
+            var type = dataTypes[i].name;
+            typeOptions += "<option value='" + i + "'>" + type + "</option>";
+        }
+        $("#dataType").html(typeOptions).change(function() {
+            setChartType(dataTypes[this.value]);
+        });
+
+        setChartType(dataTypes[0]);
+    }
+
+    function setChartType(type) {
+        level = type.maxLevel;
+        var levelOptions = "";
+        for (var i = 0 ; i <= level ; i++) {
+            var selected = level === i ? " selected" : "";
+            levelOptions += "<option value='" + i + "'" + selected + ">" + i + "</option>";
+        }
+        $("#nameLevel").html(levelOptions).off("change").change(function() {
+            level = parseInt(this.value);
+            getChartData(type);
+        });
+
+
+        if (type.data) {
+            getChartData(type);
+        } else {
+            getData(type.name,function(items) {
+                var thisData = [];
+                Object.keys(items).sort().forEach(function(i) {
+                    thisData = thisData.concat(items[i]);
+                });
+                type.data = thisData;
+                getChartData(type);
+            });   
+        }
+    }
+
+    function getChartData(type) {
+        var res = type.processData(type.data,level);
+        setChartData(res.series,res.zoom,res.options);
+    }
+
+    function setChartData(series,zoom,dataOptions) {
+        if (series) {
+            var options = {
+                chart: {
+                    renderTo: "redirects",
+                    zoomType: "x",
+                    type: "column"
+                },
+                title: {
+                    text: "Redirects"
+                },
+                xAxis:{
+                    type: "datetime"
+                },
+                yAxis: {
+                    title: {
+                        text: "Number of Redirects"
+                    }
+                },
+                series: series,
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get("rgba")]
+                            ]
+                        },
+                        marker: {
+                            radius: 2
+                        },
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null
+                    },
+                    column: {
+                        stacking: "normal",
+                        pointPadding: 0,
+                        borderWidth: 0
+                    }
+                }
+            };
+            for (var option in dataOptions) {
+                options[option] = dataOptions[option];
+            }
+            var chart = new Highcharts.Chart(options);
+            if (zoom) {
+                chart.xAxis[0].setExtremes(zoom[0],zoom[1]);
+                chart.showResetZoom();
+            }
+        }
+    }
+    function MinutesSecondsFormat(milli) {
+        var secs = Math.floor(milli/1000);
+        return Math.floor(secs/60)  + ":" + ("0" + Math.floor(secs%60)).slice(-2);
+    }
 });
