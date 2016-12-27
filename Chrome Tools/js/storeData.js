@@ -63,7 +63,7 @@ var getData;
             var setObj = {indexes:indexes};
             setObj[indexName] = indexes;
             setObj[name + suf] = [];
-            setObj[dataName] = data;
+            setObj[dataName] = info;
             chrome.storage.sync.set(setObj, function() {
                 if (chrome.runtime.lastError) {
                     log(chrome.runtime.lastError);
