@@ -27,18 +27,7 @@ var gameEnd;
 var winner;
 var winningPlayer = -1;
 
-var players = [];
 
-
-//start
-createDeck();
-initializeDefaultAI();
-
-helper.setUp(board.getInfo());
-
-newGame();
-
-exports.setAI = setAI;
 exports.setSettings = function(obj) {
     for (var setting in obj) {
         var val = obj[setting];
@@ -58,45 +47,85 @@ exports.setSettings = function(obj) {
 
 //this iife generally controls the flow of the game
 (function() {
+    var players = [];
     var spectators = [];
     var activePlayers = 0;
     var nextPlayTimer = -1;
     var recentLeave = -1;
 
-    exports.addPlayer = addPlayer;
+    exports.addHuman = addHuman;
     exports.addSpectator = addSpectator;
+    exports.setAI = setAI;
 
-    function addPlayer(playerObj) {
+    //start
+    createDeck();
+    initializeDefaultAI();
+
+    helper.setUp(board.getInfo());
+
+    newGame();
+
+    function initializeDefaultAI() {
+        setAI([0,1,2,3],defaultAI);
+    }
+
+    function setAI(playerList,AIname) {
+        for (var i = 0 ; i < playerList.length ; i++) {
+            //create a seperate closure for each player
+            try {
+                var player = playerList[i];
+                var AI = require("./AI/" + AIname);
+
+                if (AI.play) {
+                    //create a wrapper object
+                    var AIobj = Object.assign({},AI);
+                    AIobj.play = function(hand,team,info,callback) {
+                        var startTime;
+                        if (speed) {
+                            startTime = +new Date();
+                        }
+                        var result = AI.play(hand,team,info);
+                        if (speed) {
+                            setTimeout(function() {
+                                callback(result);
+                            },speed - new Date() + startTime);
+                        } else {
+                            callback(result);
+                        }
+                    };
+                    AIobj.human = false;
+                    addPlayer(player,AIobj);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    }
+
+    function addHuman(playerObj) {
         var ret = {};
         var player = recentLeave === -1 ? getOpenPlayerSlot() : recentLeave;
         recentLeave = -1;
         if (player !== -1) {
-            players[player] = playerObj;
+            var playerHolder = Object.assign({},playerObj);
+            playerHolder.human = true;
 
-            //send game info to player, may want to combine with AI version later
-            var gameInfo = getAllInfo();
-            gameInfo.type = "start";
-            gameInfo.player = player;
-            gameInfo.hand = hands[player];
-            playerObj.setup(JSON.stringify(gameInfo));
+            addPlayer(player,playerHolder);
 
-            //allow caller to use these functions, but player is protected
             var remove = function() {
                 removePlayer(player);
             };
-            var play = function(result) {
-                playCard(player,result);
-            };
             ret.success = true;
             ret.remove = remove;
-            ret.play = play;
 
             activePlayers++;
             if (player === nextPlayer) {
+                //this will stop the currently running AI
                 clearTimeout(nextPlayTimer);
+                playNext();
             } else if (activePlayers === 1) {
                 //this means this is only player
-                nextPlayTimer = setTimeout(playCard,speed);
+                playNext();
             }
         } else {
             ret.success = false;
@@ -104,9 +133,36 @@ exports.setSettings = function(obj) {
         return ret;
     }
 
-    function addSpectator(spectateObj) {
+    function addPlayer(player,playerObj) {
+        var gameInfo = getAllInfo();
+        gameInfo.type = "start";
+        gameInfo.player = player;
+        gameInfo.team = helper.getTeam(player);
+        gameInfo.hand = hands[player];
+        //playerObj.setup(JSON.stringify(gameInfo));
+        try {
+            if (playerObj.setup) {
+                playerObj.setup(gameInfo);
+            }
+            players[player] = playerObj;
+        } catch (err) {
+            console.log(err);
+        }
+        players[player] = playerObj;
+    }
+
+    function getOpenPlayerSlot() {
+        for (var player = 0 ; player < players.length ; player++) {
+            if (!players[player].human) {
+                return player;
+            }
+        }
+        return -1;
+    }
+
+    function addSpectator(spectateObj,level) {
         //this is only used for simulation, so a lot things are missing - remove, etc
-        ret = {};
+        var ret = {};
         spectators.push(spectateObj);
 
         //from addPlayer
@@ -121,19 +177,10 @@ exports.setSettings = function(obj) {
         activePlayers++;
         if (activePlayers === 1) {
             //this means this is only player
-            nextPlayTimer = setTimeout(playCard,speed);
+            playNext();
         }
 
         return ret;
-    }
-
-    function getOpenPlayerSlot() {
-        for (var player = 0 ; player < players.length ; player++) {
-            if (!players[player].human) {
-                return player;
-            }
-        }
-        return -1;
     }
 
     function removePlayer(player) {
@@ -150,7 +197,7 @@ exports.setSettings = function(obj) {
 
         if (activePlayers) {
             if (nextPlayer === player) {
-                nextPlayTimer = setTimeout(playCard,speed * 10);
+                nextPlayTimer = setTimeout(playNext,speed * 10);
             }
         } else {
             //stop game if no one is playing
@@ -158,16 +205,33 @@ exports.setSettings = function(obj) {
         }
     }
 
+    function playNext() {
+        var player = nextPlayer;
+        var team = helper.getTeam(player);
+        var hand = hands[player];
+        try {
+            players[player].play(hand,team,board.getInfo(),function(result) {
+                playCard(player,result);
+            });
+        } catch (err) {
+            //this will stop everything
+            console.log(err.stack);
+            //may want to change AI to something else
+        }
+    }
+
     function playCard(player,result) {
-        var ret = play(player,result);
+        if (!result) {
+            //so to not destroy processTurn, will be caught later
+            result = {};
+        }
+        var ret = processTurn(player,result);
         if (ret.status === -1) {
             console.log("something wrong with play");
         } else {
-            if (ret.status === 2) {
-                //waiting for player input
-            } else if (ret.status === 1) {
-                //calls with no parameters
-                nextPlayTimer = setTimeout(playCard,speed);
+            if (ret.status === 1) {
+                playNext();
+                //nextPlayTimer = setTimeout(playCard,speed);
             } else if (ret.status === 3) {
                 sendEnd(ret.winner);
                 setTimeout(startNewGame,speed * 3);
@@ -178,20 +242,32 @@ exports.setSettings = function(obj) {
         }
     }
 
+    function startNewGame() {
+        if (games < maxGame) {
+            newGame();
+            sendNewGame();
+            playNext();
+        } else {
+            sendAllDone();
+        }
+    }
+
     function sendPlay(data) {
         //copy to not affect outside function
         var send = copyObject(data.all);
         var newCard = data.newCard;
 
         send.type = "play";
-        var info = JSON.stringify(send);
-
-        send.newCard = newCard;
-        var prevPlayerInfo = JSON.stringify(send);
         for (var player = 0 ; player < players.length ; player++) {
             var onPlay = players[player].onPlay;
             if (onPlay) {
-                onPlay(player === send.player ? prevPlayerInfo : info);
+                if (player === send.player) {
+                    send.newCard = newCard;
+                    onPlay(send);
+                    delete send.newCard;
+                } else {
+                    onPlay(send);
+                }
             }
         }
 
@@ -199,38 +275,32 @@ exports.setSettings = function(obj) {
             var spectator = spectators[i];
             var onPlay = spectator.onPlay;
             if (onPlay) {
-                onPlay(spectator.lvl >= 5 || spectator.lvl === send.player ? prevPlayerInfo : info);
+                if (spectator.lvl >= 5 || spectator.lvl === send.player) {
+                    send.newCard = newCard;
+                    onPlay(send);
+                    delete send.newCard;
+                } else {
+                    onPlay(send);
+                }
             }
         }
     }
 
     function sendEnd(winner) {
         var data = {type:"end",winner:winner};
-        var info = JSON.stringify(data);
         for (var player = 0 ; player < players.length ; player++) {
             if (players[player].onEndGame) {
-                players[player].onEndGame(info);
+                players[player].onEndGame(data);
             }
         }
         for (var i = 0 ; i < spectators.length ; i++) {
             var onEndGame = spectators[i].onEndGame;
             if (onEndGame) {
-                onEndGame(info);
+                onEndGame(data);
             }
         }
     }
 
-    function startNewGame() {
-        if (games < maxGame) {
-            newGame();
-            sendNewGame();
-            if (!players[nextPlayer].human) {
-                nextPlayTimer = setTimeout(playCard,speed);
-            }
-        } else {
-            sendAllDone();
-        }
-    }
 
     function sendNewGame() {
         var data = getAllInfo();
@@ -238,31 +308,28 @@ exports.setSettings = function(obj) {
         for (var player = 0 ; player < players.length ; player++) {
             if (players[player].onNewGame) {
                 data.hand = hands[player];
-                var info = JSON.stringify(data);
-                players[player].onNewGame(info);
+                players[player].onNewGame(data);
             }
         }
         for (var i = 0 ; i < spectators.length ; i++) {
             var onNewGame = spectators[i].onNewGame;
             if (onNewGame) {
-                var info = JSON.stringify(data);
-                onNewGame(info);
+                onNewGame(data);
             }
         }
     }
 
     function sendAllDone() {
         var data = {type:"allDone",bluewin:bluewin,greenwin:greenwin,ties:ties,games:games};
-        var info = JSON.stringify(data);
         for (var player = 0 ; player < players.length ; player++) {
             if (players[player].onAllDone) {
-                players[player].onAllDone(info);
+                players[player].onAllDone(data);
             }
         }
         for (var i = 0 ; i < spectators.length ; i++) {
             var onAllDone = spectators[i].onAllDone;
             if (onAllDone) {
-                onAllDone(info);
+                onAllDone(data);
             }
         }
     }
@@ -288,57 +355,6 @@ function getAllInfo() {
     info.handLengths = handLengths;
     info.nextPlayer = nextPlayer;
     return info;
-}
-
-function initializeDefaultAI() {
-    setAI([0,1,2,3],defaultAI);
-}
-
-
-function setAI(playerList,AIname) {
-    for (var i = 0 ; i < playerList.length ; i++) {
-        //create a seperate closure for each player
-        try {
-            var player = playerList[i];
-            var AI = require("./AI/" + AIname);
-            if (AI.play) {
-                if (AI.setup) {
-                    AI.setup(board.getInfo(),player,helper.getTeam(player));
-                }
-                AI.human = false;
-                players[player] = AI;
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
-}
-
-function play(player,play) {
-    if (player === undefined) {
-        player = nextPlayer;
-        if (players[player].human) {
-            console.log("should be human playing, not AI");
-            play = {};
-        } else {
-            var team = helper.getTeam(player);
-            var hand = hands[player];
-            var AI = players[player].play;
-            try {
-                play = AI(hand,team,board.getInfo());
-            } catch (err) {
-                //this will stop everything
-                console.log(err);
-                //as to not break the next part
-                play = {};
-                //may want to change AI to something else
-            }
-        }
-    } else if (player !== nextPlayer) {
-        console.log("not your turn");
-    }
-    //the play is checked in here
-    return processTurn(player,play);
 }
 
 function processTurn(player,play) {
@@ -424,10 +440,6 @@ function processTurn(player,play) {
                 }
             }
             all.nextPlayer = nextPlayer;
-            if (players[nextPlayer].human) {
-                //means waiting for player next turn
-                ret.status = 2;
-            }
         }
     }
     return ret;
