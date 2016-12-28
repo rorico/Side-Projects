@@ -7,6 +7,16 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         processRedirect = function(typeData,level) {
             var series = [];
             var zoom = [];
+            var options = {
+                title: {
+                    text: "Redirects"
+                },
+                yAxis: {
+                    title: {
+                        text: "Number of Redirects"
+                    }
+                }
+            };
             if (typeData && typeData.length) {
                 var indexes = {};
                 var index = 0;
@@ -39,7 +49,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 var last = all[all.length-1][0];
                 zoom = [last - defaultZoom,last];
             }
-            return {series:series,zoom:zoom};
+            return {series:series,zoom:zoom,options:options};
         };
 
         function addRedirectEntry(data,hour) {
@@ -57,10 +67,24 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
 
         processTimeLine = function(typeData,level) {
-            console.log(typeData)
             var series = [];
             var zoom = [];
+
             var options = {
+                title: {
+                    text: "TimeLine Wasting Time"
+                },
+                yAxis: {
+                    title: {
+                        text: "Time Spent"
+                    },
+                    labels: {
+                        formatter: function() {
+                            console.log(this);  
+                            return MinutesSecondsFormat(this.value);
+                        }
+                    }
+                },
                 tooltip: {
                     pointFormatter: function() {
                         //copied from default with value format changed
@@ -245,20 +269,12 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         if (series) {
             var options = {
                 chart: {
-                    renderTo: "redirects",
+                    renderTo: "highcharts",
                     zoomType: "x",
                     type: "column"
                 },
-                title: {
-                    text: "Redirects"
-                },
                 xAxis:{
                     type: "datetime"
-                },
-                yAxis: {
-                    title: {
-                        text: "Number of Redirects"
-                    }
                 },
                 series: series,
                 plotOptions: {
