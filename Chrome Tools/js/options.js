@@ -21,9 +21,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 var indexes = {};
                 var index = 0;
 
-                //set all
-                var allStart = nearestHour(typeData[0][0]) - hourAmount;
-                var all = [[allStart,0]];
                 for (var j = 0 ; j < typeData.length ; j++) {
                     var name = getWebsiteName(typeData[j][1],level);
                     var hour = nearestHour(typeData[j][0]);
@@ -37,16 +34,17 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     }
                     var data = series[curIndex].data;
                     addRedirectEntry(data,hour);
-                    addRedirectEntry(all,hour);
                 }
-                series.push({name:"all",data:all,visible:false});
+                var last = -Infinity;
                 //add a 0 aftet end of data
                 for (var i = 0 ; i < series.length ; i++) {
                     var data = series[i].data;
-                    data.push([data[data.length-1][0] + hourAmount, 0]);
+                    var lastEntry = data[data.length-1][0];
+                    data.push([lastEntry + hourAmount, 0]);
+                    if (lastEntry > last) {
+                        last = lastEntry;
+                    }
                 }
-
-                var last = all[all.length-1][0];
                 zoom = [last - defaultZoom,last];
             }
             return {series:series,zoom:zoom,options:options};
