@@ -23,10 +23,10 @@ var getData;
                 info.push(data);
                 var setObj = {};
                 setObj[storeName] = info;
-                set(setObj,function() {
+                set(setObj,null,function(message) {
                     //if total data is too large, move things into local storage
                     //would like to change the way this is done, but this seems alright
-                    if (chrome.runtime.lastError && chrome.runtime.lastError.message === "QUOTA_BYTES quota exceeded") {
+                    if (message === "QUOTA_BYTES quota exceeded") {
                         moveData(name,info,data);
                     }
                 });
@@ -53,77 +53,84 @@ var getData;
         var metaName = name + metaSuf;
         get([indexName,metaName], function(items) {
             var indexes = items[indexName] || [];
-            var dataName = name + "_" + indexes.length;
-            indexes.push(dataName);
-
-            var setObj = {indexes:indexes};
-            setObj[indexName] = indexes;
-            setObj[metaName] = metaData;
-            setObj[name + suf] = [];
-            setObj[dataName] = info;
-            set(setObj);
-            storeData(name,data);
-
-
-            //move older things to localStorage - unlimited storage
             var metaData = items[metaName] || {};
 
+            var store = function() {
+                var dataName = name + "_" + indexes.length;
+                indexes.push(dataName);
+                var setObj = {indexes:indexes};
+                setObj[indexName] = indexes;
+                setObj[name + suf] = [];
+                setObj[dataName] = info;
+                setObj[metaName] = metaData;
+                set(setObj);
+                storeData(name,data);
+            };
+
+            //move older things to localStorage - unlimited storage
             //hold [start,end] values, end is 1 more than largest
             if (!metaData.sync) {
                 metaData.sync = [0,indexes.length];
             }
             metaData.sync[1]++;
             //limit to 5 blocks of data
-            var overflow = metaData.sync[1] - metaData.sync[0] - 5;
+            var overflow = metaData.sync[1] - metaData.sync[0] - 3;
+
             if (overflow > 0) {
                 if (!metaData.local) {
                     metaData.local = [0,0];
                 }
                 metaData.local[1] += overflow;
-                var removeIndexes = indexes.slice(metaData[0],metaData[0] + overflow);
+                var removeIndexes = indexes.slice(metaData.sync[0],metaData.sync[0] + overflow);
                 metaData.sync[0] += overflow;
                 get(removeIndexes, function(removedItems) {
                     setLocal(removedItems);
-                    remove(removeIndexes);
+                    //store after to free up space first
+                    remove(removeIndexes,store);
                 });
+            } else {
+                store();
             }
         });
     }
 
-    function set(obj,callback) {
+    function set(obj,callback,onerror) {
         chrome.storage.sync.set(obj,function() {
-            if (!storageError() && typeof callback === "function") {
+            if (!storageError(onerror) && typeof callback === "function") {
                 callback();
             }
         });
     }
 
-    function setLocal(obj,callback) {
+    function setLocal(obj,callback,onerror) {
         chrome.storage.local.set(obj,function() {
-            if (!storageError() && typeof callback === "function") {
+            if (!storageError(onerror) && typeof callback === "function") {
                 callback();
             }
         });
     }
 
-    function get(list,callback) {
+    function get(list,callback,onerror) {
         chrome.storage.sync.get(list, function(items) {
-            if (!storageError() && typeof callback === "function") {
+            if (!storageError(onerror) && typeof callback === "function") {
                 callback(items);
             }
         });
     }
 
-    function remove(list,callback) {
-        chrome.storage.sync.remove(remove,function() {
-            if (!storageError() && typeof callback === "function") {
+    function remove(list,callback,onerror) {
+        chrome.storage.sync.remove(list,function() {
+            if (!storageError(onerror) && typeof callback === "function") {
                 callback();
             }
         });
     }
 
-    function storageError() {
+    function storageError(onerror) {
         if (chrome.runtime.lastError) {
+            if (typeof onerror === "function") {
+                onerror(chrome.runtime.lastError.message);
+            }
             log(chrome.runtime.lastError.message);
             return true;
         }
