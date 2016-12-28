@@ -99,7 +99,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                         last = lastEntry;
                     }
                 }
-
                 zoom = [last - defaultZoom,last];
             }
             return {series:series,zoom:zoom,options:options};
@@ -111,7 +110,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                 var nextHour = hour + hourAmount;
                 var thisHour;
                 if (time + amount > nextHour) {
-                    //addEntry(data,nextHour,time + amount - nextHour);
                     thisHour = nextHour - time;
                 } else {
                     thisHour = amount;
