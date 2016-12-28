@@ -6,12 +6,7 @@ var getData;
     var metaSuf = "Meta";
     storeData = function(name,data) {
         var storeName = name + suf;
-        chrome.storage.sync.get(storeName, function(items) {
-            if (chrome.runtime.lastError) {
-                log(chrome.runtime.lastError);
-                return;
-            }
-
+        get(storeName, function(items) {
             var info = items[storeName] || [];
             //approximately the max size per item, slightly smaller
             //for some reason the limit is around 7700 instead of 8192, be much lower to be sure
@@ -28,13 +23,11 @@ var getData;
                 info.push(data);
                 var setObj = {};
                 setObj[storeName] = info;
-                chrome.storage.sync.set(setObj, function() {
-                    if (chrome.runtime.lastError) {
-                        if (chrome.runtime.lastError.message === "QUOTA_BYTES quota exceeded") {
-                            moveData(name,info,data);
-                        }
-                        log(chrome.runtime.lastError);
-                        return;
+                set(setObj,function() {
+                    //if total data is too large, move things into local storage
+                    //would like to change the way this is done, but this seems alright
+                    if (chrome.runtime.lastError && chrome.runtime.lastError.message === "QUOTA_BYTES quota exceeded") {
+                        moveData(name,info,data);
                     }
                 });
             }
@@ -44,29 +37,21 @@ var getData;
     getData = function(name,callback) {
         var indexName = name + indexSuf;
         var metaName = name + metaSuf;
-        chrome.storage.sync.get([indexName,metaName], function(item) {
-            if (chrome.runtime.lastError) {
-                log(chrome.runtime.lastError);
-                return;
-            }
+        get([indexName,metaName], function(item) {
             var indexes = item[indexName] || [];
-            var metaData = items[metaName] || {};
+            var metaData = item[metaName] || {};
             if (metaData.sync) {
                 indexes = indexes.slice(metaData.sync[0],metaData.sync[1]);
             }
             indexes.push(name + suf);
-            chrome.storage.sync.get(indexes, callback);
+            get(indexes, callback);
         });
     };
 
     function moveData(name,info,data) {
         var indexName = name + indexSuf;
         var metaName = name + metaSuf;
-        chrome.storage.sync.get([indexName,metaName], function(items) {
-            if (chrome.runtime.lastError) {
-                log(chrome.runtime.lastError);
-                return;
-            }
+        get([indexName,metaName], function(items) {
             var indexes = items[indexName] || [];
             var dataName = name + "_" + indexes.length;
             indexes.push(dataName);
@@ -76,12 +61,7 @@ var getData;
             setObj[metaName] = metaData;
             setObj[name + suf] = [];
             setObj[dataName] = info;
-            chrome.storage.sync.set(setObj, function() {
-                if (chrome.runtime.lastError) {
-                    log(chrome.runtime.lastError);
-                    return;
-                }
-            });
+            set(setObj);
             storeData(name,data);
 
 
@@ -95,32 +75,58 @@ var getData;
             metaData.sync[1]++;
             //limit to 5 blocks of data
             var overflow = metaData.sync[1] - metaData.sync[0] - 5;
-            if (size > 0) {
+            if (overflow > 0) {
                 if (!metaData.local) {
                     metaData.local = [0,0];
                 }
-                metaData.local[1] += size;
-                var remove = indexes.slice(metaData[0],metaData[0] + size);
-                metaData.sync[0] += size;
-                chrome.storage.sync.get(remove, function(removedItems) {
-                    if (chrome.runtime.lastError) {
-                        log(chrome.runtime.lastError);
-                        return;
-                    }
-                    chrome.storage.local.set(removedItems,function() {
-                        if (chrome.runtime.lastError) {
-                            log(chrome.runtime.lastError);
-                            return;
-                        }
-                    });
-                    chrome.storage.sync.remove(remove,function()) {
-                        if (chrome.runtime.lastError) {
-                            log(chrome.runtime.lastError);
-                            return;
-                        }
-                    }
+                metaData.local[1] += overflow;
+                var removeIndexes = indexes.slice(metaData[0],metaData[0] + overflow);
+                metaData.sync[0] += overflow;
+                get(removeIndexes, function(removedItems) {
+                    setLocal(removedItems);
+                    remove(removeIndexes);
                 });
             }
         });
+    }
+
+    function set(obj,callback) {
+        chrome.storage.sync.set(obj,function() {
+            if (!storageError() && typeof callback === "function") {
+                callback();
+            }
+        });
+    }
+
+    function setLocal(obj,callback) {
+        chrome.storage.local.set(obj,function() {
+            if (!storageError() && typeof callback === "function") {
+                callback();
+            }
+        });
+    }
+
+    function get(list,callback) {
+        chrome.storage.sync.get(list, function(items) {
+            if (!storageError() && typeof callback === "function") {
+                callback(items);
+            }
+        });
+    }
+
+    function remove(list,callback) {
+        chrome.storage.sync.remove(remove,function() {
+            if (!storageError() && typeof callback === "function") {
+                callback();
+            }
+        });
+    }
+
+    function storageError() {
+        if (chrome.runtime.lastError) {
+            log(chrome.runtime.lastError.message);
+            return true;
+        }
+        return false;
     }
 })();
