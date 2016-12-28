@@ -45,7 +45,6 @@ function weekSchedule(dates,callback) {
 }
 
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
-    console.log(a,b,c);
     switch (a.action) {
         case "block":
             block(a.type,a.info);
