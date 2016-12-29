@@ -120,7 +120,7 @@ function startConnection() {
                         }
                     } else {
                         hands[me][playedCard] = data.newCard;
-                        $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard));
+                        $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard)).detach().appendTo($("#p" + me));
                     }
                 } else {
                     $("#p" + data.player).removeClass("myTurn" + getTeam(data.player));
