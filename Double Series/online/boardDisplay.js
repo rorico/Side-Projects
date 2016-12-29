@@ -31,6 +31,7 @@ function boardDisplay() {
 function createPlayers() {
     var currentPlayer = me ? me : 0;
     $("#botPlayer").html(playerHtml(currentPlayer));
+    $("#p" + me).sortable();
     currentPlayer = (currentPlayer + 1) % 4;
     $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(currentPlayer) + "</div></div>");
     currentPlayer = (currentPlayer + 1) % 4;
