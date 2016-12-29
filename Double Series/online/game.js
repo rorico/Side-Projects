@@ -139,16 +139,14 @@ exports.setSettings = function(obj) {
         gameInfo.player = player;
         gameInfo.team = helper.getTeam(player);
         gameInfo.hand = hands[player];
-        //playerObj.setup(JSON.stringify(gameInfo));
         try {
             if (playerObj.setup) {
                 playerObj.setup(gameInfo);
             }
             players[player] = playerObj;
         } catch (err) {
-            console.log(err);
+            console.log(err.stack);
         }
-        players[player] = playerObj;
     }
 
     function getOpenPlayerSlot() {
@@ -231,7 +229,6 @@ exports.setSettings = function(obj) {
         } else {
             if (ret.status === 1) {
                 playNext();
-                //nextPlayTimer = setTimeout(playCard,speed);
             } else if (ret.status === 3) {
                 sendEnd(ret.winner);
                 setTimeout(startNewGame,speed * 3);
