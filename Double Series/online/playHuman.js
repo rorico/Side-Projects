@@ -48,7 +48,7 @@ function chooseCard(player,team,card,options) {
             var ret = {
                 card:card,
                 action:constants.PLAY_REPLACE
-            }
+            };
             choosePlay(player,ret);
         });
     }
@@ -100,7 +100,6 @@ function showFinish(player,team,ret,possible) {
         finish();
     } else {
         var unFinished = 0;
-        var startIndexes = [];
         for (var i = 0 ; i < possible.length ; i++) {
             var line = possible[i];
             var random = Math.floor(Math.random() * (line.length - 5));

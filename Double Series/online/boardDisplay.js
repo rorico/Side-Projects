@@ -50,7 +50,7 @@ function joinGameClickCallback(gameInfo) {
             return function() {
                 var data = {type:"joinGame",gameId:gameId,name:myName};
                 connection.send(JSON.stringify(data));
-            }
+            };
         }(gameId));
         $("#modal").append(html);
     }
@@ -197,16 +197,6 @@ function showFinishLine(line,team) {
 
 function showFinishPoint(x,y,team) {
     getPosition(x,y).removeClass("v" + team).addClass("v"+(team+1));
-}
-
-//for showing statistics of what points is used to win
-function showWorth() {
-    for (var x = 0 ; x < 10; x++) {
-        for (var y = 0 ; y < 10; y++) {
-            getPosition(x,y).removeClass().addClass("v0").text(pointworth[x][y]);
-        }
-    }
-    $("#values").append(JSON.stringify(pointworth));
 }
 
 //change card numbers to corresponding card in game

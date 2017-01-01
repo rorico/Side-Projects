@@ -60,7 +60,6 @@ function startConnection() {
             if (data.gameId) {
                 if (gameId !== data.gameId) {
                     gameId = data.gameId;
-                    console.log(gameId)
                     history.pushState({}, null, "/" + gameId);
                 }
             }
