@@ -3,6 +3,8 @@ function popup() {
     var nameField = $("<input class='block' type='text' name='name' value='Your Name'>");
     nameField.change(function(e) {
         myName = nameField.val();
+        /*var data = {type:"change",name:myName};
+        connection.send(JSON.stringify(data));*/
     });
     popup.append(nameField);
     popup.append("<br />");
@@ -22,7 +24,7 @@ function popup() {
 function createGame() {
     //for now just create and join a game
     $("#modal").html("Loading...");
-    var data = {type:"createGame"};
+    var data = {type:"createGame",name:myName};
     connection.send(JSON.stringify(data));
 }
 
@@ -46,7 +48,7 @@ function joinGameClickCallback(gameInfo) {
         var html = $("<button class='block' name='name'>" + text + "</button>");
         html.click(function(gameId) {
             return function() {
-                var data = {type:"joinGame",gameId:gameId};
+                var data = {type:"joinGame",gameId:gameId,name:myName};
                 connection.send(JSON.stringify(data));
             }
         }(gameId));
@@ -96,6 +98,10 @@ function createPlayers() {
     var currentPlayer = me ? me : 0;
     $("#botPlayer").html(playerHtml(currentPlayer));
     $("#p" + me).sortable();
+    $("#pt" + me).prop("contenteditable",true).blur(function() {
+        var data = {type:"change",name:$(this).html()};
+        connection.send(JSON.stringify(data));
+    });
     currentPlayer = (currentPlayer + 1) % 4;
     $("#rightPlayer").html("<div class='boardSide sideHolder'><div id='rightSide' class='rotate270'>" + playerHtml(currentPlayer) + "</div></div>");
     currentPlayer = (currentPlayer + 1) % 4;
@@ -112,7 +118,8 @@ function createPlayers() {
 }
 
 function playerHtml(player) {
-    return "<div class='playerTitle'>Player " + (player + 1) + "</div><div class='hand' id='p" + player + "'>" + cardHtml(player) + "</div>";
+    var playerName = player === me ? myName : (playerNames[player] || "Player " + (player + 1));
+    return "<div class='playerTitle'><span id='pt" + player + "'>" + playerName + "</span></div><div class='hand' id='p" + player + "'>" + cardHtml(player) + "</div>";
 }
 
 function newPlayers() {

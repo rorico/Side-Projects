@@ -56,6 +56,7 @@ module.exports = function() {
     //this iife generally controls the flow of the game
     (function() {
         var players = [];
+        var playerNames = [];
         var spectators = [];
         var activePlayers = 0;
         var nextPlayTimer = -1;
@@ -94,10 +95,14 @@ module.exports = function() {
         function addHuman(playerObj) {
             var ret = {};
             var player = recentLeave === -1 ? getOpenPlayerSlot() : (clearTimeout(removeTimer), recentLeave);
-            console.log(player);
             recentLeave = -1;
             if (player !== -1 && addPlayer(player,playerObj,true)) {
                 ret.success = true;
+                ret.change = function(name) {
+                    playerNames[player] = name;
+                    players[player].name = name;
+                    sendChange({player:player,name:name});
+                };
                 ret.remove = function() {
                     removePlayer(player);
                 };
@@ -130,8 +135,10 @@ module.exports = function() {
                 if (typeof playerObj.play !== "function") {
                     return false;
                 }
-                if (!human) {
-                    //not sure if this will work;
+                if (human) {
+                    playerObj.name = playerObj.name || "Player " + (player + 1);
+                } else {
+                    playerObj.name = playerObj.name || "Computer " + (player + 1);
                     //wrap AI play to be callback, don't want to change the way AI returns
                     var AIplay = playerObj.play;
                     playerObj.play = function(hand,team,info,callback) {
@@ -150,6 +157,8 @@ module.exports = function() {
                     };
                 }
                 players[player] = playerObj;
+                playerNames[player] = playerObj.name;
+                sendChange({player:player,name:playerObj.name});
                 return true;
             } catch (err) {
                 console.log(err.stack);
@@ -217,7 +226,7 @@ module.exports = function() {
             var team = helper.getTeam(player);
             var hand = hands[player];
             try {
-                players[player].play(hand,team,board.getInfo(),function(result) {
+                players[player].play(hand,team,getInfo(),function(result) {
                     playCard(player,result);
                 });
             } catch (err) {
@@ -292,6 +301,21 @@ module.exports = function() {
             }
         }
 
+        function sendChange(data) {
+            data.type = "change";
+            for (var player = 0 ; player < players.length ; player++) {
+                if (players[player].onChange) {
+                    players[player].onChange(data);
+                }
+            }
+            for (var i = 0 ; i < spectators.length ; i++) {
+                var onChange = spectators[i].onChange;
+                if (onChange) {
+                    onChange(data);
+                }
+            }
+        }
+
         function sendEnd(winner) {
             var data = {type:"end",winner:winner};
             for (var player = 0 ; player < players.length ; player++) {
@@ -340,28 +364,29 @@ module.exports = function() {
             }
         }
 
+        function getInfo() {
+            var info = board.getInfo();
+            info.cardsPlayed = cardsPlayed;
+            info.cardsleft = cardsleft;
+            info.handLengths = handLengths;
+            return info;
+        }
+
+        function getAllInfo() {
+            var info = getInfo();
+            info.bluewin = bluewin;
+            info.greenwin = greenwin;
+            info.games = games;
+            info.playerNames = playerNames;
+            info.handLengths = handLengths;
+            info.nextPlayer = nextPlayer;
+            return info;
+        }
+
         function copyObject(obj) {
             return JSON.parse(JSON.stringify(obj));
         }
     })();
-
-    function getInfo() {
-        var info = board.getInfo();
-        info.cardsPlayed = cardsPlayed;
-        info.cardsleft = cardsleft;
-        info.handLengths = handLengths;
-        return info;
-    }
-
-    function getAllInfo() {
-        var info = getInfo();
-        info.bluewin = bluewin;
-        info.greenwin = greenwin;
-        info.games = games;
-        info.handLengths = handLengths;
-        info.nextPlayer = nextPlayer;
-        return info;
-    }
 
     function processTurn(player,play) {
         //play object will change, but not used outside the function

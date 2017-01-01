@@ -13,11 +13,12 @@ var handLength = 7;
 
 var hands = [];
 var handLengths = [];
+var playerNames = [];
 var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 
 var gameId;
-var myName = "Player 1";
+var myName;
 var me;
 var playedCard = -1;
 var connection;
@@ -74,6 +75,9 @@ function startConnection() {
             }
             if (data.handLengths) {
                 handLengths = data.handLengths;
+            }
+            if (data.playerNames) {
+                playerNames = data.playerNames;
             }
             if (data.cardsPlayed) {
                 cardsPlayed = data.cardsPlayed;
@@ -180,6 +184,9 @@ function startConnection() {
             break;
         case "home":
             popup();
+            break;
+        case "change":
+            $("#pt" + data.player).html(data.name);
             break;
         case "getGames":
             if (data.games) {

@@ -72,13 +72,13 @@ wsServer.on('request', function(request) {
                     sendData(ret);
                     break;
                 case "joinGame":
-                    joinGame(query.gameId);
+                    joinGame(query.gameId,query.name);
                     break;
                 case "createGame":
                     var thisGame = newGame();
                     currentGameId++;
                     activeGames[currentGameId] = thisGame;
-                    joinGame(currentGameId);
+                    joinGame(currentGameId,query.name);
                     break;
             }
         };
@@ -97,7 +97,7 @@ wsServer.on('request', function(request) {
         }
     });
 
-    function joinGame(gameId) {
+    function joinGame(gameId,name) {
         if (activeGames.hasOwnProperty(gameId)) {
             var game = activeGames[gameId];
             var playCallback;
@@ -110,7 +110,9 @@ wsServer.on('request', function(request) {
                 play:play,
                 onNewGame:sendData,
                 onPlay:sendData,
-                onEndGame:sendData
+                onEndGame:sendData,
+                onChange:sendData,
+                name:name
             };
 
             function playerObj(info) {
@@ -123,13 +125,19 @@ wsServer.on('request', function(request) {
             if (res.success) {
                 messageHandler = function(message) {
                     var query = JSON.parse(message);
-                    if (query && query.type === "play") {
-                        if (typeof playCallback === "function") {
-                            playCallback(query.result);
-                        } else {
-                            console.log("not your turn?");
-                        }
-                        playCallback = null;
+                    var type = query ? query.type : "";
+                    switch(type) {
+                        case "play":
+                            if (typeof playCallback === "function") {
+                                playCallback(query.result);
+                            } else {
+                                console.log("not your turn?");
+                            }
+                            playCallback = null;
+                            break;
+                        case "change":
+                            res.change(query.name);
+                            break;
                     }
                 };
                 closeHandler = res.remove;
