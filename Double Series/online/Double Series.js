@@ -2,6 +2,8 @@ var speed = 500;
 var games = 0;
 
 //game parts
+var board;
+var helper;
 var greenwin = 0;
 var bluewin = 0;
 var ties = 0;
@@ -14,12 +16,15 @@ var handLengths = [];
 var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 
+var myName = "Player 1";
 var me;
 var playedCard = -1;
 var connection;
 
 $(document).ready(function() {
-    createBoard();
+    board = newBoard();
+    helper = boardHelper(board.points);
+    popup();
     startConnection();
 });
 
@@ -31,7 +36,7 @@ function startConnection() {
     } else {
         new_uri = "ws:";
     }
-    new_uri += "//" + loc.host + "/websocket";
+    new_uri += "//" + loc.host + "/websocket?game=" + loc.pathname.substring(1);
     connection = new socket(new_uri);
     connection.onerror = function (error) {
         console.log(error);
@@ -43,13 +48,14 @@ function startConnection() {
         var leftOffset = ($("body").innerWidth() - $("#msg").outerWidth())/2;
         var topOffset = ($("body").innerHeight() - $("#msg").outerHeight())/2;
         $("#msg").css("left",leftOffset).css("top",topOffset);
-    }
+    };
 
     connection.onmessage = function (message) {
         var data = JSON.parse(message.data);
         console.log(data);
         switch (data.type) {
         case "start":
+            joinGameCallback();
             if (data.player === undefined) {
                 alert("something went very wrong");
             } else {
@@ -61,9 +67,22 @@ function startConnection() {
             if (data.handLengths) {
                 handLengths = data.handLengths;
             }
+            if (data.cardsPlayed) {
+                cardsPlayed = data.cardsPlayed;
+                if (cardsPlayed.length) {
+                    for (var i = 0 ; i < cardsPlayed.length ;i++) {
+                        var card = cardsPlayed[i];
+                        var team = helper.getTeam(card.player);
+                        addCardPlayed(card,team);
+                    }
+                }
+            }
+            console.log(data.points);
+            board = newBoard(data);
+            helper = boardHelper(board.points);
             createPlayers();
 
-            if (data.points) {
+            /*if (data.points) {
                 points = data.points;
                 for (var x = 0 ; x < points.length ; x++) {
                     for (var y = 0 ; y < points[x].length ; y++) {
@@ -72,21 +91,11 @@ function startConnection() {
                         }
                     }
                 }
-            }
-            if (data.cardsPlayed) {
-                cardsPlayed = data.cardsPlayed;
-                if (cardsPlayed.length) {
-                    for (var i = 0 ; i < cardsPlayed.length ;i++) {
-                        var card = cardsPlayed[i];
-                        var team = getTeam(card.player);
-                        addCardPlayed(card,team);
-                    }
-                }
-            }
+            }*/
 
-            if (data.linesDone) {
+            /*if (data.linesDone) {
                 linesDone = linesDone;
-            }
+            }*/
             if (data.games) {
                 games = data.games;
                 if (data.bluewin) {
@@ -100,9 +109,9 @@ function startConnection() {
             }
             if (data.nextPlayer !== undefined) {
                 if (data.nextPlayer === me) {
-                    playHuman(me,getTeam(me));
+                    playHuman(me,helper.getTeam(me));
                 } else {
-                    $("#p" + data.nextPlayer).addClass("myTurn" + getTeam(data.nextPlayer));
+                    $("#p" + data.nextPlayer).addClass("myTurn" + helper.getTeam(data.nextPlayer));
                 }
             }
             break;
@@ -110,6 +119,7 @@ function startConnection() {
             if (data.player === undefined) {
                 alert("something went very wrong");
             } else {
+                var team = helper.getTeam(data.player);
                 if (data.player === me) {
                     if (data.newCard === undefined) {
                         hands[me].splice(playedCard,1);
@@ -123,24 +133,22 @@ function startConnection() {
                         $("#p"+me+"_"+playedCard).html(changeToCards(data.newCard)).detach().appendTo($("#p" + me));
                     }
                 } else {
-                    $("#p" + data.player).removeClass("myTurn" + getTeam(data.player));
+                    $("#p" + data.player).removeClass("myTurn" + helper.getTeam(data.player));
                     if (data.handSize !== undefined) {
                         //assume handSize drops by 1
                         $("#p" + data.player + " div").first().remove();
                         //doesn't matter which is removed
                     }
+                    board.playCard(data.player,team,data);
                 }
-
-                var team = getTeam(data.player);
-                playCard(data.player,team,data);
                 addCardPlayed(data,team);
                 if (data.nextPlayer !== undefined) {
                     if (data.nextPlayer === me) {
                         setTimeout(function() {
-                            playHuman(me,getTeam(me));
+                            playHuman(me,helper.getTeam(me));
                         },speed);
                     } else {
-                        $("#p" + data.nextPlayer).addClass("myTurn" + getTeam(data.nextPlayer));
+                        $("#p" + data.nextPlayer).addClass("myTurn" + helper.getTeam(data.nextPlayer));
                     }
                 }
             }
@@ -169,13 +177,18 @@ function startConnection() {
                 handLengths = data.handLengths;
             }
             newPlayers();
-            newGame();
+            board.newGame();
             if (data.nextPlayer !== undefined) {
                 if (data.nextPlayer === me) {
-                    playHuman(me,getTeam(me));
+                    playHuman(me,helper.getTeam(me));
                 } else {
-                    $("#p" + data.nextPlayer).addClass("myTurn" + getTeam(data.nextPlayer));
+                    $("#p" + data.nextPlayer).addClass("myTurn" + helper.getTeam(data.nextPlayer));
                 }
+            }
+            break;
+        case "getGames":
+            if (data.games) {
+                joinGameClickCallback(data.games);
             }
             break;
         }

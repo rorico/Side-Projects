@@ -3,7 +3,7 @@ const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const WebSocketServer = require("websocket").server;
-const game = require("./game.js");
+const newGame = require("./game.js");
 
 var mimeTypes = {
     ".html": "text/html",
@@ -14,10 +14,15 @@ var mimeTypes = {
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8081,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0";
 
+//start with a game
+var currentGameId = 2;
+var activeGames = {"0":newGame()};
+
 var server = http.createServer(function(request, response) {
     var svrUrl = url.parse(request.url);
     var filename = svrUrl.path;
-    if (filename === "/game" || filename === "/") {
+    //paths with numbers in them correspond to specific games
+    if (filename === "/game" || filename === "/" || activeGames.hasOwnProperty(filename.substring(1))) {
         filename = "Double Series.html";
     }
     filename = path.basename(filename.replace(/\%20/g," "));
@@ -43,35 +48,92 @@ var wsServer = new WebSocketServer({
 
 wsServer.on('request', function(request) {
     var connection = request.accept(null, request.origin);
+    var query = request && request.resourceURL && request.resourceURL.query;
+    var gameId = query.game;// ? query.game : 0;
+
+    var messageHandler;
+    var closeHandler;
 
     var sendData = function(info) {
-        connection.sendUTF(info);
+        connection.sendUTF(JSON.stringify(info));
     };
 
-    var player = {
-        human:true,
-        setup:sendData,
-        onNewGame:sendData,
-        onPlay:sendData,
-        onEndGame:sendData
-    };
-
-    var res = game.addPlayer(player);
-    if (res.success) {
-        connection.on("message", function(message) {
-            if (message.type === "utf8") {
-                var query = JSON.parse(message.utf8Data);
-                var type = query ? query.type : "";
-                switch(type) {
-                case "play":
-                    res.play(query.result);
+    if (activeGames.hasOwnProperty(gameId)) {
+        joinGame(activeGames[gameId]);
+    } else {
+        messageHandler = function(message) {
+            var query = JSON.parse(message);
+            var type = query ? query.type : "";
+            switch(type) {
+                case "getGames":
+                    var list = [];
+                    for (var gameId in activeGames) {
+                        list.push([gameId,activeGames[gameId].spaces()]);
+                    }
+                    var ret = {type:"getGames",games:list};
+                    sendData(ret);
                     break;
-                }
+                case "joinGame":
+                    if (activeGames.hasOwnProperty(query.gameId)) {
+                        joinGame(activeGames[query.gameId]);
+                    }
+                    break;
+                case "createGame":
+                    var thisGame = newGame();
+                    activeGames[currentGameId] = thisGame;
+                    currentGameId++;
+                    joinGame(thisGame);
+                    break;
             }
-        });
+        };
+    }
 
-        connection.on("close", function(connection) {
-            res.remove();
-        });
+    //these allow changes in the functions outside
+    connection.on("message", function(message) {
+        if (message.type === "utf8" && typeof messageHandler === "function") {
+            messageHandler(message.utf8Data);
+        }
+    });
+
+    connection.on("close", function() {
+        if (typeof closeHandler === "function") {
+            closeHandler();
+        }
+    });
+
+    function joinGame(game) {
+        var playCallback;
+
+        var play = function(a,b,c,callback) {
+            playCallback = callback;
+        }
+
+        var player = {
+            play:play,
+            onNewGame:sendData,
+            onPlay:sendData,
+            onEndGame:sendData
+        };
+
+        function playerObj(info) {
+            sendData(info);
+            return player;
+        }
+        //var res = game.addSpectator(player);
+        var res = game.addHuman(playerObj);
+        if (res.success) {
+            messageHandler = function(message) {
+                var query = JSON.parse(message);
+                if (query && query.type === "play") {
+                    if (typeof playCallback === "function") {
+                        playCallback(query.result);
+                    } else {
+                        console.log("not your turn?");
+                    }
+                    playCallback = null;
+                }
+            };
+            closeHandler = res.remove;
+        }
     }
 });

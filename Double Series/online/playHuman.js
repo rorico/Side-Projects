@@ -8,7 +8,7 @@ function playHuman(player,team) {
         if (hand[card] === 0 || hand[card] === -1) {
             cardEle.addClass("special");
         } else {
-            options = cardOptions(hand[card]);
+            options = helper.cardOptions(hand[card]);
             //no possible moves for the card
             if (!options.length) {
                 cardEle.addClass("special");
@@ -38,10 +38,10 @@ function chooseCard(player,team,card,options) {
 
     var action = constants.PLAY_ADD;
     if (hands[player][card] === 0) {
-        options = addJoptions();
+        options = helper.addJoptions();
     } else if (hands[player][card] === -1) {
         action = constants.PLAY_REMOVE;
-        options = removeJoptions(team);
+        options = helper.removeJoptions(team);
     } else if (!options.length) {     //useless card
         addOption(player,"REMOVE",function() {
             clearHuman();
@@ -76,7 +76,9 @@ function showChoosePosition(player,team,card,action,x,y) {
             position:[x,y]
         };
         var possible;
-        if (action === constants.PLAY_ADD && (addPoint(x,y,team),possible = checker(x,y,team),possible.length)) {
+        board.playCard(player,team,ret);
+
+        if (action === constants.PLAY_ADD && (possible = helper.checker(x,y,team),possible.length)) {
             showFinish(player,team,ret,possible);
         } else {
             choosePlay(player,ret);
@@ -86,7 +88,7 @@ function showChoosePosition(player,team,card,action,x,y) {
 
 function showFinish(player,team,ret,possible) {
     ret.action = constants.PLAY_FINISH;
-    var linesFinished = linesDone[team];
+    var linesFinished = board.linesDone[team];
     var choose = [];
     //if play is going to finish the game, it doesn't matter what i picked
     if (possible.length >= 2 - linesFinished) {
@@ -95,10 +97,7 @@ function showFinish(player,team,ret,possible) {
             var random = Math.floor(Math.random() * (line.length - 5));
             choose.push(line.slice(random,random + 5));
         }
-        finishLines(choose);
-        clearHuman();
-        ret.finishedLines = choose;
-        choosePlay(player,ret);
+        finish();
     } else {
         var unFinished = 0;
         var startIndexes = [];
@@ -138,9 +137,7 @@ function showFinish(player,team,ret,possible) {
                         if (end - start >= 5) {
                             choose.push(poss.slice(start,end));
                             if (!--unFinished) {
-                                clearHuman();
-                                ret.finishedLines = choose;
-                                choosePlay(player,ret);
+                                finish();
                             }
                         }
                     });
@@ -149,10 +146,14 @@ function showFinish(player,team,ret,possible) {
         }
         //no choices
         if (!unFinished) {
-            clearHuman();
-            ret.finishedLines = choose;
-            choosePlay(player,ret);
+            finish();
         }
+    }
+    function finish() {
+        clearHuman();
+        ret.finishedLines = choose;
+        board.playCard(player,team,ret);
+        choosePlay(player,ret);
     }
 }
 

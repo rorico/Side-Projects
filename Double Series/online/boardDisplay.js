@@ -1,4 +1,68 @@
-function boardDisplay() {
+function popup() {
+    var popup = $("<div id='modal' class='block'></div>");
+    var nameField = $("<input class='block' type='text' name='name' value='Your Name'>");
+    nameField.change(function(e) {
+        myName = nameField.val();
+    });
+    popup.append(nameField);
+    popup.append("<br />");
+
+    var newGameButton = $("<input class='block' type='button' name='name' value='Create Game'>");
+    newGameButton.click(createGame);
+    popup.append(newGameButton);
+    var joinGameButton = $("<input class='block' type='button' name='name' value='Join game'>");
+    joinGameButton.click(joinGameClick);
+    popup.append(joinGameButton);
+
+    $("#holder").append(popup);
+    //var topOffset = ($("body").innerHeight() - $("#modal").outerHeight())/2;
+    //$("#modal").css("top",topOffset);
+}
+
+function createGame() {
+    //for now just create and join a game
+    $("#modal").html("Loading...");
+    var data = {type:"createGame"};
+    connection.send(JSON.stringify(data));
+}
+
+function createGameCallback(gameInfo) {
+}
+
+function joinGameClick() {
+    $("#modal").html("Loading...");
+    var data = {type:"getGames"};
+    connection.send(JSON.stringify(data));
+}
+
+function joinGameClickCallback(gameInfo) {
+    $("#modal").empty();
+    for (var i = 0 ; i < gameInfo.length ; i++) {
+        var gameId = gameInfo[i][0] || "";
+        var stats = gameInfo[i][1];
+        var activePlayers = stats.activePlayers;
+        var maxNumHumanPlayers = stats.maxNumHumanPlayers;
+        var text = "Game " + gameInfo[i][0] + "<br />Players: " + activePlayers + "/" + maxNumHumanPlayers;
+        var html = $("<button class='block' name='name'>" + text + "</button>");
+        html.click(function(gameId) {
+            return function() {
+                var data = {type:"joinGame",gameId:gameId};
+                connection.send(JSON.stringify(data));
+            }
+        }(gameId));
+        $("#modal").append(html);
+    }
+}
+
+function joinGame() {
+    $("#modal").html("Loading...");
+}
+
+function joinGameCallback() {
+    $("#modal").remove();
+}
+
+function boardDisplay(board,points) {
     //create board display
 
     var cnt = 1;

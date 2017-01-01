@@ -167,3 +167,25 @@ div, td {
 .possible {
     background-color: yellow;
 }
+#modal {
+    background-color: white;
+    position: fixed;
+    font-size: 30px;
+    border: 1px black solid;
+    padding: 10px;
+    text-align: center;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+#modal .block {
+    border-radius: 5px;
+    font-size: 30px;
+    border: 1px black solid;
+    margin: 10px;
+    text-align: center;
+}
+.inline {
+    display:inline-block;
+    padding: 5px;
+}
