@@ -16,6 +16,7 @@ var handLengths = [];
 var cardsleft = maxCards - 4 * handLength - 1;
 var cardsPlayed = [];
 
+var gameId;
 var myName = "Player 1";
 var me;
 var playedCard = -1;
@@ -36,7 +37,8 @@ function startConnection() {
     } else {
         new_uri = "ws:";
     }
-    new_uri += "//" + loc.host + "/websocket?game=" + loc.pathname.substring(1);
+    var gameId = loc.pathname.substring(1);
+    new_uri += "//" + loc.host + "/websocket?game=" + gameId;
     connection = new socket(new_uri);
     connection.onerror = function (error) {
         console.log(error);
@@ -55,6 +57,13 @@ function startConnection() {
         console.log(data);
         switch (data.type) {
         case "start":
+            if (data.gameId) {
+                if (gameId !== data.gameId) {
+                    gameId = data.gameId;
+                    console.log(gameId)
+                    history.pushState({}, null, "/" + gameId);
+                }
+            }
             joinGameCallback();
             if (data.player === undefined) {
                 alert("something went very wrong");
@@ -77,25 +86,10 @@ function startConnection() {
                     }
                 }
             }
-            console.log(data.points);
             board = newBoard(data);
             helper = boardHelper(board.points);
             createPlayers();
 
-            /*if (data.points) {
-                points = data.points;
-                for (var x = 0 ; x < points.length ; x++) {
-                    for (var y = 0 ; y < points[x].length ; y++) {
-                        if (points[x][y]) {
-                            changeBoard(x,y,points[x][y]);
-                        }
-                    }
-                }
-            }*/
-
-            /*if (data.linesDone) {
-                linesDone = linesDone;
-            }*/
             if (data.games) {
                 games = data.games;
                 if (data.bluewin) {

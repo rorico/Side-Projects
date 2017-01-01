@@ -58,9 +58,7 @@ wsServer.on('request', function(request) {
         connection.sendUTF(JSON.stringify(info));
     };
 
-    if (activeGames.hasOwnProperty(gameId)) {
-        joinGame(activeGames[gameId]);
-    } else {
+    if (!joinGame(gameId)) {
         messageHandler = function(message) {
             var query = JSON.parse(message);
             var type = query ? query.type : "";
@@ -74,9 +72,7 @@ wsServer.on('request', function(request) {
                     sendData(ret);
                     break;
                 case "joinGame":
-                    if (activeGames.hasOwnProperty(query.gameId)) {
-                        joinGame(activeGames[query.gameId]);
-                    }
+                    joinGame(query.gameId);
                     break;
                 case "createGame":
                     var thisGame = newGame();
@@ -101,39 +97,45 @@ wsServer.on('request', function(request) {
         }
     });
 
-    function joinGame(game) {
-        var playCallback;
+    function joinGame(gameId) {
+        if (activeGames.hasOwnProperty(gameId)) {
+            var game = activeGames[gameId];
+            var playCallback;
 
-        var play = function(a,b,c,callback) {
-            playCallback = callback;
-        }
+            var play = function(a,b,c,callback) {
+                playCallback = callback;
+            }
 
-        var player = {
-            play:play,
-            onNewGame:sendData,
-            onPlay:sendData,
-            onEndGame:sendData
-        };
-
-        function playerObj(info) {
-            sendData(info);
-            return player;
-        }
-        //var res = game.addSpectator(player);
-        var res = game.addHuman(playerObj);
-        if (res.success) {
-            messageHandler = function(message) {
-                var query = JSON.parse(message);
-                if (query && query.type === "play") {
-                    if (typeof playCallback === "function") {
-                        playCallback(query.result);
-                    } else {
-                        console.log("not your turn?");
-                    }
-                    playCallback = null;
-                }
+            var player = {
+                play:play,
+                onNewGame:sendData,
+                onPlay:sendData,
+                onEndGame:sendData
             };
-            closeHandler = res.remove;
+
+            function playerObj(info) {
+                info.gameId = gameId;
+                sendData(info);
+                return player;
+            }
+            //var res = game.addSpectator(player);
+            var res = game.addHuman(playerObj);
+            if (res.success) {
+                messageHandler = function(message) {
+                    var query = JSON.parse(message);
+                    if (query && query.type === "play") {
+                        if (typeof playCallback === "function") {
+                            playCallback(query.result);
+                        } else {
+                            console.log("not your turn?");
+                        }
+                        playCallback = null;
+                    }
+                };
+                closeHandler = res.remove;
+                return true;
+            }
         }
+        return false;
     }
 });
