@@ -25,7 +25,6 @@ var connection;
 $(document).ready(function() {
     board = newBoard();
     helper = boardHelper(board.points);
-    popup();
     startConnection();
 });
 
@@ -178,6 +177,9 @@ function startConnection() {
                     $("#p" + data.nextPlayer).addClass("myTurn" + helper.getTeam(data.nextPlayer));
                 }
             }
+            break;
+        case "home":
+            popup();
             break;
         case "getGames":
             if (data.games) {

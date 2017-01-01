@@ -58,6 +58,7 @@ wsServer.on('request', function(request) {
     };
 
     if (!joinGame(gameId)) {
+        sendData({type:"home"});
         messageHandler = function(message) {
             var query = JSON.parse(message);
             var type = query ? query.type : "";
