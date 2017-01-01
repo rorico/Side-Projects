@@ -15,7 +15,7 @@ var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8081,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0";
 
 //start with a game
-var currentGameId = 2;
+var currentGameId = 0;
 var activeGames = {"0":newGame()};
 
 var server = http.createServer(function(request, response) {
@@ -28,9 +28,8 @@ var server = http.createServer(function(request, response) {
     filename = path.basename(filename.replace(/\%20/g," "));
     fs.access(filename, function(err) {
         if (err) {
-            console.log(err);
             response.writeHead(404, {"Content-Type": "text/plain"});
-            response.end("Hello World\n");
+            response.end("Game doesn't exist\n");
         } else {
             response.writeHead(200, {"Content-Type": mimeTypes[path.extname(filename)]});
             var fileStream = fs.createReadStream(filename);
@@ -49,7 +48,7 @@ var wsServer = new WebSocketServer({
 wsServer.on('request', function(request) {
     var connection = request.accept(null, request.origin);
     var query = request && request.resourceURL && request.resourceURL.query;
-    var gameId = query.game;// ? query.game : 0;
+    var gameId = query.game;
 
     var messageHandler;
     var closeHandler;
@@ -76,9 +75,9 @@ wsServer.on('request', function(request) {
                     break;
                 case "createGame":
                     var thisGame = newGame();
-                    activeGames[currentGameId] = thisGame;
                     currentGameId++;
-                    joinGame(thisGame);
+                    activeGames[currentGameId] = thisGame;
+                    joinGame(currentGameId);
                     break;
             }
         };
