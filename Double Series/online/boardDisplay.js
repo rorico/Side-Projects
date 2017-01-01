@@ -67,14 +67,7 @@ function boardDisplay(board,points) {
 
     var cnt = 1;
 
-    var display = $("<table><tr><td></td><td id='topPlayer'></td><td id='card_played'></td></tr>" + 
-                    "<tr><td id='leftPlayer'></td><td id='board'></td><td id='rightPlayer'></td></tr>" + 
-                    "<tr><td id='blueData'></td><td id='botPlayer'></td><td id='greenData'></td></tr>" + 
-                    "<tr><td></td><td id='options'></td><td></td></tr></table>");
-    $("#game").append(display);
-
-
-    var html = "";
+    var html = "<table>";
     for (var i = 0 ; i < board.length ; i++) {
         html += "<tr>";
         for (var j = 0 ; j < board[i].length ; j++) {
@@ -83,7 +76,14 @@ function boardDisplay(board,points) {
         }
         html += "</tr>";
     }
-    $("#board").html(html);
+    html += "</table>";
+
+    var display = $("<table><tr><td></td><td id='topPlayer'></td><td id='card_played'></td></tr>" + 
+                    "<tr><td id='leftPlayer'></td><td id='board'>" + html + "</td><td id='rightPlayer'></td></tr>" + 
+                    "<tr><td id='blueData'></td><td id='botPlayer'></td><td id='greenData'></td></tr>" + 
+                    "<tr><td></td><td id='options'></td><td></td></tr></table>");
+    
+    $("#game").html(display);
 
     $("#blueData").html("Blue<br /><span id='bluewin'>0 (0.00%)</span>");
     $("#greenData").html("Green<br /><span id='greenwin'>0 (0.00%)</span>");

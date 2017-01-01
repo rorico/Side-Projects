@@ -88,7 +88,6 @@ function startConnection() {
             }
             board = newBoard(data);
             helper = boardHelper(board.points);
-            createPlayers();
 
             if (data.games) {
                 games = data.games;

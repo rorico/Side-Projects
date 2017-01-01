@@ -8,6 +8,7 @@ div, td {
     box-sizing: border-box;
 }
 #holder {
+    position:relative;
     justify-content: center;
     text-align: center;
 }
@@ -169,7 +170,7 @@ div, td {
 }
 #modal {
     background-color: white;
-    position: fixed;
+    position: absolute;
     font-size: 30px;
     border: 1px black solid;
     padding: 10px;
