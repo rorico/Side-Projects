@@ -1,17 +1,17 @@
-const game = require("./game");
+const newGame = require("./game");
 
 var sendData = function(info) {
     console.log(info);
 };
 
-game.setSettings({
+game = newGame({
     speed:0,
     maxGame:1000,
     checkValid:false
 });
 
-game.setAI([1,3],"playBest")
-game.setAI([0,2],"playRandom")
+game.setAI([1,3],"playBest");
+game.setAI([0,2],"playRandom");
 
 var player = {
     lvl:5,

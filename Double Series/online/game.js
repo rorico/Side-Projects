@@ -2,7 +2,7 @@ const newHelper = require("./boardHelper");
 const constants = require("./constants");
 const newBoard = require("./board");
 
-module.exports = function() {
+module.exports = function(settings) {
     var ret = {};
 
     //settings
@@ -33,23 +33,12 @@ module.exports = function() {
     var winner;
     var winningPlayer = -1;
 
-    ret.setSettings = function(obj) {
-        for (var setting in obj) {
-            var val = obj[setting];
-            switch (setting) {
-                case "maxGame":
-                    maxGame = val;
-                    break;
-                case "speed":
-                    speed = val;
-                    break;
-                case "checkValid":
-                    checkValid = val;
-                    break;
-                case "maxNumHumanPlayers":
-                    maxNumHumanPlayers = val;
-                    break;
-            }
+    var setSettings = ret.setSettings = function(obj) {
+        if (obj) {
+            maxGame = obj.maxGame === undefined ? maxGame : obj.maxGame;
+            speed = obj.speed === undefined ? speed : obj.speed;
+            checkValid = obj.checkValid === undefined ? checkValid : obj.checkValid;
+            maxNumHumanPlayers = obj.maxNumHumanPlayers === undefined ? maxNumHumanPlayers : obj.maxNumHumanPlayers;
         }
     };
 
@@ -71,6 +60,7 @@ module.exports = function() {
         };
 
         //start
+        setSettings(settings);
         createDeck();
         initializeDefaultAI();
 
