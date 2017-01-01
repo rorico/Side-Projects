@@ -60,6 +60,7 @@ module.exports = function() {
         var activePlayers = 0;
         var nextPlayTimer = -1;
         var recentLeave = -1;
+        var removeTimer;
 
         ret.addHuman = addHuman;
         ret.addSpectator = addSpectator;
@@ -92,7 +93,8 @@ module.exports = function() {
 
         function addHuman(playerObj) {
             var ret = {};
-            var player = recentLeave === -1 ? getOpenPlayerSlot() : recentLeave;
+            var player = recentLeave === -1 ? getOpenPlayerSlot() : (clearTimeout(removeTimer), recentLeave);
+            console.log(player);
             recentLeave = -1;
             if (player !== -1 && addPlayer(player,playerObj,true)) {
                 ret.success = true;
@@ -188,24 +190,25 @@ module.exports = function() {
         }
 
         function removePlayer(player) {
+            //only really care about human players
+            //let some time before really removing them
             if (players[player].human) {
-                setAI([player],defaultAI);
-            }
-            activePlayers--;
-            recentLeave = player;
-            setTimeout(function() {
-                if (recentLeave === player) {
-                    recentLeave = -1;
-                }
-            },5000);
-
-            if (activePlayers) {
-                if (nextPlayer === player) {
-                    nextPlayTimer = setTimeout(playNext,speed * 10);
-                }
-            } else {
-                //stop game if no one is playing
-                clearTimeout(nextPlayTimer);
+                recentLeave = player;
+                removeTimer = setTimeout(function() {
+                    if (players[player].human) {
+                        setAI([player],defaultAI);
+                    }
+                    activePlayers--;
+                    if (recentLeave === player) {
+                        recentLeave = -1;
+                    }
+                    if (activePlayers) {
+                        playNext();
+                    } else {
+                        //stop game if no one is playing
+                        clearTimeout(nextPlayTimer);
+                    }
+                },5000);
             }
         }
 
