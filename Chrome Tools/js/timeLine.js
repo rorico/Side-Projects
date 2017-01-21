@@ -179,20 +179,25 @@ var keyPhrases;
         });
     }
 
-    function displayInfo(i) {
+    function displayInfo(i,repeat) {
         clearTimeout(timeCurrentInterval);
         var info = "";
         if (i === -1) {
             timeCurrent = new Date() - startTime;
             var delay = 1000 - (timeCurrent%1000);
+            if (repeat) {
+                $("#timeSpend").html(MinutesSecondsFormat(timeCurrent,true));
+            } else {
+                info = formatInfo(url,timeCurrent,title);
+                $("#info").html(info);
+            }
             timeCurrentInterval = setTimeout(function() {
-                displayInfo(i);
+                displayInfo(i,true);
             },delay);
-            info = formatInfo(url,timeCurrent,title);
         } else {
             info = formatInfo(timeLine[i][2],timeLine[i][0],timeLine[i][3]);
+            $("#info").html(info);
         }
-        $("#info").html(info);
     }
 
     changeTimeLine = function(index,prev) {
@@ -255,19 +260,9 @@ var keyPhrases;
     }
 
     function formatInfo(url,time,title) {
-        return shorten(title," ",50) + "<br />" + shorten(url,"/",50) + "<br />Time spent:" + MinutesSecondsFormat(time,true);
-    }
-
-    function shorten(info,delim,limit) {
-        if (info.length > limit) { //show be about a line (400px)
-            var index = 0;
-            do {
-                index = info.lastIndexOf(delim);
-                info = info.substring(0,index);
-            } while(index > limit);
-            info += delim + "...";
-        }
-        return info;
+        return "<div class='ellipsis'>" + title + "</div>" + 
+                "<div class='ellipsis'>" + url + "</div>" + 
+                "Time spent: <span id='timeSpend'>" + MinutesSecondsFormat(time,true) + "</span>";
     }
 
     function MinutesSecondsFormat(milli,up) {
