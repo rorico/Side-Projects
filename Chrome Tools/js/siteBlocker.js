@@ -228,8 +228,8 @@ var sendContent;
             timeLine.splice(load[0],load[1]);
         } else if (action === "change") {
             if (load < timeLine.length || load < 0) {
-                sendRequest("change",[load,timeLine[load][1]],1);
                 if (timeLine[load][1]) {
+                    sendRequest("change",[load,timeLine[load][1]],1);
                     timeLine[load][1] = 0;
                     changeTimeLeft(timeLine[load][0]);
                 }
@@ -579,10 +579,12 @@ var sendContent;
 
     change = function(timeLineIndex) {
         if (timeLineIndex === -1) {
-            //change the current one and restart counter
-            sendRequest("change",[timeLineIndex,wastingTime],1);
-            wastingTime = 0;
-            handleNewPage(url,title);
+            if (wastingTime) {
+                //change the current one and restart counter
+                sendRequest("change",[timeLineIndex,wastingTime],1);
+                wastingTime = 0;
+                handleNewPage(url,title);
+            }
         } else {
             modifyTimeLine("change",timeLineIndex);
         }
