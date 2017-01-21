@@ -17,6 +17,7 @@ var addNumberListener;
         container.prepend("<div id='chromeTools_keyPress'></div>");
 
         container.attr("tabindex",1).focus().keydown(function(e) {
+            e.stopPropagation();
             if (currentPhrase) {
                 //get ascii value of next part
                 if (e.keyCode === currentPhrase[0].charCodeAt(phraseIndex)) {
