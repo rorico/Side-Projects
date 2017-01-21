@@ -275,7 +275,7 @@ var sendContent;
             var VIPtimeLeft = VIPlength - new Date() + tempVIPstartTime;
             if (VIPtab === tabId && time < VIPtimeLeft) {
                 //if not wasting time, vip will countDown, but stop when reach timeLeft
-                if (!countDown && !wastingTime) {
+                if (!countDown && !wastingTime && time > endTime) {
                     endTime = time;
                 }
                 time = VIPtimeLeft;
