@@ -30,7 +30,9 @@ var keyPhrases;
     keyPhrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],
                     ["VIP",VIP,1],
                     ["CHANGE",change],
-                    ["TEMP",tempVIP]];
+                    ["TEMP",tempVIP],
+                    ["NO",zero],
+                    ["MO",antizero,1]];
 
     timeLineInit = function(container,background) {
         var maxWidth = container.width() - 30;
@@ -284,6 +286,14 @@ var keyPhrases;
 
     function tempVIP() {
         sendRequest("temp");
+    }
+
+    function zero() {
+        sendRequest("zero");
+    }
+
+    function antizero() {
+        sendRequest("antizero");
     }
 
     //send requests to background

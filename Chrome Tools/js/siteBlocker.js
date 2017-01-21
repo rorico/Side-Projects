@@ -12,6 +12,8 @@ var change;
 var VIP;
 var resetTime;
 var tempVIP;
+var zero;
+var antizero;
 var setupClass;
 
 var sendContent;
@@ -23,6 +25,8 @@ var sendContent;
     var VIPtab = -1;
     var tempVIPtimer = -1;
     var tempVIPstartTime = 0;
+    var zeroMode = false;
+    var zeroTimer = -1;
     var classes = [];
     var classStart = Infinity;
     //sites that will block after time spent
@@ -40,6 +44,7 @@ var sendContent;
     var startingTimeLeft = 300000; // 5 mins
     var secondLimit = 300000; //5 mins
     var VIPlength = 20000; // 20s
+    var zeroLength = 1800000; // 30 mins
     var tolerance = 2000; // 2s
     if (0) { // if in testing mode
         timeLineLength = 120000; // 2 mins
@@ -270,6 +275,8 @@ var sendContent;
                 time = classStart - new Date();
                 countDown = true;
                 blockType = "class";
+            } else if (zeroMode) {
+                time = 0;
             }
 
             //don't even bother if more time left than limit
@@ -591,6 +598,21 @@ var sendContent;
         }
         clearTimer(returnTimer);
         returnTime();
+        timeLeftOutput();
+    };
+
+    zero = function() {
+        clearTimer(zeroTimer);
+        zeroMode = true;
+        timeLeftOutput();
+        zeroTimer = setTimer(function() {
+            zeroMode = false;
+        },zeroLength);
+    };
+
+    antizero = function() {
+        clearTimer(zeroTimer);
+        zeroMode = false;
         timeLeftOutput();
     };
 })();
