@@ -353,7 +353,7 @@ var sendContent;
                 unblockSite();
             }
             clearTimeout(blockTimer);
-            if (countDown && wastingTime === 1) {
+            if (countDown && wastingTime) {
                 if (time < tolerance) {
                     time = tolerance;
                 }
