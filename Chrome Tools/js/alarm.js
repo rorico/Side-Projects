@@ -3,7 +3,7 @@
 //        1 - sleep alarm
 //        2 - block alert
 var alarms = [];
-var numMaxAlarms = 5;
+var numMaxAlarms = 3;
 
 var typeColors = ["#0000FF","#33FFFF","#FF0000"];   //["blue","teal","red"];
 var defaultColor = "#000000";   //black
