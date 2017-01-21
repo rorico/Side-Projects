@@ -207,6 +207,7 @@ var keyPhrases;
         timeLine.unshift(input.newest);
         timeLineOffset++;
         addTimeLine(-1,true,new Date() - startTime,wastingTime);
+        displayInfo(-1);
     };
 
     countDown = function(timeLeft) {
