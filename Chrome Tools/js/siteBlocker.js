@@ -38,6 +38,7 @@ var sendContent;
 
     timeLineLength = 1800000; // 30 mins
     var startingTimeLeft = 300000; // 5 mins
+    var secondLimit = 300000; //5 mins
     var VIPlength = 20000; // 20s
     var tolerance = 2000; // 2s
     if (0) { // if in testing mode
@@ -254,9 +255,9 @@ var sendContent;
         return timeLeftOutput;
         //ideally, shows lowest timeLeft at all points
         function timeLeftOutput() {
-            //have the option to update browserAction every time, but accuracy isn't completely needed
-            sendRequest("timer",timeLeft,1);
-            var time = timeLeft - (wastingTime ? new Date() - startTime : 0);
+            //give wastingTime 2 more time, but do not show in badge
+            //note the returntime isn't optimized to for this, but that should be fine.
+            var time = timeLeft - (wastingTime ? new Date() - startTime : 0) + (wastingTime === 2 ? secondLimit : 0);
             var endTime = 0;
             var countDown = wastingTime;
             var blockType = "time";
@@ -282,8 +283,10 @@ var sendContent;
                 countDown = true;
                 //when this turns to 0, will not show actual time left, may want to fix this later
             }
-            countDownTimer(time,endTime,countDown);
             blockTab(time,countDown,blockType);
+            //gave wastingTime 2 more time, but don't want to show it
+            time -= (wastingTime === 2 ? secondLimit : 0);
+            countDownTimer(time,endTime,countDown);
         }
 
         function countDownTimer(time,endTime,countDown) {
