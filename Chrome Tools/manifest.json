@@ -13,7 +13,8 @@
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
-        "default": "Alt+Q"
+        "mac": "MacCtrl+Space",
+        "default": "Ctrl+Space"
       }
     },
     "open_schedule": {
