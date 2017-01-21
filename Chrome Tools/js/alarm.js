@@ -1,8 +1,9 @@
-//[state, alarm time, alarm object, type]
-var alarms = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]; 
+//alarms in the form of {state, alarm time, type, destructor}
 //types : 0 - regular
 //        1 - sleep alarm
 //        2 - block alert
+var alarms = [];
+var numMaxAlarms = 5;
 
 var typeColors = ["#0000FF","#33FFFF","#FF0000"];   //["blue","teal","red"];
 var defaultColor = "#000000";   //black
@@ -36,66 +37,72 @@ function setSleepAlarm() {
     },date - new Date());
 }
 
-//returns [alarmNumber, alarm timestamp]
 function setAlarm(delay,type) {
-    for (var i = 0 ; i<alarms.length ;i++) {
-        if (!alarms[i][0]) {
+    for (var i = 0 ; i < numMaxAlarms ; i++) {
+        var alarm = alarms[i];
+        if (!alarm) {
             var alarmTime = new Date();
-            alarmTime.setMinutes(alarmTime.getMinutes()+delay);
+            alarmTime.setMinutes(alarmTime.getMinutes() + delay);
+
+            var destructor = setRing(i,type,delay);
+
             alarmCnt++;
-            var alarm = setTimer(function() {
-                ringAlarm(i,type);
-            },delay*60000);
-
-
             alarmTypeCnt[type]++;
+
             //display highest type color
             if (type > alarmTypeMax) {
                 chrome.browserAction.setBadgeBackgroundColor({color:typeColors[type]});
                 alarmTypeMax = type;
             }
-            alarms[i] = [1,alarmTime,alarm,type];
+
+            var alarmObj = {
+                state: 1,
+                alarmTime: alarmTime,
+                type: type,
+                destructor: destructor
+            }
+            alarms[i] = alarmObj;
             sendRequest("setAlarm",[i,+alarmTime,type]);
-            return [i,+alarmTime];
+            return;
         }
     }
-    return [-1,0];
 }
 
-function ringAlarm(alarmNumber,type) {
-    ringingCnt++;
-    alarms[alarmNumber][0] = 2;
-    playAlarmCheck = true;
-    sendRequest("ringing",alarmNumber);
-    //don't ring if chrome is closed
-    //likely want to change the way this is done later
-    chrome.windows.getAll(function(windows){
-        if (windows.length) {
-            audio.play();
+function setRing(alarmNumber,type,delay) {
+    var timeout;    //hold this outside for destructor
+    var ringer = setTimer(function() {
+        ringingCnt++;
+        alarms[alarmNumber].state = 2;
+        playAlarmCheck = true;
+        sendRequest("ringing",alarmNumber);
+        //don't ring if chrome is closed
+        //likely want to change the way this is done later
+        chrome.windows.getAll(function(windows){
+            if (windows.length) {
+                audio.play();
 
-            //sleep auto snoozes
-            if (type === 1) {
-                //hold local copy
-                var timestamp = alarms[alarmNumber][1];
-                setTimeout(function(){
-                    //check if alarm is still ringing
-                    if (timestamp === alarms[alarmNumber][1] && alarms[alarmNumber][0] === 2) {
+                //sleep auto snoozes
+                if (type === 1) {
+                    timeout = setTimeout(function(){
                         removeAlarm(alarmNumber,type);
                         setAlarm(5,1);
-                    } else {
-
-                    }
-                },5000);//5 seconds
+                    },5000);//5 seconds
+                }
             }
-        }
-    });
+        });
+    },delay * 60000);
+    return function() {
+        clearTimer(ringer);
+        clearTimeout(timeout);
+    }
 }
 
 //returns true if alarm is removed
 function removeAlarm(alarmNumber,type) {
     //unspecified type is a catchall,
     //type 2 needs specific call
-    if (alarms[alarmNumber][0] && ((typeof type === "undefined" && alarms[alarmNumber][3] !== 2) || alarms[alarmNumber][3] == type)) {
+    var alarm = alarms[alarmNumber];
+    if (alarm && ((typeof type === "undefined" && alarm.type !== 2) || alarm.type == type)) {
         alarmTypeCnt[type]--;
         //if no alarms left
         if (!--alarmCnt) {
@@ -112,7 +119,7 @@ function removeAlarm(alarmNumber,type) {
             }
         }
         //check if ringing
-        if (playAlarmCheck && alarms[alarmNumber][0]===2) {
+        if (playAlarmCheck && alarm.state===2) {
             //if no alarms ringing, turn off sound
             if (!--ringingCnt) {
                 playAlarmCheck = false;
@@ -121,9 +128,9 @@ function removeAlarm(alarmNumber,type) {
             }
         }
 
-        clearTimer(alarms[alarmNumber][2]);
-        alarms[alarmNumber][0] = 0;
-        sendRequest("removeAlarm",[alarmNumber,alarms[alarmNumber][3]]);
+        alarm.destructor();
+        alarms[alarmNumber] = undefined;
+        sendRequest("removeAlarm",[alarmNumber,alarm.type]);
         return true;
     }
     return false;
@@ -133,8 +140,8 @@ function removeAlarm(alarmNumber,type) {
 function stopAllAlarms(type) {
     var ret = false;
     if (playAlarmCheck) {
-        for (var i = 0 ; i<alarms.length ; i++) {
-            if (alarms[i][0]===2) {
+        for (var i = 0 ; i < alarms.length ; i++) {
+            if (alarms[i] && alarms[i].state === 2) {
                 ret |= removeAlarm(i,type);
             }
         }

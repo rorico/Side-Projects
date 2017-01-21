@@ -1,15 +1,24 @@
 chrome.runtime.getBackgroundPage(function (backgroundPage) {
-    var ringingAlarms = [0,0,0,0,0];
+    var ringingAlarms = [];
     var background = backgroundPage;
     var typeColors = backgroundPage.typeColors;
     var defaultColor = backgroundPage.defaultColor;
     var alarms = background.alarms;
+    var numMaxAlarms = background.numMaxAlarms;
+
+    var html = "";
+    for (var i = 0 ; i < numMaxAlarms ; i++) {
+        html += "<div id='alarm" + i + "' class='alarm notSet'><div class='alarmTitle'>" + (i + 1) + "</div><div id='alarmText" + i + "' class='alarmData'>Not Set</div></div>";
+    }
+    $("#alarms").html(html);
+
     for (var i = 0 ; i < alarms.length ; i++) {
-        if (alarms[i][0] == 1) {
-            showAlarm(alarms[i][1],i,alarms[i][3]);
-        } else if (alarms[i][0] == 2) {
-            showAlarm(alarms[i][1],i,alarms[i][3]);
-            showRinging(i);
+        var alarm = alarms[i];
+        if (alarm && alarm.state) {
+            showAlarm(alarm.alarmTime,i,alarm.type);
+            if (alarm.state == 2) {
+                showRinging(i);
+            }
         }
     }
 
@@ -19,7 +28,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var alarmPhrases = [["S",setAlarmKey],["A",stopAllAlarms],["X",snooze]];
     addPhrases(alarmPhrases);
 
-    addNumberListener(removeAlarm,"D");
+    addNumberListener(function(num) {
+        removeAlarm(num - 1);  //0 index
+    },"D");
     addNumberListener(changeTimer);
 
     var logs = background.allLogs;
@@ -109,9 +120,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function removeAlarm(alarmNumber) {
-        var num = alarmNumber - 1;  //0 index
-        if (num >= 0 && num < 5) {
-            sendRequest("removeAlarm",num);
+        if (alarmNumber >= 0 && alarmNumber < 5) {
+            sendRequest("removeAlarm",alarmNumber);
         }
     }
 
@@ -137,6 +147,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         if (a.from === "background") {
             switch(a.action) {
                 case "setAlarm":
+                    //assume new alarm will only be either in current alarm length, or the next one
                     var input = a.input;
                     showAlarm(new Date(input[1]),input[0],input[2]);
                     break;
@@ -153,17 +164,15 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function showAlarm(date,alarmNumber,type) {
         var time = date.toLocaleTimeString();
-        var alarm = alarmNumber + 1;
-        $("#alarmText" + alarm).html("Alarm at "+time);
-        $("#alarm" + alarm).removeClass("notSet").css({"color":typeColors[type],"border-color":typeColors[type]}).bind("click",function() {
-            removeAlarm(alarm);
+        $("#alarmText" + alarmNumber).html("Alarm at " + time);
+        $("#alarm" + alarmNumber).removeClass("notSet").css({"color":typeColors[type],"border-color":typeColors[type]}).bind("click",function() {
+            removeAlarm(alarmNumber);
         });
     }
 
     function showRemove(alarmNumber,type) {
-        var alarm = alarmNumber + 1;
-        $("#alarmText" + alarm).html("Not Set");
-        $("#alarm" + alarm).addClass("notSet").unbind("click").css({"color":defaultColor,"border-color":defaultColor,"visibility":"visible"});
+        $("#alarmText" + alarmNumber).html("Not Set");
+        $("#alarm" + alarmNumber).addClass("notSet").unbind("click").css({"color":defaultColor,"border-color":defaultColor,"visibility":"visible"});
         clearInterval(ringingAlarms[alarmNumber]);
     }
 
@@ -171,7 +180,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         var visibility = "hidden";
         ringingAlarms[alarmNumber] = setInterval(function() {
             visibility = (visibility === "hidden" ? "visible" : "hidden");
-            $("#alarmText"+(alarmNumber+1)).css("visibility",visibility);
+            $("#alarmText" + alarmNumber).css("visibility",visibility);
         },300);
     }
 });
