@@ -429,7 +429,7 @@ var sendContent;
         })();
 
         function blockSite(tab,type) {
-            //all changes in tabs should be caught, but in case, check
+            //if in the time to block, tab changes, don't block
             if (tab === tabId) {
                 //use a wrapper in case tabId gets changed in the meantime, may not be needed
                 blockedTab = tab;
@@ -455,8 +455,6 @@ var sendContent;
                 blockedUrl = url;
                 blockedTitle = title;
                 handleNewPage("Blocked","Blocked");
-            } else {
-                log("uncaught change in tabId");
             }
         }
 
