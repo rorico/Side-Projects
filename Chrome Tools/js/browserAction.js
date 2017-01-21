@@ -97,7 +97,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     var currentTimer = "";
     function changeTimer(digit) {
         var now = new Date();
-        if (now-time<1000) {
+        if (now-time < 1000) {
             currentTimer += digit.toFixed(0);
             //limit to 3 digits
             if (currentTimer.length > 3) {
@@ -147,7 +147,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         if (a.from === "background") {
             switch(a.action) {
                 case "setAlarm":
-                    //assume new alarm will only be either in current alarm length, or the next one
                     var input = a.input;
                     showAlarm(new Date(input[1]),input[0],input[2]);
                     break;
@@ -171,9 +170,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function showRemove(alarmNumber,type) {
-        $("#alarmText" + alarmNumber).html("Not Set");
-        $("#alarm" + alarmNumber).addClass("notSet").unbind("click").css({"color":defaultColor,"border-color":defaultColor,"visibility":"visible"});
+        $("#alarmText" + alarmNumber).html("Not Set").css("visibility","visible");
         clearInterval(ringingAlarms[alarmNumber]);
+        $("#alarm" + alarmNumber).addClass("notSet").unbind("click").css({"color":defaultColor,"border-color":defaultColor});
     }
 
     function showRinging(alarmNumber) {
