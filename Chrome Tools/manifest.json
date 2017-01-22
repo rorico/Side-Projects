@@ -30,6 +30,10 @@
       "description": "Open Options"
     }
   },
+  "content_scripts": [{
+    "matches" : ["*://*.youtube.com/*", "*://youtube.com/*"],
+    "js": ["js/youtubeContent.js"]
+  }],
   "options_page": "html/options.html",
   "web_accessible_resources": ["*"],
   "manifest_version": 2

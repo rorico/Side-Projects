@@ -40,6 +40,11 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
             case "removeLog":
                 removeLog(a.input);
                 break;
+
+            //from youtube.js
+            case "youtube":
+                youtube();
+                break;
         }
     } else if (a.from === "options") {
         switch(a.action) {

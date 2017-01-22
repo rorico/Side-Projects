@@ -25,7 +25,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     timeLineInit($("#timeLineH"),background);
     keyPressInit($("body"),keyPhrases);
 
-    var alarmPhrases = [["S",setAlarmKey],["A",stopAllAlarms],["X",snooze]];
+    //last one isn't really alarms, but grouping here
+    var alarmPhrases = [["S",setAlarmKey],["A",stopAllAlarms],["X",snooze],["P",youtube]];
     addPhrases(alarmPhrases);
 
     addNumberListener(function(num) {
@@ -131,6 +132,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
     function snooze() {
         sendRequest("snooze");
+    }
+
+    function youtube() {
+        sendRequest("youtube");
     }
 
     //send requests to background
