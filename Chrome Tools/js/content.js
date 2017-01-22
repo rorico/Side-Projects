@@ -1,18 +1,20 @@
 var currentBlock;
 var blockId = "chromeTools_block";
+var blockCallback;
 
 function block(type,info) {
     var blockScreen;
     if (currentBlock) {
         if (type !== currentBlock) {
             blockScreen = $("#" + blockId).empty();
-            blockType(blockScreen,type,info);
+            return blockType(blockScreen,type,info);
         }
     } else {
         blockScreen = $("<div id='" + blockId + "'></div>");
         $("body").append(blockScreen);
-        blockType(blockScreen,type,info);
+        return blockType(blockScreen,type,info);
     }
+    return false;
 }
 
 //only helper function for block
@@ -32,9 +34,25 @@ function blockType(blockScreen,type,info) {
         }
     }
     currentBlock = type;
+    var isFullScreen = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
+    if (isFullScreen) {
+        $(document).one("webkitfullscreenchange mozfullscreenchange fullscreenchange",function() {
+            if (typeof blockCallback === "function") {
+                blockCallback(true);
+                blockCallback = undefined;
+            }
+        });
+        return false;
+    } else {
+        return true;
+    }
 }
 
 function unblock() {
+    if (typeof blockCallback === "function") {
+        blockCallback(false);
+        blockCallback = undefined;
+    }
     $("#" + blockId).remove();
     currentBlock = "";
 }
@@ -47,7 +65,12 @@ function weekSchedule(dates,callback) {
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
     switch (a.action) {
         case "block":
-            block(a.type,a.info);
+            if (block(a.type,a.info)) {
+                c(true);
+            } else {
+                blockCallback = c;
+                return true;
+            }
             break;
         case "unblock":
             unblock();

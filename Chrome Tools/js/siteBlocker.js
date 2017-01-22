@@ -460,11 +460,16 @@ var sendContent;
                 }
 
                 storeData("redirect",[+new Date(),url]);
-                sendContent({action:"block",info:info,type:type});
+                var data = {action:"block",info:info,type:type};
 
-                blockedUrl = url;
-                blockedTitle = title;
-                handleNewPage("Blocked","Blocked");
+                chrome.tabs.sendMessage(tab,data,function(blocked) {
+                    //when page is actually blocked, update timeline
+                    if (blocked && tab === tabId) {
+                        blockedUrl = url;
+                        blockedTitle = title;
+                        handleNewPage("Blocked","Blocked");
+                    }
+                });
             }
         }
 
