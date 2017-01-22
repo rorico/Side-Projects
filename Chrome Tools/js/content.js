@@ -40,6 +40,8 @@ function blockType(blockScreen,type,info) {
             if (typeof blockCallback === "function") {
                 blockCallback(true);
                 blockCallback = undefined;
+                //for keypress.js
+                blockScreen.focus();
             }
         });
         return false;
