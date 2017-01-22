@@ -260,23 +260,24 @@ var sendContent;
         return timeLeftOutput;
         //ideally, shows lowest timeLeft at all points
         function timeLeftOutput() {
+            var displayTime = timeLeft - (wastingTime ? new Date() - startTime : 0);
             //give wastingTime 2 more time, but do not show in badge
             //note the returntime isn't optimized to for this, but that should be fine.
-            var time = timeLeft - (wastingTime ? new Date() - startTime : 0) + (wastingTime === 2 ? secondLimit : 0);
+            var time = displayTime + (wastingTime === 2 ? secondLimit : 0);
             var endTime = 0;
             var countDown = wastingTime;
             var blockType = "time";
 
             if (VIPtab === tabId && !tempVIPstartTime) {
                 //if tempVIPstartTime is not set, VIP isn't temp
-                time = Infinity;
+                displayTime = time = Infinity;
                 countDown = false;
             } else if (time > classStart - new Date()) {
-                time = classStart - new Date();
+                displayTime = time = classStart - new Date();
                 countDown = true;
                 blockType = "class";
             } else if (zeroMode) {
-                time = 0;
+                displayTime = time = 0;
             }
 
             //don't even bother if more time left than limit
@@ -286,14 +287,12 @@ var sendContent;
                 if (!countDown && !wastingTime && time > endTime) {
                     endTime = time;
                 }
-                time = VIPtimeLeft;
+                displayTime = time = VIPtimeLeft;
                 countDown = true;
                 //when this turns to 0, will not show actual time left, may want to fix this later
             }
             blockTab(time,countDown,blockType);
-            //gave wastingTime 2 more time, but don't want to show it
-            time -= (wastingTime === 2 ? secondLimit : 0);
-            countDownTimer(time,endTime,countDown);
+            countDownTimer(displayTime,endTime,countDown);
         }
 
         function countDownTimer(time,endTime,countDown) {
