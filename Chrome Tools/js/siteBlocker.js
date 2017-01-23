@@ -27,6 +27,7 @@ var sendContent;
     var tempVIPstartTime = 0;
     var zeroMode = false;
     var zeroTimer = -1;
+    var nextTime;
     var classes = [];
     var classStart = Infinity;
     //sites that will block after time spent
@@ -212,6 +213,13 @@ var sendContent;
             title:title
         };
         sendRequest("newPage",info,1);
+
+        //check for returnTime to be more up to date
+        if (startTime > nextTime + tolerance) {
+            log("you probably slept the computer, didn't you?");
+            clearTimer(returnTimer);
+            returnTime();
+        }
     }
 
     //checks all levels and returns the level of url if matched, 0 if none
@@ -546,6 +554,8 @@ var sendContent;
             timeLeftOutput();
             //upper limit can be passed if currently in very long wastingTime
             var nextDelay = Math.min(timeTotal - timeLeft + currentTimeOffset,timeLineLength - startingTimeLeft);
+            //used to make sure that this is called at appropriate times
+            nextTime = new Date() + nextDelay;
             returnTime(nextDelay);
         },delay);
     }
