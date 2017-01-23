@@ -12,7 +12,7 @@ var youtube = (function() {
             for (var i = 0 ; i < num ; i++) {
                 var tab = tabs[i];
                 var data = {action:"pause"};
-                var callback = function(id) {
+                var callback = (function(id) {
                     return function(stopped) {
                         if (stopped) {
                             if (paused) {
@@ -27,13 +27,13 @@ var youtube = (function() {
                             play();
                         }
                     };
-                }(tab.id);
+                })(tab.id);
 
                 chrome.tabs.sendMessage(tab.id,data,callback);
             }
         });
     }
-
+    function play() {
         for (var i = 0 ; i < pausedVideos.length ; i++) {
             var data = {action:"play"};
             chrome.tabs.sendMessage(pausedVideos[i],data);
