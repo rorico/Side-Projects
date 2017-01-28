@@ -268,6 +268,7 @@ var sendContent;
         return timeLeftOutput;
         //ideally, shows lowest timeLeft at all points
         function timeLeftOutput() {
+            sendRequest("timer",timeLeft,1);
             var displayTime = timeLeft - (wastingTime ? new Date() - startTime : 0);
             //give wastingTime 2 more time, but do not show in badge
             //note the returntime isn't optimized to for this, but that should be fine.
