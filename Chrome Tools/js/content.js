@@ -1,60 +1,58 @@
-var currentBlock;
+var currentBlock;   //holds current block type, as well as if block or going to be blocked
 var blockId = "chromeTools_block";
-var blockCallback;
 
-function block(type,info) {
+function block(type,info,callback) {
     var blockScreen;
     if (currentBlock) {
         if (type !== currentBlock) {
             blockScreen = $("#" + blockId).empty();
-            return blockType(blockScreen,type,info);
         }
     } else {
         blockScreen = $("<div id='" + blockId + "'></div>");
         $("body").append(blockScreen);
-        return blockType(blockScreen,type,info);
     }
-    return false;
+    return blockScreen ? blockType(blockScreen,type,info,callback) : false;
 }
 
 //only helper function for block
-function blockType(blockScreen,type,info) {
-    if (type === "time") {
-        if (typeof timeLineInit === "undefined" || typeof keyPressInit === "undefined") {
-            console.log(type + " content script missing");
-        } else {
-            timeLineInit(blockScreen,info);
-            keyPressInit(blockScreen,keyPhrases);
-        }
-    } else {
-        if (typeof scheduleInit === "undefined") {
-            console.log(type + " content script missing");
-        } else {
-            scheduleInit(blockScreen);
-        }
-    }
+function blockType(blockScreen,type,info,callback) {
     currentBlock = type;
+    var funct = function() {
+        if (type === "time") {
+            if (typeof timeLineInit === "undefined" || typeof keyPressInit === "undefined") {
+                console.log(type + " content script missing");
+            } else {
+                timeLineInit(blockScreen,info);
+                keyPressInit(blockScreen,keyPhrases);
+            }
+        } else {
+            if (typeof scheduleInit === "undefined") {
+                console.log(type + " content script missing");
+            } else {
+                scheduleInit(blockScreen);
+            }
+        }
+    };
+
     var isFullScreen = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
     if (isFullScreen) {
         $(document).one("webkitfullscreenchange mozfullscreenchange fullscreenchange",function() {
-            if (typeof blockCallback === "function") {
-                blockCallback(true);
-                blockCallback = undefined;
-                //for keypress.js
-                blockScreen.focus();
+            if (currentBlock) {
+                callback(true);
+                funct();
+            } else {
+                //probably means that page was unblocked
+                callback(false);
             }
         });
-        return false;
-    } else {
         return true;
+    } else {
+        funct();
+        return false;
     }
 }
 
 function unblock() {
-    if (typeof blockCallback === "function") {
-        blockCallback(false);
-        blockCallback = undefined;
-    }
     $("#" + blockId).remove();
     currentBlock = "";
 }
@@ -67,13 +65,7 @@ function weekSchedule(dates,callback) {
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
     switch (a.action) {
         case "block":
-            if (block(a.type,a.info)) {
-                c(true);
-            } else {
-                blockCallback = c;
-                return true;
-            }
-            break;
+            return block(a.type,a.info,c);
         case "unblock":
             unblock();
             break;
