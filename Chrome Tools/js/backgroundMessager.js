@@ -1,4 +1,4 @@
-//get requests from browserAction
+//note this is at the top of the list because of sendRequest, the listener doesn't get called immediately anyways
 chrome.runtime.onMessage.addListener(function(a, b, c) {
     if (a.from === "browserAction") {
         switch(a.action) {
