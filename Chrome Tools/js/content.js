@@ -47,6 +47,7 @@ function blockType(blockScreen,type,info,callback) {
         });
         return true;
     } else {
+        callback(true);
         funct();
         return false;
     }
