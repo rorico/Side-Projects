@@ -3,6 +3,7 @@ body {
     font-size: 100%;
     width: 400px;
     text-align: center;
+    position:relative;
 }
 div {
     text-align: center;
@@ -30,6 +31,7 @@ div p {
     top: 0;
     border-color: red;
     background-color: white;
+    margin-top:0;
 }
 #setTimer {
     width: 70px;

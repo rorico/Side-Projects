@@ -66,8 +66,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
         var logHolder = $("#logHolder");
         logHolder.html(allLogEle);
-        //20 is 2 * margin
-        logHolder.outerWidth($("body").width() - 20);
         logHolder.one("click",function() {
             //maybe want to just change instead of remove
             this.remove();
