@@ -32,12 +32,17 @@ var addNumberListener;
                         } else {
                             fnc();
                         }
-                        disappearHotkey();
+                        disappearHotkey(1200);
                     }
                 } else {
-                    showHotkey(phraseIndex,false);
-                    if (!allowMistakes) {
-                        clearHotkey();
+                    if (e.keyCode === 27) {
+                        //esc key
+                        disappearHotkey();
+                    } else {
+                        showHotkey(phraseIndex,false);
+                        if (!allowMistakes) {
+                            clearHotkey();
+                        }
                     }
                 }
             } else  {
@@ -146,18 +151,23 @@ var addNumberListener;
 
     var disappearInterval;
     function disappearHotkey(time) {
-        var opacity = 0.8;
-        var delay = (time ? time / opacity / 100 : 15);
-        $("#phrase").css("opacity",opacity);
         clearInterval(disappearInterval);
-        if (!allowMistakes) {
-            disappearInterval = setInterval(function() {
-                opacity -= 0.01;
-                $("#phrase").css("opacity",opacity);
-                if (opacity <= 0) {
-                    clearHotkey();
-                }
-            },delay);
+        if (time > 0) {
+            var opacity = 0.8;
+            var delay = time / opacity / 100;
+            $("#phrase").css("opacity",opacity);
+            if (!allowMistakes) {
+                disappearInterval = setInterval(function() {
+                    opacity -= 0.01;
+                    $("#phrase").css("opacity",opacity);
+                    if (opacity <= 0) {
+                        clearHotkey();
+                    }
+                },delay);
+            }
+        } else {
+            $("#phrase").css("opacity",0);
+            clearHotkey();
         }
     }
 
