@@ -89,7 +89,7 @@
     border: 1px solid black;
     border-radius: 5px;
     z-index: 2;
-    color: white;
+    color: #f0f0f0;
 }
 #chromeTools_keyPress #phraseBack {
     position: absolute;
