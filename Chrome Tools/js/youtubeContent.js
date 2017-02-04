@@ -1,6 +1,22 @@
-var p = window.document.getElementsByTagName("video")[0];
-p.onended = function() {
-    sendRequest("youtubeEnd");
+var p;
+init();
+
+//youtube is special in that new urls don't actual reload page
+//http://stackoverflow.com/a/18398921
+document.addEventListener('transitionend', function(e) {
+    if (e.target.id === 'progress') {
+        // do stuff
+        init();
+    }
+});
+
+function init() {
+    p = window.document.getElementsByTagName("video")[0];
+    if (p) {
+        p.onended = function() {
+            sendRequest("youtubeEnd");
+        }
+    }
 }
 
 function pause() {
