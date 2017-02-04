@@ -9,14 +9,13 @@ function log(arg) {
 }
 
 function addLog(message) {
-    //second is if message is read or not
-    allLogs.push([message,false]);
+    allLogs.push([message,true]);
     numUnread++;
 }
 
 function removeLog(index) {
-    if (!allLogs[index][1]) {
-        allLogs[index][1] = true;
+    if (allLogs[index][1]) {
+        allLogs[index][1] = false;
         numUnread--;
     }
 }

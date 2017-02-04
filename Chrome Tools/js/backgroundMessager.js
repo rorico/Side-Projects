@@ -43,8 +43,8 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
 
             //from youtube.js
             case "youtube":
-                youtube();
-                break;
+                youtube(a.input,c);
+                return true;
         }
     } else if (a.from === "options") {
         switch(a.action) {

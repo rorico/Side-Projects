@@ -25,13 +25,17 @@ div p {
     border: 1px black solid;
     margin: 10px;
 }
-#logHolder {
+.topButton {
     position: absolute;
     z-index: 1;
     top: 0;
     border-color: red;
     background-color: white;
     margin-top:0;
+}
+.topButton.right {
+    right: 0;
+    border-color: blue;
 }
 #setTimer {
     width: 70px;

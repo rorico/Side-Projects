@@ -34,9 +34,10 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     },"D");
     addNumberListener(changeTimer);
 
-    var logs = background.allLogs;
-    var numUnread = background.numUnread;
     alertLogs();
+
+    var youtubeButton;
+    youtubeDisplay();
 
     //automatically close window after a period of time
     //due to alt tabbing out of game to close alarm multiple times and expecting it not to be open
@@ -46,43 +47,106 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         window.close();
     },60000);//1 minute
 
+    //list entries in format [ele, enable] or ele, depending on enable
+    function topButton(list,symbol,side,enable,clickCallback) {
+        var obj = {
+            list:list,
+            cnt:0,
+            state:1,
+            destructor:destructor,
+            restart:fullDisplay
+        };
+        var cls = "";
+        if (side === "right") {
+            cls = " right";
+        }
+        var button = $("<div class='topButton block" + cls + "'>" + symbol + "</div>");
+        $("body").prepend(button);
+        button.width(button.height());
+        button.click(function() {
+            if (obj.state === 1) {
+                fullDisplay();
+            } else if (obj.state === 2) {
+                obj.state = 1;
+                button.html(symbol);
+                button.width(button.height());
+            }
+        });
+
+        return obj;
+
+        function fullDisplay() {
+            obj.state = 2;
+            var allEle = $("<div></div>");
+            for (var i = 0 ; i < list.length ; i++) {
+                var info;
+                if (enable) {
+                    if (list[i][1]) {
+                        info = list[i][0];
+                    } else {
+                        continue;
+                    }
+                } else {
+                    info = list[i];
+                }
+                var ele = $("<div class='log block'>" + info + "</div>");
+                setClick(ele,i);
+                allEle.append(ele);
+                obj.cnt++;
+            }
+            button.html(allEle);
+            //20 is 2 * margin
+            button.outerWidth($("body").width() - 20);
+        }
+
+        function setClick(ele,i) {
+            ele.click(function(e){
+                e.stopPropagation();
+                clickCallback(i);
+                this.remove();
+                obj.cnt--;
+                if (!obj.cnt) {
+                    destructor();
+                }
+            });
+        }
+
+        function destructor() {
+            obj.state = 0;
+            button.remove();
+        }
+    }
+
     function alertLogs() {
+        var logs = background.allLogs;
+        var numUnread = background.numUnread;
         if (numUnread) {
-            var logHolder = $("<div id='logHolder' class='block'>!</div>");
-            $("body").prepend(logHolder);
-            logHolder.width(logHolder.height());
-            logHolder.one("click",displayLogs);
+            topButton(logs,"!","left",true,function(index) {
+                sendRequest("removeLog",i);
+            })
         }
     }
 
-    function displayLogs() {
-        var allLogEle = $("<div id='logs'></div>");
-        for (var i = 0 ; i < logs.length ; i++) {
-            if (!logs[i][1]) {
-                var logEle = $("<div class='log block'>" + logs[i][0] + "</div>");
-                clickLogRemove(logEle,i);
-                allLogEle.append(logEle);
+    function youtubeDisplay() {
+        var youtube = background.youtubeVideos;
+        if (youtubeButton) {
+            youtubeButton.list = youtube;
+            if (youtube.length) {
+                if (youtubeButton.state === 2) {
+                    youtubeButton.restart();
+                }
+            } else {
+                youtubeButton.destructor();
+                youtubeButton = null;
+            }
+        } else {
+            if (youtube.length) {
+                //play symbol, may want to change
+                youtubeButton = topButton(youtube,"&#9658;","right",false,function(index) {
+                    sendRequest("youtube",index);
+                });
             }
         }
-        var logHolder = $("#logHolder");
-        logHolder.html(allLogEle);
-        logHolder.one("click",function() {
-            //maybe want to just change instead of remove
-            this.remove();
-            alertLogs();
-        });
-    }
-
-    function clickLogRemove(ele,i) {
-        ele.click(function(e){
-            e.stopPropagation();
-            this.remove();
-            sendRequest("removeLog",i);
-            numUnread--;
-            if (!numUnread) {
-                $("#logHolder").remove();
-            }
-        });
     }
 
     ////////////////////////events//////////////////////////////
@@ -133,16 +197,16 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function youtube() {
-        sendRequest("youtube");
+        sendRequest("youtube",null,youtubeDisplay);
     }
 
     //send requests to background
-    function sendRequest(action,input) {
+    function sendRequest(action,input,callback) {
         chrome.runtime.sendMessage({
             from: "browserAction",
             action: action,
-            input: input
-        });
+            input: input,
+        },callback);
     }
 
     //get from background to display
