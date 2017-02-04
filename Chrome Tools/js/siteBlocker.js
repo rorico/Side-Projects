@@ -556,7 +556,7 @@ var sendContent;
             //upper limit can be passed if currently in very long wastingTime
             var nextDelay = Math.min(timeTotal - timeLeft + currentTimeOffset,timeLineLength - startingTimeLeft);
             //used to make sure that this is called at appropriate times
-            nextTime = new Date() + nextDelay;
+            nextTime = +new Date() + nextDelay;
             returnTime(nextDelay);
         },delay);
     }
