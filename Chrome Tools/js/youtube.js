@@ -1,10 +1,12 @@
-var youtubeVideos = [];
+var youtubeVideoNames = [];
 var youtube = (function() {
+    var youtubeVideoIds = [];
     return youtube;
 
     function youtube(index,c) {
         if (typeof index === "number") {
-            play(youtubeVideos.splice(index,1)[0]);
+            play(youtubeVideoIds.splice(index,1)[0]);
+            youtubeVideoNames.splice(index,1);
             c();
         } else {
             //get all youtube tabs that isn't the current one
@@ -16,25 +18,30 @@ var youtube = (function() {
                 for (var i = 0 ; i < num ; i++) {
                     var tab = tabs[i];
                     var data = {action:"pause"};
-                    var callback = (function(id) {
+                    var callback = (function(id,title) {
+                        //remove ending - YouTube
+                        title = title.substr(0,title.lastIndexOf(" - YouTube"));
                         return function(stopped) {
                             if (stopped) {
                                 if (paused) {
-                                    youtubeVideos.push(id);
+                                    youtubeVideoIds.push(id);
+                                    youtubeVideoNames.push(title)
                                 } else {
-                                    youtubeVideos = [id];
+                                    youtubeVideoIds = [id];
+                                    youtubeVideoNames = [title];
                                 }
                                 paused = true;
                             }
                             cnt++;
                             if (cnt === num) {
                                 c();
+                                sendRequest("youtube");
                                 if (!paused) {
                                     playAll();
                                 }
                             }
                         };
-                    })(tab.id);
+                    })(tab.id,tab.title);
 
                     chrome.tabs.sendMessage(tab.id,data,callback);
                 }
@@ -43,10 +50,11 @@ var youtube = (function() {
     }
 
     function playAll() {
-        for (var i = 0 ; i < youtubeVideos.length ; i++) {
-            play(youtubeVideos[i]);
+        for (var i = 0 ; i < youtubeVideoIds.length ; i++) {
+            play(youtubeVideoIds[i]);
         }
-        youtubeVideos = [];
+        youtubeVideoIds = [];
+        youtubeVideoNames = [];
     }
 
     function play(tabId) {

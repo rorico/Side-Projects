@@ -128,7 +128,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function youtubeDisplay() {
-        var youtube = background.youtubeVideos;
+        var youtube = background.youtubeVideoNames;
         if (youtubeButton) {
             youtubeButton.list = youtube;
             if (youtube.length) {
