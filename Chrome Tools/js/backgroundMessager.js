@@ -43,7 +43,7 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
 
             //from youtube.js
             case "youtube":
-                youtube(a.input,c);
+                youtube(a.input);
                 return true;
         }
     } else if (a.from === "options") {
@@ -58,6 +58,11 @@ chrome.runtime.onMessage.addListener(function(a, b, c) {
             //from scheduleInfo.js
             case "weekSchedule":
                 c(weekSchedule(a.input));
+                break;
+
+            //from youtube.js
+            case "youtubeEnd":
+                youtubeEnd(b.tab);
                 break;
         }
     }

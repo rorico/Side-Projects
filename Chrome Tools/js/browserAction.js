@@ -197,16 +197,16 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function youtube() {
-        sendRequest("youtube",null,youtubeDisplay);
+        sendRequest("youtube");
     }
 
     //send requests to background
-    function sendRequest(action,input,callback) {
+    function sendRequest(action,input) {
         chrome.runtime.sendMessage({
             from: "browserAction",
             action: action,
             input: input,
-        },callback);
+        });
     }
 
     //get from background to display
@@ -223,6 +223,9 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     break;
                 case "ringing":
                     showRinging(a.input);
+                    break;
+                case "youtube":
+                    youtubeDisplay();
                     break;
             }
         }
