@@ -8,7 +8,7 @@ var youtube = (function() {
             c();
         } else {
             //get all youtube tabs that isn't the current one
-            chrome.tabs.query({url:["*://*.youtube.com/*", "*://youtube.com/*"],active:true}, function(tabs) {
+            chrome.tabs.query({url:["*://*.youtube.com/*", "*://youtube.com/*"],active:false}, function(tabs) {
                 //if tabs is empty, nothing to play anyways
                 var cnt = 0;
                 var num = tabs.length;
