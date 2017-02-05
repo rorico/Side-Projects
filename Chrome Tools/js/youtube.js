@@ -1,18 +1,16 @@
 var youtubeVideoNames = [];
 
-var youtubeEnd;
-var youtube = (function() {
+(function() {
     var youtubeVideoIds = [];
 
-    //only add the ending video if nothing there
-    youtubeEnd = function(tab) {
-        if (!youtubeVideoIds.length) {
-            addTab(tab.id,tab.title);
-            sendRequest("youtube");
+    addMessageListener({
+        "youtube": function(a) {
+            youtube(a.input);
+        },
+        "youtubeEnd": function(a,b) {
+            youtubeEnd(b.tab);
         }
-    };
-
-    return youtube;
+    });
 
     function youtube(index) {
         if (typeof index === "number") {
@@ -55,6 +53,7 @@ var youtube = (function() {
             });
         }
     }
+
     function addTab(id,title) {
         //remove ending - YouTube
         title = title.substr(0,title.lastIndexOf(" - YouTube"));
@@ -74,4 +73,12 @@ var youtube = (function() {
         var data = {action:"play"};
         chrome.tabs.sendMessage(tabId,data);
     }
+
+    //only add the ending video if nothing there
+    function youtubeEnd(tab) {
+        if (!youtubeVideoIds.length) {
+            addTab(tab.id,tab.title);
+            sendRequest("youtube");
+        }
+    };
 })();

@@ -1,6 +1,12 @@
 var allLogs = [];
 var numUnread = 0;
 
+addMessageListener({
+    "removeLog": function(a) {
+        removeLog(a.input);
+    }
+})
+
 //for logging information, and display to console. Only takes in 1 argument
 function log(arg) {
     //should only contain strings

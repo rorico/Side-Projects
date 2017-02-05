@@ -2,6 +2,14 @@ var scheduleInfo;
 var date = new Date();
 var today;
 setScheduleInfo();
+
+addMessageListener({
+    "resetSchedule": setScheduleInfo,
+    "weekSchedule": function(a,b,c) {
+        c(weekSchedule(a.input));
+    }
+})
+
 function setScheduleInfo() {
     chrome.storage.sync.get("scheduleInfo", function(items) {
         if (chrome.runtime.lastError) {

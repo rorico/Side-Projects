@@ -8,12 +8,6 @@ var timeLine = [];
 var timeLineLength;
 
 //functions
-var change;
-var VIP;
-var resetTime;
-var tempVIP;
-var zero;
-var antizero;
 var setupClass;
 
 var sendContent;
@@ -56,6 +50,17 @@ var sendContent;
     //functions in their own closure
     var blockTab;
     var unblockSite;
+
+    addMessageListener({
+        "VIP": VIP,
+        "resetTime": resetTime,
+        "change": function(a) {
+            change(a.input);
+        },
+        "temp": tempVIP,
+        "zero": zero,
+        "antizero": antizero
+    });
 
     //set-up first time when opened
     startTimeLine();
@@ -562,7 +567,7 @@ var sendContent;
     }
 
     ///////////// Requests from outside ///////////
-    resetTime = function() {
+    function resetTime() {
         clearTimer(returnTimer);
         startTime = new Date();
         timeLeft = startingTimeLeft;
@@ -584,13 +589,13 @@ var sendContent;
         VIPtab = tabId;
     }
 
-    VIP = function() {
+    function VIP() {
         makeCurrentTabVIP();
         tempVIPstartTime = 0;
         timeLeftOutput();
     };
 
-    tempVIP = function() {
+    function tempVIP() {
         makeCurrentTabVIP();
         tempVIPstartTime = +new Date();
         tempVIPtimer = setTimeout(function() {
@@ -600,7 +605,7 @@ var sendContent;
         timeLeftOutput();
     };
 
-    change = function(timeLineIndex) {
+    function change(timeLineIndex) {
         if (timeLineIndex === -1) {
             if (wastingTime) {
                 //change the current one and restart counter
@@ -616,7 +621,7 @@ var sendContent;
         timeLeftOutput();
     };
 
-    zero = function() {
+    function zero() {
         clearTimer(zeroTimer);
         zeroMode = true;
         timeLeftOutput();
@@ -625,7 +630,7 @@ var sendContent;
         },zeroLength);
     };
 
-    antizero = function() {
+    function antizero() {
         clearTimer(zeroTimer);
         zeroMode = false;
         timeLeftOutput();

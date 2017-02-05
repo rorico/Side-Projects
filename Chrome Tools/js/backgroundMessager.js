@@ -1,72 +1,25 @@
-//note this is at the top of the list because of sendRequest, the listener doesn't get called immediately anyways
-chrome.runtime.onMessage.addListener(function(a, b, c) {
-    if (a.from === "browserAction") {
-        switch(a.action) {
-            //from siteBlocker.js
-            case "VIP":
-                VIP();
-                break;
-            case "resetTime":
-                resetTime();
-                break;
-            case "change":
-                change(a.input);
-                break;
-            case "temp":
-                tempVIP();
-                break;
-            case "zero":
-                zero();
-                break;
-            case "antizero":
-                antizero();
-                break;
+var addMessageListener;
+(function() {
+    var messageListeners = {};
 
-            //from alarm.js
-            case "stopAllAlarms":
-                stopAllAlarms();
-                break;
-            case "snooze":
-                snooze();
-                break;
-            case "setAlarm":
-                setAlarm(a.input,0);
-                break;
-            case "removeAlarm":
-                removeAlarm(a.input);
-                break;
-
-            //from log.js
-            case "removeLog":
-                removeLog(a.input);
-                break;
-
-            //from youtube.js
-            case "youtube":
-                youtube(a.input);
-                return true;
-        }
-    } else if (a.from === "options") {
-        switch(a.action) {
-            //from scheduleInfo.js
-            case "resetSchedule":
-                setScheduleInfo();
-                break;
-        }
-    } else if (a.from === "content") {
-        switch(a.action) {
-            //from scheduleInfo.js
-            case "weekSchedule":
-                c(weekSchedule(a.input));
-                break;
-
-            //from youtube.js
-            case "youtubeEnd":
-                youtubeEnd(b.tab);
-                break;
+    addMessageListener = function(obj) {
+        //this doesn't allow removal, but not needed at least for now
+        for (prop in obj) {
+            //i'm gonna assume this is a function
+            messageListeners[prop] = obj[prop];
         }
     }
-});
+
+    chrome.runtime.onMessage.addListener(function(a, b, c) {
+        //just to make sure there is no infinite loop
+        if (a.from !== "background") {
+            var funct = messageListeners[a.action];
+            if (typeof funct === "function") {
+                funct(a,b,c);
+            }
+        }
+    });
+})();
 
 //for displaying in an open browser action
 function sendRequest(action,input,content) {

@@ -23,6 +23,17 @@ var sleepAlarmStart = 22;   //10pm
 var sleepAlarmEnd = 6;      //6am
 setSleepAlarm();
 
+addMessageListener({
+    "stopAllAlarms": stopAllAlarms,
+    "snooze": snooze,
+    "setAlarm": function(a) {
+        setAlarm(a.input,0);
+    },
+    "removeAlarm": function(a) {
+        removeAlarm(a.input);
+    }
+});
+
 function setSleepAlarm() {
     var date = new Date();
     date.setSeconds(0);
