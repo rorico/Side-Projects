@@ -71,7 +71,7 @@ function setAlarm(delay,type) {
                 alarmTime: alarmTime,
                 type: type,
                 destructor: destructor
-            }
+            };
             alarms[i] = alarmObj;
             sendRequest("setAlarm",[i,+alarmTime,type]);
             return;
@@ -105,7 +105,7 @@ function setRing(alarmNumber,type,delay) {
     return function() {
         clearTimer(ringer);
         clearTimeout(timeout);
-    }
+    };
 }
 
 //returns true if alarm is removed

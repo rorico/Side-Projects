@@ -582,7 +582,7 @@ var sendContent;
             title:title
         };
         sendRequest("reset",info,1);
-    };
+    }
 
     function makeCurrentTabVIP() {
         clearTimeout(tempVIPtimer);
@@ -593,7 +593,7 @@ var sendContent;
         makeCurrentTabVIP();
         tempVIPstartTime = 0;
         timeLeftOutput();
-    };
+    }
 
     function tempVIP() {
         makeCurrentTabVIP();
@@ -603,7 +603,7 @@ var sendContent;
             tempVIPstartTime = 0;
         },VIPlength);
         timeLeftOutput();
-    };
+    }
 
     function change(timeLineIndex) {
         if (timeLineIndex === -1) {
@@ -619,7 +619,7 @@ var sendContent;
         clearTimer(returnTimer);
         returnTime();
         timeLeftOutput();
-    };
+    }
 
     function zero() {
         clearTimer(zeroTimer);
@@ -628,11 +628,11 @@ var sendContent;
         zeroTimer = setTimer(function() {
             zeroMode = false;
         },zeroLength);
-    };
+    }
 
     function antizero() {
         clearTimer(zeroTimer);
         zeroMode = false;
         timeLeftOutput();
-    };
+    }
 })();

@@ -4,11 +4,11 @@ var addMessageListener;
 
     addMessageListener = function(obj) {
         //this doesn't allow removal, but not needed at least for now
-        for (prop in obj) {
+        for (var prop in obj) {
             //i'm gonna assume this is a function
             messageListeners[prop] = obj[prop];
         }
-    }
+    };
 
     chrome.runtime.onMessage.addListener(function(a, b, c) {
         //just to make sure there is no infinite loop
@@ -27,7 +27,7 @@ function sendRequest(action,input,content) {
         from: "background",
         action: action,
         input: input
-    }
+    };
 
     chrome.runtime.sendMessage(data);
     //if send to content scripts

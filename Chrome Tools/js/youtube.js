@@ -80,5 +80,5 @@ var youtubeVideoNames = [];
             addTab(tab.id,tab.title);
             sendRequest("youtube");
         }
-    };
+    }
 })();
