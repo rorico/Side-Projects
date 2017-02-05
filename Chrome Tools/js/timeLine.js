@@ -1,13 +1,9 @@
-var currentTimePiece = -1;
+
 
 //functions
 var timeLineInit;
-var countDown;
-var addTimeLine;
-var changeTimeLine;
-var restartTimeLine;
-var newPage;
 var keyPhrases;
+
 (function(){
     var timeLeft;
     var startTime;
@@ -22,6 +18,7 @@ var keyPhrases;
     var parentWidth = 360;      //keep unchanged
     var timeLineLeft = parentWidth;
     var offset = 0;
+    var currentTimePiece = -1;
     var timeLineOffset = 0;
     var updateTimeLineInterval = -1;
     var timeCurrentInterval = -1;
