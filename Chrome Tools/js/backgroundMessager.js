@@ -21,14 +21,15 @@ var addMessageListener;
     });
 })();
 
-//for displaying in an open browser action
-function sendRequest(action,input,content) {
-    var data = {
+function sendFormat(action,input) {
+    return {
         from: "background",
         action: action,
         input: input
     };
+}
 
-    chrome.runtime.sendMessage(data);
-    return data;
+//for displaying in an open browser action
+function sendRequest(action,input) {
+    chrome.runtime.sendMessage(sendFormat(action,input));
 }

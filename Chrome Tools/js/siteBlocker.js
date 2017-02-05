@@ -487,7 +487,7 @@ var setupClass;
 
         unblockSite = function() {
             if (blockedTab !== -2) {
-                sendContent({action:"unblock"});
+                sendContent("unblock",null,true);
                 blockedTab = -2;
                 blocked = false;
 
@@ -498,10 +498,13 @@ var setupClass;
             }
         };
 
-        sendContent = function(action,input) {
-            var data = sendRequest(action,input);
+        sendContent = function(action,input,content) {
+            //only send to content scripts
+            if (!content) {
+                sendRequest(action,input);
+            }
             if (blockedTab !== -2) {
-                chrome.tabs.sendMessage(blockedTab,data);
+                chrome.tabs.sendMessage(blockedTab,sendFormat(action,input));
             }
         };
     })();
