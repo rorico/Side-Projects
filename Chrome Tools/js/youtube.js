@@ -1,14 +1,5 @@
 var youtubeVideoNames = [];
 
-//called in siteBlocker.js
-function youtubeTabUpdated(tabId) {
-    //this is copied and hard coded, probably won't change anytime soon, so oh well
-    if (new RegExp("^" + "*://*.youtube.com/*".replace(/\./g,"\\.").replace(/\*/g, ".*") + "$").test(url)) {
-        var data = {action:"youtubeNewPage"};
-        chrome.tabs.sendMessage(tabId,data);
-    }
-}
-
 (function() {
     var youtubeVideoIds = [];
 

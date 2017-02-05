@@ -3,6 +3,16 @@ var ad;
 var inAd;
 youtubeNewPage();
 
+//youtube is special in that new urls don't actual reload page
+//http://stackoverflow.com/a/18398921
+document.addEventListener('transitionend', function(e) {
+    if (e.target.id === 'progress') {
+        // do stuff
+        youtubeNewPage();
+    }
+});
+
+
 function youtubeNewPage() {
     p = window.document.getElementsByTagName("video")[0];
     if (p) {
@@ -53,8 +63,6 @@ chrome.runtime.onMessage.addListener(function listener(a, b, c) {
         case "skipAd":
             c(skipAd());
             break;
-        case "youtubeNewPage":
-            youtubeNewPage();
             break;
     }
 });
