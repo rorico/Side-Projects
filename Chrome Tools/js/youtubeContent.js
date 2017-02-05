@@ -1,13 +1,29 @@
 var p;
+var ad;
+var inAd;
 youtubeNewPage();
 
 function youtubeNewPage() {
     p = window.document.getElementsByTagName("video")[0];
     if (p) {
         p.onended = function() {
-            sendRequest("youtubeEnd");
+            if (inAd) {
+                sendRequest("youtubeEnd");
+            }
         }
     }
+    inAd = false;
+    ad = document.getElementsByClassName("videoAdUiSkipButton")[0];
+    inAd = !!ad;
+}
+
+function skipAd() {
+    if (inAd) {
+        ad.click();
+        inAd = false;
+        return true;
+    }
+    return false;
 }
 
 function pause() {
@@ -33,6 +49,9 @@ chrome.runtime.onMessage.addListener(function listener(a, b, c) {
             break;
         case "play":
             c(play());
+            break;
+        case "skipAd":
+            c(skipAd());
             break;
         case "youtubeNewPage":
             youtubeNewPage();
