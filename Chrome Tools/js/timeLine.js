@@ -30,8 +30,7 @@ var keyPhrases;
                     ["MO",antizero,1]];
 
     timeLineInit = function(container,background) {
-        var maxWidth = container.width() - 30;
-        parentWidth = Math.floor(maxWidth / 60) * 60;
+        parentWidth = calcWidth(container.width());
 
         var top = "<div id='axisTop'>";
         var bot = "<div id='axisBot'>";
@@ -52,21 +51,39 @@ var keyPhrases;
         wastingTime = background.wastingTime;
         url = background.url;
         title = background.title;
-        timeCurrent = new Date() - startTime;
-        countDownTimer = -1;
         countDown(timeLeft);
 
-
-        timeLineLeft = parentWidth;
-        offset = 0;
-        timeLineOffset = 0;
-        clearInterval(updateTimeLineInterval);
-        clearInterval(timeCurrentInterval);
-
-        $("#info").html(formatInfo(url,timeCurrent,title));
+        timeLineLength = background.timeLineLength;
         //deep copy to not affect it outside of function call
         timeLine = JSON.parse(JSON.stringify(background.timeLine));
-        timeLineLength = background.timeLineLength;
+        timeLineCreate();
+
+        //after things are added in, vertically center
+        var topOffset = (container.innerHeight() - $("#chromeTools_timeLine").outerHeight())/2;
+        $("#chromeTools_timeLine").css("top",topOffset);
+        $(window).resize(function(){
+            var newWidth = calcWidth(container.width());
+            if(newWidth !== parentWidth){
+                console.log(newWidth)
+                parentWidth = newWidth;
+                $(".axisPart").outerWidth(parentWidth/6);
+                $("#timeLine").empty();
+                timeLineCreate();
+            }
+        });
+    };
+
+    function calcWidth(width) {
+        //add some padding, and make multiple of 60
+        return Math.floor((width - 30) / 60) * 60;
+    }
+
+    function timeLineCreate() {
+        timeLineLeft = parentWidth;
+        offset = 0;
+        currentTimePiece = -1;
+        timeLineOffset = 0;
+        timeCurrent = new Date() - startTime;
 
         if (addTimeLine(-1,false,timeCurrent,wastingTime)) {
             for (var i = 0; i < timeLine.length ; i++) {
@@ -79,36 +96,19 @@ var keyPhrases;
         }
         displayInfo(-1);
         updateTimeLine();
+    }
 
-        //after things are added in, vertically center
-        var topOffset = (container.innerHeight() - $("#chromeTools_timeLine").outerHeight())/2;
-        $("#chromeTools_timeLine").css("top",topOffset);
-    };
-
-    //may want to combine with start later
     function restartTimeLine(background) {
-        clearInterval(updateTimeLineInterval);
-        clearInterval(timeCurrentInterval);
-
-        //these values will probably be update from background when called
         timeLeft = background.timeLeft;
         startTime = background.startTime;
         wastingTime = background.wastingTime;
         url = background.url;
         title = background.title;
-
-        //reset these to starting
         timeCurrent = new Date() - startTime;
-        $("#info").html(formatInfo(url,timeCurrent,title));
-        timeLineLeft = parentWidth;
-        currentTimePiece = -1;
-        offset = 0;
-
+        //this is reset on the backend as well
+        timeLine = [];
         $("#timeLine").empty();
-        addTimeLine(-1,false,timeCurrent,wastingTime);
-        addTimeLine(-2,false);
-        displayInfo(-1);
-        updateTimeLine();
+        timeLineCreate();
     }
 
     //returns true if not done
@@ -235,6 +235,7 @@ var keyPhrases;
     }
 
     function updateTimeLine() {
+        clearInterval(updateTimeLineInterval);
         var delay = timeLineLength/parentWidth;
         updateTimeLineInterval = setInterval(function() {
             var newEle = $("#timeLine div:last-child");
