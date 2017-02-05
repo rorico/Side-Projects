@@ -1,5 +1,3 @@
-
-
 //functions
 var timeLineInit;
 var keyPhrases;
@@ -88,7 +86,7 @@ var keyPhrases;
     };
 
     //may want to combine with start later
-    restartTimeLine = function(background) {
+    function restartTimeLine(background) {
         clearInterval(updateTimeLineInterval);
         clearInterval(timeCurrentInterval);
 
@@ -111,10 +109,10 @@ var keyPhrases;
         addTimeLine(-2,false);
         displayInfo(-1);
         updateTimeLine();
-    };
+    }
 
     //returns true if not done
-    addTimeLine = function(index,first,time,wastingTime) {
+    function addTimeLine(index,first,time,wastingTime) {
         var width = 0;
         if (index === -2) {
             width = timeLineLeft;
@@ -156,7 +154,7 @@ var keyPhrases;
             setClick(timeLineEntry,getIndex(index));
         }
         return ret;
-    };
+    }
 
     function getIndex(index) {
         return index - timeLineOffset;
@@ -199,11 +197,11 @@ var keyPhrases;
         }
     }
 
-    changeTimeLine = function(index,prev) {
+    function changeTimeLine(index,prev) {
         $("#" + getTimeLineId(index)).removeClass("wasting" + prev).addClass("wasting0");
-    };
+    }
 
-    newPage = function(input) {
+    function newPage(input) {
         startTime = input.startTime;
         wastingTime = input.wastingTime;
         url = input.url;
@@ -212,9 +210,9 @@ var keyPhrases;
         timeLineOffset++;
         addTimeLine(-1,true,new Date() - startTime,wastingTime);
         displayInfo(-1);
-    };
+    }
 
-    countDown = function(timeLeft) {
+    function countDown(timeLeft) {
         if (wastingTime) {
             timeLeft -= new Date() - startTime;
         }
@@ -223,7 +221,7 @@ var keyPhrases;
         }
         clearTimeout(countDownTimer);
         countDownFunction(timeLeft);
-    };
+    }
 
     //not exactly accurate, not too important
     function countDownFunction(time) {
