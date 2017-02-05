@@ -61,10 +61,11 @@ var keyPhrases;
         //after things are added in, vertically center
         var topOffset = (container.innerHeight() - $("#chromeTools_timeLine").outerHeight())/2;
         $("#chromeTools_timeLine").css("top",topOffset);
+
+        //add responsiveness
         $(window).resize(function(){
             var newWidth = calcWidth(container.width());
             if(newWidth !== parentWidth){
-                console.log(newWidth)
                 parentWidth = newWidth;
                 $(".axisPart").outerWidth(parentWidth/6);
                 $("#timeLine").empty();
