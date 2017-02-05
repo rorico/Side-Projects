@@ -58,8 +58,7 @@ var youtubeVideoNames = [];
                             }
                         }
                     } else if (numPause) {
-                        youtubeVideoIds = [];
-                        youtubeVideoNames = [];
+                        emptyList();
                         for (var i = 0 ; i < num ; i++) {
                             if (states[i] === "play") {
                                 var tab = tabs[i];
@@ -86,12 +85,16 @@ var youtubeVideoNames = [];
         youtubeVideoNames.push(title);
     }
 
+    function emptyList() {
+        youtubeVideoIds = [];
+        youtubeVideoNames = [];
+    }
+
     function playAll() {
         for (var i = 0 ; i < youtubeVideoIds.length ; i++) {
             play(youtubeVideoIds[i]);
         }
-        youtubeVideoIds = [];
-        youtubeVideoNames = [];
+        emptyList();
     }
 
     function play(tabId) {
@@ -99,11 +102,14 @@ var youtubeVideoNames = [];
         chrome.tabs.sendMessage(tabId,data);
     }
 
-    //only add the ending video if nothing there
     function youtubeEnd(tab) {
-        if (!youtubeVideoIds.length) {
+        //add to list only if empty, or thing before was added this way
+        //property that gets overwritten when array is restarted
+        if (youtubeVideoIds.ended || !youtubeVideoIds.length) {
+            emptyList();
             addTab(tab.id,tab.title);
             sendRequest("youtube");
+            youtubeVideoIds.ended = true;
         }
     }
 })();
