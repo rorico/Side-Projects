@@ -156,6 +156,8 @@ var sendContent;
                 title = changeInfo.title;
             }
         }
+        //for youtube.js, can seperate, but can just do this for now
+        youtubeTabUpdated(id);
     });
 
 

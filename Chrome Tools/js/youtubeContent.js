@@ -1,16 +1,7 @@
 var p;
-init();
+newPage();
 
-//youtube is special in that new urls don't actual reload page
-//http://stackoverflow.com/a/18398921
-document.addEventListener('transitionend', function(e) {
-    if (e.target.id === 'progress') {
-        // do stuff
-        init();
-    }
-});
-
-function init() {
+function newPage() {
     p = window.document.getElementsByTagName("video")[0];
     if (p) {
         p.onended = function() {
@@ -42,6 +33,9 @@ chrome.runtime.onMessage.addListener(function listener(a, b, c) {
             break;
         case "play":
             c(play());
+            break;
+        case "newPage":
+            newPage();
             break;
     }
 });

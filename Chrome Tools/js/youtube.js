@@ -1,5 +1,11 @@
 var youtubeVideoNames = [];
 
+//called in siteBlocker.js
+function youtubeTabUpdated(tabId) {
+    var data = {action:"newPage"};
+    chrome.tabs.sendMessage(tabId,data);
+}
+
 (function() {
     var youtubeVideoIds = [];
 
