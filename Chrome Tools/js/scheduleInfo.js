@@ -10,6 +10,12 @@ addMessageListener({
     }
 });
 
+
+var scheduleListeners = [];
+function addScheduleListener(funct) {
+    scheduleListeners.push(funct);
+}
+
 function setScheduleInfo() {
     chrome.storage.sync.get("scheduleInfo", function(items) {
         if (chrome.runtime.lastError) {
@@ -18,12 +24,12 @@ function setScheduleInfo() {
         if (items.scheduleInfo) {
             scheduleInfo = items.scheduleInfo;
             today = todaySchedule(date);
-            
-            //for siteBlocker.js
-            setupClass();
         } else {
             scheduleInfo = [];
             today = [];
+        }
+        for (var i = 0 ; i < scheduleListeners.length ; i++) {
+            scheduleListeners[i](today);
         }
     });
 }

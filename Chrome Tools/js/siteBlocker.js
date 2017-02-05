@@ -7,9 +7,6 @@ var timeLeft = 0;
 var timeLine = [];
 var timeLineLength;
 
-//functions
-var setupClass;
-
 (function(){
     var tabId = -2;
     var windowId = -3;
@@ -60,12 +57,13 @@ var setupClass;
         "zero": zero,
         "antizero": antizero
     });
+    addScheduleListener(setupClass);
 
     //set-up first time when opened
     startTimeLine();
 
     //gets run when schedule gets loaded in ScheduleInfo.js
-    setupClass = function() {
+    function setupClass(today) {
         var now = new Date();
         var position = UTCtoMilitary(now);
         for (var i = 0 ; i < today.length ; i++) {
@@ -77,7 +75,7 @@ var setupClass;
             classStart = militaryToUTC(classes[0][0]);
             classReminder(classStart - now - startingTimeLeft);
         }
-    };
+    }
 
     //for before class, show how much time left
     function classReminder(delay) {
