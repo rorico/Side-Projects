@@ -8,7 +8,7 @@ addMessageListener({
     "weekSchedule": function(a,b,c) {
         c(weekSchedule(a.input));
     }
-})
+});
 
 function setScheduleInfo() {
     chrome.storage.sync.get("scheduleInfo", function(items) {
