@@ -78,16 +78,16 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         function fullDisplay() {
             obj.state = 2;
             var allEle = $("<div></div>");
-            for (var i = 0 ; i < list.length ; i++) {
+            for (var i = 0 ; i < obj.list.length ; i++) {
                 var info;
                 if (enable) {
-                    if (list[i][1]) {
-                        info = list[i][0];
+                    if (obj.list[i][1]) {
+                        info = obj.list[i][0];
                     } else {
                         continue;
                     }
                 } else {
-                    info = list[i];
+                    info = obj.list[i];
                 }
                 var ele = $("<div class='log block'>" + info + "</div>");
                 setClick(ele,i);
