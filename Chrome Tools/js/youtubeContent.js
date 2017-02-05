@@ -1,7 +1,7 @@
 var p;
-newPage();
+youtubeNewPage();
 
-function newPage() {
+function youtubeNewPage() {
     p = window.document.getElementsByTagName("video")[0];
     if (p) {
         p.onended = function() {
@@ -34,8 +34,8 @@ chrome.runtime.onMessage.addListener(function listener(a, b, c) {
         case "play":
             c(play());
             break;
-        case "newPage":
-            newPage();
+        case "youtubeNewPage":
+            youtubeNewPage();
             break;
     }
 });
