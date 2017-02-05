@@ -10,8 +10,6 @@ var timeLineLength;
 //functions
 var setupClass;
 
-var sendContent;
-
 (function(){
     var tabId = -2;
     var windowId = -3;
@@ -50,6 +48,7 @@ var sendContent;
     //functions in their own closure
     var blockTab;
     var unblockSite;
+    var sendContent;
 
     addMessageListener({
         "VIP": VIP,
@@ -217,7 +216,7 @@ var sendContent;
             url:url,
             title:title
         };
-        sendRequest("newPage",info,1);
+        sendContent("newPage",info);
 
         //check for returnTime to be more up to date
         if (startTime > nextTime + tolerance) {
@@ -248,7 +247,7 @@ var sendContent;
         } else if (action === "change") {
             if (load < timeLine.length || load < 0) {
                 if (timeLine[load][1]) {
-                    sendRequest("change",[load,timeLine[load][1]],1);
+                    sendContent("change",[load,timeLine[load][1]]);
                     timeLine[load][1] = 0;
                     changeTimeLeft(timeLine[load][0]);
                 }
@@ -273,7 +272,7 @@ var sendContent;
         return timeLeftOutput;
         //ideally, shows lowest timeLeft at all points
         function timeLeftOutput() {
-            sendRequest("timer",timeLeft,1);
+            sendContent("timer",timeLeft);
             var displayTime = timeLeft - (wastingTime ? new Date() - startTime : 0);
             //give wastingTime 2 more time, but do not show in badge
             //note the returntime isn't optimized to for this, but that should be fine.
@@ -499,7 +498,8 @@ var sendContent;
             }
         };
 
-        sendContent = function(data) {
+        sendContent = function(action,input) {
+            var data = sendRequest(action,input);
             if (blockedTab !== -2) {
                 chrome.tabs.sendMessage(blockedTab,data);
             }
@@ -581,7 +581,7 @@ var sendContent;
             url:url,
             title:title
         };
-        sendRequest("reset",info,1);
+        sendContent("reset",info);
     }
 
     function makeCurrentTabVIP() {
@@ -609,7 +609,7 @@ var sendContent;
         if (timeLineIndex === -1) {
             if (wastingTime) {
                 //change the current one and restart counter
-                sendRequest("change",[timeLineIndex,wastingTime],1);
+                sendContent("change",[timeLineIndex,wastingTime]);
                 wastingTime = 0;
                 handleNewPage(url,title);
             }

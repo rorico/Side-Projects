@@ -30,8 +30,5 @@ function sendRequest(action,input,content) {
     };
 
     chrome.runtime.sendMessage(data);
-    //if send to content scripts
-    if (content) {
-        sendContent(data);
-    }
+    return data;
 }
