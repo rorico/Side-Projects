@@ -20,78 +20,64 @@ var youtubeVideoNames = [];
             //get all youtube tabs that isn't the current one
             chrome.tabs.query({url:["*://*.youtube.com/*", "*://youtube.com/*"],active:false}, function(tabs) {
                 //if tabs is empty, nothing to play anyways
+                var states = [];
+                var numAd = 0;
+                var numPause = 0;
 
-                var adSkipped = false;
-                eachTab(tabs,"skipAd",function(stopped,tab) {
-                    if (stopped) {
-                        //check if can skip ads first
-                        adSkipped = true;
+                var cnt = 0;
+                var num = tabs.length;
+                for (var i = 0 ; i < num ; i++) {
+                    var tab = tabs[i];
+                    var data = {action:"getState"};
+
+                    chrome.tabs.sendMessage(tab.id,data,tabCallback(i));
+                }
+
+                function tabCallback(i) {
+                    return function(state) {
+                        states[i] = state;
+                        if (state === "ad") {
+                            numAd++;
+                        } else if (state === "play") {
+                            numPause++;
+                        }
+                        cnt++;
+                        if (cnt === num) {
+                            action();
+                        }
+                    };
+                }
+
+                function action() {
+                    if (numAd) {
+                        for (var i = 0 ; i < num ; i++) {
+                            if (states[i] === "ad") {
+                                var tab = tabs[i];
+                                var data = {action:"skipAd"};
+                                chrome.tabs.sendMessage(tab.id,data);
+                            }
+                        }
+                    } else if (numPause) {
+                        youtubeVideoIds = [];
+                        youtubeVideoNames = [];
+                        for (var i = 0 ; i < num ; i++) {
+                            if (states[i] === "play") {
+                                var tab = tabs[i];
+                                var data = {action:"pause"};
+
+                                chrome.tabs.sendMessage(tab.id,data);
+                                addTab(tab.id,tab.title);
+                            }
+                        }
+                        sendRequest("youtube");
+                    } else {
+                        playAll();
+                        sendRequest("youtube");
                     }
-                }, function() {
-                    if (!adSkipped) {
-                        pauseAll(tabs);
-                    }
-                });
-
-
+                }
             });
         }
     }
-
-    function pauseAll(tabs) {
-        var paused = false;
-        eachTab(tabs,"pause",function(stopped,tab) {
-            if (stopped) {
-                //idea is if none are paused, don't reset list, only reset on first
-                if (!paused) {
-                    youtubeVideoIds = [];
-                    youtubeVideoNames = [];
-                }
-                addTab(tab.id,tab.title);
-                paused = true;
-            }
-        }, function() {
-            if (!paused) {
-                playAll();
-            }
-        });
-    }
-
-    function eachTab(tabs,action,eachC,doneC) {
-        var cnt = 0;
-        var num = tabs.length;
-        for (var i = 0 ; i < num ; i++) {
-            var tab = tabs[i];
-            var data = {action:action};
-
-            chrome.tabs.sendMessage(tab.id,data,tabCallback(tab));
-        }
-
-        function tabCallback(id,title) {
-            return function(stopped) {
-                eachC(stopped,tab);
-                cnt++;
-                if (cnt === num) {
-                    doneC();
-                    sendRequest("youtube");
-                }
-            };
-        }
-    }
-
-    var skipped = false;
-            return function(stopped) {
-                if (stopped) {
-                    skipped = true;
-                }
-                cnt++;
-                if (cnt === num) {
-                    if (!skipped) {
-                        playAll();
-                    }
-                    sendRequest("youtube");
-                }
-            };
 
     function addTab(id,title) {
         //remove ending - YouTube

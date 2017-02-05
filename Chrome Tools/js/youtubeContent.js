@@ -1,5 +1,5 @@
 var p;
-var ad;
+var adSkip;
 var inAd;
 youtubeNewPage();
 
@@ -18,18 +18,19 @@ function youtubeNewPage() {
     if (p) {
         p.onended = function() {
             if (inAd) {
+                inAd = false;
+            } else {
                 sendRequest("youtubeEnd");
             }
         }
     }
-    inAd = false;
-    ad = document.getElementsByClassName("videoAdUiSkipButton")[0];
-    inAd = !!ad;
+    inAd = !!document.getElementsByClassName("videoAdUi")[0];
+    adSkip = document.getElementsByClassName("videoAdUiSkipButton")[0];
 }
 
 function skipAd() {
-    if (inAd) {
-        ad.click();
+    if (adSkip) {
+        adSkip.click();
         inAd = false;
         return true;
     }
@@ -52,6 +53,17 @@ function play() {
     return false;
 }
 
+function getState() {
+    if (adSkip) {
+        //means in ad and can skip
+        return "ad";
+    }
+    if (p.paused) {
+        return "pause";
+    }
+    return "play";
+}
+
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
     switch (a.action) {
         case "pause":
@@ -63,6 +75,8 @@ chrome.runtime.onMessage.addListener(function listener(a, b, c) {
         case "skipAd":
             c(skipAd());
             break;
+        case "getState":
+            c(getState());
             break;
     }
 });
