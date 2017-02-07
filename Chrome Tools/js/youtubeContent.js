@@ -54,7 +54,7 @@ function play() {
 }
 
 function getState() {
-    if (adSkip) {
+    if (inAd && adSkip) {
         //means in ad and can skip
         return "ad";
     }
