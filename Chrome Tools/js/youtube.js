@@ -110,6 +110,11 @@ var youtubeVideoNames = [];
             addTab(tab.id,tab.title);
             sendRequest("youtube");
             youtubeVideoIds.ended = true;
+            chrome.tabs.sendMessage(tab.id,{action:"listen"},function() {
+                if (youtubeVideoIds.ended && youtubeVideoIds[0] === tab.id) {
+                    emptyList();
+                }
+            });
         }
     }
 })();

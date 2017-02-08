@@ -64,6 +64,16 @@ function getState() {
     return "play";
 }
 
+function listen(c) {
+    p.onplay = function() {
+        c();
+        p.onplay = null;
+        window.onbeforeunload = null;
+    };
+    //don't really need to undo this, its right as the page ends
+    window.onbeforeunload = c;
+}
+
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
     switch (a.action) {
         case "pause":
@@ -78,6 +88,9 @@ chrome.runtime.onMessage.addListener(function listener(a, b, c) {
         case "getState":
             c(getState());
             break;
+        case "listen":
+            listen(c);
+            return true;
     }
 });
 
