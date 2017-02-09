@@ -35,8 +35,8 @@ var addNumberListener;
                         disappearHotkey(1200);
                     }
                 } else {
-                    if (e.keyCode === 27) {
-                        //esc key
+                    if (e.keyCode === 27 || e.keyCode === 13) {
+                        //esc key or enter key
                         disappearHotkey();
                     } else {
                         showHotkey(phraseIndex,false);
