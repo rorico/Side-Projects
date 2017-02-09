@@ -82,6 +82,7 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         function fullDisplay() {
             obj.state = 2;
             var allEle = $("<div></div>");
+            obj.cnt = 0;
             for (var i = 0 ; i < obj.list.length ; i++) {
                 var info;
                 if (enable) {
