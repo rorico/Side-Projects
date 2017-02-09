@@ -145,25 +145,36 @@ var addNumberListener;
             disappearHotkey(1200);
         } else {
             $("#phrase" + index).addClass("failed");
-            disappearHotkey(500);
+            disappearHotkey(800);
         }
     }
 
     var disappearInterval;
+    var disappearTimeout;
     function disappearHotkey(time) {
         clearInterval(disappearInterval);
+        clearTimeout(disappearTimeout);
         if (time > 0) {
             var opacity = 0.8;
-            var delay = time / opacity / 100;
             $("#phrase").css("opacity",opacity);
             if (!allowMistakes) {
-                disappearInterval = setInterval(function() {
-                    opacity -= 0.01;
-                    $("#phrase").css("opacity",opacity);
-                    if (opacity <= 0) {
+                var disapperTime = 500;
+                //start disappearing after 0.5 secs
+                disappearTimeout = setTimeout(function() {
+                    if (time > disapperTime) {
+                        var delay = (time - disapperTime) / opacity / 100;
+                        disappearInterval = setInterval(function() {
+                            opacity -= 0.01;
+                            $("#phrase").css("opacity",opacity);
+                            if (opacity <= 0) {
+                                clearHotkey();
+                            }
+                        },delay);
+                    } else {
+                        $("#phrase").css("opacity",0);
                         clearHotkey();
                     }
-                },delay);
+                },disapperTime);
             }
         } else {
             $("#phrase").css("opacity",0);
