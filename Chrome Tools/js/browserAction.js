@@ -63,13 +63,17 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         var button = $("<div class='topButton block" + cls + "'>" + symbol + "</div>");
         $("body").prepend(button);
         button.width(button.height());
-        button.click(function() {
+        button.click(function(e) {
+            e.stopPropagation();
             if (obj.state === 1) {
                 fullDisplay();
             } else if (obj.state === 2) {
-                obj.state = 1;
-                button.html(symbol);
-                button.width(button.height());
+                closeDisplay();
+            }
+        });
+        $("body").click(function() {
+            if (obj.state === 2) {
+                closeDisplay();
             }
         });
 
@@ -97,6 +101,12 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             button.html(allEle);
             //20 is 2 * margin
             button.outerWidth($("body").width() - 20);
+        }
+
+        function closeDisplay() {
+            obj.state = 1;
+            button.html(symbol);
+            button.width(button.height());
         }
 
         function setClick(ele,i) {
