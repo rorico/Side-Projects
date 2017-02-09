@@ -11,7 +11,6 @@ var addNumberListener;
     var currentPhrase = 0;
     var phraseIndex = 0;
     var allowMistakes = false;
-    var deletes = false;
     keyPressInit = function(container,startPhrases) {
         phrases = startPhrases;
         container.prepend("<div id='chromeTools_keyPress'></div>");
