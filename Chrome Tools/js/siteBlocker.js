@@ -171,8 +171,8 @@ var timeLineLength;
                 chrome.tabs.query({windowId:id,active:true}, function(tabs) {
                     if (tabs.length) {
                         var activeTab = tabs[0];
-                        handleNewPage(activeTab.url,activeTab.title);
                         tabId = activeTab.id;
+                        handleNewPage(activeTab.url,activeTab.title);
                     } else {
                         log("window empty tab");
                     }
