@@ -218,7 +218,6 @@ var timeLineLength;
 
         //check for returnTime to be more up to date
         if (startTime > nextTime + tolerance) {
-            log("you probably slept the computer, didn't you?");
             clearTimer(returnTimer);
             returnTime();
         }
