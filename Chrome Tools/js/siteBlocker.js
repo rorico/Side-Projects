@@ -16,7 +16,7 @@ var timeLineLength;
     var tempVIPstartTime = 0;
     var zeroMode = false;
     var zeroTimer = -1;
-    var nextTime;
+    var nextTime = 0;
     var classes = [];
     var classStart = Infinity;
     //sites that will block after time spent
@@ -135,7 +135,6 @@ var timeLineLength;
                 tabId = activeTab.id;
             }
         });
-        returnTime(timeLineLength - timeLeft);
     }
 
     chrome.tabs.onActivated.addListener(function(activeInfo) {
@@ -218,7 +217,6 @@ var timeLineLength;
 
         //check for returnTime to be more up to date
         if (startTime > nextTime + tolerance) {
-            clearTimer(returnTimer);
             returnTime();
         }
     }
@@ -506,69 +504,67 @@ var timeLineLength;
         };
     })();
 
-    function returnTime(delay) {
-        returnTimer = setTimer(function() {
-            var date = new Date() - timeLineLength;
-            var endingIndex = -1;
-            var cnt = 0;
-            var timeTotal = 0;
-            var currentTimeInterval = new Date() - startTime;
-            var currentTimeOffset = (wastingTime ? currentTimeInterval : 0);
-            //remove anything after limit
-            for (var i = timeLine.length - 1 ; i != -1 ; i--) {
-                //endtime is same as next starttime
-                var endTime = (i ? timeLine[i-1][4] : +timeLine[i][4] + timeLine[i][0]);
-                if (date > endTime) {
-                    if (timeLine[i][1]) {
-                        timeLeft += timeLine[i][0];
-                    }
-                    cnt++;
+    function returnTime() {
+        var date = new Date() - timeLineLength;
+        var endingIndex = -1;
+        var cnt = 0;
+        var timeTotal = 0;
+        var currentTimeInterval = new Date() - startTime;
+        var currentTimeOffset = (wastingTime ? currentTimeInterval : 0);
+        //remove anything after limit
+        for (var i = timeLine.length - 1 ; i != -1 ; i--) {
+            //endtime is same as next starttime
+            var endTime = (i ? timeLine[i-1][4] : +timeLine[i][4] + timeLine[i][0]);
+            if (date > endTime) {
+                if (timeLine[i][1]) {
+                    timeLeft += timeLine[i][0];
+                }
+                cnt++;
+            } else {
+                //note if going through entire array, this will never run
+                timeTotal = timeLine[i][4] - date; //negative
+                endingIndex = i;
+                break;
+            }
+        }
+        if (endingIndex === -1) {
+            timeTotal = startTime - date; //negative
+        }
+
+        if (cnt) {
+            modifyTimeLine("remove",[endingIndex + 1,cnt]);
+        }
+
+        //return time and calculate when to call function again
+        //ideally check again when can return time again
+        var completed = false;
+        for (var i = endingIndex ; i != -1 ; i--) {
+            if (timeLine[i][1]) {
+                //note timeLeft can be negative
+                if (timeLeft - currentTimeOffset > timeTotal) {
+                    modifyTimeLine("change",i);
                 } else {
-                    //note if going through entire array, this will never run
-                    timeTotal = timeLine[i][4] - date; //negative
-                    endingIndex = i;
+                    completed = true;
                     break;
                 }
             }
-            if (endingIndex === -1) {
-                timeTotal = startTime - date; //negative
-            }
-
-            if (cnt) {
-                modifyTimeLine("remove",[endingIndex + 1,cnt]);
-            }
-
-            //return time and calculate when to call function again
-            //ideally check again when can return time again
-            var completed = false;
-            for (var i = endingIndex ; i != -1 ; i--) {
-                if (timeLine[i][1]) {
-                    //note timeLeft can be negative
-                    if (timeLeft - currentTimeOffset > timeTotal) {
-                        modifyTimeLine("change",i);
-                    } else {
-                        completed = true;
-                        break;
-                    }
-                }
-                timeTotal += timeLine[i][0];
-            }
-            //if reach end of the list, add current time
-            if (!completed) {
-                timeTotal += currentTimeInterval;
-            }
-            timeLeftOutput();
-            //upper limit can be passed if currently in very long wastingTime
-            var nextDelay = Math.min(timeTotal - timeLeft + currentTimeOffset,timeLineLength - startingTimeLeft);
-            //used to make sure that this is called at appropriate times
-            nextTime = +new Date() + nextDelay;
-            returnTime(nextDelay);
-        },delay);
+            timeTotal += timeLine[i][0];
+        }
+        //if reach end of the list, add current time
+        if (!completed) {
+            timeTotal += currentTimeInterval;
+        }
+        timeLeftOutput();
+        //upper limit can be passed if currently in very long wastingTime
+        var nextDelay = Math.min(timeTotal - timeLeft + currentTimeOffset,timeLineLength - startingTimeLeft);
+        //used to make sure that this is called at appropriate times
+        nextTime = +new Date() + nextDelay;
+        clearTimer(returnTimer);
+        returnTimer = setTimer(returnTime,nextDelay);
     }
 
     ///////////// Requests from outside ///////////
     function resetTime() {
-        clearTimer(returnTimer);
         startTime = new Date();
         timeLeft = startingTimeLeft;
         timeLine = [];
@@ -616,7 +612,6 @@ var timeLineLength;
         } else {
             modifyTimeLine("change",timeLineIndex);
         }
-        clearTimer(returnTimer);
         returnTime();
         timeLeftOutput();
     }
