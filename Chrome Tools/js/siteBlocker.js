@@ -128,11 +128,12 @@ var timeLineLength;
     }
 
     function startTimeLine() {
-        chrome.tabs.query({windowId:chrome.windows.WINDOW_ID_CURRENT,active:true}, function(tabs) {
+        chrome.tabs.query({active:true}, function(tabs) {
             if (tabs.length) {
                 var activeTab = tabs[0];
-                handleNewPage(activeTab.url,activeTab.title);
                 tabId = activeTab.id;
+                windowId = activeTab.windowId;
+                handleNewPage(activeTab.url,activeTab.title);
             }
         });
     }
