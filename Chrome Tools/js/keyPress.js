@@ -11,8 +11,8 @@ var addNumberListener;
     var currentPhrase = 0;
     var phraseIndex = 0;
     var allowMistakes = false;
-    keyPressInit = function(container,startPhrases) {
-        phrases = startPhrases;
+    keyPressInit = function(container) {
+        phrases = [];
         container.prepend("<div id='chromeTools_keyPress'></div>");
 
         container.attr("tabindex",1).focus().keydown(function(e) {

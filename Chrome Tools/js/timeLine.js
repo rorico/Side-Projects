@@ -1,6 +1,5 @@
 //functions
 var timeLineInit;
-var keyPhrases;
 
 (function(){
     var timeLeft;
@@ -45,7 +44,6 @@ var keyPhrases;
 
         $(".axisPart").outerWidth(parentWidth/6);
 
-
         timeLeft = background.timeLeft;
         startTime = background.startTime;
         wastingTime = background.wastingTime;
@@ -72,6 +70,9 @@ var keyPhrases;
                 timeLineCreate();
             }
         });
+
+        // setup keypress
+        addPhrases(keyPhrases);
     };
 
     function calcWidth(width) {

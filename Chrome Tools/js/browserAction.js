@@ -22,8 +22,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         }
     }
 
+    keyPressInit($("body"));
     timeLineInit($("#timeLineH"),background);
-    keyPressInit($("body"),keyPhrases);
 
     //last one isn't really alarms, but grouping here
     var alarmPhrases = [["S",setAlarmKey],["A",stopAllAlarms],["X",snooze],["P",youtube]];

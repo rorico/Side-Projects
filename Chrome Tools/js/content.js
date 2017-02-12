@@ -22,8 +22,8 @@ function blockType(blockScreen,type,info,callback) {
             if (typeof timeLineInit === "undefined" || typeof keyPressInit === "undefined") {
                 console.log(type + " content script missing");
             } else {
+                keyPressInit(blockScreen);
                 timeLineInit(blockScreen,info);
-                keyPressInit(blockScreen,keyPhrases);
             }
         } else {
             if (typeof scheduleInit === "undefined") {
