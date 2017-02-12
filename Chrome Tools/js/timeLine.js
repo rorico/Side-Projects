@@ -1,7 +1,4 @@
-//functions
-var timeLineInit;
-
-(function(){
+var timeLineInit = (function(){
     var timeLeft;
     var startTime;
     var wastingTime;
@@ -28,7 +25,9 @@ var timeLineInit;
                     ["NO",zero],
                     ["MO",antizero,1]];
 
-    timeLineInit = function(container,background) {
+    return init;
+
+    function init(container,background) {
         parentWidth = calcWidth(container.width());
 
         var top = "<div id='axisTop'>";
