@@ -1,4 +1,5 @@
-var timeLineInit = (function(){
+var timeLineInit;
+(function(){
     var timeLeft;
     var startTime;
     var wastingTime;
@@ -25,7 +26,8 @@ var timeLineInit = (function(){
                     ["NO",zero],
                     ["MO",antizero,1]];
 
-    return init;
+    //this is the global scope
+    timeLineInit = init;
 
     function init(container,background) {
         parentWidth = calcWidth(container.width());
