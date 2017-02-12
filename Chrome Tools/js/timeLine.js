@@ -65,7 +65,7 @@ var keyPhrases;
         //add responsiveness
         $(window).resize(function(){
             var newWidth = calcWidth(container.width());
-            if(newWidth !== parentWidth){
+            if (newWidth !== parentWidth) {
                 parentWidth = newWidth;
                 $(".axisPart").outerWidth(parentWidth/6);
                 $("#timeLine").empty();
