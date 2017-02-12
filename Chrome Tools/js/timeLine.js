@@ -39,7 +39,7 @@ var timeLineInit = (function(){
         top += "</div>";
         bot += "</div>";
         var html = "<div id='chromeTools_timeLine'><div id='timeLeft'></div><div id='timeLineHolder'>" + top + "<div id='timeLine'></div>" + bot + "</div><div id='info'></div></div>";
-        container.html(html);
+        container.append(html);
 
         $(".axisPart").outerWidth(parentWidth/6);
 
