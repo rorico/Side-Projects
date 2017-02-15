@@ -57,10 +57,6 @@ var timeLineInit;
         timeLine = JSON.parse(JSON.stringify(background.timeLine));
         timeLineCreate();
 
-        //after things are added in, vertically center
-        var topOffset = (container.innerHeight() - $("#chromeTools_timeLine").outerHeight())/2;
-        $("#chromeTools_timeLine").css("top",topOffset);
-
         //add responsiveness
         $(window).resize(function(){
             var newWidth = calcWidth(container.width());
