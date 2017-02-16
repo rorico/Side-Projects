@@ -3,8 +3,7 @@ var addPhrase;
 var addPhrases;
 var addNumberListener;
 (function() {
-    //order matters in terms of what gets checked first
-    //keep letters capitalized
+    var holderId = "#chromeTools_keyPress";
     var phrases = [];
     var numberListeners = [];
 
@@ -90,6 +89,8 @@ var addNumberListener;
         });
     };
 
+    //order matters in terms of what gets checked first
+    //keep letters capitalized
     addPhrase = function(phrase,funct,hard) {
         phrases.push([phrase,funct,hard]);
     };
@@ -117,21 +118,22 @@ var addNumberListener;
         back += "</div>";
         var html = "<div id='phrase'>" + front + back + "</div>";
 
-        var holder = $("#chromeTools_keyPress");
+        var holder = $(holderId);
         var parent = holder.parent();
         holder.html(html);
         var fontSize = 100;
         var widthMargin = 40;    //don't want text to hug the sides
         var maxWidth = parent.width() - widthMargin;
-        if (maxWidth < $("#phraseFront").width()) {
-            //shouldn't get stuck in an infinite loop
-            fontSize = Math.floor(fontSize / ($("#phraseFront").width() / maxWidth));
+        if (maxWidth < holder.width()) {
+            fontSize = Math.floor(fontSize / (holder.width() / maxWidth));
             $(".phrasePart").css("font-size",fontSize);
         }
         //center display
-        var leftOffset = (parent.innerWidth() - $("#phraseFront").outerWidth())/2;
-        var topOffset = (parent.innerHeight() - $("#phraseFront").outerHeight())/2;
-        $("#chromeTools_keyPress").css("left",leftOffset).css("top",topOffset);
+        var leftOffset = (parent.innerWidth() - holder.outerWidth())/2;
+        var topOffset = (parent.innerHeight() - holder.outerHeight())/2;
+        //can use css transforms to center, but that makes it blurry
+        holder.css("left",leftOffset).css("top",topOffset);
+        
         if (start) {
             $("#phrase0").addClass("filled");
         }
@@ -166,22 +168,22 @@ var addNumberListener;
                             opacity -= 0.01;
                             $("#phrase").css("opacity",opacity);
                             if (opacity <= 0) {
+                                clearInterval(disappearInterval);
                                 clearHotkey();
                             }
                         },delay);
                     } else {
-                        $("#phrase").css("opacity",0);
                         clearHotkey();
                     }
                 },disapperTime);
             }
         } else {
-            $("#phrase").css("opacity",0);
             clearHotkey();
         }
     }
 
     function clearHotkey() {
+        $("#phrase").remove();
         currentPhrase = 0;
         phraseIndex = 0;
         allowMistakes = false;

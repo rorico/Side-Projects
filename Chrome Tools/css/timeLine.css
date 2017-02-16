@@ -64,15 +64,8 @@
     border-right: 0;
 }
 #chromeTools_keyPress {
-    height: 0;
-    width: 0;
-    position: relative;
-}
-#chromeTools_keyPress #phrase {
     position: absolute;
     z-index: 1;
-    left: 0;
-    top: 0;
 }
 #chromeTools_keyPress .filled {
     color: black;
@@ -92,7 +85,7 @@
     color: #f0f0f0;
 }
 #chromeTools_keyPress #phraseBack {
-    position: absolute;
+    position: relative;
     border: 1px solid black;
     border-radius: 5px;
     background-color: white;
