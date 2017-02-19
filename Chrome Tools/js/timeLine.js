@@ -57,8 +57,11 @@ var timeLineInit;
         timeLine = JSON.parse(JSON.stringify(background.timeLine));
         timeLineCreate();
 
-        //add responsiveness
-        $(window).resize(function(){
+        // setup keypress
+        addPhrases(keyPhrases);
+
+        //need this when modal is moved
+        timeLineResize = function() {
             var newWidth = calcWidth(container.width());
             if (newWidth !== parentWidth) {
                 parentWidth = newWidth;
@@ -66,10 +69,9 @@ var timeLineInit;
                 $("#timeLine").empty();
                 timeLineCreate();
             }
-        });
-
-        // setup keypress
-        addPhrases(keyPhrases);
+        }
+        //add responsiveness
+        $(window).resize(timeLineResize);
     };
 
     function calcWidth(width) {
