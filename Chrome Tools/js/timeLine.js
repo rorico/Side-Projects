@@ -1,4 +1,5 @@
 var timeLineInit;
+var timeLineResize;
 (function(){
     var timeLeft;
     var startTime;
