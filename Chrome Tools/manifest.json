@@ -34,6 +34,9 @@
     "matches" : ["*://*.youtube.com/*", "*://youtube.com/*"],
     "js": ["js/youtubeContent.js"]
   }],
+  "chrome_url_overrides" : {
+    "newtab": "html/newTab.html"
+  },
   "options_page": "html/options.html",
   "web_accessible_resources": ["*"],
   "manifest_version": 2
