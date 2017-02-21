@@ -2,7 +2,7 @@
   "name": "Chrome Tools",
   "version": "3.3",
   "description": "Various tools to help with organization and time management",
-  "permissions": ["<all_urls>","alarms","storage","tabs","unlimitedStorage","activeTab"],
+  "permissions": ["<all_urls>","alarms","storage","tabs","unlimitedStorage","activeTab","webRequest","webRequestBlocking"],
   "background": {
     "page": "html/background.html"
   },

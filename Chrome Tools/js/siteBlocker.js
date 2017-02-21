@@ -396,6 +396,7 @@ var timeLineLength;
                 time:[
                     "/js/timeLine.js",
                     "/js/keyPress.js",
+                    "/js/iframe.js",
                     "/css/timeLine.css"]
             };
             return injectScripts;
@@ -463,7 +464,9 @@ var timeLineLength;
                         url: url,
                         title: title,
                         timeLine: timeLine,
-                        timeLineLength: timeLineLength
+                        timeLineLength: timeLineLength,
+                        //for iframe, not timeline
+                        iframeUrls:iframeUrls
                     };
                 }
 

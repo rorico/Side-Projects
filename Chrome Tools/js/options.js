@@ -230,6 +230,14 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         setChartType(dataTypes[0]);
     }
 
+    //for iframe urls
+    var iframeUrls = backgroundPage.iframeUrls || [];
+    $("#iframe").val(iframeUrls.join("\n"));
+    $("#iframeSubmit").click(function() {
+        chrome.storage.sync.set({"iframeUrls": $("#iframe").val().split("\n")});
+        backgroundPage.setIframeUrls();
+    });
+
     function setChartType(type) {
         level = type.maxLevel;
         var levelOptions = "";

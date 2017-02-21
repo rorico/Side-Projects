@@ -1,10 +1,10 @@
 $("#convert").click(function() {
-    var info = $("#input").val();
+    var info = $("#class").val();
     //note, cannot store date objects, so convert to timestamp
     chrome.storage.sync.set({"scheduleInfo": parseData(info)});
     sendRequest("resetSchedule");
     //reset input
-    $("#input").val("");
+    $("#class").val("");
 });
 
 function parseData(text) {

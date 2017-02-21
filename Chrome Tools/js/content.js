@@ -45,11 +45,12 @@ function block(type,info,callback) {
 function blockType(blockScreen,type,info,callback) {
     currentBlock = type;
     if (type === "time") {
-        if (typeof timeLineInit === "undefined" || typeof keyPressInit === "undefined") {
+        if (typeof timeLineInit === "undefined" || typeof keyPressInit === "undefined" || typeof iframe === "undefined") {
             console.log(type + " content script missing");
         } else {
             keyPressInit(blockScreen);
-            timeLineInit(blockScreen,info);
+            var container = timeLineInit(blockScreen,info);
+            iframe(container,info.iframeUrls);
         }
     } else {
         if (typeof scheduleInit === "undefined") {

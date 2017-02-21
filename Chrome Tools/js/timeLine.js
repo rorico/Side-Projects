@@ -1,6 +1,7 @@
 var timeLineInit;
 var timeLineResize;
 (function(){
+    var timeLineId = "chromeTools_timeLine";
     var timeLeft;
     var startTime;
     var wastingTime;
@@ -41,7 +42,7 @@ var timeLineResize;
         }
         top += "</div>";
         bot += "</div>";
-        var html = "<div id='chromeTools_timeLine'><div id='timeLeft'></div><div id='timeLineHolder'>" + top + "<div id='timeLine'></div>" + bot + "</div><div id='info'></div></div>";
+        var html = "<div id='" + timeLineId + "'><div id='timeLeft'></div><div id='timeLineHolder'>" + top + "<div id='timeLine'></div>" + bot + "</div><div id='info'></div></div>";
         container.append(html);
 
         $(".axisPart").outerWidth(parentWidth/6);
@@ -73,6 +74,7 @@ var timeLineResize;
         }
         //add responsiveness
         $(window).resize(timeLineResize);
+        return $("#" + timeLineId);
     };
 
     function calcWidth(width) {
