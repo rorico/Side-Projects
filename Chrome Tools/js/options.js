@@ -78,7 +78,6 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
                     },
                     labels: {
                         formatter: function() {
-                            console.log(this);  
                             return MinutesSecondsFormat(this.value);
                         }
                     }
