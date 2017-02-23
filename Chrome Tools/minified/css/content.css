@@ -1,1 +1,1 @@
-#chromeTools_block{all:initial;height:100%;width:100%;z-index:999;display:table;position:fixed;top:0;left:0;background-color:white;text-align:center}
+#chromeTools_block{all:initial;height:100%;width:100%;z-index:2147483647;position:fixed;top:0;left:0;background-color:white;text-align:center;display:flex;align-items:center;justify-content:center}.iframe{margin:30px;border:1px solid black;overflow:hidden}
