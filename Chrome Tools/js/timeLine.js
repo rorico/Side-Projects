@@ -74,7 +74,6 @@ var timeLineResize;
         }
         //add responsiveness
         $(window).resize(timeLineResize);
-        return $("#" + timeLineId);
     };
 
     function calcWidth(width) {

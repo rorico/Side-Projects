@@ -14,7 +14,7 @@ function iframe(container,urls) {
     $(document).one('focusout', function(){
         setTimeout(function(){
             if (document.activeElement instanceof HTMLIFrameElement) {
-                $("#chromeTools_block").focus();
+                container.focus();
             }
         },0);
     })

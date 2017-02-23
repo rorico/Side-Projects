@@ -49,8 +49,8 @@ function blockType(blockScreen,type,info,callback) {
             console.log(type + " content script missing");
         } else {
             keyPressInit(blockScreen);
-            var container = timeLineInit(blockScreen,info);
-            iframe(container,info.iframeUrls);
+            timeLineInit(blockScreen,info);
+            iframe(blockScreen,info.iframeUrls);
         }
     } else {
         if (typeof scheduleInit === "undefined") {
