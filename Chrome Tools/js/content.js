@@ -1,44 +1,45 @@
 var currentBlock;   //holds current block type, as well as if block or going to be blocked
 var blockId = "chromeTools_block";
 var fullWait = false;
+var hidden = false;
 
 function block(type,info,callback) {
-    var blockScreen;
-    if (currentBlock) {
+    var blockScreen = $("#" + blockId);
+    if (blockScreen.length) {
         if (type !== currentBlock) {
-            blockScreen = $("#" + blockId).empty();
+            blockScreen.empty();
+        }
+        if (hidden) {
+            blockScreen.show().focus();
+            hidden = false;
         }
     } else {
         blockScreen = $("<div id='" + blockId + "'></div>");
         $("body").append(blockScreen);
     }
-    if (blockScreen) {
-        //assuming this is run on chrome
-        var full = document.webkitFullscreenElement;
-        if (full) {
-            //can't append to iframes, so just force close fullscreen
-            if (full.tagName === "IFRAME") {
-                document.webkitExitFullscreen();
-            } else {
-                blockScreen.detach().appendTo(full);
-                //don't make more than 1 listener
-                if (!fullWait) {
-                    fullWait = true;
-                    $(document).one("webkitfullscreenchange",function() {
-                        fullWait = false;
-                        if (currentBlock) {
-                            blockScreen.detach().appendTo("body").focus();
-                            if (currentBlock === "time") {
-                                timeLineResize();
-                            }
-                        }
-                    });
-                }
+    //assuming this is run on chrome
+    var full = document.webkitFullscreenElement;
+    if (full) {
+        //can't append to iframes, so just force close fullscreen
+        if (full.tagName === "IFRAME") {
+            document.webkitExitFullscreen();
+        } else {
+            blockScreen.detach().appendTo(full);
+            //don't make more than 1 listener
+            if (!fullWait) {
+                fullWait = true;
+                $(document).one("webkitfullscreenchange",function() {
+                    fullWait = false;
+                    if (!hidden) {
+                        blockScreen.detach().appendTo("body").focus();
+                        //trigger resize event for blocking things
+                        $(window).trigger("resize");
+                    }
+                });
             }
         }
-        return blockType(blockScreen,type,info,callback);
     }
-    return false;
+    return type === currentBlock ? false : blockType(blockScreen,type,info,callback);
 }
 
 //only helper function for block
@@ -65,8 +66,8 @@ function blockType(blockScreen,type,info,callback) {
 }
 
 function unblock() {
-    $("#" + blockId).remove();
-    currentBlock = "";
+    $("#" + blockId).hide();
+    hidden = true;
 }
 
 //don't change name, need this as cannot directly use background functions
