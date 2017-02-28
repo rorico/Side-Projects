@@ -1,5 +1,5 @@
 #chromeTools_block {
-    all: initial;
+    isolation: isolate;
     height: 100%;
     width: 100%;
     z-index: 2147483647;
