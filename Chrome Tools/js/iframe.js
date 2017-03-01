@@ -17,18 +17,10 @@ var iframe;
         $(window).resize(resize);
 
         function resize() {
-            var newWidth = Math.min(400,roundTo(container.width()/urls.length - 50,50));
+            var newWidth = Math.min(400,roundTo(container.width()/urls.length - 120,50));
             if (newWidth !== width) {
                 width = newWidth;
                 $(".iframe").width(width);
-            }
-            var last = container.children().last();
-            var bottom = last.height() + last.offset().top;
-            var maxHeight = (container.height() - bottom) * 2 + $("#" + iframeId).height();
-            var newHeight = Math.min(500,roundTo(maxHeight - 120,50));
-            if (newHeight !== height) {
-                height = newHeight;
-                $(".iframe").height(height);
             }
         }
 
