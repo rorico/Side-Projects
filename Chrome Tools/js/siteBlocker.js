@@ -436,7 +436,7 @@ var timeLineLength;
                                 injecting = false;
                                 callback(ready);
                                 if (injectQueue.length) {
-                                    var next = injectQueue.splice(0,1);
+                                    var next = injectQueue.shift();
                                     next();
                                 }
                             });
