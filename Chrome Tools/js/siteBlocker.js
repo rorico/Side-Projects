@@ -433,6 +433,7 @@ var timeLineLength;
                         } else {
                             injecting = true;
                             addContentScript(tab,list,0,function(ready) {
+                                injecting = false;
                                 callback(ready);
                                 if (injectQueue.length) {
                                     var next = injectQueue.splice(0,1);
