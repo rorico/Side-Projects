@@ -373,16 +373,20 @@ var timeLineLength;
             var start = +new Date();
             blockTimer = setTimeout(function() {
                 //note, won't inject if already injected
-                injectScripts(tabId,blockType,function() {
-                    var elapsed = +new Date() - start;
-                    blockTimer = setTimeout(function() {
-                        blockSite(tabId,blockType);
-                    },time - elapsed);
+                injectScripts(tabId,blockType,function(ready) {
+                    if (ready) {
+                        var elapsed = +new Date() - start;
+                        blockTimer = setTimeout(function() {
+                            blockSite(tabId,blockType);
+                        },time - elapsed);
+                    }
                 });
             },time - tolerance);
         }
 
         var injectScripts = (function() {
+            var injecting = false;
+            var injectQueue = [];
             var scripts = {
                 all:[
                     "/lib/jquery.min.js",
@@ -420,9 +424,24 @@ var timeLineLength;
                         for (var i = 0 ; i < injectTypes.length ; i++) {
                             list = list.concat(scripts[injectTypes[i]]);
                         }
-                        addContentScript(tab,list,0,callback);
+                        //want to make sure not injecting to the same page twice
+                        if (injecting) {
+                            //ping again
+                            injectQueue.push(function() {
+                                injectScripts(tab,blockType,callback);
+                            });
+                        } else {
+                            injecting = true;
+                            addContentScript(tab,list,0,function(ready) {
+                                callback(ready);
+                                if (injectQueue.length) {
+                                    var next = injectQueue.splice(0,1);
+                                    next();
+                                }
+                            });
+                        }
                     } else {
-                        callback();
+                        callback(true);
                     }
                 });
             }
@@ -435,11 +454,12 @@ var timeLineLength;
                         //this happens a lot due to closing of tab
                         //don't show front end
                         console.log(chrome.runtime.lastError);
+                        callback(false);
                         return;
                     }
                     i++;
                     if (list.length === i) {
-                        callback();
+                        callback(true);
                     } else {
                         addContentScript(tab,list,i,callback);
                     }
