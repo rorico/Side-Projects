@@ -26,7 +26,7 @@ var addNumberListener;
                         var hard = currentPhrase[2];
                         clearHotkey();
                         if (hard) {
-                            double(fnc);
+                            double(fnc,hard);
                         } else {
                             fnc();
                         }
@@ -189,11 +189,11 @@ var addNumberListener;
         allowMistakes = false;
     }
 
-    function double(funct) {
+    function double(funct,length) {
         //add another test to actually call vip in background
         var random = "";
         var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        for (var i = 0 ; i < 18 ; i++) {
+        for (var i = 0 ; i < length ; i++) {
             random += possible.charAt(Math.floor(Math.random() * possible.length));
         }
         currentPhrase = [random,funct];

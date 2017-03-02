@@ -22,11 +22,11 @@ var timeLineResize;
 
     //for setup key presses
     keyPhrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],
-                    ["VIP",VIP,1],
-                    ["CHANGE",change],
+                    ["VIP",VIP,18],
+                    ["CHANGE",change,6],
                     ["TEMP",tempVIP],
                     ["NO",zero],
-                    ["MO",antizero,1]];
+                    ["MO",antizero,8]];
 
     //this is the global scope
     timeLineInit = init;
