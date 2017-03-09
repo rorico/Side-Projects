@@ -18,7 +18,13 @@ var youtubeVideoNames = [];
             youtubeVideoNames.splice(index,1);
         } else {
             //get all youtube tabs that isn't the current one
-            chrome.tabs.query({url:["*://*.youtube.com/*", "*://youtube.com/*"],active:false}, function(tabs) {
+            var query = {url:["*://*.youtube.com/*", "*://youtube.com/*"]};
+            //if current page is blocked, add it to current list
+            //sorta hacky, defined in siteBlocker
+            if (url !== "Blocked") {
+                query.active = false;
+            }
+            chrome.tabs.query(query, function(tabs) {
                 //if tabs is empty, nothing to play anyways
                 var states = [];
                 var numAd = 0;
