@@ -26,7 +26,8 @@ var timeLineResize;
                     ["CHANGE",change,6],
                     ["TEMP",tempVIP],
                     ["NO",zero],
-                    ["MO",antizero,8]];
+                    ["MO",antizero,8],
+                    ["P",youtube]];
 
     //this is the global scope
     timeLineInit = init;
@@ -71,10 +72,10 @@ var timeLineResize;
                 $("#timeLine").empty();
                 timeLineCreate();
             }
-        }
+        };
         //add responsiveness
         $(window).resize(timeLineResize);
-    };
+    }
 
     function calcWidth(width) {
         //add some padding, and make multiple of 60
@@ -293,6 +294,10 @@ var timeLineResize;
 
     function antizero() {
         sendRequest("antizero");
+    }
+
+    function youtube() {
+        sendRequest("youtube");
     }
 
     //send requests to background
