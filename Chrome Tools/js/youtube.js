@@ -2,6 +2,7 @@ var youtubeVideoNames = [];
 
 (function() {
     var youtubeVideoIds = [];
+    var scriptUrl = "/js/youtubeContent.js";
 
     addMessageListener({
         "youtube": function(a) {
@@ -33,25 +34,36 @@ var youtubeVideoNames = [];
                 var cnt = 0;
                 var num = tabs.length;
                 for (var i = 0 ; i < num ; i++) {
-                    var tab = tabs[i];
-                    var data = {action:"getState"};
-
-                    chrome.tabs.sendMessage(tab.id,data,tabCallback(i));
+                    getState(tabs[i].id,i);
                 }
 
-                function tabCallback(i) {
-                    return function(state) {
-                        states[i] = state;
-                        if (state === "ad") {
-                            numAd++;
-                        } else if (state === "play") {
-                            numPause++;
+                function getState(id,i) {
+                    var data = {action:"getState"};
+                    chrome.tabs.sendMessage(id,data,function(state) {
+                        //script missing from the tab, inject
+                        if (state === undefined) {
+                            chrome.tabs.executeScript(id,{file:scriptUrl},function() {
+                                if (chrome.runtime.lastError) {
+                                    //something went wrong here, don't try again, just move on
+                                    log(chrome.runtime.lastError);
+                                    action();
+                                } else {
+                                    getState(id,i);
+                                }
+                            });
+                        } else {
+                            states[i] = state;
+                            if (state === "ad") {
+                                numAd++;
+                            } else if (state === "play") {
+                                numPause++;
+                            }
+                            cnt++;
+                            if (cnt === num) {
+                                action();
+                            }
                         }
-                        cnt++;
-                        if (cnt === num) {
-                            action();
-                        }
-                    };
+                    });
                 }
 
                 function action() {
