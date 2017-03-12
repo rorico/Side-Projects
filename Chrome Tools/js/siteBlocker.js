@@ -50,6 +50,7 @@ var isBlocked;
     var blockTab;
     var unblockSite;
     var sendContent;
+    var getBlockedUrl;
 
     addMessageListener({
         "VIP": VIP,
@@ -277,7 +278,8 @@ var isBlocked;
             var displayTime = timeLeft - (wastingTime ? new Date() - startTime : 0);
             //give wastingTime 2 more time, but do not show in badge
             //note the returntime isn't optimized to for this, but that should be fine.
-            var time = displayTime + (wastingTime === 2 ? secondLimit : 0);
+            //also, need to handle blocked pages
+            var time = displayTime + (wastingTime || (isBlocked() && matchesURL(getBlockedUrl())) === 2 ? secondLimit : 0);
             var endTime = 0;
             var countDown = wastingTime;
             var blockType = "time";
@@ -457,7 +459,7 @@ var isBlocked;
                 var file = list[i];
                 var inject = file.substring(file.lastIndexOf(".")) === ".js" ? chrome.tabs.executeScript : chrome.tabs.insertCSS;
                 inject(tab,{file:file},function() {
-                    if(chrome.runtime.lastError) {
+                    if (chrome.runtime.lastError) {
                         //this happens a lot due to closing of tab
                         //don't show front end
                         console.log(chrome.runtime.lastError);
@@ -536,6 +538,10 @@ var isBlocked;
         isBlocked = function() {
             //I'm just gonna assume there is no usual url named "Blocked"
             return url === "Blocked";
+        }
+
+        getBlockedUrl = function() {
+            return blockedUrl;
         }
     })();
 
