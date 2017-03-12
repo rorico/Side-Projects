@@ -7,6 +7,9 @@ var timeLeft = 0;
 var timeLine = [];
 var timeLineLength;
 
+//functions
+var isBlocked;
+
 (function(){
     var tabId = -2;
     var windowId = -3;
@@ -511,8 +514,7 @@ var timeLineLength;
                 blockedTab = -2;
                 blocked = false;
 
-                //I'm just gonna assume there is no usual url named "Blocked"
-                if (url === "Blocked") {
+                if (isBlocked()) {
                     handleNewPage(blockedUrl,blockedTitle);
                 }
             }
@@ -527,6 +529,11 @@ var timeLineLength;
                 chrome.tabs.sendMessage(blockedTab,sendFormat(action,input));
             }
         };
+
+        isBlocked = function() {
+            //I'm just gonna assume there is no usual url named "Blocked"
+            return url === "Blocked";
+        }
     })();
 
     function returnTime() {

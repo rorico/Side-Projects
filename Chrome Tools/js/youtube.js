@@ -20,8 +20,8 @@ var youtubeVideoNames = [];
             //get all youtube tabs that isn't the current one
             var query = {url:["*://*.youtube.com/*", "*://youtube.com/*"]};
             //if current page is blocked, add it to current list
-            //sorta hacky, defined in siteBlocker
-            if (url !== "Blocked") {
+            //defined in siteBlocker
+            if (isBlocked()) {
                 query.active = false;
             }
             chrome.tabs.query(query, function(tabs) {
