@@ -23,6 +23,7 @@ var timeLineResize;
     //for setup key presses
     keyPhrases = [["ZYXWVUTSRQPONMLKJIHGFEDCBA",resetTimeLine],
                     ["VIP",VIP,18],
+                    ["FINISH",finish,10],
                     ["CHANGE",change,6],
                     ["TEMP",tempVIP],
                     ["NO",zero],
@@ -278,6 +279,10 @@ var timeLineResize;
 
     function VIP() {
         sendRequest("VIP");
+    }
+    
+    function finish() {
+        sendRequest("finish");
     }
 
     function change() {

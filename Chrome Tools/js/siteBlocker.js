@@ -17,6 +17,7 @@ var isBlocked;
     var VIPtab = -1;
     var tempVIPtimer = -1;
     var tempVIPstartTime = 0;
+    var finishTime = 0;
     var zeroMode = false;
     var zeroTimer = -1;
     var nextTime = 0;
@@ -52,6 +53,7 @@ var isBlocked;
 
     addMessageListener({
         "VIP": VIP,
+        "finish": finish,
         "resetTime": resetTime,
         "change": function(a) {
             change(a.input);
@@ -280,8 +282,9 @@ var isBlocked;
             var countDown = wastingTime;
             var blockType = "time";
 
-            if (VIPtab === tabId && !tempVIPstartTime) {
+            if (VIPtab === tabId && !tempVIPstartTime && !(finishTime && !checkFinish())) {
                 //if tempVIPstartTime is not set, VIP isn't temp
+                //if finishTime is set, but checkFinish is false, isn't actually VIP
                 displayTime = time = Infinity;
                 countDown = false;
             } else if (time > classStart - new Date()) {
@@ -621,6 +624,23 @@ var isBlocked;
         makeCurrentTabVIP();
         tempVIPstartTime = 0;
         timeLeftOutput();
+    }
+
+    //VIP until pagechange
+    function finish() {
+        //startTime only changes on newPage
+        finishTime = startTime;
+        VIP();
+    }
+
+    function checkFinish() {
+        if (finishTime === startTime) {
+            return true;
+        } else {
+            finishTime = 0;
+            VIPtab = -1;
+            return false;
+        }
     }
 
     function tempVIP() {
