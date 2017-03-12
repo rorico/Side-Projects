@@ -28,6 +28,7 @@ var timeLineResize;
                     ["TEMP",tempVIP],
                     ["NO",zero],
                     ["MO",antizero,8],
+                    ["O",skipAd],
                     ["P",youtube]];
 
     //this is the global scope
@@ -304,6 +305,11 @@ var timeLineResize;
     function youtube() {
         sendRequest("youtube");
     }
+
+    function skipAd() {
+        sendRequest("skipAd");
+    }
+
 
     //send requests to background
     function sendRequest(action,input) {

@@ -10,25 +10,31 @@ var youtubeVideoNames = [];
         },
         "youtubeEnd": function(a,b) {
             youtubeEnd(b.tab);
+        },
+        "skipAd": function(a,b) {
+            skipAd(b.tab);
         }
     });
+
+    function youtubeTabs(callback) {
+        //get all youtube tabs that isn't the current one
+        var query = {url:["*://*.youtube.com/*", "*://youtube.com/*"]};
+        //if current page is blocked, add it to current list
+        //defined in siteBlocker
+        if (isBlocked()) {
+            query.active = false;
+        }
+        chrome.tabs.query(query,callback);
+    }
 
     function youtube(index) {
         if (typeof index === "number") {
             play(youtubeVideoIds.splice(index,1)[0]);
             youtubeVideoNames.splice(index,1);
         } else {
-            //get all youtube tabs that isn't the current one
-            var query = {url:["*://*.youtube.com/*", "*://youtube.com/*"]};
-            //if current page is blocked, add it to current list
-            //defined in siteBlocker
-            if (isBlocked()) {
-                query.active = false;
-            }
-            chrome.tabs.query(query, function(tabs) {
+            youtubeTabs(function(tabs) {
                 //if tabs is empty, nothing to play anyways
                 var states = [];
-                var numAd = 0;
                 var numPause = 0;
 
                 var cnt = 0;
@@ -53,9 +59,7 @@ var youtubeVideoNames = [];
                             });
                         } else {
                             states[i] = state;
-                            if (state === "ad") {
-                                numAd++;
-                            } else if (state === "play") {
+                            if (state === "play") {
                                 numPause++;
                             }
                             cnt++;
@@ -67,15 +71,7 @@ var youtubeVideoNames = [];
                 }
 
                 function action() {
-                    if (numAd) {
-                        for (var i = 0 ; i < num ; i++) {
-                            if (states[i] === "ad") {
-                                var tab = tabs[i];
-                                var data = {action:"skipAd"};
-                                chrome.tabs.sendMessage(tab.id,data);
-                            }
-                        }
-                    } else if (numPause) {
+                    if (numPause) {
                         emptyList();
                         for (var i = 0 ; i < num ; i++) {
                             if (states[i] === "play") {
@@ -94,6 +90,15 @@ var youtubeVideoNames = [];
                 }
             });
         }
+    }
+
+    function skipAd() {
+        youtubeTabs(function(tabs) {
+            var data = {action:"skipAd"};
+            for (var i = 0 ; i < tabs.length ; i++) {
+                chrome.tabs.sendMessage(tabs[i].id,data);
+            }
+        });
     }
 
     function addTab(id,title) {

@@ -1,6 +1,4 @@
 var p;
-var adSkip;
-var inAd;
 youtubeNewPage();
 
 //youtube is special in that new urls don't actual reload page
@@ -12,26 +10,22 @@ document.addEventListener('transitionend', function(e) {
     }
 });
 
-
 function youtubeNewPage() {
     p = window.document.getElementsByTagName("video")[0];
     if (p) {
         p.onended = function() {
-            if (inAd) {
-                inAd = false;
-            } else {
+            //if was just an ad, won't pause it
+            if (!p.paused) {
                 sendRequest("youtubeEnd");
             }
         }
     }
-    inAd = !!document.getElementsByClassName("videoAdUi")[0];
-    adSkip = document.getElementsByClassName("videoAdUiSkipButton")[0];
 }
 
 function skipAd() {
+    adSkip = document.getElementsByClassName("videoAdUiSkipButton")[0];
     if (adSkip) {
         adSkip.click();
-        inAd = false;
         return true;
     }
     return false;
@@ -54,10 +48,6 @@ function play() {
 }
 
 function getState() {
-    if (inAd && adSkip) {
-        //means in ad and can skip
-        return "ad";
-    }
     if (p.paused) {
         return "pause";
     }
