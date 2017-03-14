@@ -279,7 +279,8 @@ var isBlocked;
             //give wastingTime 2 more time, but do not show in badge
             //note the returntime isn't optimized to for this, but that should be fine.
             //also, need to handle blocked pages
-            var time = displayTime + (wastingTime || (isBlocked() && matchesURL(getBlockedUrl())) === 2 ? secondLimit : 0);
+            var thisWasting = isBlocked() ? matchesURL(getBlockedUrl()) : wastingTime;
+            var time = displayTime + (thisWasting === 2 ? secondLimit : 0);
             var endTime = 0;
             var countDown = wastingTime;
             var blockType = "time";
