@@ -21,7 +21,7 @@ var youtubeVideoNames = [];
         var query = {url:["*://*.youtube.com/*", "*://youtube.com/*"]};
         //if current page is blocked, add it to current list
         //defined in siteBlocker
-        if (isBlocked()) {
+        if (!isBlocked()) {
             query.active = false;
         }
         chrome.tabs.query(query,callback);
