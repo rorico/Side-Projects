@@ -43,18 +43,19 @@ var youtubeVideoNames = [];
                     getState(tabs[i].id,i);
                 }
 
-                function getState(id,i) {
+                function getState(id,i,repeat) {
                     var data = {action:"getState"};
                     chrome.tabs.sendMessage(id,data,function(state) {
                         //script missing from the tab, inject
-                        if (state === undefined) {
+                        if (state === undefined && !repeat) {
                             chrome.tabs.executeScript(id,{file:scriptUrl},function() {
                                 if (chrome.runtime.lastError) {
                                     //something went wrong here, don't try again, just move on
                                     log(chrome.runtime.lastError);
                                     action();
                                 } else {
-                                    getState(id,i);
+                                    //make sure not to get in infinite loop
+                                    getState(id,i,true);
                                 }
                             });
                         } else {
