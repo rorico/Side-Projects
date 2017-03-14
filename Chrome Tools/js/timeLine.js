@@ -1,5 +1,6 @@
 var timeLineInit;
 var timeLineResize;
+var timeLineUpdate;
 (function(){
     var timeLineId = "chromeTools_timeLine";
     var timeLeft;
@@ -33,6 +34,7 @@ var timeLineResize;
 
     //this is the global scope
     timeLineInit = init;
+    timeLineUpdate = setTimeLine;
 
     function init(container,background) {
         parentWidth = calcWidth(container.width());
@@ -50,17 +52,9 @@ var timeLineResize;
 
         $(".axisPart").outerWidth(parentWidth/6);
 
-        timeLeft = background.timeLeft;
-        startTime = background.startTime;
-        wastingTime = background.wastingTime;
-        url = background.url;
-        title = background.title;
-        countDown(timeLeft);
-
         timeLineLength = background.timeLineLength;
-        //deep copy to not affect it outside of function call
-        timeLine = JSON.parse(JSON.stringify(background.timeLine));
-        timeLineCreate();
+        setTimeLine(background);
+        countDown(timeLeft);
 
         // setup keypress
         addPhrases(keyPhrases);
@@ -84,6 +78,20 @@ var timeLineResize;
         return Math.floor((width - 30) / 60) * 60;
     }
 
+    function setTimeLine(background) {
+        timeLeft = background.timeLeft;
+        startTime = background.startTime;
+        wastingTime = background.wastingTime;
+        url = background.url;
+        title = background.title;
+        timeCurrent = new Date() - startTime;
+        //if empty, assume reset
+        //deep copy to not affect it outside of function call
+        timeLine = background.timeLine ? JSON.parse(JSON.stringify(background.timeLine)) : [];
+        $("#timeLine").empty();
+        timeLineCreate();
+    }
+
     function timeLineCreate() {
         timeLineLeft = parentWidth;
         offset = 0;
@@ -102,19 +110,6 @@ var timeLineResize;
         }
         displayInfo(-1);
         updateTimeLine();
-    }
-
-    function restartTimeLine(background) {
-        timeLeft = background.timeLeft;
-        startTime = background.startTime;
-        wastingTime = background.wastingTime;
-        url = background.url;
-        title = background.title;
-        timeCurrent = new Date() - startTime;
-        //this is reset on the backend as well
-        timeLine = [];
-        $("#timeLine").empty();
-        timeLineCreate();
     }
 
     //returns true if not done
@@ -332,7 +327,7 @@ var timeLineResize;
                     changeTimeLine(input[0],input[1]);
                     break;
                 case "reset":
-                    restartTimeLine(a.input);
+                    setTimeLine(a.input);
                     break;
                 case "newPage":
                     newPage(a.input);

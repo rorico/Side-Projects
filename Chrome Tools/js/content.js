@@ -2,21 +2,30 @@ var currentBlock;   //holds current block type, as well as if block or going to 
 var blockId = "chromeTools_block";
 var fullWait = false;
 var hidden = false;
+var updateInfo;
+
+var blockScreen = $("<div id='" + blockId + "'></div>");
+$("body").append(blockScreen);
+
+function prepare(type,info) {
+    if (type === "time") {
+        if (typeof timeLineInit === "undefined" || typeof keyPressInit === "undefined" || typeof iframe === "undefined") {
+            console.log(type + " content script missing");
+        } else {
+            //check if other parts of this block are already made
+            if (type !== currentBlock) {
+                keyPressInit(blockScreen);
+                timeLineInit(blockScreen,info);
+                iframe(blockScreen,info.iframeUrls);
+            } else {
+                iframeUpdate(info.iframeUrls,info.delay);
+            }
+        }
+    }
+    currentBlock = type;
+}
 
 function block(type,info,callback) {
-    var blockScreen = $("#" + blockId);
-    if (blockScreen.length) {
-        if (type !== currentBlock) {
-            blockScreen.empty();
-        }
-        if (hidden) {
-            blockScreen.show().focus();
-            hidden = false;
-        }
-    } else {
-        blockScreen = $("<div id='" + blockId + "'></div>");
-        $("body").append(blockScreen);
-    }
     //assuming this is run on chrome
     var full = document.webkitFullscreenElement;
     if (full) {
@@ -25,6 +34,8 @@ function block(type,info,callback) {
             document.webkitExitFullscreen();
         } else {
             blockScreen.detach().appendTo(full);
+            //trigger resize event for blocking things
+            $(window).trigger("resize");
             //don't make more than 1 listener
             if (!fullWait) {
                 fullWait = true;
@@ -39,34 +50,30 @@ function block(type,info,callback) {
             }
         }
     }
-    return type === currentBlock ? false : blockType(blockScreen,type,info,callback);
-}
-
-//only helper function for block
-function blockType(blockScreen,type,info,callback) {
-    currentBlock = type;
     if (type === "time") {
         if (typeof timeLineInit === "undefined" || typeof keyPressInit === "undefined" || typeof iframe === "undefined") {
             console.log(type + " content script missing");
         } else {
-            keyPressInit(blockScreen);
-            timeLineInit(blockScreen,info);
-            iframe(blockScreen,info.iframeUrls);
+            //assume this has been prepared first
+            timeLineUpdate(info);
         }
     } else {
         if (typeof scheduleInit === "undefined") {
             console.log(type + " content script missing");
         } else {
-            scheduleInit(blockScreen);
+            if (type !== currentBlock) {
+                scheduleInit(blockScreen);
+            }
         }
     }
-
+    currentBlock = type;
+    blockScreen.addClass("display").focus();
     callback(true);
     return false;
 }
 
 function unblock() {
-    $("#" + blockId).hide();
+    $("#" + blockId).removeClass("display").blur();
     hidden = true;
 }
 
@@ -77,6 +84,9 @@ function weekSchedule(dates,callback) {
 
 chrome.runtime.onMessage.addListener(function listener(a, b, c) {
     switch (a.action) {
+        case "prepare":
+            prepare(a.type,a.info);
+            break;
         case "block":
             return block(a.type,a.info,c);
         case "unblock":

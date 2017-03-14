@@ -9,10 +9,7 @@
     left: 0;
     background-color: white;
     text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+    display: none;
 }
 #chromeTools_block.display {
     display: flex;
@@ -23,11 +20,15 @@
 #chromeTools_iframe {
     flex: 1 1 auto;
     display: flex;
-    height: 100%; /* here */
+    height: 100%;
 }
 #chromeTools_block .iframe {
     height: calc(90% - 15px);
     margin: 30px;
     border: 1px solid black;
-    overflow: hidden;
+}
+#chromeTools_block .iframe.hidden {
+	display: none;
+    height: 500px;
+    width: 400px;
 }
