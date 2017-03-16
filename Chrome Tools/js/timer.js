@@ -55,7 +55,7 @@ function clearTimer(handlerId) {
 }
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
-    if (alarm.name==="timer") {
+    if (alarm.name === "timer") {
         var threshold = +new Date() + timerThreshold;
         var cnt = 0;
         for (var i = 0 ; i < timerQueue.length ; i++) {
