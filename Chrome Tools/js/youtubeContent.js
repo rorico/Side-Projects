@@ -15,9 +15,11 @@ function youtubeNewPage() {
     if (p) {
         p.onended = function() {
             //if was just an ad, won't pause it
-            if (!p.paused) {
-                sendRequest("youtubeEnd");
-            }
+            setTimeout(function() {
+                if (!p.paused) {
+                    sendRequest("youtubeEnd");
+                }
+            },100);
         }
     }
 }
