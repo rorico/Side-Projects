@@ -72,8 +72,9 @@ var todaySchedule = (function() {
                 day = "F";
                 break;
         }
-        if (DOW.indexOf(day) > -1) {
-            if (day=="T"&&DOW[DOW.indexOf(day)+1]=="h") {
+        var index = DOW.indexOf(day);
+        if (index > -1) {
+            if (day === "T" && DOW[index + 1] === "h") {
                 return false;
             }
             return true;
@@ -82,7 +83,7 @@ var todaySchedule = (function() {
     }
 
     function isInRange(date,range) {
-        return (date>=range[0]&&date<=range[1]);
+        return (date >= range[0] && date <= range[1]);
     }
 
     function sort_by_date(a,b) {
