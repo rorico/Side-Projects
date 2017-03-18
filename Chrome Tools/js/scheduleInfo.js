@@ -6,7 +6,7 @@ setScheduleInfo();
 addMessageListener({
     "resetSchedule": setScheduleInfo,
     "weekSchedule": function(a,b,c) {
-        c(weekSchedule(a.input));
+        weekSchedule(a.input,c);
     }
 });
 
@@ -93,12 +93,12 @@ var todaySchedule = (function() {
     }
 })();
 
-function weekSchedule(dates) {
+function weekSchedule(dates,callback) {
     var ret = [];
     for (var i = 0 ; i < dates.length ; i++) {
         ret.push(todaySchedule(dates[i]));
     }
-    return ret;
+    callback(ret);
 }
 /* used to add a timeslot somewhere, not used yet
 function add(dayOfW,startT,endT,room,teacher,startD,endD,courseCode,courseInfo,type) {

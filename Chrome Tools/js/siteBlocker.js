@@ -478,7 +478,7 @@ var isBlocked;
         function blockSite(tab,type,blockTime) {
             if (tab === tabId) {
                 //iframes need time to load, load beforehand if can
-                var info;
+                var info = {};
                 if (blockType === "time") {
                     info = {
                         //just for setup
@@ -496,15 +496,17 @@ var isBlocked;
                         blockedTab = tab;
                         blocked = true;
                         blockType = type;
-                        info = {
-                            timeLeft: timeLeft,
-                            startTime: +startTime,
-                            wastingTime: wastingTime,
-                            url: url,
-                            title: title,
-                            timeLine: timeLine,
-                            timeLineLength: timeLineLength
-                        };
+                        if (blockType === "time") {
+                            info = {
+                                timeLeft: timeLeft,
+                                startTime: +startTime,
+                                wastingTime: wastingTime,
+                                url: url,
+                                title: title,
+                                timeLine: timeLine,
+                                timeLineLength: timeLineLength
+                            };
+                        }
                         data = {action:"block",info:info,type:type};
                         chrome.tabs.sendMessage(tab,data,function(blocked) {
                             //when page is actually blocked, update timeline

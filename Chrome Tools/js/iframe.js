@@ -10,7 +10,8 @@ var iframeUpdate;
     iframe = init;
     iframeUpdate = update;
 
-    function init(container,urls) {
+    function init(container,background) {
+        var urls = background.iframeUrls;
         //create foundation for iframes
         var html = "<div id='" + iframeId + "'>";
         for (var i = 0 ; i < urls.length ; i++) {
@@ -18,8 +19,12 @@ var iframeUpdate;
         }
         html += "</div>";
         container.append(html);
-        update(urls,true);
+        updateUrls(urls,true);
         resize();
+        return {
+            resize: resize,
+            update: update
+        }
         //add responsiveness
         $(window).resize(resize);
 
@@ -32,8 +37,12 @@ var iframeUpdate;
         }
     }
 
+    function update(background) {
+        updateUrls(background.iframeUrls,background.delay);
+    }
+
     //second argument can be empty
-    function update(urls,time) {
+    function updateUrls(urls,time) {
         //hide first, then when they are loaded, move them up
         for (var i = 0 ; i < urls.length ; i++) {
             if (!loading[i]) {
@@ -64,6 +73,7 @@ var iframeUpdate;
                 setTimeout(function(){
                     var ele = document.activeElement;
                     if (ele instanceof HTMLIFrameElement && ele.getAttribute("src") === url) {
+                        ele.blur();
                         //assume parent is container
                         $("#" + iframeId).parent().focus();
                         $(document).off('focusout');

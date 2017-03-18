@@ -7,7 +7,11 @@ var scheduleInit = (function() {
     var weekMode = false;
     var nowTimer = -1;
 
-    function scheduleInit(container) {
+    //function set by background on init
+    var weekSchedule;
+
+    function scheduleInit(container,background) {
+        weekSchedule = background.weekSchedule;
         //accepts jquery object
         var header = "<div id='header'>" + 
                         "<input type='button' value='Prev' id='prev'>\n" + 
@@ -208,7 +212,6 @@ var scheduleInit = (function() {
     function weekView() {
         var date = $("#datepicker").datepicker("getDate");
         weekMode = !weekMode;
-        console.log(weekMode);
         if (weekMode) {
             $("#showWeek").val("Show Day");
             showWeek(date);

@@ -1,8 +1,8 @@
-chrome.runtime.getBackgroundPage(function (backgroundPage) {
+chrome.runtime.getBackgroundPage(function(background) {
 	var blockId = "chromeTools_block";
     blockScreen = $("<div id='" + blockId + "' class='display'></div>");
     $("body").append(blockScreen);
     keyPressInit(blockScreen);
-    timeLineInit(blockScreen,backgroundPage);
-    iframe(blockScreen,backgroundPage.iframeUrls);
+    timeLineInit(blockScreen,background);
+    iframe(blockScreen,background);
 });

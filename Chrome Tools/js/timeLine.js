@@ -69,6 +69,11 @@ var timeLineUpdate;
                 timeLineCreate();
             }
         };
+
+        return {
+            resize: timeLineResize,
+            update: setTimeLine
+        };
         //add responsiveness
         $(window).resize(timeLineResize);
     }
