@@ -1,11 +1,14 @@
 var blockId = "chromeTools_block";
-var fullWait = false;
 var hidden = false;
-var updateInfo;
 var blockObj;
 
 var blockScreen = $("<div id='" + blockId + "'></div>");
 $("body").append(blockScreen);
+$(document).on("webkitfullscreenchange",function() {
+    if (!hidden) {
+        move(document.webkitFullscreenElement || document.getElementsByTagName("body")[0]);
+    }
+});
 
 function prepare(type,info) {
     if (currentType(type,info)) {
@@ -23,35 +26,28 @@ function block(type,info,callback) {
             document.webkitExitFullscreen();
         } else {
             appendTo = full;
-            //don't make more than 1 listener
-            if (!fullWait) {
-                fullWait = true;
-                $(document).one("webkitfullscreenchange",function() {
-                    fullWait = false;
-                    if (!hidden) {
-                        blockScreen.detach().appendTo("body").focus();
-                        blockObj.resize();
-                    }
-                });
-            }
         }
     } else {
         appendTo = document.getElementsByTagName("body")[0];
     }
+    move(appendTo);
 
     if (currentType(type,info)) {
         blockObj.update(info);
-    }
-
-    if (blockScreen.parent().get()[0] !== appendTo) {
-        blockScreen.detach().appendTo(appendTo);
-        blockObj.resize();
     }
 
     blockScreen.addClass("display").focus();
     hidden = false;
     callback(true);
     return false;
+}
+
+function move(toContainer) {
+    if (blockScreen.parent().get()[0] !== toContainer) {
+        blockScreen.detach().appendTo(toContainer).focus();
+        //blockObj may not have been initialized yet
+        blockObj && blockObj.resize();
+    }
 }
 
 function currentType(type,info) {
