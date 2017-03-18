@@ -483,7 +483,7 @@ var isBlocked;
                     info = {
                         //just for setup
                         timeLineLength: timeLineLength,
-                        iframeUrls: iframeUrls,
+                        iframeInfo: iframeInfo,
                         delay: blockTime
                     };
                 }
