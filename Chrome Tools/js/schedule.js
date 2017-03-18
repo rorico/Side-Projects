@@ -6,13 +6,16 @@ var scheduleInit = (function() {
     var pxPerHr = 50;
     var weekMode = false;
     var nowTimer = -1;
+    var numDays = 5;
+    var weekWidth;
 
     //function set by background on init
     var weekSchedule;
+    var resize;
 
     function scheduleInit(container,background) {
         weekSchedule = background.weekSchedule;
-        //accepts jquery object
+
         var header = "<div id='header'>" + 
                         "<input type='button' value='Prev' id='prev'>\n" + 
                         "<input type='text' id='datepicker'>\n" + 
@@ -45,6 +48,7 @@ var scheduleInit = (function() {
         container.html(html);
 
         container.attr("tabindex",1).focus().keydown(function(e) {
+            e.stopPropagation();
             switch (e.keyCode) {
                 case 78:        //n
                     setToday();
@@ -78,6 +82,19 @@ var scheduleInit = (function() {
         //normally the widget is outside container, move inside
 
         changeDate(now);
+
+        resize = function() {
+            if (weekMode) {
+                var width = Math.floor((container.width() - 100) / numDays);
+
+                $(".class").outerWidth(width);
+                $(".placeholder").outerWidth(width);
+                $("#now").outerWidth(width);
+            }
+        }
+        return {
+            resize: resize
+        };
     }
 
     function changeDate(date) { //single day
@@ -88,7 +105,7 @@ var scheduleInit = (function() {
         var dates = [];
         var start = date.getDay() - 1;
         date.setDate(date.getDate() - start);    //set to monday
-        for (var i = 0 ; i<5 ; i++) {
+        for (var i = 0 ; i < numDays ; i++) {
             dates.push(+date);
             date.setDate(date.getDate() + 1);
         }
@@ -138,14 +155,7 @@ var scheduleInit = (function() {
                     all.append(holder).append("<div id='side'></div>");
                 }
                 $("#container").html(all);
-                if (weekMode) {
-                    var width = Math.floor(($("#chromeTools_calendar").width() - 100) / dates.length);
-                    $(".class").outerWidth(width);
-                    $(".placeholder").outerWidth(width);
-                    $("#now").outerWidth(width);
-                    clearTimeout(nowTimer);
-                    showNow();
-                }
+                resize();
             });
         }
 
