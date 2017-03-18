@@ -1,12 +1,16 @@
-var iframeUrls;
-setIframeUrls();
-function setIframeUrls() {
-    chrome.storage.sync.get("iframeUrls", function(items) {
+var iframeInfo;
+setIframeInfo();
+function setIframeInfo() {
+    chrome.storage.sync.get("iframeInfo", function(items) {
         if (chrome.runtime.lastError) {
             log(chrome.runtime.lastError);
         }
-        if (items.iframeUrls) {
-            iframeUrls = items.iframeUrls;
+        if (items.iframeInfo) {
+            iframeInfo = items.iframeInfo;
+            var urls = [];
+            for (var i = 0 ; i < iframeInfo.length ; i++) {
+                urls.push(iframeInfo[i].url);
+            }
 
             //workaround for sameorigin problem
             chrome.webRequest.onHeadersReceived.addListener(function(e) {
@@ -21,11 +25,11 @@ function setIframeUrls() {
                     responseHeaders: headers
                 }
             }, {
-                urls: iframeUrls,
+                urls: urls,
                 types: ["sub_frame"]
             }, ["blocking", "responseHeaders"]);
         } else {
-            iframeUrls = [];
+            iframeInfo = [];
         }
     });
 }

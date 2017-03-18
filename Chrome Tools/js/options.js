@@ -232,11 +232,11 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
 
 
     //for iframe urls
-    var iframeUrls = backgroundPage.iframeUrls;
+    var iframeInfo = backgroundPage.iframeInfo;
     var scheduleInfo = backgroundPage.scheduleInfo;
 
     liveChange("class",scheduleInfo,parseSchedule,submitSchedule);
-    liveChange("iframe",iframeUrls,parseIframe,submitIframe);
+    liveChange("iframe",iframeInfo,parseIframe,submitIframe);
 
     function liveChange(baseId,data,parser,submitCallback) {
         var before = $("#" + baseId + "-before");
@@ -253,12 +253,25 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
     }
 
     function parseIframe(text) {
-        return text.split("\n");
+        var each = text.split("\n");
+        var ret = [];
+        for (var i = 0 ; i < each.length ; i++) {
+            var row = each[i].trim();
+            var cols = row.split(" ");
+            if (cols[0]) {
+                var item = {
+                    url: cols[0],
+                    reload: cols[1] === "reload"
+                }
+                ret.push(item);
+            }
+        }
+        return ret;
     }
 
     function submitIframe(data) {
-        chrome.storage.sync.set({"iframeUrls": data});
-        backgroundPage.setIframeUrls();
+        chrome.storage.sync.set({"iframeInfo": data});
+        backgroundPage.setIframeInfo();
     }
 
     function setChartType(type) {

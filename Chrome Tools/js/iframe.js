@@ -11,15 +11,15 @@ var iframeUpdate;
     iframeUpdate = update;
 
     function init(container,background) {
-        var urls = background.iframeUrls;
+        var iframeInfo = background.iframeInfo;
         //create foundation for iframes
         var html = "<div id='" + iframeId + "'>";
-        for (var i = 0 ; i < urls.length ; i++) {
+        for (var i = 0 ; i < iframeInfo.length ; i++) {
             html += "<div id='frame" + i + "'></div>";
         }
         html += "</div>";
         container.append(html);
-        updateUrls(urls,true);
+        updateIframes(iframeInfo,true);
         resize();
         return {
             resize: resize,
@@ -29,7 +29,7 @@ var iframeUpdate;
         $(window).resize(resize);
 
         function resize() {
-            var newWidth = Math.min(400,roundTo(container.width()/urls.length - 120,50));
+            var newWidth = Math.min(400,roundTo(container.width()/iframeInfo.length - 120,50));
             if (newWidth !== width) {
                 width = newWidth;
                 $("#" + iframeId + " .iframe").width(width);
@@ -38,24 +38,29 @@ var iframeUpdate;
     }
 
     function update(background) {
-        updateUrls(background.iframeUrls,background.delay);
+        updateIframes(background.iframeInfo,background.delay);
     }
 
     //second argument can be empty
-    function updateUrls(urls,time) {
+    function updateIframes(iframeInfo,time) {
         //hide first, then when they are loaded, move them up
-        for (var i = 0 ; i < urls.length ; i++) {
+        for (var i = 0 ; i < iframeInfo.length ; i++) {
             if (!loading[i]) {
-                updateUrl(urls[i],i,time);
+                updateUrl(iframeInfo[i],i,time);
             }
         }
     }
 
     //time is earliest time until block
-    function updateUrl(url,i,time) {
+    function updateUrl(info,i,time) {
+        var url = info.url;
+        var reload = info.reload;
         //hide until loaded, unless nothing there in the first place
         var holder = $("#frame" + i);
         var show = !holder.children().length;
+        if (!show && !reload) {
+            return;
+        }
         var cls = show ? "" : " hidden";
 
         var ele = $("<iframe class='iframe" + cls + "' src=" + url + " tabindex='-1' sandbox='allow-same-origin allow-popups allow-forms allow-scripts' scrolling='no' ></iframe>");
