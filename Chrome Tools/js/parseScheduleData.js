@@ -1,13 +1,8 @@
-$("#convert").click(function() {
-    var info = $("#class").val();
-    //note, cannot store date objects, so convert to timestamp
-    chrome.storage.sync.set({"scheduleInfo": parseData(info)});
-    sendRequest("resetSchedule");
-    //reset input
-    $("#class").val("");
-});
+function submitSchedule(data) {
+    chrome.storage.sync.set({"scheduleInfo": data});
+}
 
-function parseData(text) {
+function parseSchedule(text) {
     var info = [];
     var beginning = "University of Waterloo";
     var end = "Printer Friendly Page";

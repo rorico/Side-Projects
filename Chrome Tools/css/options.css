@@ -15,3 +15,7 @@ div p {
     margin: 20px;
     padding: 20px;
 }
+textarea {
+	width: 40%;
+	margin: 2%;
+}

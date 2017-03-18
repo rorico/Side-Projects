@@ -230,13 +230,36 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         setChartType(dataTypes[0]);
     }
 
+
     //for iframe urls
-    var iframeUrls = backgroundPage.iframeUrls || [];
-    $("#iframe").val(iframeUrls.join("\n"));
-    $("#iframeSubmit").click(function() {
-        chrome.storage.sync.set({"iframeUrls": $("#iframe").val().split("\n")});
+    var iframeUrls = backgroundPage.iframeUrls;
+    var scheduleInfo = backgroundPage.scheduleInfo;
+
+    liveChange("class",scheduleInfo,parseSchedule,submitSchedule);
+    liveChange("iframe",iframeUrls,parseIframe,submitIframe);
+
+    function liveChange(baseId,data,parser,submitCallback) {
+        var before = $("#" + baseId + "-before");
+        var after = $("#" + baseId + "-after");
+        var submit = $("#" + baseId + "-submit");
+        after.val(data ? JSON.stringify(data, null, 4) : "");
+        before.change(function() {
+            data = parser(before.val());
+            after.val(JSON.stringify(data, null, 4));
+        });
+        submit.click(function() {
+            submitCallback(data);
+        });
+    }
+
+    function parseIframe(text) {
+        return text.split("\n");
+    }
+
+    function submitIframe(data) {
+        chrome.storage.sync.set({"iframeUrls": data});
         backgroundPage.setIframeUrls();
-    });
+    }
 
     function setChartType(type) {
         level = type.maxLevel;
