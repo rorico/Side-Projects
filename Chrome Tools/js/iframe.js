@@ -57,60 +57,74 @@ var iframeUpdate;
         var reload = info.reload;
         //hide until loaded, unless nothing there in the first place
         var holder = $("#frame" + i);
-        var show = !holder.children().length;
-        if (!show && !reload) {
+        var first = !holder.children().length;
+        if (!first && !reload) {
             return;
         }
-        var cls = show ? "" : " hidden";
+        var cls = first ? "" : " hidden";
 
         var ele = $("<iframe class='iframe" + cls + "' src=" + url + " tabindex='-1' sandbox='allow-same-origin allow-popups allow-forms allow-scripts' scrolling='no' ></iframe>");
         holder.append(ele);
 
-        var loadTime = Math.max(loadingTime,time);
-        //the reason I don't go off the event, is that some internal js still runs to load page
-        //run on the last of the two
         loading[i] = true;
-        var loaded = false;
-        var allowFocus = false;
-        ele.click(function() {
-            allowFocus = true;
-        });
-        var onloaded = function() {
-            //some iframes take control once they load, stop that
-            //http://stackoverflow.com/a/28932220
-            $(document).on('focusout',function() {
-                if (!allowFocus) {
-                    var old = document.activeElement;
-                    setTimeout(function(){
-                        var ele = document.activeElement;
-                        if (ele instanceof HTMLIFrameElement && ele.getAttribute("src") === url) {
-                            old.focus();
-                        }
-                    },0);
-                }
+        if (first) {
+            ele.load(function() {
+                stopIframeFocus(ele);
+                loading[i] = false;
             });
-
-            if (!loaded) {
-                loaded = true;
-                return;
-            }
-            loading[i] = false;
-            if (!show) {
+        } else {
+            var loadTime = Math.max(loadingTime,time);
+            //the reason I don't go off the event, is that some internal js still runs to load page
+            //run on the last of the two
+            var loaded = false;
+            var check = function() {
+                if (!loaded) {
+                    loaded = true;
+                    return;
+                }
+                loading[i] = false;
                 $("#frame" + i).children().each(function() {
-                    var that = $(this);
-                    if (that.hasClass("hidden")) {
-                        that.removeClass("hidden");
-                        that.width(width);
+                    if (this === ele.get()[0]) {
+                        ele.removeClass("hidden");
                     } else {
-                        that.remove();
+                        this.remove();
                     }
                 });
             }
+            ele.load(function() {
+                stopIframeFocus(ele);
+                check();
+            });
+            setTimeout(check,loadTime);
+        }
+    }
+
+    var stopIframeFocus = (function() {
+        var list = {};
+        //some iframes take control once they load, stop that
+        //http://stackoverflow.com/a/28932220
+        function stopIframeFocus(ele) {
+            var url = ele.getAttribute("src");
+            list[url] = false;
+            ele.click(function() {
+                list[url] = true;
+            });
         }
 
-        ele.load(onloaded);
-        setTimeout(onloaded,loadingTime);
-    }
+        $(document).on("focusout",function() {
+            var old = document.activeElement;
+            setTimeout(function(){
+                var ele = document.activeElement;
+                if (ele instanceof HTMLIFrameElement) {
+                    var url = ele.getAttribute("src");
+                    if (!list[url]) {
+                        old.focus;
+                    }
+                }
+            },0);
+        });
+        return stopIframeFocus;
+    })();
 
     function roundTo(num,round) {
         var div = num % round;
