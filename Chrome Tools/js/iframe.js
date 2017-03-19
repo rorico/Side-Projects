@@ -71,19 +71,23 @@ var iframeUpdate;
         //run on the last of the two
         loading[i] = true;
         var loaded = false;
+        var allowFocus = false;
+        ele.click(function() {
+            allowFocus = true;
+        });
         var onloaded = function() {
             //some iframes take control once they load, stop that
             //http://stackoverflow.com/a/28932220
-            $(document).on('focusout', function(){
-                setTimeout(function(){
-                    var ele = document.activeElement;
-                    if (ele instanceof HTMLIFrameElement && ele.getAttribute("src") === url) {
-                        ele.blur();
-                        //assume parent is container
-                        $("#" + iframeId).parent().focus();
-                        $(document).off('focusout');
-                    }
-                },0);
+            $(document).on('focusout',function() {
+                if (!allowFocus) {
+                    var old = document.activeElement;
+                    setTimeout(function(){
+                        var ele = document.activeElement;
+                        if (ele instanceof HTMLIFrameElement && ele.getAttribute("src") === url) {
+                            old.focus();
+                        }
+                    },0);
+                }
             });
 
             if (!loaded) {
