@@ -1,5 +1,4 @@
 var iframe;
-var iframeUpdate;
 (function() {
     var iframeId = "chromeTools_iframe";
     var width;
@@ -8,7 +7,6 @@ var iframeUpdate;
     var loadingTime = 2000; //2 secs
 
     iframe = init;
-    iframeUpdate = update;
 
     function init(container,background) {
         var iframeInfo = background.iframeInfo;
@@ -25,8 +23,6 @@ var iframeUpdate;
             resize: resize,
             update: update
         }
-        //add responsiveness
-        $(window).resize(resize);
 
         function resize() {
             var newWidth = Math.min(400,roundTo(container.width()/iframeInfo.length - 120,50));

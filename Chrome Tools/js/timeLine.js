@@ -1,6 +1,4 @@
 var timeLineInit;
-var timeLineResize;
-var timeLineUpdate;
 (function(){
     var timeLineId = "chromeTools_timeLine";
     var timeLeft;
@@ -34,7 +32,6 @@ var timeLineUpdate;
 
     //this is the global scope
     timeLineInit = init;
-    timeLineUpdate = setTimeLine;
 
     function init(container,background) {
         parentWidth = calcWidth(container.width());
@@ -74,8 +71,6 @@ var timeLineUpdate;
             resize: timeLineResize,
             update: setTimeLine
         };
-        //add responsiveness
-        $(window).resize(timeLineResize);
     }
 
     function calcWidth(width) {
