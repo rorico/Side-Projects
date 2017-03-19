@@ -249,6 +249,8 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
         });
         submit.click(function() {
             submitCallback(data);
+            //show it worked by doing emptying
+            before.val("");
         });
     }
 
