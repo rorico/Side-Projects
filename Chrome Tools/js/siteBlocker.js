@@ -40,6 +40,7 @@ var isBlocked;
     var VIPlength = 20000; // 20s
     var zeroLength = 1800000; // 30 mins
     var tolerance = 2000; // 2s
+    var quickTabTime = 400; // 0.4s
     if (0) { // if in testing mode
         timeLineLength = 120000; // 2 mins
         startingTimeLeft = 60000; // 1 mins
@@ -380,6 +381,7 @@ var isBlocked;
 
         function block(tabId,time,blockType) {
             var start = +new Date();
+            var delay = Math.min(time - tolerance,quickTabTime);
             blockTimer = setTimeout(function() {
                 //note, won't inject if already injected
                 injectScripts(tabId,blockType,function(ready) {
@@ -388,7 +390,7 @@ var isBlocked;
                         blockSite(tabId,blockType,time - elapsed);
                     }
                 });
-            },time - tolerance);
+            },delay);
         }
 
         var injectScripts = (function() {
