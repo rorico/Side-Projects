@@ -479,7 +479,7 @@ var isBlocked;
             if (tab === tabId) {
                 //iframes need time to load, load beforehand if can
                 var info = {};
-                if (blockType === "time") {
+                if (type === "time") {
                     info = {
                         //just for setup
                         timeLineLength: timeLineLength,
