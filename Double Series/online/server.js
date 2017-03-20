@@ -133,7 +133,6 @@ wsServer.on('request', function(request) {
                             } else {
                                 console.log("not your turn?");
                             }
-                            playCallback = null;
                             break;
                         case "change":
                             res.change(query.name);
