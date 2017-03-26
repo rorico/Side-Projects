@@ -16,7 +16,7 @@ function youtubeNewPage() {
         p.onended = function() {
             //if was just an ad, won't pause it
             setTimeout(function() {
-                if (!p.paused) {
+                if (p.paused) {
                     sendRequest("youtubeEnd");
                 }
             },100);
