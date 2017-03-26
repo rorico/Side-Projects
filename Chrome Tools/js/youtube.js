@@ -88,7 +88,7 @@ var youtubeVideoNames = [];
                         playAll();
                         sendRequest("youtube");
                     } else if (isBlocked()) {
-                        playCurrent();
+                        playCurrent(tabs);
                     }
                 }
             });
