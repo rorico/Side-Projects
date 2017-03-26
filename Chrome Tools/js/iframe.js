@@ -81,7 +81,7 @@ var iframe;
                 loading[i] = false;
                 $("#frame" + i).children().each(function() {
                     if (this === ele.get()[0]) {
-                        ele.removeClass("hidden");
+                        ele.removeClass("hidden").width(width);
                     } else {
                         this.remove();
                     }
