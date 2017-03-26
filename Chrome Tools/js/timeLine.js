@@ -67,6 +67,27 @@ var timeLineInit;
             }
         };
 
+        //get from background to display
+        chrome.runtime.onMessage.addListener(function(a, b, c) {
+            if (a.from === "background") {
+                switch(a.action) {
+                    case "timer":
+                        countDown(a.input);
+                        break;
+                    case "change":
+                        var input = a.input;
+                        changeTimeLine(input[0],input[1]);
+                        break;
+                    case "reset":
+                        setTimeLine(a.input);
+                        break;
+                    case "newPage":
+                        newPage(a.input);
+                        break;
+                }
+            }
+        });
+
         return {
             resize: timeLineResize,
             update: setTimeLine
@@ -305,7 +326,6 @@ var timeLineInit;
         sendRequest("skipAd");
     }
 
-
     //send requests to background
     function sendRequest(action,input) {
         chrome.runtime.sendMessage({
@@ -314,25 +334,4 @@ var timeLineInit;
             input: input
         });
     }
-
-    //get from background to display
-    chrome.runtime.onMessage.addListener(function(a, b, c) {
-        if (a.from === "background") {
-            switch(a.action) {
-                case "timer":
-                    countDown(a.input);
-                    break;
-                case "change":
-                    var input = a.input;
-                    changeTimeLine(input[0],input[1]);
-                    break;
-                case "reset":
-                    setTimeLine(a.input);
-                    break;
-                case "newPage":
-                    newPage(a.input);
-                    break;
-            }
-        }
-    });
 })();
