@@ -100,7 +100,7 @@ var iframe;
         //some iframes take control once they load, stop that
         //http://stackoverflow.com/a/28932220
         function stopIframeFocus(ele) {
-            var url = ele.getAttribute("src");
+            var url = ele.attr("src");
             list[url] = false;
             ele.click(function() {
                 list[url] = true;
