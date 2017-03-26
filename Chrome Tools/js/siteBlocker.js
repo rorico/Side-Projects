@@ -634,6 +634,7 @@ var isBlocked;
 
     function makeCurrentTabVIP() {
         clearTimeout(tempVIPtimer);
+        finishTime = 0;
         VIPtab = tabId;
     }
 
