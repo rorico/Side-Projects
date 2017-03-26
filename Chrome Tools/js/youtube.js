@@ -84,9 +84,11 @@ var youtubeVideoNames = [];
                             }
                         }
                         sendRequest("youtube");
-                    } else {
+                    } else if (youtubeVideoIds.length) {
                         playAll();
                         sendRequest("youtube");
+                    } else if (isBlocked()) {
+                        playCurrent();
                     }
                 }
             });
@@ -119,6 +121,15 @@ var youtubeVideoNames = [];
             play(youtubeVideoIds[i]);
         }
         emptyList();
+    }
+
+    function playCurrent(tabs) {
+        for (var i = 0 ; i < tabs.length ; i++) {
+            if (tabs[i].active) {
+                play(tabs[i].id);
+                return;
+            }
+        }
     }
 
     function play(tabId) {
