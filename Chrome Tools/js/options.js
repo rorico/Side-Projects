@@ -248,9 +248,16 @@ chrome.runtime.getBackgroundPage(function (backgroundPage) {
             after.val(JSON.stringify(data, null, 4));
         });
         submit.click(function() {
-            submitCallback(data);
-            //show it worked by doing emptying
-            before.val("");
+            var message;
+            try {
+                data = JSON.parse(after.val());
+                submitCallback(data);
+                message = "Submitted successfully";
+            } catch(e) {
+                message = "Error submitting";
+            }
+            //show it worked
+            before.val(message);
         });
     }
 
