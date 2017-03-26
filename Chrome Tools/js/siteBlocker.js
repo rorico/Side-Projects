@@ -381,7 +381,7 @@ var isBlocked;
 
         function block(tabId,time,blockType) {
             var start = +new Date();
-            var delay = Math.min(time - tolerance,quickTabTime);
+            var delay = Math.max(time - tolerance,quickTabTime);
             blockTimer = setTimeout(function() {
                 //note, won't inject if already injected
                 injectScripts(tabId,blockType,function(ready) {
