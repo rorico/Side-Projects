@@ -100,7 +100,3 @@ function weekSchedule(dates,callback) {
     }
     callback(ret);
 }
-/* used to add a timeslot somewhere, not used yet
-function add(dayOfW,startT,endT,room,teacher,startD,endD,courseCode,courseInfo,type) {
-    info.push([[[dayOfW,startT,endT],room,teacher,[startD,endD],[courseCode,courseInfo],type]])
-}*/
