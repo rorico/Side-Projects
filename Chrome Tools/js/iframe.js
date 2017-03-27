@@ -114,7 +114,13 @@ var iframe;
                 if (ele instanceof HTMLIFrameElement) {
                     var url = ele.getAttribute("src");
                     if (!list[url]) {
-                        old.focus;
+                        if (old.hasAttribute("tabindex")) {
+                            old.focus();
+                        } else {
+                            old.setAttribute("tabindex", "-1");
+                            old.focus();
+                            old.removeAttribute("tabindex");
+                        }
                     }
                 }
             },0);
