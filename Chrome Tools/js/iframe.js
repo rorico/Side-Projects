@@ -96,10 +96,14 @@ var iframe;
     }
 
     var stopIframeFocus = (function() {
-        var list = {};
+        var list;// = {};
+        var waiting = false;
         //some iframes take control once they load, stop that
         //http://stackoverflow.com/a/28932220
         function stopIframeFocus(ele) {
+            if (!list) {
+                init();
+            }
             var url = ele.attr("src");
             list[url] = false;
             ele.click(function() {
@@ -107,24 +111,38 @@ var iframe;
             });
         }
 
-        $(document).on("focusout",function() {
-            var old = document.activeElement;
-            setTimeout(function(){
-                var ele = document.activeElement;
-                if (ele instanceof HTMLIFrameElement) {
-                    var url = ele.getAttribute("src");
-                    if (!list[url]) {
-                        if (old.hasAttribute("tabindex")) {
-                            old.focus();
-                        } else {
-                            old.setAttribute("tabindex", "-1");
-                            old.focus();
-                            old.removeAttribute("tabindex");
+        function init() {
+            list = {};
+
+            $(document).on("focusout",function(e) {
+                //when we call focus, we trigger another focusout, ignore it
+                if (waiting) {
+                    waiting = false;
+                    return;
+                }
+                var old = e.target;
+                setTimeout(function() {
+                    var ele = document.activeElement;
+                    if (ele instanceof HTMLIFrameElement) {
+                        var url = ele.getAttribute("src");
+                        if (!list[url]) {
+                            if (old.hasAttribute("tabindex")) {
+                                old.focus();
+                            } else {
+                                old.setAttribute("tabindex", "-1");
+                                old.focus();
+                                old.removeAttribute("tabindex");
+                            }
+                            //just in case of errors or something
+                            waiting = true;
+                            setTimeout(function() {
+                                waiting = false;
+                            },100);
                         }
                     }
-                }
-            },0);
-        });
+                },0);
+            });
+        }
         return stopIframeFocus;
     })();
 
