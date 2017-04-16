@@ -7,7 +7,7 @@ var sendData = function(info) {
 game = newGame({
     speed:0,
     maxGame:1000,
-    checkValid:true
+    checkValid:false
 });
 
 game.setAI([1,3],"playBest");
