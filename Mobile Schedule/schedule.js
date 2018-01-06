@@ -112,40 +112,13 @@ function showNow() {
     }
 }
 
-//mobile events
-$(document).on("swipeleft",next);
-$(document).on("swiperight",prev);
-$(document).on("orientationchange",function(e){
-    var date = new Date();
-    if (e.orientation === "landscape") {
-        weekMode = true;
-        $("#showWeek").val("Show Day");
-        showWeek(date);
-    } else {
-        //should be portrait
-        weekMode = false;
-        $("#showWeek").val("Show Week");
-        changeDate(date);
-    }
-});
-var doubleTap = 0;
-$(document).on("vclick",function(e){
-    var test = new Date();
-    if (test - doubleTap > 300) {
-        doubleTap = test;
-    } else {
-        e.preventDefault();
-        setToday();
-    }
-});
-
 $(window).keydown(function(e) {
     switch (e.keyCode) {
         case 78:        //n
             setToday();
             break;
         case 77:        //m
-            weekView();
+            weekView(!weekMode);
             break;
         case 188:        //,
             prev();
@@ -159,9 +132,9 @@ $(window).keydown(function(e) {
 $("#next").click(next);
 $("#prev").click(prev);
 
-function weekView() {
+function weekView(mode) {
+    weekMode = mode;
     var date = $("#datepicker").datepicker("getDate");
-    weekMode = !weekMode;
     if (weekMode) {
         $("#showWeek").val("Show Day");
         showWeek(date);
