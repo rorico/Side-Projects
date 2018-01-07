@@ -14,3 +14,5 @@ $(document).on("vclick",function(e){
         setToday();
     }
 });
+
+scheduleInit($("body"),{weekSchedule: weekSchedule});

@@ -4,10 +4,10 @@ body {
 }
 div {
     text-align: center;
-    box-sizing: border-box;
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+    box-sizing: border-box;
 }
 div p {
     position: relative;
@@ -35,7 +35,7 @@ div p {
     width: 300px;
 }
 .placeborder {
-    border-bottom: 1px rgb(228, 228, 228) solid;
+    border-top: 1px rgb(228, 228, 228) solid;
 }
 .class {
     width: 300px;
@@ -43,33 +43,37 @@ div p {
     font-size: 13px;
     vertical-align: middle;
     overflow: hidden;
+    display: inline-block;
 }
 .timeline {
-    border-top: 1px solid black;
     float: left;
     display: inline;
 }
-.timeslot {
+.timeline div{
     background-color: rgb(228, 228, 228);
     display: block;
     width: 16px;
     height: 50px;
 }
-.timeslot.half {
-    height: 25px;
+.timeline.right div{
+    width: 8px;
 }
-.timeslot.timeslotBorder {
-    border-bottom: 1px solid black;
-}
-.timeslot.number {
+.timeline.number div{
     width: 18px;
     line-height: 50px;
 }
-.timeslot.right {
-    width: 8px;
+.timeline .half {
+    height: 25px;
 }
-.timeslot.right.halftimeslotBorder {
-    border-bottom: 1px solid gray;
+.timeline .timeslotBorder {
+    border-top: 1px solid black;
+}
+.timeline.right .halftimeslotBorder {
+    border-top: 1px solid gray;
+}
+.timeline .bottom {
+    border-top: 1px solid black;
+    height:1px;
 }
 #side {
     float: left;
@@ -85,12 +89,12 @@ div p {
     width: 0px;
     height: 0px;
     position: relative;
+    display: none;
 }
 #now {
     width: 402px;
     border-top: 1px solid red;
     position: absolute;
-    display: none;
     text-align: right;
     color: red;
     font-size: 12px;
