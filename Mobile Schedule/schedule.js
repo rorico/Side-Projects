@@ -16,11 +16,10 @@ var resize;
 function scheduleInit(container,background) {
     weekSchedule = background.weekSchedule;
 
-    var header = "<div id='header'>" + 
-                    "<input type='button' value='Prev' id='prev'>\n" + 
-                    "<input type='text' id='datepicker'>\n" + 
-                    "<input type='button' value='Next' id='next'>\n" + 
-                    "<input type='button' value='Show Week' id='showWeek'>" + 
+    var header = "<div id='header'>" +
+                    "<input type='button' value='Prev' id='prev'>\n" +
+                    "<input type='text' id='datepicker'>\n" +
+                    "<input type='button' value='Next' id='next'>\n" +
                     "</div>";
 
     var side = "<div class='timeline'>";
@@ -189,7 +188,7 @@ var showSchedule = (function() {
                             addTimeSlot(thisHolder,cssCls,height,classInfo,group.length);
                             addPlaceholder(thisHolder,finish,groupEnd);
                         }
-                        var end = k === groups.length - 1 
+                        var end = k === groups.length - 1
                             ? endTime
                             : groups[k+1][0][1][1];
                         addPlaceholder(thisHolder,groupEnd,end);

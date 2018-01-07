@@ -226,11 +226,10 @@ var templateInfoPart2 = ';</script>\n'+
 'function scheduleInit(container,background) {\n'+
 '    weekSchedule = background.weekSchedule;\n'+
 '\n'+
-'    var header = "<div id=\'header\'>" + \n'+
-'                    "<input type=\'button\' value=\'Prev\' id=\'prev\'>\\n" + \n'+
-'                    "<input type=\'text\' id=\'datepicker\'>\\n" + \n'+
-'                    "<input type=\'button\' value=\'Next\' id=\'next\'>\\n" + \n'+
-'                    "<input type=\'button\' value=\'Show Week\' id=\'showWeek\'>" + \n'+
+'    var header = "<div id=\'header\'>" +\n'+
+'                    "<input type=\'button\' value=\'Prev\' id=\'prev\'>\\n" +\n'+
+'                    "<input type=\'text\' id=\'datepicker\'>\\n" +\n'+
+'                    "<input type=\'button\' value=\'Next\' id=\'next\'>\\n" +\n'+
 '                    "</div>";\n'+
 '\n'+
 '    var side = "<div class=\'timeline\'>";\n'+
@@ -399,7 +398,7 @@ var templateInfoPart2 = ';</script>\n'+
 '                            addTimeSlot(thisHolder,cssCls,height,classInfo,group.length);\n'+
 '                            addPlaceholder(thisHolder,finish,groupEnd);\n'+
 '                        }\n'+
-'                        var end = k === groups.length - 1 \n'+
+'                        var end = k === groups.length - 1\n'+
 '                            ? endTime\n'+
 '                            : groups[k+1][0][1][1];\n'+
 '                        addPlaceholder(thisHolder,groupEnd,end);\n'+
