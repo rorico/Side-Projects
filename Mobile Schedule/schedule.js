@@ -1,7 +1,8 @@
 
 var now = new Date();
-var startTime = 7 * 60;        //7AM
-var endTime = 19 * 60;         //7PM
+var startTime;
+var endTime;
+var dayLength;
 var nowTimeOffset = 50;     //for showing now bar
 var pxPerHr = 50;
 var weekMode = false;
@@ -15,6 +16,9 @@ var resize;
 
 function scheduleInit(container,background) {
     weekSchedule = background.weekSchedule;
+    startTime = background.settings.startHour * 60;
+    endTime = background.settings.endHour * 60;
+    dayLength = background.settings.endHour - background.settings.startHour;
 
     var header = "<div id='header'>" +
                     "<input type='button' value='Prev' id='prev'>\n" +
@@ -195,7 +199,7 @@ var showSchedule = (function() {
                     }
                     addTimeSlot(holder,"placeholder placeborder",0);
                 }
-                all.append(holder).append("<div id='side'></div>");
+                all.append(holder).append("<div id='side' style='height:" + (dayLength * 50) + "px;'></div>");
             }
             $("#container").html(all);
             resize();

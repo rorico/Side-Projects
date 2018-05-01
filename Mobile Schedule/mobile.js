@@ -15,4 +15,10 @@ $(document).on("vclick",function(e){
     }
 });
 
-scheduleInit($("body"),{weekSchedule: weekSchedule});
+scheduleInit($("body"),{
+	weekSchedule: weekSchedule,
+	settings: {
+		startHour: 10,
+		endHour: 22
+	}
+});

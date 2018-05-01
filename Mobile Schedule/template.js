@@ -210,8 +210,9 @@ var templateInfoPart2 = ';</script>\n'+
 '<script>'+
 '\n'+
 'var now = new Date();\n'+
-'var startTime = 7 * 60;        //7AM\n'+
-'var endTime = 19 * 60;         //7PM\n'+
+'var startTime;\n'+
+'var endTime;\n'+
+'var dayLength;\n'+
 'var nowTimeOffset = 50;     //for showing now bar\n'+
 'var pxPerHr = 50;\n'+
 'var weekMode = false;\n'+
@@ -225,6 +226,9 @@ var templateInfoPart2 = ';</script>\n'+
 '\n'+
 'function scheduleInit(container,background) {\n'+
 '    weekSchedule = background.weekSchedule;\n'+
+'    startTime = background.settings.startHour * 60;\n'+
+'    endTime = background.settings.endHour * 60;\n'+
+'    dayLength = background.settings.endHour - background.settings.startHour;\n'+
 '\n'+
 '    var header = "<div id=\'header\'>" +\n'+
 '                    "<input type=\'button\' value=\'Prev\' id=\'prev\'>\\n" +\n'+
@@ -405,7 +409,7 @@ var templateInfoPart2 = ';</script>\n'+
 '                    }\n'+
 '                    addTimeSlot(holder,"placeholder placeborder",0);\n'+
 '                }\n'+
-'                all.append(holder).append("<div id=\'side\'></div>");\n'+
+'                all.append(holder).append("<div id=\'side\' style=\'height:" + (dayLength * 50) + "px;\'></div>");\n'+
 '            }\n'+
 '            $("#container").html(all);\n'+
 '            resize();\n'+
@@ -544,7 +548,13 @@ var templateInfoPart2 = ';</script>\n'+
 '    }\n'+
 '});\n'+
 '\n'+
-'scheduleInit($("body"),{weekSchedule: weekSchedule});\n'+
+'scheduleInit($("body"),{\n'+
+'	weekSchedule: weekSchedule,\n'+
+'	settings: {\n'+
+'		startHour: 10,\n'+
+'		endHour: 22\n'+
+'	}\n'+
+'});\n'+
 '</script>'+
 '</body>\n'+
 '</html>\n'+
